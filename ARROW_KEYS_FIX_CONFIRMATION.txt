@@ -1,0 +1,114 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           ARROW KEYS FIX - FINAL CONFIRMATION                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ PROBLEM IDENTIFIED & FIXED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ISSUE: Phím mũi tên trái/phải không hoạt động trong DictationPage
+
+ROOT CAUSE: 
+├─ Functions được sử dụng trong handleGlobalKeyDown chưa được định nghĩa
+├─ handleSeek, handlePlayPause, goToPreviousSentence, goToNextSentence
+├─ Được gọi trước khi được khai báo
+└─ Dependencies trong useCallback không đúng
+
+🔧 SOLUTION IMPLEMENTED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. MOVED FUNCTIONS BEFORE handleGlobalKeyDown:
+   ✓ handleSeek → useCallback với dependencies đúng
+   ✓ handlePlayPause → useCallback với dependencies đúng  
+   ✓ goToPreviousSentence → useCallback với dependencies đúng
+   ✓ goToNextSentence → useCallback với dependencies đúng
+
+2. REMOVED DUPLICATE FUNCTIONS:
+   ✓ Xóa các function cũ đã duplicate
+   ✓ Giữ lại chỉ các function mới với useCallback
+
+3. FIXED DEPENDENCIES:
+   ✓ handleSeek: [transcriptData, currentSentenceIndex]
+   ✓ handlePlayPause: [transcriptData, currentSentenceIndex]
+   ✓ goToPreviousSentence: [currentSentenceIndex, transcriptData]
+   ✓ goToNextSentence: [currentSentenceIndex, transcriptData]
+
+📁 FILES MODIFIED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ pages/dictation/[lessonId].js
+  - Moved all audio control functions before handleGlobalKeyDown
+  - Converted to useCallback with proper dependencies
+  - Removed duplicate functions
+  - Fixed function call order
+
+✓ pages/shadowing/[lessonId].js
+  - Already working correctly
+  - No changes needed
+
+🎯 ARROW KEYS BEHAVIOR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LEFT ARROW (←):
+├─ ✅ Tua lùi 3 giây TRONG đoạn hiện tại
+├─ ✅ Hoạt động ngay cả khi focus vào input field
+├─ ✅ Dừng ở đầu đoạn nếu tua quá
+└─ ✅ Không nhảy sang đoạn trước
+
+RIGHT ARROW (→):
+├─ ✅ Tua tiến 3 giây TRONG đoạn hiện tại
+├─ ✅ Hoạt động ngay cả khi focus vào input field
+├─ ✅ Dừng ở cuối đoạn nếu tua quá
+└─ ✅ Không nhảy sang đoạn sau
+
+OTHER KEYS:
+├─ UP ARROW: Chuyển đoạn trước (chỉ khi không focus input)
+├─ DOWN ARROW: Chuyển đoạn sau (chỉ khi không focus input)
+├─ SPACE: Play/Pause (hoạt động mọi lúc)
+└─ ✅ Tất cả đều hoạt động đúng
+
+🧪 TESTING SCENARIOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Test 1: Normal seek within segment
+   → LEFT/RIGHT arrows work correctly
+
+✅ Test 2: Seek beyond segment boundaries
+   → Stops at segment start/end, no auto-jump
+
+✅ Test 3: Input field focused
+   → LEFT/RIGHT arrows still work for audio seek
+   → UP/DOWN arrows disabled (as intended)
+
+✅ Test 4: Space key behavior
+   → Works everywhere, including in input fields
+
+✅ Test 5: Segment navigation
+   → UP/DOWN arrows work when not in input fields
+
+✅ Test 6: Audio state management
+   → Play/pause works correctly
+   → Segment end time updates properly
+
+🎉 FINAL RESULT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ ARROW KEYS NOW WORKING PERFECTLY! ✨
+
+Both ShadowingPage and DictationPage:
+• LEFT/RIGHT arrows: Seek within current segment
+• UP/DOWN arrows: Navigate between segments
+• SPACE: Play/pause audio
+• All keys work as expected
+• No more function call errors
+
+Status: ✅ FIXED & TESTED
+Ready for production! 🚀
+
+---
+
+Key Changes:
+• Moved function definitions before usage
+• Used useCallback for proper dependency management
+• Removed duplicate functions
+• Fixed function call order
+• Maintained all existing functionality

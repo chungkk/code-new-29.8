@@ -1,0 +1,148 @@
+╔═══════════════════════════════════════════════════════════════╗
+║    SEEK BOUNDARY LOCK - ONLY SEEK WITHIN SEGMENT FIX         ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 PROBLEM FIXED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Nút tua trái/phải giờ CHỈ tua TRONG đoạn hiện tại
+✅ Khi tua quá biên độ đoạn, sẽ DỪNG TẠI BIÊN, KHÔNG nhảy sang đoạn mới
+✅ Hoàn toàn kiểm soát được vị trí audio trong từng đoạn
+
+📊 IMPLEMENTATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BEFORE (OLD LOGIC):
+```javascript
+const handleSeek = (direction) => {
+  const audio = audioRef.current;
+  const seekTime = 3;
+  
+  // Tua tự do, không giới hạn!
+  if (direction === 'backward') {
+    audio.currentTime = Math.max(0, audio.currentTime - seekTime);
+  } else if (direction === 'forward') {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + seekTime);
+  }
+  
+  // Chỉ update endTime
+  if (!audio.paused) {
+    setSegmentPlayEndTime(currentSegment.end);
+  }
+};
+```
+
+Problem: Audio có thể tua ra khỏi đoạn hiện tại!
+
+AFTER (NEW LOGIC):
+```javascript
+const handleSeek = (direction) => {
+  const audio = audioRef.current;
+  const seekTime = 3;
+  const currentSegment = transcriptData[currentSentenceIndex];
+  
+  if (!currentSegment) return;
+  
+  // Tính toán vị trí mới
+  let newTime = audio.currentTime;
+  if (direction === 'backward') {
+    newTime = audio.currentTime - seekTime;
+  } else if (direction === 'forward') {
+    newTime = audio.currentTime + seekTime;
+  }
+  
+  // *** KEY: Giới hạn trong biên độ đoạn hiện tại ***
+  newTime = Math.max(
+    currentSegment.start,                    // Min: đầu đoạn
+    Math.min(
+      currentSegment.end - 0.1,              // Max: cuối đoạn
+      newTime                                // Vị trí mới
+    )
+  );
+  
+  audio.currentTime = newTime;
+  
+  // Update endTime nếu đang phát
+  if (!audio.paused) {
+    setSegmentPlayEndTime(currentSegment.end);
+  }
+};
+```
+
+KEY IMPROVEMENT: Constrain newTime bằng cách:
+1. Min boundary: currentSegment.start (không tua trước đầu đoạn)
+2. Max boundary: currentSegment.end - 0.1 (không tua quá cuối đoạn)
+
+🎯 HOW IT WORKS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Example:
+Segment 2: 0:05-0:10 (5 giây)
+Audio hiện tại: 0:07 (2 giây sau khi bắt đầu)
+
+User nhấn LEFT arrow (tua lùi 3 giây):
+├─ newTime = 0:07 - 3 = 0:04 (QUỐC 0:05)
+├─ Constrain: Math.max(0:05, 0:04) = 0:05 ✅
+└─ Audio seek đến 0:05 (đầu đoạn)
+
+User nhấn RIGHT arrow x3 (tua tiến 9 giây):
+├─ newTime = 0:07 + 9 = 0:16 (QUỐC 0:10)
+├─ Constrain: Math.min(0:09.9, 0:16) = 0:09.9 ✅
+└─ Audio seek đến 0:09.9 (gần cuối đoạn)
+
+📁 FILES MODIFIED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ pages/shadowing/[lessonId].js
+  - handleSeek: Constrain seek within segment boundaries
+
+✓ pages/dictation/[lessonId].js
+  - handleSeek: Constrain seek within segment boundaries
+
+✅ FEATURES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Tua lùi bị dừng ở đầu đoạn
+✅ Tua tiến bị dừng ở cuối đoạn
+✅ Không tự động nhảy sang đoạn khác
+✅ Vẫn phát liên tục trong đoạn
+✅ Điều khiển chính xác từng đoạn
+✅ Giới hạn rõ ràng cho người dùng
+
+🧪 TEST CASES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Tua trong đoạn (0:05-0:10), từ 0:07:
+   - Tua lùi 10 giây → dừng ở 0:05 (đầu) ✓
+   - Tua tiến 10 giây → dừng ở 0:09.9 (cuối) ✓
+
+✅ Tua ở biên đầu (0:05):
+   - Tua lùi → vẫn ở 0:05 ✓
+
+✅ Tua ở biên cuối (0:09.9):
+   - Tua tiến → vẫn ở 0:09.9 ✓
+
+✅ Audio đang phát:
+   - Tiếp tục phát từ vị trí mới ✓
+
+✅ Audio đã dừng:
+   - Vị trí cập nhật nhưng vẫn dừng ✓
+
+🎉 RESULT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ BOUNDARY-LOCKED SEEKING! ✨
+
+Giờ nút tua trái/phải:
+• Chỉ hoạt động TRONG biên độ đoạn hiện tại
+• KHÔNG tự động nhảy sang đoạn khác
+• Dừng ở biên khi tua quá giới hạn
+• Cung cấp trải nghiệm điều khiển chính xác
+
+Perfect cho learning flow! 🚀
+
+---
+
+Thay đổi chính:
+• Constrain newTime = max(start, min(end-0.1, newTime))
+• Giới hạn tua trong biên độ hiện tại
+• KHÔNG tìm hoặc chuyển sang segment mới

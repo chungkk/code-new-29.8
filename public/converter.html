@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ Convert SRT sang JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        input[type="text"] {
+            padding: 10px; 
+            margin-bottom: 15px; 
+            width: 150px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #43A047;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+        .success { background-color: #e8f5e9; color: #388e3c; }
+        .error { background-color: #ffcdd2; color: #c62828; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Công Cụ Chuyển Đổi SRT sang JSON (Máy Chủ)</h1>
+        <p>1. Dán nội dung phụ đề (SRT-like) vào ô dưới đây.</p>
+        <textarea id="srtInput" placeholder="Dán nội dung SRT/VTT của bạn vào đây..."></textarea>
+        
+        <p>2. Đặt tên file đầu ra và nhấn Convert.</p>
+        <input type="text" id="fileName" placeholder="Tên file (vd: bai_3)" value="new_lesson">.json
+        <button onclick="handleConversion()">Convert & Lưu File</button>
+        
+        <div id="messageBox" class="message"></div>
+        
+        <p style="margin-top: 20px;">3. Xem trước Kết quả JSON:</p>
+        <textarea id="jsonOutput" readonly placeholder="Kết quả JSON sẽ hiển thị tại đây..." style="min-height: 250px;"></textarea>
+        
+        <a href="index.html" style="display: block; margin-top: 20px; text-align: center; color: #4CAF50;">← Quay lại Trang Chủ</a>
+    </div>
+
+    <script>
+        // --- Logic Chuyển đổi SRT sang JSON (Giữ nguyên) ---
+        function convertSrtToJson(srtContent) {
+            const blocks = srtContent.trim().split(/\n\n+/); 
+            const jsonArray = [];
+
+            function timeToSeconds(timeStr) {
+                const parts = timeStr.replace(',', '.').split(':');
+                const hours = parseFloat(parts[0]) || 0;
+                const minutes = parseFloat(parts[1]) || 0;
+                const seconds = parseFloat(parts[2]) || 0;
+                return hours * 3600 + minutes * 60 + seconds;
+            }
+
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                const timeLine = lines.find(line => line.includes('-->'));
+                if (!timeLine) return;
+
+                const timeMatch = timeLine.match(/(\d{2}:\d{2}:\d{2}[,.]\d{3}) --> (\d{2}:\d{2}:\d{2}[,.]\d{3})/);
+                if (!timeMatch) return; 
+
+                const start = timeToSeconds(timeMatch[1]);
+                const end = timeToSeconds(timeMatch[2]);
+
+                const contentLines = lines.slice(lines.indexOf(timeLine) + 1);
+                let text = contentLines.join(' ').replace(/\s+/g, ' ').trim();
+                
+                if (text) {
+                    text = text.replace(/^\d+\s*/, '').trim(); 
+                    if (!text.match(/[.?!:„”»]$/)) {
+                         text += '.';
+                    }
+                    
+                    jsonArray.push({
+                        text: text,
+                        start: start,
+                        end: end
+                    });
+                }
+            });
+
+            return JSON.stringify(jsonArray, null, 4);
+        }
+
+        // --- Gửi dữ liệu lên PHP để Lưu File ---
+        async function handleConversion() {
+            const srtContent = document.getElementById('srtInput').value;
+            const fileNameBase = document.getElementById('fileName').value.trim();
+            const jsonOutputArea = document.getElementById('jsonOutput');
+            const messageBox = document.getElementById('messageBox');
+            
+            if (!srtContent || !fileNameBase) {
+                alert("Vui lòng dán nội dung và đặt tên file.");
+                return;
+            }
+
+            let jsonOutputStr;
+            try {
+                jsonOutputStr = convertSrtToJson(srtContent);
+                jsonOutputArea.value = jsonOutputStr;
+            } catch (error) {
+                jsonOutputArea.value = "LỖI CHUYỂN ĐỔI: " + error.message;
+                return;
+            }
+            
+            // Dữ liệu sẽ được gửi lên PHP
+            const dataToSend = {
+                filename: fileNameBase + '.json',
+                content: jsonOutputStr
+            };
+            
+            messageBox.className = 'message'; // Reset
+            messageBox.textContent = 'Đang lưu file lên máy chủ...';
+            messageBox.style.display = 'block';
+
+            try {
+                const response = await fetch('save.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSend)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageBox.className = 'message success';
+                    messageBox.innerHTML = `**THÀNH CÔNG!** File <strong>${result.filename}</strong> đã được lưu vào thư mục <code>text/</code>. <br>Bạn có thể thêm bài học này vào <code>index.html</code>.`;
+                } else {
+                    messageBox.className = 'message error';
+                    messageBox.textContent = `LỖI LƯU FILE: ${result.error}`;
+                }
+
+            } catch (error) {
+                messageBox.className = 'message error';
+                messageBox.textContent = 'Lỗi kết nối máy chủ hoặc PHP: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
