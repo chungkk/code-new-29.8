@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import ProtectedPage from '../../components/ProtectedPage';
+import { fetchWithAuth } from '../../lib/api';
+import { toast } from 'react-toastify';
 
-export default function AdminDashboard() {
-  const { data: session, status } = useSession();
+function AdminDashboardContent() {
   const router = useRouter();
   const [lessons, setLessons] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -24,19 +25,8 @@ export default function AdminDashboard() {
   const [uploadMethod, setUploadMethod] = useState('url'); // 'url' or 'upload'
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/login');
-    }
-    if (session?.user?.role !== 'admin') {
-      router.push('/');
-    }
-  }, [session, status, router]);
-
-  useEffect(() => {
-    if (session?.user?.role === 'admin') {
-      fetchLessons();
-    }
-  }, [session]);
+    fetchLessons();
+  }, []);
 
   const fetchLessons = async () => {
     try {
@@ -114,13 +104,13 @@ export default function AdminDashboard() {
 
       if (!res.ok) throw new Error('Failed to save lesson');
 
-      alert(editingLesson ? 'Cập nhật thành công!' : 'Thêm bài học thành công!');
+      toast.success(editingLesson ? 'Cập nhật thành công!' : 'Thêm bài học thành công!');
       setShowForm(false);
       setEditingLesson(null);
       resetForm();
       fetchLessons();
     } catch (error) {
-      alert('Có lỗi xảy ra: ' + error.message);
+      toast.error('Có lỗi xảy ra: ' + error.message);
     }
   };
 
@@ -148,10 +138,10 @@ export default function AdminDashboard() {
 
       if (!res.ok) throw new Error('Failed to delete lesson');
 
-      alert('Xóa thành công!');
+      toast.success('Xóa thành công!');
       fetchLessons();
     } catch (error) {
-      alert('Có lỗi xảy ra: ' + error.message);
+      toast.error('Có lỗi xảy ra: ' + error.message);
     }
   };
 
@@ -172,10 +162,6 @@ export default function AdminDashboard() {
 
   if (status === 'loading') {
     return <div>Loading...</div>;
-  }
-
-  if (session?.user?.role !== 'admin') {
-    return null;
   }
 
   return (
@@ -463,5 +449,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedPage requireAdmin={true}>
+      <AdminDashboardContent />
+    </ProtectedPage>
   );
 }

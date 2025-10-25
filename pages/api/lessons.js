@@ -1,26 +1,25 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
+import { requireAdmin } from '../../lib/authMiddleware';
 import { Lesson } from '../../lib/models/Lesson';
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-
   if (req.method === 'GET') {
     try {
-      const lessons = await Lesson.findAll();
+      const lessons = await Lesson.find().sort({ order: 1 });
       return res.status(200).json(lessons);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
   }
 
-  if (!session || session.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Chỉ admin mới có quyền thực hiện thao tác này' });
-  }
+  return requireAdmin(adminHandler)(req, res);
+}
+
+async function adminHandler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const lesson = await Lesson.create(req.body);
+      const lesson = new Lesson(req.body);
+      await lesson.save();
       return res.status(201).json(lesson);
     } catch (error) {
       return res.status(400).json({ message: error.message });
@@ -30,7 +29,7 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     try {
       const { id, ...updateData } = req.body;
-      await Lesson.update(id, updateData);
+      await Lesson.findByIdAndUpdate(id, updateData);
       return res.status(200).json({ message: 'Cập nhật thành công' });
     } catch (error) {
       return res.status(400).json({ message: error.message });
@@ -40,7 +39,7 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     try {
       const { id } = req.query;
-      await Lesson.delete(id);
+      await Lesson.findByIdAndDelete(id);
       return res.status(200).json({ message: 'Xóa thành công' });
     } catch (error) {
       return res.status(400).json({ message: error.message });

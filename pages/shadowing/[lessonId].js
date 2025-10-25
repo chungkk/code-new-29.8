@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { useSession } from 'next-auth/react';
+import ProtectedPage from '../../components/ProtectedPage';
 import AudioControls from '../../components/AudioControls';
 import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
 import { useProgress } from '../../lib/hooks/useProgress';
 
-const ShadowingPage = () => {
+const ShadowingPageContent = () => {
   const router = useRouter();
   const { lessonId } = useRouter().query;
-  const { data: session } = useSession();
   
   const [transcriptData, setTranscriptData] = useState([]);
   const [isTextHidden, setIsTextHidden] = useState(false);
@@ -186,13 +185,11 @@ const ShadowingPage = () => {
         audio.play();
         setSegmentPlayEndTime(currentSentence.end);
         
-        if (session) {
-          saveProgress({
-            currentSentenceIndex,
-            currentTime: audio.currentTime,
-            lastPlayed: new Date()
-          });
-        }
+        saveProgress({
+          currentSentenceIndex,
+          currentTime: audio.currentTime,
+          lastPlayed: new Date()
+        });
       } else {
         audio.play();
       }
@@ -345,6 +342,14 @@ const ShadowingPage = () => {
         />
       </div>
     </>
+  );
+};
+
+const ShadowingPage = () => {
+  return (
+    <ProtectedPage>
+      <ShadowingPageContent />
+    </ProtectedPage>
   );
 };
 

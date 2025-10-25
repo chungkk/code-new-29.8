@@ -1,46 +1,91 @@
-import React, { useEffect } from 'react';
-import Head from 'next/head';
-import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
 
-export default function RegisterPage() {
-  const { data: session, status } = useSession();
+export default function Register() {
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (!loading && user) {
       router.push('/dashboard');
     }
-  }, [status, router]);
+  }, [user, loading, router]);
 
-  if (status === 'loading') {
+  if (loading) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
-        background: '#f5f5f5' 
+        background: '#f5f5f5'
       }}>
         <div style={{ fontSize: '24px', color: '#667eea' }}>
-          ⏳ Đang kiểm tra...
+          ⏳ Đang tải...
         </div>
       </div>
     );
   }
 
-  if (status === 'authenticated') {
+  if (user) {
     return null;
   }
 
   return (
     <>
       <Head>
-        <title>Đăng Ký - Deutsch Shadowing</title>
+        <title>Đăng ký - Deutsch Shadowing</title>
       </Head>
-      <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-        <AuthForm mode="register" />
+
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '20px'
+      }}>
+        <div style={{
+          background: 'white',
+          padding: '40px',
+          borderRadius: '12px',
+          boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+          width: '100%',
+          maxWidth: '400px'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <h1 style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              color: '#333',
+              marginBottom: '10px'
+            }}>
+              🎓 Deutsch Shadowing
+            </h1>
+            <p style={{ color: '#666', fontSize: '16px' }}>
+              Tạo tài khoản để bắt đầu học
+            </p>
+          </div>
+
+          <AuthForm mode="register" />
+
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <p style={{ color: '#666', fontSize: '14px' }}>
+              Đã có tài khoản?{' '}
+              <Link href="/auth/login" style={{
+                color: '#667eea',
+                textDecoration: 'none',
+                fontWeight: 'bold'
+              }}>
+                Đăng nhập
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </>
   );

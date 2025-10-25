@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../context/AuthContext';
+import { fetchWithAuth } from '../lib/api';
+import { toast } from 'react-toastify';
 
 export default function VocabularySaveButton({ word, context, lessonId }) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [showPopup, setShowPopup] = useState(false);
   const [translation, setTranslation] = useState('');
   const [saving, setSaving] = useState(false);
 
-  if (!session) return null;
+  if (!user) return null;
 
   const handleSave = async () => {
     if (!translation.trim()) {
-      alert('Vui lòng nhập nghĩa của từ');
+      toast.warning('Vui lòng nhập nghĩa của từ');
       return;
     }
 
     setSaving(true);
     try {
-      const res = await fetch('/api/vocabulary', {
+      const res = await fetchWithAuth('/api/vocabulary', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           word,
           translation: translation.trim(),
@@ -29,15 +30,15 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
       });
 
       if (res.ok) {
-        alert('✅ Đã lưu từ vựng!');
+        toast.success('Đã lưu từ vựng!');
         setShowPopup(false);
         setTranslation('');
       } else {
         const data = await res.json();
-        alert('❌ Lỗi: ' + data.message);
+        toast.error('Lỗi: ' + data.message);
       }
     } catch (error) {
-      alert('❌ Có lỗi xảy ra');
+      toast.error('Có lỗi xảy ra');
     } finally {
       setSaving(false);
     }

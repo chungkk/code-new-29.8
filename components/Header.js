@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const isHomePage = router.pathname === '/';
 
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push('/');
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -24,16 +23,16 @@ const Header = () => {
         </div>
         
         <nav className="header-nav">
-          <button 
+          <button
             className={`nav-link ${isHomePage ? 'active' : ''}`}
             onClick={() => router.push('/')}
           >
             <span className="nav-icon">🏠</span>
             <span className="nav-text">Trang chủ</span>
           </button>
-          
-          {session?.user?.role === 'admin' && (
-            <button 
+
+          {user?.role === 'admin' && (
+            <button
               className="nav-link"
               onClick={() => router.push('/admin/dashboard')}
             >
@@ -44,16 +43,16 @@ const Header = () => {
         </nav>
 
         <div className="header-right">
-          {session ? (
+          {user ? (
             <div style={{ position: 'relative' }}>
-              <button 
+              <button
                 className="user-button"
                 onClick={() => setShowMenu(!showMenu)}
               >
                 <span className="user-avatar">👤</span>
-                <span className="user-name">{session.user.name}</span>
+                <span className="user-name">{user.name}</span>
               </button>
-              
+
               {showMenu && (
                 <div style={{
                   position: 'absolute',
@@ -73,13 +72,13 @@ const Header = () => {
                     color: 'white'
                   }}>
                     <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
-                      {session.user.name}
+                      {user.name}
                     </div>
                     <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                      {session.user.email}
+                      {user.email}
                     </div>
                   </div>
-                  
+
                   <div style={{ padding: '8px 0' }}>
                     <button
                       onClick={() => {
@@ -105,7 +104,7 @@ const Header = () => {
                       <span style={{ fontSize: '18px' }}>📊</span>
                       <span style={{ fontWeight: '500' }}>Quản lý học tập</span>
                     </button>
-                    
+
                     <button
                       onClick={() => {
                         setShowMenu(false);
@@ -131,7 +130,7 @@ const Header = () => {
                       <span style={{ fontWeight: '500' }}>Từ vựng của tôi</span>
                     </button>
                   </div>
-                  
+
                   <div style={{ borderTop: '1px solid #eee', padding: '8px 0' }}>
                     <button
                       onClick={handleLogout}
@@ -161,7 +160,7 @@ const Header = () => {
               )}
             </div>
           ) : (
-            <button 
+            <button
               className="user-button"
               onClick={() => router.push('/auth/login')}
             >

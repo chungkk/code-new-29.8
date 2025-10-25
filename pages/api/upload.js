@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
+import { requireAdmin } from '../../lib/authMiddleware';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
@@ -10,15 +9,9 @@ export const config = {
   },
 };
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const session = await getServerSession(req, res, authOptions);
-  
-  if (!session || session.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Chỉ admin mới có quyền upload' });
   }
 
   const uploadDir = path.join(process.cwd(), 'public');
@@ -86,3 +79,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ message: 'Lỗi khi upload: ' + error.message });
   }
 }
+
+export default requireAdmin(handler);

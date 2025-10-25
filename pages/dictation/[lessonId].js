@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react';
 import Head from 'next/head';
+import ProtectedPage from '../../components/ProtectedPage';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import Transcript from '../../components/Transcript';
 
-const DictationPage = () => {
+const DictationPageContent = () => {
   const router = useRouter();
   const { lessonId } = useRouter().query;
-  const { data: session } = useSession();
   
   // State management
   const [transcriptData, setTranscriptData] = useState([]);
@@ -52,12 +51,6 @@ const DictationPage = () => {
   // Load progress from database
   useEffect(() => {
     const loadProgress = async () => {
-      // If not logged in, just mark progress as loaded (no data to load)
-      if (!session) {
-        setProgressLoaded(true);
-        return;
-      }
-      
       if (!lessonId) {
         setProgressLoaded(true);
         return;
@@ -84,7 +77,7 @@ const DictationPage = () => {
     };
     
     loadProgress();
-  }, [session, lessonId]);
+  }, [lessonId]);
 
   // Load transcript
   useEffect(() => {
@@ -359,7 +352,7 @@ const DictationPage = () => {
 
   // Save progress to database
   const saveProgress = useCallback(async (updatedCompletedSentences, updatedCompletedWords) => {
-    if (!session || !lessonId) return;
+    if (!lessonId) return;
     
     try {
       const totalWords = transcriptData.reduce((sum, sentence) => {
@@ -400,7 +393,7 @@ const DictationPage = () => {
     } catch (error) {
       console.error('Error saving progress:', error);
     }
-  }, [session, lessonId, transcriptData, currentSentenceIndex]);
+  }, [lessonId, transcriptData, currentSentenceIndex]);
 
   // Save word function
   const saveWord = useCallback((word) => {
@@ -801,6 +794,14 @@ const DictationPage = () => {
         />
       </div>
     </>
+  );
+};
+
+const DictationPage = () => {
+  return (
+    <ProtectedPage>
+      <DictationPageContent />
+    </ProtectedPage>
   );
 };
 

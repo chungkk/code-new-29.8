@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import ProtectedPage from '../components/ProtectedPage';
+import { useAuth } from '../context/AuthContext';
+import { fetchWithAuth } from '../lib/api';
+import { toast } from 'react-toastify';
 import styles from '../styles/dashboard.module.css';
 
-export default function UserDashboard() {
-  const { data: session, status } = useSession();
+function UserDashboard() {
   const router = useRouter();
+  const { user } = useAuth();
   const [progress, setProgress] = useState([]);
   const [vocabulary, setVocabulary] = useState([]);
   const [lessons, setLessons] = useState([]);
@@ -21,16 +24,8 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (session) {
-      loadData();
-    }
-  }, [session]);
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -49,7 +44,7 @@ export default function UserDashboard() {
       ];
       
       // Load progress first
-      const progressRes = await fetch('/api/progress');
+      const progressRes = await fetchWithAuth('/api/progress');
       const progressData = await progressRes.json();
       console.log('Progress data:', progressData);
       setProgress(Array.isArray(progressData) ? progressData : []);
@@ -77,7 +72,7 @@ export default function UserDashboard() {
       setLessons(lessonsWithProgress);
 
       // Load vocabulary
-      const vocabRes = await fetch('/api/vocabulary');
+      const vocabRes = await fetchWithAuth('/api/vocabulary');
       const vocabData = await vocabRes.json();
       setVocabulary(Array.isArray(vocabData) ? vocabData : []);
     } catch (error) {
@@ -125,7 +120,7 @@ export default function UserDashboard() {
         setVocabulary(vocabulary.filter(v => v._id !== id));
       }
     } catch (error) {
-      alert('Có lỗi xảy ra');
+      toast.error('Có lỗi xảy ra');
     }
   };
 
@@ -137,10 +132,6 @@ export default function UserDashboard() {
     );
   }
 
-  if (!session) {
-    return null;
-  }
-
   return (
     <>
       <Head>
@@ -150,7 +141,7 @@ export default function UserDashboard() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>
-            Xin chào, {session.user.name}! 👋
+            Xin chào, {user?.name}! 👋
           </h1>
           <p className={styles.subtitle}>
             Theo dõi tiến độ học tập và quản lý từ vựng của bạn
@@ -344,3 +335,13 @@ export default function UserDashboard() {
     </>
   );
 }
+
+function Dashboard() {
+  return (
+    <ProtectedPage>
+      <UserDashboard />
+    </ProtectedPage>
+  );
+}
+
+export default Dashboard;
