@@ -5,6 +5,7 @@ import ProtectedPage from '../components/ProtectedPage';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
+import CreateLessonModal from '../components/CreateLessonModal';
 import styles from '../styles/dashboard.module.css';
 
 function UserDashboard() {
@@ -14,6 +15,7 @@ function UserDashboard() {
   const [vocabulary, setVocabulary] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [activeTab, setActiveTab] = useState('progress');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Check URL for tab parameter
   useEffect(() => {
@@ -124,6 +126,11 @@ function UserDashboard() {
     }
   };
 
+  const handleLessonCreated = (newLesson) => {
+    // Reload data after creating lesson
+    loadData();
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className={styles.loading}>
@@ -140,12 +147,23 @@ function UserDashboard() {
 
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>
-            Xin chào, {user?.name}! 👋
-          </h1>
-          <p className={styles.subtitle}>
-            Theo dõi tiến độ học tập và quản lý từ vựng của bạn
-          </p>
+          <div>
+            <h1 className={styles.title}>
+              Xin chào, {user?.name}! 👋
+            </h1>
+            <p className={styles.subtitle}>
+              Theo dõi tiến độ học tập và quản lý từ vựng của bạn
+            </p>
+          </div>
+          
+          {user?.role === 'admin' && (
+            <button 
+              className={styles.createLessonBtn}
+              onClick={() => setShowCreateModal(true)}
+            >
+              ✍️ Viết Bài Mới
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
@@ -330,6 +348,14 @@ function UserDashboard() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Create Lesson Modal */}
+        {showCreateModal && (
+          <CreateLessonModal
+            onClose={() => setShowCreateModal(false)}
+            onLessonCreated={handleLessonCreated}
+          />
         )}
       </div>
     </>

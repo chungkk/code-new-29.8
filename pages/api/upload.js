@@ -1,7 +1,7 @@
-import { requireAdmin } from '../../lib/authMiddleware';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
+import { verifyToken } from '../../lib/jwt';
 
 export const config = {
   api: {
@@ -9,75 +9,81 @@ export const config = {
   },
 };
 
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const uploadDir = path.join(process.cwd(), 'public');
-  
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
-  const form = formidable({
-    uploadDir,
-    keepExtensions: true,
-    maxFileSize: 50 * 1024 * 1024, // 50MB
-    filename: (name, ext, part) => {
-      return `${Date.now()}_${part.originalFilename}`;
-    }
-  });
-
   try {
-    const [fields, files] = await new Promise((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        resolve([fields, files]);
-      });
+    // Verify authentication
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token không hợp lệ' });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return res.status(401).json({ message: 'Token không hợp lệ' });
+    }
+
+    // Parse form data
+    const form = formidable({
+      maxFileSize: 50 * 1024 * 1024, // 50MB
+      keepExtensions: true,
     });
 
-    const uploadedFiles = {};
+    const [fields, files] = await form.parse(req);
     
-    if (files.audio && files.audio[0]) {
-      const audioFile = files.audio[0];
-      const audioDir = path.join(uploadDir, 'audio');
-      
-      if (!fs.existsSync(audioDir)) {
-        fs.mkdirSync(audioDir, { recursive: true });
-      }
-      
-      const audioFileName = `${fields.lessonId?.[0] || Date.now()}${path.extname(audioFile.originalFilename)}`;
-      const audioNewPath = path.join(audioDir, audioFileName);
-      
-      fs.renameSync(audioFile.filepath, audioNewPath);
-      uploadedFiles.audio = `/audio/${audioFileName}`;
+    const file = files.file?.[0];
+    const type = fields.type?.[0];
+
+    if (!file) {
+      return res.status(400).json({ message: 'Không có file được upload' });
     }
 
-    if (files.text && files.text[0]) {
-      const textFile = files.text[0];
-      const textDir = path.join(uploadDir, 'text');
-      
-      if (!fs.existsSync(textDir)) {
-        fs.mkdirSync(textDir, { recursive: true });
-      }
-      
-      const textFileName = `${fields.lessonId?.[0] || Date.now()}${path.extname(textFile.originalFilename)}`;
-      const textNewPath = path.join(textDir, textFileName);
-      
-      fs.renameSync(textFile.filepath, textNewPath);
-      uploadedFiles.text = `/text/${textFileName}`;
+    // Determine target directory based on type
+    let targetDir;
+    let urlPrefix;
+    
+    if (type === 'audio') {
+      targetDir = path.join(process.cwd(), 'public', 'audio');
+      urlPrefix = '/audio';
+    } else if (type === 'json') {
+      targetDir = path.join(process.cwd(), 'public', 'text');
+      urlPrefix = '/text';
+    } else {
+      return res.status(400).json({ message: 'Type không hợp lệ (audio hoặc json)' });
     }
+
+    // Create directory if not exists
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // Generate unique filename
+    const originalName = file.originalFilename || 'file';
+    const ext = path.extname(originalName);
+    const baseName = path.basename(originalName, ext);
+    const timestamp = Date.now();
+    const fileName = `${baseName}_${timestamp}${ext}`;
+    const targetPath = path.join(targetDir, fileName);
+
+    // Move file to target directory
+    fs.copyFileSync(file.filepath, targetPath);
+    fs.unlinkSync(file.filepath); // Clean up temp file
+
+    const url = `${urlPrefix}/${fileName}`;
 
     return res.status(200).json({
-      message: 'Upload thành công',
-      files: uploadedFiles
+      success: true,
+      url,
+      fileName,
+      size: file.size
     });
 
   } catch (error) {
     console.error('Upload error:', error);
-    return res.status(500).json({ message: 'Lỗi khi upload: ' + error.message });
+    return res.status(500).json({ message: 'Lỗi upload file' });
   }
 }
-
-export default requireAdmin(handler);

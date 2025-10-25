@@ -53,13 +53,18 @@ A modern German learning application built with Next.js, featuring Shadowing and
    MONGODB_URI=your_mongodb_connection_string
    NEXTAUTH_URL=http://localhost:3000
    NEXTAUTH_SECRET=your_secret_key
+   JWT_SECRET=your_jwt_secret_key
    ```
 
-4. **Create admin user:**
-
-   ```bash
-   node scripts/createAdmin.js
-   ```
+4. **Set up Admin user:**
+   
+   - Register a new account on the website
+   - Go to MongoDB (Compass or Atlas)
+   - Find your user in `users` collection
+   - Change `role: "member"` to `role: "admin"`
+   - Logout and login again
+   
+   **See**: [QUICK_START.md](QUICK_START.md) for detailed steps
 
 5. **Run development server:**
 
@@ -69,7 +74,7 @@ A modern German learning application built with Next.js, featuring Shadowing and
 
 6. **Open browser:**
    - **Homepage**: [http://localhost:3000](http://localhost:3000)
-   - **Admin Dashboard**: [http://localhost:3000/admin/dashboard](http://localhost:3000/admin/dashboard)
+   - **Dashboard**: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 ## 🏗️ Project Structure
 
