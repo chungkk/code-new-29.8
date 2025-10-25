@@ -4,41 +4,72 @@ A modern German learning application built with Next.js, featuring Shadowing and
 
 ## 🚀 Features
 
+### For Learners
 - **Shadowing Mode**: Practice pronunciation by following audio
 - **Dictation Mode**: Improve spelling and listening skills
 - **Real-time Audio Sync**: Perfect synchronization with transcript
 - **Keyboard Controls**: Full keyboard navigation support
+- **Progress Tracking**: Save and track your learning progress
 - **Responsive Design**: Works on all devices
 - **Dark Theme**: Modern, eye-friendly interface
+
+### For Administrators
+- **Content Management**: Add, edit, delete lessons
+- **File Upload**: Upload audio and text files directly
+- **User Management**: Admin and Member roles
+- **Secure Authentication**: NextAuth with JWT
+- **Easy-to-use Dashboard**: Intuitive admin interface
 
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14
 - **Language**: JavaScript/TypeScript
+- **Database**: MongoDB with Mongoose
+- **Authentication**: NextAuth.js
 - **Styling**: CSS3 with CSS Variables
 - **Audio**: HTML5 Audio API
+- **File Upload**: Formidable
 - **Routing**: Next.js Pages Router
 
 ## 📦 Installation
 
-1. **Install dependencies:**
+1. **Clone repository:**
+
+   ```bash
+   git clone <repository-url>
+   cd deutsch-shadowing-nextjs
+   ```
+
+2. **Install dependencies:**
 
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
-2. **Run development server:**
+3. **Setup environment variables:**
+
+   Create `.env.local` file:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your_secret_key
+   ```
+
+4. **Create admin user:**
+
+   ```bash
+   node scripts/createAdmin.js
+   ```
+
+5. **Run development server:**
 
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
-3. **Open browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+6. **Open browser:**
+   - **Homepage**: [http://localhost:3000](http://localhost:3000)
+   - **Admin Dashboard**: [http://localhost:3000/admin/dashboard](http://localhost:3000/admin/dashboard)
 
 ## 🏗️ Project Structure
 
@@ -68,23 +99,46 @@ A modern German learning application built with Next.js, featuring Shadowing and
 
 ## 🎯 Usage
 
-### Shadowing Mode
+### For Learners
 
-1. Select a lesson from the homepage
-2. Choose "Shadowing" mode
-3. Listen to the audio and follow along
-4. Use keyboard controls:
+#### Shadowing Mode
+1. Register/Login at `/auth/login`
+2. Select a lesson from the homepage
+3. Choose "Shadowing" mode
+4. Listen to the audio and follow along
+5. Use keyboard controls:
    - `Space`: Play/Pause
    - `←/→`: Seek backward/forward
    - `↑/↓`: Previous/Next sentence
 
-### Dictation Mode
-
+#### Dictation Mode
 1. Select a lesson from the homepage
 2. Choose "Dictation" mode
 3. Type what you hear in the input fields
 4. Get real-time feedback on your spelling
 5. Double-click for hints
+
+### For Administrators
+
+#### Admin Dashboard
+1. Login with admin credentials at `/auth/login`
+2. Navigate to `/admin/dashboard`
+3. View all lessons in the system
+
+#### Add New Lesson
+1. Click **"Thêm Bài Học Mới"** button
+2. Fill in lesson information:
+   - ID, Title, Display Title, Description, Order
+3. Choose upload method:
+   - **Upload File**: Select audio + JSON files from computer
+   - **Enter URL**: Provide paths to existing files
+4. Click **"Thêm Bài Học"**
+
+#### Edit/Delete Lessons
+- **Edit**: Click "Sửa" button → Modify → "Cập Nhật"
+- **Delete**: Click "Xóa" button → Confirm
+
+📚 **Detailed Guide**: See [QUICK_START_ADMIN.md](QUICK_START_ADMIN.md) and [ADMIN_SYSTEM_GUIDE.md](ADMIN_SYSTEM_GUIDE.md)
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -113,9 +167,19 @@ Edit CSS variables in `styles/globals.css`:
 
 ### Adding New Lessons
 
+**Option 1: Via Admin Dashboard (Recommended)**
+1. Login as admin
+2. Go to `/admin/dashboard`
+3. Click "Thêm Bài Học Mới"
+4. Upload audio and JSON files
+5. Fill in lesson details and submit
+
+**Option 2: Manual Upload**
 1. Add audio file to `public/audio/`
 2. Add transcript JSON to `public/text/`
-3. Update lesson data in page components
+3. Use admin dashboard to create lesson entry
+
+**JSON Format**: See `public/text/example_lesson.json` for reference
 
 ## 🚀 Deployment
 

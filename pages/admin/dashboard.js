@@ -18,6 +18,10 @@ export default function AdminDashboard() {
     json: '',
     order: 0
   });
+  const [audioFile, setAudioFile] = useState(null);
+  const [textFile, setTextFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState('url'); // 'url' or 'upload'
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -44,17 +48,68 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleFileUpload = async () => {
+    if (!audioFile && !textFile) {
+      return { audio: formData.audio, json: formData.json };
+    }
+
+    setUploading(true);
+    const uploadFormData = new FormData();
+    
+    if (audioFile) {
+      uploadFormData.append('audio', audioFile);
+    }
+    if (textFile) {
+      uploadFormData.append('text', textFile);
+    }
+    uploadFormData.append('lessonId', formData.id);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const data = await res.json();
+      return {
+        audio: data.files.audio || formData.audio,
+        json: data.files.text || formData.json
+      };
+    } catch (error) {
+      throw new Error('Lỗi upload file: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
+      let audioPath = formData.audio;
+      let jsonPath = formData.json;
+
+      if (uploadMethod === 'upload' && (audioFile || textFile)) {
+        const uploadResult = await handleFileUpload();
+        audioPath = uploadResult.audio;
+        jsonPath = uploadResult.json;
+      }
+
+      const lessonData = {
+        ...formData,
+        audio: audioPath,
+        json: jsonPath
+      };
+
       const url = '/api/lessons';
       const method = editingLesson ? 'PUT' : 'POST';
       
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingLesson ? { id: editingLesson._id, ...formData } : formData)
+        body: JSON.stringify(editingLesson ? { id: editingLesson._id, ...lessonData } : lessonData)
       });
 
       if (!res.ok) throw new Error('Failed to save lesson');
@@ -110,6 +165,9 @@ export default function AdminDashboard() {
       json: '',
       order: 0
     });
+    setAudioFile(null);
+    setTextFile(null);
+    setUploadMethod('url');
   };
 
   if (status === 'loading') {
@@ -212,30 +270,110 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Audio URL (ví dụ: /audio/bai_2.mp3)
+                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                  Phương thức thêm Audio & Text
                 </label>
-                <input
-                  type="text"
-                  value={formData.audio}
-                  onChange={(e) => setFormData({ ...formData, audio: e.target.value })}
-                  required
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '5px' }}
-                />
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={{ marginRight: '20px' }}>
+                    <input
+                      type="radio"
+                      value="url"
+                      checked={uploadMethod === 'url'}
+                      onChange={(e) => setUploadMethod(e.target.value)}
+                      style={{ marginRight: '5px' }}
+                    />
+                    Nhập URL
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      value="upload"
+                      checked={uploadMethod === 'upload'}
+                      onChange={(e) => setUploadMethod(e.target.value)}
+                      style={{ marginRight: '5px' }}
+                    />
+                    Upload File
+                  </label>
+                </div>
               </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  JSON URL (ví dụ: /text/bai_2.json)
-                </label>
-                <input
-                  type="text"
-                  value={formData.json}
-                  onChange={(e) => setFormData({ ...formData, json: e.target.value })}
-                  required
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '5px' }}
-                />
-              </div>
+              {uploadMethod === 'url' ? (
+                <>
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                      Audio URL (ví dụ: /audio/bai_2.mp3)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.audio}
+                      onChange={(e) => setFormData({ ...formData, audio: e.target.value })}
+                      required
+                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '5px' }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                      JSON URL (ví dụ: /text/bai_2.json)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.json}
+                      onChange={(e) => setFormData({ ...formData, json: e.target.value })}
+                      required
+                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '5px' }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                      Upload Audio File (MP3, WAV, etc.)
+                    </label>
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => setAudioFile(e.target.files[0])}
+                      style={{ 
+                        width: '100%', 
+                        padding: '8px', 
+                        border: '1px solid #ddd', 
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    {audioFile && (
+                      <p style={{ marginTop: '5px', color: '#4CAF50', fontSize: '14px' }}>
+                        ✓ Đã chọn: {audioFile.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                      Upload Text/JSON File
+                    </label>
+                    <input
+                      type="file"
+                      accept=".json,.txt"
+                      onChange={(e) => setTextFile(e.target.files[0])}
+                      style={{ 
+                        width: '100%', 
+                        padding: '8px', 
+                        border: '1px solid #ddd', 
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    {textFile && (
+                      <p style={{ marginTop: '5px', color: '#4CAF50', fontSize: '14px' }}>
+                        ✓ Đã chọn: {textFile.name}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -252,16 +390,17 @@ export default function AdminDashboard() {
 
               <button
                 type="submit"
+                disabled={uploading}
                 style={{
                   padding: '10px 20px',
-                  background: '#4CAF50',
+                  background: uploading ? '#ccc' : '#4CAF50',
                   color: 'white',
                   border: 'none',
                   borderRadius: '5px',
-                  cursor: 'pointer'
+                  cursor: uploading ? 'not-allowed' : 'pointer'
                 }}
               >
-                {editingLesson ? 'Cập Nhật' : 'Thêm Bài Học'}
+                {uploading ? 'Đang upload...' : (editingLesson ? 'Cập Nhật' : 'Thêm Bài Học')}
               </button>
             </form>
           </div>
