@@ -2,17 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    appDir: false, // Use pages directory
-  },
   images: {
     domains: ['localhost'],
-    unoptimized: true // For static export compatibility
   },
-  // For static export if needed
-  trailingSlash: true,
-  output: 'export',
-  distDir: 'out'
+  // Removed 'output: export' to enable API routes for authentication
 }
 
 module.exports = nextConfig

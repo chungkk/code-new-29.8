@@ -253,12 +253,12 @@ body::before {
     margin: 0 auto;
     padding: 16px;
     border-radius: 0;
-    margin-top: 90px;
+    margin-top: 130px; /* Reduced from 170px - compact audio bar */
     padding-bottom: 80px;
     flex: 1;
 }
 
-/* Phần Audio Cố Định (Fixed Bar - TOP) - 🎨 Colorful */
+/* Phần Audio Cố Định (Fixed Bar - TOP) - 🎨 Colorful - COMPACT */
 .fixed-audio-bar {
     position: fixed;
     top: 80px;
@@ -269,28 +269,33 @@ body::before {
     color: white;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 10px 20px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .audio-content-wrapper {
-    max-width: 400px;
-    width: 70%;
+    max-width: 1200px;
+    width: 90%;
     margin: 0 auto;
     padding: 0;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
 }
 
 .fixed-audio-bar h1 {
     color: white;
-    text-align: center;
-    margin: 0 0 4px 0;
-    font-size: 0.85em;
-    font-weight: 600;
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    animation: bounce 2s ease-in-out infinite;
-    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+    max-width: 400px;
 }
 
 @keyframes bounce {
@@ -300,8 +305,10 @@ body::before {
 
 .audio-section {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 15px;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 #germanAudio {
@@ -313,46 +320,53 @@ body::before {
 }
 
 .time-display {
-    font-weight: 600;
+    font-weight: 700;
     color: white;
-    margin-top: 0;
-    font-size: 0.65em;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 3px 10px;
-    border-radius: 12px;
+    margin: 0;
+    font-size: 1em;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 8px 16px;
+    border-radius: 20px;
     display: inline-block;
     backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
 }
 
-/* Nút Điều Khiển Tua Mobile (Chỉ dùng cho PC/Tablet lớn) */
+/* Nút Điều Khiển Tua Mobile (Inline with title and time) */
 .mobile-seek-controls {
-    display: none; 
-    width: 100%;
-    justify-content: space-between;
-    padding: 0 10px;
-    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .seek-btn {
-    background-color: #333;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 8px 15px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    font-size: 0.9em;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: background-color 0.1s;
-    width: 45%; 
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
+}
+
+.seek-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .seek-btn:active {
-    background-color: var(--accent-color);
-    color: var(--text-color-dark);
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(0);
 }
 
 
@@ -631,33 +645,49 @@ body::before {
     .lesson-card {
         flex: 1 1 100%;
     }
-    .mobile-seek-controls {
-        display: none !important; 
-    }
+    
     .fixed-audio-bar {
-        padding-top: calc(4px + env(safe-area-inset-top));
-        padding-bottom: 4px;
+        padding: 8px 12px;
     }
+    
+    .audio-content-wrapper {
+        width: 95%;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
     .shadowing-app-container {
         padding: 10px;
-        margin-top: 170px; /* Offset cho header (80px) + audio bar mỏng (70px) + spacing (20px) */
-        
-        /* Tăng padding dưới để tránh nội dung bị mobile footer controls che khuất */
+        margin-top: 150px; /* Compact audio bar for mobile */
         padding-bottom: 90px; 
     }
 
     .fixed-audio-bar h1 {
-        font-size: 0.8em;
-        margin: 0 0 3px 0;
-        text-align: center;
-        padding: 0 8px;
-        word-break: break-word;
-        line-height: 1.2;
+        font-size: 0.85em;
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    
+    .audio-section {
+        flex: 1 1 100%;
+        justify-content: center;
+        gap: 8px;
     }
     
     .time-display {
-        font-size: 0.6em;
-        padding: 2px 8px;
+        font-size: 0.75em;
+        padding: 6px 12px;
+    }
+    
+    .mobile-seek-controls {
+        flex: 1 1 100%;
+        justify-content: center;
+        order: 3;
+    }
+    
+    .seek-btn {
+        font-size: 0.8em;
+        padding: 6px 12px;
     }
 
     .transcript-box {
@@ -1291,6 +1321,175 @@ body::before {
     color: var(--text-color);
     margin: 0 4px;
     line-height: 42px;
+}
+
+/* Hint Button (Eye Icon) */
+.hint-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid #1a1a1a;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 100;
+    padding: 0;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.hint-btn:hover {
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.hint-btn:active {
+    transform: scale(0.95);
+}
+
+/* Word Container */
+.word-container {
+    position: relative;
+    display: inline-block;
+    margin: 4px 6px;
+    vertical-align: middle;
+}
+
+.word-container.completed {
+    animation: wordCompleteFlash 0.6s ease-out;
+}
+
+/* Word Input Field */
+.word-input {
+    display: inline-block;
+    padding: 10px 16px;
+    min-width: 60px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #ffffff;
+    font-size: 1.1em;
+    font-weight: 700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    caret-color: #667eea;
+}
+
+.word-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+}
+
+.word-input:focus {
+    border-color: #764ba2;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4), 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: scale(1.05);
+}
+
+.word-input:hover:not(:focus) {
+    border-color: #8a9ced;
+    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
+}
+
+@keyframes wordCompleteFlash {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Correct Word Styles */
+.correct-word {
+    display: inline-block;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    color: #155724;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(132, 250, 176, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.correct-word:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(132, 250, 176, 0.6);
+    background: linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%);
+}
+
+/* Completed Word (when sentence is done) */
+.completed-word {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 10px 16px;
+    font-size: 1.15em;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    animation: completedWordPulse 2s ease-in-out infinite;
+}
+
+@keyframes completedWordPulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.5);
+    }
+    50% {
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.8);
+    }
+}
+
+.completed-word:hover {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 8px 24px rgba(245, 87, 108, 0.7);
+}
+
+/* Hint Revealed (word shown via hint button) */
+.hint-revealed {
+    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+    color: #4a148c;
+    border: 2px solid rgba(138, 43, 226, 0.3);
+    animation: hintRevealAnimation 0.5s ease-out;
+}
+
+@keyframes hintRevealAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-10deg);
+    }
+    60% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.hint-revealed:hover {
+    background: linear-gradient(135deg, #a6c1ee 0%, #fbc2eb 100%);
+    box-shadow: 0 6px 18px rgba(138, 43, 226, 0.4);
 }
 
 /* Sentence Navigation Buttons - Enhanced for Dictation */

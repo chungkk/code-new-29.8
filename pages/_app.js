@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { SessionProvider } from 'next-auth/react';
 import '../styles/globals.css';
 import '../styles/popup.css';
 import Header from '../components/Header';
@@ -16,9 +17,9 @@ function Layout({ children }) {
   );
 }
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
-    <>
+    <SessionProvider session={session}>
       <Head>
         <title>Deutsch Shadowing - German Learning App</title>
         <meta name="description" content="Learn German with Shadowing and Dictation methods" />
@@ -31,7 +32,7 @@ function MyApp({ Component, pageProps }) {
           <Component {...pageProps} />
         </Layout>
       </div>
-    </>
+    </SessionProvider>
   );
 }
 

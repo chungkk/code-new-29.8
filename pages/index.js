@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import LessonCard from '../components/LessonCard';
@@ -7,9 +7,7 @@ import ModeSelectionPopup from '../components/ModeSelectionPopup';
 const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const router = useRouter();
-
-  const lessons = [
+  const [lessons, setLessons] = useState([
     {
       id: 'bai_1',
       title: 'Patient Erde: Zustand kritisch',
@@ -18,7 +16,26 @@ const HomePage = () => {
       displayTitle: 'Lektion 1: Patient Erde',
       description: 'Thema: Umwelt, Klimawandel (DW)'
     }
-  ];
+  ]);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchLessons();
+  }, []);
+
+  const fetchLessons = async () => {
+    try {
+      const res = await fetch('/api/lessons');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setLessons(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading lessons:', error);
+    }
+  };
 
   const handleLessonClick = (lesson) => {
     setSelectedLesson(lesson);

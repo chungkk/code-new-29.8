@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
@@ -8,6 +9,7 @@ import Transcript from '../../components/Transcript';
 const DictationPage = () => {
   const router = useRouter();
   const { lessonId } = useRouter().query;
+  const { data: session } = useSession();
   
   // State management
   const [transcriptData, setTranscriptData] = useState([]);
@@ -25,6 +27,14 @@ const DictationPage = () => {
   const [lastClickedInput, setLastClickedInput] = useState(null);
   const [processedText, setProcessedText] = useState('');
   
+  // Track last 's' keystroke time for timeout logic
+  const lastSKeystrokeTime = useRef({});
+  
+  // Progress tracking
+  const [completedSentences, setCompletedSentences] = useState([]);
+  const [completedWords, setCompletedWords] = useState({}); // { sentenceIndex: { wordIndex: correctWord } }
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  
   const audioRef = useRef(null);
 
   const lessonData = {
@@ -38,6 +48,34 @@ const DictationPage = () => {
   };
 
   const lesson = lessonData[lessonId];
+
+  // Load progress from database
+  useEffect(() => {
+    const loadProgress = async () => {
+      if (!session || !lessonId) return;
+      
+      try {
+        const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.progress) {
+            setCompletedSentences(data.progress.completedSentences || []);
+            setCompletedWords(data.progress.completedWords || {});
+            console.log('Loaded progress:', {
+              completedSentences: data.progress.completedSentences,
+              completedWords: data.progress.completedWords
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading progress:', error);
+      } finally {
+        setProgressLoaded(true);
+      }
+    };
+    
+    loadProgress();
+  }, [session, lessonId]);
 
   // Load transcript
   useEffect(() => {
@@ -270,11 +308,36 @@ const DictationPage = () => {
 
   // Character replacement for German umlauts
   const replaceCharacters = useCallback((input) => {
+    const currentTime = Date.now();
+    const inputId = input.getAttribute('data-word-id') || input;
+    
+    // Special handling for "ss" with timeout
+    if (input.value.endsWith("ss")) {
+      const lastSTime = lastSKeystrokeTime.current[inputId];
+      const timeDiff = lastSTime ? currentTime - lastSTime : Infinity;
+      
+      // If less than 3 seconds, convert to ß
+      if (timeDiff < 3000) {
+        input.value = input.value.slice(0, -2) + "ß";
+        delete lastSKeystrokeTime.current[inputId];
+        return;
+      }
+      // If more than 3 seconds, keep "ss"
+      else {
+        delete lastSKeystrokeTime.current[inputId];
+        return;
+      }
+    }
+    
+    // Track when user types 's'
+    if (input.value.endsWith("s")) {
+      lastSKeystrokeTime.current[inputId] = currentTime;
+    }
+    
     const transformations = [
       { find: "ae", replace: "ä" },
       { find: "oe", replace: "ö" },
       { find: "ue", replace: "ü" },
-      { find: "ss", replace: "ß" },
     ];
 
     for (const transformation of transformations) {
@@ -284,6 +347,51 @@ const DictationPage = () => {
       }
     }
   }, []);
+
+  // Save progress to database
+  const saveProgress = useCallback(async (updatedCompletedSentences, updatedCompletedWords) => {
+    if (!session || !lessonId) return;
+    
+    try {
+      const totalWords = transcriptData.reduce((sum, sentence) => {
+        const words = sentence.text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1);
+        return sum + words.length;
+      }, 0);
+      
+      // Count correct words from completedWords object
+      let correctWordsCount = 0;
+      Object.keys(updatedCompletedWords).forEach(sentenceIdx => {
+        const sentenceWords = updatedCompletedWords[sentenceIdx];
+        correctWordsCount += Object.keys(sentenceWords).length;
+      });
+      
+      await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lessonId,
+          mode: 'dictation',
+          progress: {
+            completedSentences: updatedCompletedSentences,
+            completedWords: updatedCompletedWords,
+            currentSentenceIndex,
+            totalSentences: transcriptData.length,
+            correctWords: correctWordsCount,
+            totalWords
+          }
+        })
+      });
+      
+      console.log('Progress saved:', { 
+        completedSentences: updatedCompletedSentences, 
+        completedWords: updatedCompletedWords,
+        correctWordsCount, 
+        totalWords 
+      });
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  }, [session, lessonId, transcriptData, currentSentenceIndex]);
 
   // Save word function
   const saveWord = useCallback((word) => {
@@ -330,14 +438,50 @@ const DictationPage = () => {
     return allInputs[currentIndex + 1];
   };
 
+  // Save individual word completion
+  const saveWordCompletion = useCallback((wordIndex, correctWord) => {
+    const updatedWords = { ...completedWords };
+    
+    if (!updatedWords[currentSentenceIndex]) {
+      updatedWords[currentSentenceIndex] = {};
+    }
+    
+    updatedWords[currentSentenceIndex][wordIndex] = correctWord;
+    setCompletedWords(updatedWords);
+    
+    // Save to database
+    saveProgress(completedSentences, updatedWords);
+    
+    console.log(`Word saved: sentence ${currentSentenceIndex}, word ${wordIndex}: ${correctWord}`);
+  }, [completedWords, currentSentenceIndex, completedSentences, saveProgress]);
+
+  // Check if current sentence is completed
+  const checkSentenceCompletion = useCallback(() => {
+    setTimeout(() => {
+      const allInputs = document.querySelectorAll(".word-input");
+      const remainingInputs = Array.from(allInputs);
+      
+      if (remainingInputs.length === 0 && !completedSentences.includes(currentSentenceIndex)) {
+        // All words are correct, mark sentence as completed
+        const updatedCompleted = [...completedSentences, currentSentenceIndex];
+        setCompletedSentences(updatedCompleted);
+        saveProgress(updatedCompleted, completedWords);
+        console.log(`Sentence ${currentSentenceIndex} completed!`);
+      }
+    }, 200);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress]);
+
   // Check word function
-  const checkWord = useCallback((input, correctWord) => {
+  const checkWord = useCallback((input, correctWord, wordIndex) => {
     const sanitizedCorrectWord = correctWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
     
     replaceCharacters(input);
     
     if (input.value.toLowerCase() === sanitizedCorrectWord.toLowerCase()) {
       saveWord(correctWord);
+      
+      // Save this word completion to database
+      saveWordCompletion(wordIndex, correctWord);
       
       const wordSpan = document.createElement("span");
       wordSpan.className = "correct-word";
@@ -347,6 +491,9 @@ const DictationPage = () => {
       };
       
       input.parentNode.replaceWith(wordSpan);
+      
+      // Check if sentence is now completed
+      checkSentenceCompletion();
       
       // Only auto-focus next input when word is actually completed by typing
       // Not when just clicking on input
@@ -359,7 +506,7 @@ const DictationPage = () => {
     } else {
       updateInputBackground(input, sanitizedCorrectWord);
     }
-  }, [replaceCharacters, saveWord, updateInputBackground]);
+  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion]);
 
   // Update input background
   const updateInputBackground = useCallback((input, correctWord) => {
@@ -387,8 +534,43 @@ const DictationPage = () => {
     }
   }, []);
 
+  // Show hint for a word
+  const showHint = useCallback((button, correctWord, wordIndex) => {
+    const container = button.parentElement;
+    const input = container.querySelector('.word-input');
+    
+    if (input) {
+      // Save this word completion to database
+      saveWordCompletion(wordIndex, correctWord);
+      
+      // Replace input with correct word
+      const wordSpan = document.createElement("span");
+      wordSpan.className = "correct-word hint-revealed";
+      wordSpan.innerText = correctWord;
+      wordSpan.onclick = function () {
+        if (window.saveWord) window.saveWord(correctWord);
+      };
+      
+      // Find the punctuation span
+      const punctuation = container.querySelector('.word-punctuation');
+      
+      // Clear container and rebuild
+      container.innerHTML = '';
+      container.appendChild(wordSpan);
+      if (punctuation) {
+        container.appendChild(punctuation);
+      }
+      
+      // Save the word
+      saveWord(correctWord);
+      
+      // Check if sentence is completed
+      checkSentenceCompletion();
+    }
+  }, [saveWord, checkSentenceCompletion, saveWordCompletion]);
+
   // Process text for dictation
-  const processLevelUp = useCallback((sentence) => {
+  const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted) => {
     const sentences = sentence.split(/\n+/);
     
     const processedSentences = sentences.map((sentence) => {
@@ -399,11 +581,40 @@ const DictationPage = () => {
         if (pureWord.length >= 1) {
           const nonAlphaNumeric = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
           
+          // Check if this specific word is completed
+          const isWordCompleted = sentenceWordsCompleted && sentenceWordsCompleted[wordIndex];
+          
+          // If entire sentence is completed, show all words
+          if (isCompleted) {
+            return `<span class="word-container completed">
+              <span class="correct-word completed-word" onclick="window.saveWord && window.saveWord('${pureWord}')">${pureWord}</span>
+              <span class="word-punctuation">${nonAlphaNumeric}</span>
+            </span>`;
+          }
+          
+          // If this specific word is completed, show it
+          if (isWordCompleted) {
+            return `<span class="word-container">
+              <span class="correct-word" onclick="window.saveWord && window.saveWord('${pureWord}')">${pureWord}</span>
+              <span class="word-punctuation">${nonAlphaNumeric}</span>
+            </span>`;
+          }
+          
+          // Otherwise show input with hint button
           return `<span class="word-container">
+            <button 
+              class="hint-btn" 
+              onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
+              title="Hiển thị gợi ý"
+              type="button"
+            >
+              👁️
+            </button>
             <input 
               type="text" 
               class="word-input" 
-              oninput="window.checkWord(this, '${pureWord}')" 
+              data-word-id="word-${wordIndex}"
+              oninput="window.checkWord(this, '${pureWord}', ${wordIndex})" 
               onclick="window.handleInputClick(this, '${pureWord}')" 
               onkeydown="window.disableArrowKeys(event)" 
               onfocus="window.handleInputFocus(this, '${pureWord}')"
@@ -412,7 +623,7 @@ const DictationPage = () => {
               size="${pureWord.length}" 
               placeholder="${'*'.repeat(pureWord.length)}"
             />
-            ${nonAlphaNumeric}
+            <span class="word-punctuation">${nonAlphaNumeric}</span>
           </span>`;
         }
         return `<span>${word}</span>`;
@@ -426,9 +637,11 @@ const DictationPage = () => {
 
   // Initialize dictation for current sentence
   useEffect(() => {
-    if (transcriptData.length > 0 && transcriptData[currentSentenceIndex]) {
+    if (transcriptData.length > 0 && transcriptData[currentSentenceIndex] && progressLoaded) {
       const text = transcriptData[currentSentenceIndex].text;
-      const processed = processLevelUp(text);
+      const isCompleted = completedSentences.includes(currentSentenceIndex);
+      const sentenceWordsCompleted = completedWords[currentSentenceIndex] || {};
+      const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
       setProcessedText(processed);
       
       if (typeof window !== 'undefined') {
@@ -436,6 +649,8 @@ const DictationPage = () => {
         window.handleInputClick = handleInputClick;
         window.handleInputFocus = handleInputFocus;
         window.handleInputBlur = handleInputBlur;
+        window.saveWord = saveWord;
+        window.showHint = showHint;
         window.disableArrowKeys = (e) => {
           // Prevent all arrow keys and space from being typed in input fields
           if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
@@ -444,7 +659,7 @@ const DictationPage = () => {
         };
       }
     }
-  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur]);
+  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, completedSentences, completedWords, progressLoaded]);
 
   const handleBackToHome = () => router.push('/');
 
@@ -470,17 +685,7 @@ const DictationPage = () => {
           Trình duyệt của bạn không hỗ trợ thẻ audio.
         </audio>
 
-        <AudioControls
-          lessonTitle={`${lesson.displayTitle} - Diktat`}
-          currentTime={currentTime}
-          duration={duration}
-          isPlaying={isPlaying}
-          onSeek={handleSeek}
-          onPlayPause={handlePlayPause}
-          formatTime={formatTime}
-        />
-
-        <div className="shadowing-app-container">
+        <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
           <div className="shadowing-layout">
             {/* LEFT SIDE: Diktat */}
             <div className="current-sentence-section">
@@ -551,7 +756,10 @@ const DictationPage = () => {
                       </div>
                       <div className="sentence-content">
                         <div className="sentence-text">
-                          {maskText(segment.text.trim())}
+                          {completedSentences.includes(index) 
+                            ? segment.text.trim() 
+                            : maskText(segment.text.trim())
+                          }
                         </div>
                         <div className="sentence-time">
                           {formatTime(segment.start)} - {formatTime(segment.end)}

@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { useSession } from 'next-auth/react';
 import AudioControls from '../../components/AudioControls';
 import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
+import { useProgress } from '../../lib/hooks/useProgress';
 
 const ShadowingPage = () => {
   const router = useRouter();
   const { lessonId } = useRouter().query;
+  const { data: session } = useSession();
   
   const [transcriptData, setTranscriptData] = useState([]);
   const [isTextHidden, setIsTextHidden] = useState(false);
@@ -18,6 +21,7 @@ const ShadowingPage = () => {
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   
   const audioRef = useRef(null);
+  const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
 
   // Lesson data - in a real app, this would come from an API
   const lessonData = {
@@ -172,17 +176,23 @@ const ShadowingPage = () => {
     if (!audio) return;
 
     if (audio.paused) {
-      // Kiểm tra nếu đang ở cuối câu (hoặc sau endTime), reset về đầu câu
       if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
         const currentSentence = transcriptData[currentSentenceIndex];
         
-        // Nếu currentTime >= endTime của câu, reset về đầu câu
         if (audio.currentTime >= currentSentence.end - 0.05) {
           audio.currentTime = currentSentence.start;
         }
         
         audio.play();
         setSegmentPlayEndTime(currentSentence.end);
+        
+        if (session) {
+          saveProgress({
+            currentSentenceIndex,
+            currentTime: audio.currentTime,
+            lastPlayed: new Date()
+          });
+        }
       } else {
         audio.play();
       }
@@ -269,17 +279,7 @@ const ShadowingPage = () => {
           Trình duyệt của bạn không hỗ trợ thẻ audio.
         </audio>
 
-        <AudioControls
-          lessonTitle={lesson.title}
-          currentTime={currentTime}
-          duration={duration}
-          isPlaying={isPlaying}
-          onSeek={handleSeek}
-          onPlayPause={handlePlayPause}
-          formatTime={formatTime}
-        />
-
-        <div className="shadowing-app-container">
+        <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
           <div className="shadowing-layout">
             <div className="current-sentence-section">
               <Transcript

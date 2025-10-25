@@ -5,7 +5,7 @@ const LessonCard = ({ lesson, onClick }) => {
     <div className="lesson-card" onClick={onClick}>
       <h3>{lesson.displayTitle}</h3>
       <p>{lesson.description}</p>
-      <button>Los geht's!</button>
+      <button>Los geht&apos;s!</button>
     </div>
   );
 };
