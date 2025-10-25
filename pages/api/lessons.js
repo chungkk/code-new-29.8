@@ -1,12 +1,16 @@
 import { requireAdmin } from '../../lib/authMiddleware';
 import { Lesson } from '../../lib/models/Lesson';
+import connectDB from '../../lib/mongodb';
 
 export default async function handler(req, res) {
+  await connectDB();
+  
   if (req.method === 'GET') {
     try {
       const lessons = await Lesson.find().sort({ order: 1 });
       return res.status(200).json(lessons);
     } catch (error) {
+      console.error('Get lessons error:', error);
       return res.status(500).json({ message: error.message });
     }
   }

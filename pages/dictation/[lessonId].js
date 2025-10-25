@@ -57,15 +57,42 @@ const DictationPageContent = () => {
       }
       
       try {
-        const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setProgressLoaded(true);
+          return;
+        }
+        
+        const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
         if (res.ok) {
           const data = await res.json();
-          if (data && data.progress) {
-            setCompletedSentences(data.progress.completedSentences || []);
-            setCompletedWords(data.progress.completedWords || {});
-            console.log('Loaded progress:', {
-              completedSentences: data.progress.completedSentences,
-              completedWords: data.progress.completedWords
+          console.log('Raw API response:', data);
+          
+          if (data && Object.keys(data).length > 0) {
+            const loadedSentences = data.completedSentences || [];
+            const loadedWords = data.completedWords || {};
+            
+            // Normalize keys to numbers
+            const normalizedWords = {};
+            Object.keys(loadedWords).forEach(sentenceIdx => {
+              const numIdx = parseInt(sentenceIdx);
+              normalizedWords[numIdx] = {};
+              Object.keys(loadedWords[sentenceIdx]).forEach(wordIdx => {
+                const numWordIdx = parseInt(wordIdx);
+                normalizedWords[numIdx][numWordIdx] = loadedWords[sentenceIdx][wordIdx];
+              });
+            });
+            
+            setCompletedSentences(loadedSentences);
+            setCompletedWords(normalizedWords);
+            console.log('Loaded and normalized progress:', {
+              completedSentences: loadedSentences,
+              completedWords: normalizedWords
             });
           }
         }
@@ -355,6 +382,12 @@ const DictationPageContent = () => {
     if (!lessonId) return;
     
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token found, cannot save progress');
+        return;
+      }
+      
       const totalWords = transcriptData.reduce((sum, sentence) => {
         const words = sentence.text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1);
         return sum + words.length;
@@ -367,9 +400,12 @@ const DictationPageContent = () => {
         correctWordsCount += Object.keys(sentenceWords).length;
       });
       
-      await fetch('/api/progress', {
+      const response = await fetch('/api/progress', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           lessonId,
           mode: 'dictation',
@@ -384,11 +420,18 @@ const DictationPageContent = () => {
         })
       });
       
-      console.log('Progress saved:', { 
+      if (!response.ok) {
+        throw new Error('Failed to save progress');
+      }
+      
+      const result = await response.json();
+      
+      console.log('✅ Progress saved:', { 
         completedSentences: updatedCompletedSentences, 
         completedWords: updatedCompletedWords,
         correctWordsCount, 
-        totalWords 
+        totalWords,
+        completionPercent: result.completionPercent
       });
     } catch (error) {
       console.error('Error saving progress:', error);
@@ -442,20 +485,23 @@ const DictationPageContent = () => {
 
   // Save individual word completion
   const saveWordCompletion = useCallback((wordIndex, correctWord) => {
-    const updatedWords = { ...completedWords };
-    
-    if (!updatedWords[currentSentenceIndex]) {
-      updatedWords[currentSentenceIndex] = {};
-    }
-    
-    updatedWords[currentSentenceIndex][wordIndex] = correctWord;
-    setCompletedWords(updatedWords);
-    
-    // Save to database
-    saveProgress(completedSentences, updatedWords);
-    
-    console.log(`Word saved: sentence ${currentSentenceIndex}, word ${wordIndex}: ${correctWord}`);
-  }, [completedWords, currentSentenceIndex, completedSentences, saveProgress]);
+    setCompletedWords(prevWords => {
+      const updatedWords = { ...prevWords };
+      
+      if (!updatedWords[currentSentenceIndex]) {
+        updatedWords[currentSentenceIndex] = {};
+      }
+      
+      updatedWords[currentSentenceIndex][wordIndex] = correctWord;
+      
+      console.log(`Word saved: sentence ${currentSentenceIndex}, word ${wordIndex}: ${correctWord}`, updatedWords);
+      
+      // Save to database with updated data
+      saveProgress(completedSentences, updatedWords);
+      
+      return updatedWords;
+    });
+  }, [currentSentenceIndex, completedSentences, saveProgress]);
 
   // Check if current sentence is completed
   const checkSentenceCompletion = useCallback(() => {
@@ -586,6 +632,10 @@ const DictationPageContent = () => {
           // Check if this specific word is completed
           const isWordCompleted = sentenceWordsCompleted && sentenceWordsCompleted[wordIndex];
           
+          if (isWordCompleted) {
+            console.log(`Word ${wordIndex} (${pureWord}) is completed:`, sentenceWordsCompleted[wordIndex]);
+          }
+          
           // If entire sentence is completed, show all words
           if (isCompleted) {
             return `<span class="word-container completed">
@@ -643,6 +693,13 @@ const DictationPageContent = () => {
       const text = transcriptData[currentSentenceIndex].text;
       const isCompleted = completedSentences.includes(currentSentenceIndex);
       const sentenceWordsCompleted = completedWords[currentSentenceIndex] || {};
+      
+      console.log('Rendering sentence', currentSentenceIndex, ':', {
+        isCompleted,
+        sentenceWordsCompleted,
+        allCompletedWords: completedWords
+      });
+      
       const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
       setProcessedText(processed);
       

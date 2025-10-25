@@ -1,17 +1,42 @@
 import { requireAuth } from '../../lib/authMiddleware';
 import { UserProgress } from '../../lib/models/UserProgress';
+import connectDB from '../../lib/mongodb';
 
 async function handler(req, res) {
+  await connectDB();
+  
   if (req.method === 'POST') {
     try {
       const { lessonId, mode, progress } = req.body;
-      await UserProgress.findOneAndUpdate(
-        { userId: req.user._id, lessonId, mode },
-        { progress },
-        { upsert: true, new: true }
-      );
-      return res.status(200).json({ message: 'Lưu tiến trình thành công' });
+      
+      // Find existing progress or create new one
+      let userProgress = await UserProgress.findOne({ 
+        userId: req.user._id, 
+        lessonId, 
+        mode 
+      });
+      
+      if (userProgress) {
+        // Update existing progress
+        userProgress.progress = progress;
+        await userProgress.save(); // This triggers pre-save middleware
+      } else {
+        // Create new progress
+        userProgress = new UserProgress({
+          userId: req.user._id,
+          lessonId,
+          mode,
+          progress
+        });
+        await userProgress.save(); // This triggers pre-save middleware
+      }
+      
+      return res.status(200).json({ 
+        message: 'Lưu tiến trình thành công',
+        completionPercent: userProgress.completionPercent 
+      });
     } catch (error) {
+      console.error('Save progress error:', error);
       return res.status(400).json({ message: error.message });
     }
   }
