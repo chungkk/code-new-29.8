@@ -52,7 +52,16 @@ const DictationPage = () => {
   // Load progress from database
   useEffect(() => {
     const loadProgress = async () => {
-      if (!session || !lessonId) return;
+      // If not logged in, just mark progress as loaded (no data to load)
+      if (!session) {
+        setProgressLoaded(true);
+        return;
+      }
+      
+      if (!lessonId) {
+        setProgressLoaded(true);
+        return;
+      }
       
       try {
         const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`);

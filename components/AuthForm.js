@@ -38,23 +38,27 @@ export default function AuthForm({ mode = 'login' }) {
         const result = await signIn('credentials', {
           redirect: false,
           email: formData.email,
-          password: formData.password,
-          callbackUrl: '/'
+          password: formData.password
         });
 
         console.log('SignIn result:', result);
 
         if (result?.error) {
           console.error('SignIn error:', result.error);
-          throw new Error(result.error);
+          throw new Error('Email hoặc mật khẩu không đúng');
         }
 
-        if (result?.ok) {
-          console.log('SignIn successful, redirecting...');
-          router.push('/');
-        } else {
-          throw new Error('Đăng nhập thất bại');
+        if (!result?.ok) {
+          throw new Error('Email hoặc mật khẩu không đúng');
         }
+
+        console.log('SignIn successful, redirecting...');
+        
+        // Wait a bit for session to be set
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError(err.message);

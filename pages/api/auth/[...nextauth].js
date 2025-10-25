@@ -13,31 +13,37 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           console.log('🔍 Attempting login for:', credentials.email);
+          
+          if (!credentials?.email || !credentials?.password) {
+            console.log('❌ Missing credentials');
+            return null;
+          }
+          
           const user = await User.findByEmail(credentials.email);
           
           if (!user) {
             console.log('❌ User not found:', credentials.email);
-            throw new Error('Email hoặc mật khẩu không đúng');
+            return null;
           }
 
-          console.log('✅ User found:', user.email);
+          console.log('✅ User found:', user.email, 'Role:', user.role || 'user');
           const isValid = await User.verifyPassword(credentials.password, user.password);
           
           if (!isValid) {
             console.log('❌ Invalid password for:', credentials.email);
-            throw new Error('Email hoặc mật khẩu không đúng');
+            return null;
           }
 
-          console.log('✅ Login successful for:', user.email, 'Role:', user.role);
+          console.log('✅ Login successful for:', user.email, 'Role:', user.role || 'user');
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
-            role: user.role
+            role: user.role || 'user'
           };
         } catch (error) {
           console.error('❌ Login error:', error.message);
-          throw new Error(error.message);
+          return null;
         }
       }
     })
