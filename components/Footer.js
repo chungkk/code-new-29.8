@@ -4,7 +4,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="app-footer">
+    <footer className="app-footer colorful-cheerful">
       <div className="footer-content">
         <div className="footer-section">
           <h3 className="footer-title">🎓 Deutsch Shadowing</h3>

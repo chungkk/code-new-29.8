@@ -17,6 +17,7 @@ const ShadowingPageContent = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
+  const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +97,7 @@ const ShadowingPageContent = () => {
     const handlePause = () => {
       setIsPlaying(false);
       setSegmentPlayEndTime(null);
+      setSegmentEndTimeLocked(false);
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
@@ -125,22 +127,22 @@ const ShadowingPageContent = () => {
   // Tìm câu hiện tại dựa trên thời gian
   useEffect(() => {
     if (!transcriptData.length) return;
-    
+
     const currentIndex = transcriptData.findIndex(
       (item, index) => currentTime >= item.start && currentTime < item.end
     );
-    
+
     if (currentIndex !== -1 && currentIndex !== currentSentenceIndex) {
       setCurrentSentenceIndex(currentIndex);
-      
-      // Khi câu thay đổi và đang phát, update endTime của câu mới
+
+      // Khi câu thay đổi và đang phát, update endTime của câu mới (chỉ khi không lock)
       const audio = audioRef.current;
-      if (audio && !audio.paused) {
+      if (audio && !audio.paused && !segmentEndTimeLocked) {
         const newSentence = transcriptData[currentIndex];
         setSegmentPlayEndTime(newSentence.end);
       }
     }
-  }, [currentTime, transcriptData, currentSentenceIndex]);
+  }, [currentTime, transcriptData, currentSentenceIndex, segmentEndTimeLocked]);
 
   const loadTranscript = async (jsonPath) => {
     try {
@@ -166,6 +168,7 @@ const ShadowingPageContent = () => {
       audio.play();
     }
     setSegmentPlayEndTime(endTime);
+    setSegmentEndTimeLocked(true);
   };
 
   const goToPreviousSentence = () => {
@@ -220,14 +223,15 @@ const ShadowingPageContent = () => {
     if (audio.paused) {
       if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
         const currentSentence = transcriptData[currentSentenceIndex];
-        
+
         if (audio.currentTime >= currentSentence.end - 0.05) {
           audio.currentTime = currentSentence.start;
         }
-        
+
         audio.play();
         setSegmentPlayEndTime(currentSentence.end);
-        
+        setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
+
         saveProgress({
           currentSentenceIndex,
           currentTime: audio.currentTime,
@@ -235,6 +239,7 @@ const ShadowingPageContent = () => {
         });
       } else {
         audio.play();
+        setSegmentEndTimeLocked(false);
       }
     } else {
       audio.pause();
@@ -339,8 +344,8 @@ const ShadowingPageContent = () => {
         <title>{lesson.displayTitle} - Shadowing</title>
         <meta name="description" content={`Shadowing Übung: ${lesson.title}`} />
       </Head>
-      
-      <div className="shadowing-page">
+
+      <div className="shadowing-page dark-theme">
         <audio ref={audioRef} controls style={{ display: 'none' }}>
           <source src={lesson.audio} type="audio/mp3" />
           Ihr Browser unterstützt das Audio-Tag nicht.
@@ -349,17 +354,20 @@ const ShadowingPageContent = () => {
         <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
           <div className="shadowing-layout">
             <div className="current-sentence-section">
-              <Transcript
-                transcriptData={transcriptData}
-                currentTime={currentTime}
-                isHidden={isTextHidden}
-                onSentenceClick={handleSentenceClick}
-                currentSentenceIndex={currentSentenceIndex}
-                onPreviousSentence={goToPreviousSentence}
-                onNextSentence={goToNextSentence}
-                isPlaying={isPlaying}
-                lessonId={lessonId}
-              />
+              <div className="current-sentence-container">
+                <h3>Aktueller Satz</h3>
+                <Transcript
+                  transcriptData={transcriptData}
+                  currentTime={currentTime}
+                  isHidden={isTextHidden}
+                  onSentenceClick={handleSentenceClick}
+                  currentSentenceIndex={currentSentenceIndex}
+                  onPreviousSentence={goToPreviousSentence}
+                  onNextSentence={goToNextSentence}
+                  isPlaying={isPlaying}
+                  lessonId={lessonId}
+                />
+              </div>
             </div>
             
             <div className="sentence-list-section">

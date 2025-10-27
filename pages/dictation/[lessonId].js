@@ -7,6 +7,7 @@ import FooterControls from '../../components/FooterControls';
 import Transcript from '../../components/Transcript';
 import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
+import { speakText } from '../../lib/textToSpeech';
 
 const DictationPageContent = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ const DictationPageContent = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
+  const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [isTextHidden, setIsTextHidden] = useState(true);
   const [lesson, setLesson] = useState(null);
@@ -176,6 +178,7 @@ const DictationPageContent = () => {
     const handlePause = () => {
       setIsPlaying(false);
       setSegmentPlayEndTime(null);
+      setSegmentEndTimeLocked(false);
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
@@ -210,15 +213,15 @@ const DictationPageContent = () => {
     );
     if (currentIndex !== -1 && currentIndex !== currentSentenceIndex) {
       setCurrentSentenceIndex(currentIndex);
-      
-      // Khi câu thay đổi và đang phát, update endTime của câu mới
+
+      // Khi câu thay đổi và đang phát, update endTime của câu mới (chỉ khi không lock)
       const audio = audioRef.current;
-      if (audio && !audio.paused) {
+      if (audio && !audio.paused && !segmentEndTimeLocked) {
         const newSentence = transcriptData[currentIndex];
         setSegmentPlayEndTime(newSentence.end);
       }
     }
-  }, [currentTime, transcriptData, currentSentenceIndex]);
+  }, [currentTime, transcriptData, currentSentenceIndex, segmentEndTimeLocked]);
 
   // Audio control functions
   const handleSeek = useCallback((direction) => {
@@ -255,16 +258,18 @@ const DictationPageContent = () => {
       // Kiểm tra nếu đang ở cuối câu (hoặc sau endTime), reset về đầu câu
       if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
         const currentSentence = transcriptData[currentSentenceIndex];
-        
+
         // Nếu currentTime >= endTime của câu, reset về đầu câu
         if (audio.currentTime >= currentSentence.end - 0.05) {
           audio.currentTime = currentSentence.start;
         }
-        
+
         audio.play();
         setSegmentPlayEndTime(currentSentence.end);
+        setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
       } else {
         audio.play();
+        setSegmentEndTimeLocked(false);
       }
     } else {
       audio.pause();
@@ -283,6 +288,7 @@ const DictationPageContent = () => {
           audio.play();
         }
         setSegmentPlayEndTime(item.end);
+        setSegmentEndTimeLocked(true);
       }
     }
   }, [currentSentenceIndex, transcriptData]);
@@ -299,6 +305,7 @@ const DictationPageContent = () => {
           audio.play();
         }
         setSegmentPlayEndTime(item.end);
+        setSegmentEndTimeLocked(true);
       }
     }
   }, [currentSentenceIndex, transcriptData]);
@@ -378,6 +385,7 @@ const DictationPageContent = () => {
     audio.currentTime = startTime;
     if (audio.paused) audio.play();
     setSegmentPlayEndTime(endTime);
+    setSegmentEndTimeLocked(true);
   };
 
 
@@ -511,18 +519,21 @@ const DictationPageContent = () => {
         audio.pause();
       }
     }
-    
+
     const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
     if (!cleanedWord) return;
-    
+
+    // Speak the word
+    speakText(cleanedWord);
+
     // Calculate popup position
     const rect = event.target.getBoundingClientRect();
     const popupWidth = 240;
     const popupHeight = 230;
-    
+
     let top = rect.top;
     let left = rect.right + 15;
-    
+
     // Check if popup would go off right edge
     if (left + popupWidth / 2 > window.innerWidth - 20) {
       left = rect.left - popupWidth / 2 - 15;
@@ -530,7 +541,7 @@ const DictationPageContent = () => {
         left = rect.left + rect.width / 2;
       }
     }
-    
+
     // Check vertical position
     if (top + popupHeight > window.innerHeight - 20) {
       top = window.innerHeight - popupHeight - 20;
@@ -538,7 +549,7 @@ const DictationPageContent = () => {
     if (top < 20) {
       top = 20;
     }
-    
+
     setSelectedWord(cleanedWord);
     setPopupPosition({ top, left });
     setShowVocabPopup(true);
@@ -870,10 +881,10 @@ const DictationPageContent = () => {
 
         <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
           <div className="shadowing-layout">
-            {/* LEFT SIDE: Diktat */}
+            {/* LEFT SIDE: Aktueller Satz */}
             <div className="current-sentence-section">
-              <div className="sentence-list-container">
-                <h3>Diktat</h3>
+              <div className="current-sentence-container">
+                <h3>Aktueller Satz</h3>
                 
                 {/* Current Sentence Dictation Input */}
                 {transcriptData[currentSentenceIndex] && (

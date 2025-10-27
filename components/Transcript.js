@@ -34,11 +34,11 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
 
     const currentItem = transcriptData[currentSentenceIndex];
     const isHighlighted = currentTime >= currentItem.start && currentTime < currentItem.end;
-    
+
     return (
-      <div className="current-sentence-container">
+      <div className="current-sentence-dictation">
         <div className="sentence-counter-container">
-          <button 
+          <button
             className="nav-btn prev-btn"
             onClick={onPreviousSentence}
             disabled={currentSentenceIndex === 0}
@@ -46,12 +46,12 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
           >
             ‹
           </button>
-          
+
           <div className="sentence-counter">
             Satz {currentSentenceIndex + 1} / {transcriptData.length}
           </div>
-          
-          <button 
+
+          <button
             className="nav-btn next-btn"
             onClick={onNextSentence}
             disabled={currentSentenceIndex === transcriptData.length - 1}
@@ -60,23 +60,25 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
             ›
           </button>
         </div>
-        
-        <div 
-          className={`current-sentence ${isHighlighted ? 'highlighted-sentence' : ''}`}
-        >
-          {splitTextIntoWords(currentItem.text.trim())}
+
+        <div className="dictation-input-area">
+          <div
+            className={`current-sentence ${isHighlighted ? 'highlighted-sentence' : ''}`}
+          >
+            {splitTextIntoWords(currentItem.text.trim())}
+          </div>
         </div>
-        
-        <div 
+
+        <div
           className={`sentence-time-container ${isPlaying ? 'playing' : ''}`}
           onClick={() => onSentenceClick(currentItem.start, currentItem.end)}
           title="Click để phát lại câu này"
         >
           <div className="time-progress-bar">
-            <div 
+            <div
               className="time-progress-fill"
               style={{
-                width: isPlaying && currentItem 
+                width: isPlaying && currentItem
                   ? `${((currentTime - currentItem.start) / (currentItem.end - currentItem.start)) * 100}%`
                   : '0%'
               }}
@@ -105,10 +107,8 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
   const currentSentence = transcriptData[currentSentenceIndex];
 
   return (
-    <div className="text-section">
-      <div className={`transcript-box sentence-mode ${isHidden ? 'hidden' : ''}`}>
-        {renderCurrentSentence()}
-      </div>
+    <>
+      {renderCurrentSentence()}
 
       {showVocabPopup && (
         <VocabularyPopup
@@ -120,7 +120,7 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
           preTranslation={preTranslation}
         />
       )}
-    </div>
+    </>
   );
 };
 

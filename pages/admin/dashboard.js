@@ -417,22 +417,11 @@ function AdminDashboardContent() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Admin-Dashboard</h1>
-            <p className={styles.subtitle}>Lektionen und Inhalte verwalten</p>
           </div>
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditingLesson(null);
-              resetForm();
-            }}
-            className={styles.addButton}
-          >
-            {showForm ? '✕ Formular schließen' : '+ Neue Lektion hinzufügen'}
-          </button>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        {/* Tabs and Add Button */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'center' }}>
           <button
             onClick={() => setActiveTab('lessons')}
             style={{
@@ -462,6 +451,17 @@ function AdminDashboardContent() {
           >
             🗂️ Dateien verwalten ({unusedFiles.audio.length + unusedFiles.json.length})
           </button>
+          <div style={{ flex: 1 }}></div> {/* Spacer */}
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setEditingLesson(null);
+              resetForm();
+            }}
+            className={styles.addButton}
+          >
+            {showForm ? '✕ Formular schließen' : '+ Neue Lektion hinzufügen'}
+          </button>
         </div>
 
         {activeTab === 'lessons' && (
@@ -489,7 +489,7 @@ function AdminDashboardContent() {
                <div className={styles.statLabel}>Wird bearbeitet</div>
             </div>
           </div>
-        </div>
+         </div>
 
         {/* Form Section */}
         {showForm && (

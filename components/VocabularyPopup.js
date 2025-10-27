@@ -68,8 +68,9 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
       const rect = popup.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
 
-      // Approximate header height (adjust if needed)
-      const headerHeight = 70;
+      // Get actual header height
+      const header = document.querySelector('.app-header');
+      const headerHeight = header ? header.offsetHeight : 80;
 
       // Position popup right below header, centered horizontally
       const newTop = headerHeight + 10;

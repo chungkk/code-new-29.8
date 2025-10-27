@@ -6,7 +6,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,13 +24,13 @@
 }
 
 .mode-popup-container {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 20px;
+    background: white;
+    border-radius: 8px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 20px 60px rgba(108, 92, 231, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    animation: popupSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: popupSlideIn 0.5s ease;
 }
 
 @keyframes popupSlideIn {
@@ -45,30 +45,29 @@
 }
 
 .mode-popup-header {
-    background: linear-gradient(135deg, #FF6B9D 0%, #FF9A76 100%);
+    background: var(--primary-color);
     color: white;
-    padding: 25px;
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid var(--accent-color);
 }
 
 .mode-popup-header h2 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .mode-popup-close {
     background: rgba(255, 255, 255, 0.2);
-    border: 2px solid white;
+    border: 1px solid white;
     color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 1.8rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -80,85 +79,99 @@
 
 .mode-popup-close:hover {
     background: white;
+    color: var(--primary-color);
+    transform: rotate(90deg);
+}
+
+.mode-popup-close:hover {
+    background: white;
     color: #FF6B9D;
     transform: rotate(90deg) scale(1.1);
 }
 
 .mode-popup-lesson-info {
-    padding: 25px;
-    background: linear-gradient(135deg, #fff5f8 0%, #f0f4ff 100%);
-    border-bottom: 2px solid rgba(255, 107, 157, 0.1);
+    padding: 20px;
+    background: var(--surface-gradient);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .mode-popup-lesson-info h3 {
     margin: 0 0 10px 0;
-    color: #6C5CE7;
+    color: var(--primary-color);
     font-size: 1.3rem;
     font-weight: 700;
 }
 
 .mode-popup-lesson-info p {
     margin: 0;
-    color: #636e72;
+    color: var(--text-color-light);
     font-size: 0.95rem;
     line-height: 1.5;
 }
 
 .mode-popup-options {
-    padding: 25px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .mode-popup-option {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background: white;
-    border: 2px solid #dfe6e9;
-    border-radius: 15px;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .mode-popup-option:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(255, 107, 157, 0.2);
-    border-color: #FF6B9D;
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover);
+    border-color: var(--primary-color);
+}
+
+.mode-popup-option.mode-option-dictation {
+    background: linear-gradient(135deg, rgba(231, 111, 81, 0.2) 0%, rgba(244, 162, 97, 0.1) 100%);
+    border-left: 5px solid var(--danger-color);
 }
 
 .mode-popup-option.mode-option-dictation:hover {
-    background: linear-gradient(135deg, #fff5f8 0%, #ffe0eb 100%);
-    border-color: #FF6B9D;
+    background: linear-gradient(135deg, rgba(231, 111, 81, 0.3) 0%, rgba(244, 162, 97, 0.15) 100%);
+    box-shadow: 0 8px 25px rgba(231, 111, 81, 0.4);
+}
+
+.mode-popup-option.mode-option-shadowing {
+    background: linear-gradient(135deg, rgba(69, 123, 157, 0.25) 0%, rgba(26, 26, 46, 0.15) 100%);
+    border-left: 5px solid var(--blue-color);
 }
 
 .mode-popup-option.mode-option-shadowing:hover {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2ff 100%);
-    border-color: #4ECDC4;
+    background: linear-gradient(135deg, rgba(69, 123, 157, 0.35) 0%, rgba(26, 26, 46, 0.2) 100%);
+    box-shadow: 0 8px 25px rgba(69, 123, 157, 0.5);
 }
 
 .mode-popup-icon {
-    font-size: 3rem;
-    min-width: 60px;
+    font-size: 2.5rem;
+    min-width: 50px;
     text-align: center;
-    animation: bounce 2s ease-in-out infinite;
+    transition: all 0.3s ease;
 }
 
-.mode-popup-option:hover .mode-popup-icon {
-    animation: none;
-    transform: scale(1.2);
+.mode-popup-option.mode-option-dictation .mode-popup-icon {
+    color: var(--danger-color);
 }
 
-@keyframes bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-5px);
-    }
+.mode-popup-option.mode-option-shadowing .mode-popup-icon {
+    color: var(--blue-color);
 }
+
+
 
 .mode-popup-text {
     flex: 1;
@@ -166,16 +179,38 @@
 
 .mode-popup-text h4 {
     margin: 0 0 8px 0;
-    color: #2d3436;
+    color: var(--text-color);
     font-size: 1.2rem;
     font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mode-popup-option.mode-option-dictation .mode-popup-text h4 {
+    background: linear-gradient(135deg, var(--danger-color) 0%, var(--accent-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.mode-popup-option.mode-option-shadowing .mode-popup-text h4 {
+    background: linear-gradient(135deg, var(--blue-color) 0%, #1a1a2e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
 }
 
 .mode-popup-text p {
     margin: 0;
-    color: #636e72;
+    color: var(--text-color-light);
     font-size: 0.9rem;
     line-height: 1.4;
+    transition: all 0.3s ease;
+}
+
+.mode-popup-option:hover .mode-popup-text p {
+    color: var(--text-color);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -226,5 +261,10 @@
 
     .mode-popup-text p {
         font-size: 0.85rem;
+    }
+
+    .mode-popup-option.mode-option-dictation,
+    .mode-popup-option.mode-option-shadowing {
+        border-left-width: 4px;
     }
 }

@@ -200,73 +200,33 @@ function UserDashboard() {
                 gap: '10px',
                 flexWrap: 'wrap'
               }}>
-                <button
-                  onClick={() => setLessonFilter('all')}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    border: lessonFilter === 'all' ? '2px solid #667eea' : '2px solid #e0e0e0',
-                    background: lessonFilter === 'all' ? '#667eea' : 'white',
-                    color: lessonFilter === 'all' ? 'white' : '#666',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
-                >
-                  🗂️ Alle ({allLessons.length})
-                </button>
-                <button
-                  onClick={() => setLessonFilter('in-progress')}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    border: lessonFilter === 'in-progress' ? '2px solid #f5576c' : '2px solid #e0e0e0',
-                    background: lessonFilter === 'in-progress' ? '#f5576c' : 'white',
-                    color: lessonFilter === 'in-progress' ? 'white' : '#666',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
-                >
-                  📊 In Bearbeitung ({allLessons.filter(l => {
-                    const p = calculateProgress(l.id);
-                    return p > 0 && p < 100;
-                  }).length})
-                </button>
-                <button
-                  onClick={() => setLessonFilter('completed')}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    border: lessonFilter === 'completed' ? '2px solid #4CAF50' : '2px solid #e0e0e0',
-                    background: lessonFilter === 'completed' ? '#4CAF50' : 'white',
-                    color: lessonFilter === 'completed' ? 'white' : '#666',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
-                >
-                  ✅ Abgeschlossen ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
-                </button>
-                <button
-                  onClick={() => setLessonFilter('not-started')}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    border: lessonFilter === 'not-started' ? '2px solid #FF9800' : '2px solid #e0e0e0',
-                    background: lessonFilter === 'not-started' ? '#FF9800' : 'white',
-                    color: lessonFilter === 'not-started' ? 'white' : '#666',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
-                >
-                  🆕 Nicht begonnen ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
-                </button>
+                 <button
+                   onClick={() => setLessonFilter('all')}
+                   className={`${styles.filterBtn} ${styles.all} ${lessonFilter === 'all' ? styles.active : ''}`}
+                 >
+                   🗂️ Alle ({allLessons.length})
+                 </button>
+                 <button
+                   onClick={() => setLessonFilter('in-progress')}
+                   className={`${styles.filterBtn} ${styles.inProgress} ${lessonFilter === 'in-progress' ? styles.active : ''}`}
+                 >
+                   📊 In Bearbeitung ({allLessons.filter(l => {
+                     const p = calculateProgress(l.id);
+                     return p > 0 && p < 100;
+                   }).length})
+                 </button>
+                 <button
+                   onClick={() => setLessonFilter('completed')}
+                   className={`${styles.filterBtn} ${styles.completed} ${lessonFilter === 'completed' ? styles.active : ''}`}
+                 >
+                   ✅ Abgeschlossen ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
+                 </button>
+                 <button
+                   onClick={() => setLessonFilter('not-started')}
+                   className={`${styles.filterBtn} ${styles.notStarted} ${lessonFilter === 'not-started' ? styles.active : ''}`}
+                 >
+                   🆕 Nicht begonnen ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
+                 </button>
               </div>
             </div>
             
@@ -291,113 +251,68 @@ function UserDashboard() {
                       key={lesson.id}
                       className={styles.lessonCard}
                     >
-                      <div style={{ marginBottom: '12px' }}>
-                        <h3 className={styles.lessonTitle}>
-                          {lesson.displayTitle || lesson.title}
-                        </h3>
-                        <p className={styles.lessonDescription}>
-                          {lesson.description || 'Keine Beschreibung'}
-                        </p>
-                      </div>
+                       <div style={{ marginBottom: '12px', flex: 1 }}>
+                         <h3 className={styles.lessonTitle}>
+                           {lesson.displayTitle || lesson.title}
+                         </h3>
+                         <p className={styles.lessonDescription}>
+                           {lesson.description || 'Keine Beschreibung'}
+                         </p>
+                       </div>
                       
-                      {/* Progress */}
-                      <div style={{ marginBottom: '15px' }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between',
-                          marginBottom: '8px',
-                          alignItems: 'center'
-                        }}>
-                          <span style={{ fontSize: '13px', color: '#999', fontWeight: '600' }}>
-                            Fortschritt
-                          </span>
-                          <span className={styles.progressPercent}>
-                            {progressPercent}%
-                          </span>
-                        </div>
-                        <div className={styles.progressBar}>
-                          <div 
-                            className={styles.progressFill}
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      </div>
+                       {/* Bottom section - Progress and Action Buttons */}
+                       <div style={{ marginTop: 'auto' }}>
+                         {/* Progress */}
+                         <div style={{ marginBottom: '15px' }}>
+                           <div style={{
+                             display: 'flex',
+                             justifyContent: 'space-between',
+                             marginBottom: '8px',
+                             alignItems: 'center'
+                           }}>
+                             <span style={{ fontSize: '13px', color: '#999', fontWeight: '600' }}>
+                               Fortschritt
+                             </span>
+                             <span className={styles.progressPercent}>
+                               {progressPercent}%
+                             </span>
+                           </div>
+                           <div className={styles.progressBar}>
+                             <div
+                               className={styles.progressFill}
+                               style={{ width: `${progressPercent}%` }}
+                             />
+                           </div>
+                         </div>
 
-                      {/* Action Buttons */}
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <button
-                          onClick={() => router.push(`/shadowing/${lesson.id}`)}
-                          style={{
-                            flex: 1,
-                            padding: '10px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s',
-                            boxShadow: '0 2px 8px rgba(245, 87, 108, 0.3)'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                          🎤 Shadowing
-                        </button>
-                        <button
-                          onClick={() => router.push(`/dictation/${lesson.id}`)}
-                          style={{
-                            flex: 1,
-                            padding: '10px 16px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s',
-                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                          ✍️ Dictation
-                        </button>
-                      </div>
+                          {/* Action Buttons */}
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                         <button
+                           onClick={() => router.push(`/shadowing/${lesson.id}`)}
+                           className={`${styles.actionBtn} ${styles.shadowing}`}
+                         >
+                           🎤 Shadowing
+                         </button>
+                         <button
+                           onClick={() => router.push(`/dictation/${lesson.id}`)}
+                           className={`${styles.actionBtn} ${styles.dictation}`}
+                          >
+                            ✍️ Dictation
+                          </button>
+                        </div>
+                       </div>
 
-                      {/* Status Badge */}
-                      {progressPercent === 100 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '10px',
-                          right: '10px',
-                          background: '#4CAF50',
-                          color: 'white',
-                          padding: '4px 12px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: '700'
-                        }}>
-                          ✅ Abgeschlossen
-                        </div>
-                      )}
-                      {progressPercent === 0 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '10px',
-                          right: '10px',
-                          background: '#FF9800',
-                          color: 'white',
-                          padding: '4px 12px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: '700'
-                        }}>
-                          🆕 Neu
-                        </div>
-                      )}
+                       {/* Status Badge */}
+                       {progressPercent === 100 && (
+                         <div className={`${styles.statusBadge} ${styles.completed}`}>
+                           ✅ Abgeschlossen
+                         </div>
+                       )}
+                       {progressPercent === 0 && (
+                         <div className={`${styles.statusBadge} ${styles.notStarted}`}>
+                           🆕 Neu
+                         </div>
+                       )}
                     </div>
                   );
                 })}

@@ -49,10 +49,10 @@ const Header = () => {
   };
 
   return (
-    <header className={`app-header ${isScrolled ? 'scrolled' : ''}`}>
+    <header className={`app-header colorful-cheerful ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-content">
         <div className="logo" onClick={() => router.push('/')}>
-          <span className="logo-icon">🚀</span>
+          <span className="logo-icon">🎨</span>
           <span className="logo-text">LinguaLearn</span>
         </div>
 
