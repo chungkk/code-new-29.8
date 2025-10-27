@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import ProtectedPage from '../../components/ProtectedPage';
 import AudioControls from '../../components/AudioControls';
 import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
+import SentenceListItem from '../../components/SentenceListItem';
 import { useProgress } from '../../lib/hooks/useProgress';
 
 const ShadowingPageContent = () => {
@@ -18,63 +18,106 @@ const ShadowingPageContent = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [lesson, setLesson] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   const audioRef = useRef(null);
   const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
 
-  // Lesson data - in a real app, this would come from an API
-  const lessonData = {
-    bai_1: {
-      id: 'bai_1',
-      title: 'Patient Erde: Zustand kritisch',
-      audio: '/audio/bai_1.mp3',
-      json: '/text/bai_1.json',
-      displayTitle: 'Lektion 1: Patient Erde'
-    }
-  };
-
-  const lesson = lessonData[lessonId];
-
+  // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
-    console.log('Lesson ID:', lessonId);
-    console.log('Lesson data:', lesson);
-    if (lesson) {
-      loadTranscript(lesson.json);
-    } else {
-      console.error('Lesson không tồn tại:', lessonId);
+    if (typeof window !== 'undefined') {
+      window.mainAudioRef = audioRef;
     }
-  }, [lesson, lessonId]);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.mainAudioRef = null;
+      }
+    };
+  }, []);
 
+  // Fetch lesson data from API
+  useEffect(() => {
+    const fetchLesson = async () => {
+      if (!lessonId) return;
+      
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/lessons/${lessonId}`);
+        
+        if (!res.ok) {
+          throw new Error('Lesson not found');
+        }
+        
+        const data = await res.json();
+        setLesson(data);
+        console.log('Lesson loaded:', data);
+        
+        if (data.json) {
+          loadTranscript(data.json);
+        }
+      } catch (error) {
+        console.error('Error loading lesson:', error);
+        setLesson(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchLesson();
+  }, [lessonId]);
+
+  // Smooth time update with requestAnimationFrame
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      
-      // Auto-stop when segment ends
-      if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
-        audio.pause();
-        setSegmentPlayEndTime(null);
+    let animationFrameId = null;
+
+    const updateTime = () => {
+      if (audio && !audio.paused) {
+        setCurrentTime(audio.currentTime);
+        
+        // Auto-stop when segment ends
+        if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
+          audio.pause();
+          setSegmentPlayEndTime(null);
+        }
+        
+        animationFrameId = requestAnimationFrame(updateTime);
       }
     };
 
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      animationFrameId = requestAnimationFrame(updateTime);
+    };
+    
     const handlePause = () => {
       setIsPlaying(false);
       setSegmentPlayEndTime(null);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
+    
     const handleLoadedMetadata = () => setDuration(audio.duration);
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handlePause);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
+    // Initial time update
+    setCurrentTime(audio.currentTime);
+
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handlePause);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [segmentPlayEndTime]);
@@ -254,11 +297,38 @@ const ShadowingPageContent = () => {
     router.push('/');
   };
 
+  if (loading) {
+    return (
+      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>⏳ Đang tải bài học...</h2>
+        </div>
+      </div>
+    );
+  }
+
   if (!lesson) {
     return (
-      <div className="main-container">
-        <h1>Lektion nicht gefunden</h1>
-        <button onClick={handleBackToHome}>Zurück zur Startseite</button>
+      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>❌ Không tìm thấy bài học</h1>
+          <p style={{ marginTop: '20px' }}>Bài học với ID "<strong>{lessonId}</strong>" không tồn tại.</p>
+          <button 
+            onClick={handleBackToHome}
+            style={{ 
+              marginTop: '30px', 
+              padding: '12px 24px', 
+              fontSize: '16px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            ← Về Trang Chủ
+          </button>
+        </div>
       </div>
     );
   }
@@ -287,6 +357,8 @@ const ShadowingPageContent = () => {
                 currentSentenceIndex={currentSentenceIndex}
                 onPreviousSentence={goToPreviousSentence}
                 onNextSentence={goToNextSentence}
+                isPlaying={isPlaying}
+                lessonId={lessonId}
               />
             </div>
             
@@ -295,39 +367,18 @@ const ShadowingPageContent = () => {
                 <h3>Satzliste</h3>
                 <div className="sentence-list">
                   {transcriptData.map((segment, index) => (
-                    <div
+                    <SentenceListItem
                       key={index}
-                      className={`sentence-item ${
-                        currentSentenceIndex === index ? 'active' : ''
-                      } ${
-                        currentTime >= segment.start && currentTime < segment.end ? 'playing' : ''
-                      }`}
-                      onClick={() => handleSentenceClick(segment.start, segment.end)}
-                    >
-                      <div className="sentence-number">
-                        {index + 1}
-                      </div>
-                      <div className="sentence-content">
-                        <div className="sentence-text">
-                          {segment.text.trim()}
-                        </div>
-                        <div className="sentence-time">
-                          {formatTime(segment.start)} - {formatTime(segment.end)}
-                        </div>
-                      </div>
-                      <div className="sentence-actions">
-                        <button 
-                          className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSentenceClick(segment.start, segment.end);
-                          }}
-                          title="Diesen Satz abspielen"
-                        >
-                          ▶
-                        </button>
-                      </div>
-                    </div>
+                      segment={segment}
+                      index={index}
+                      currentSentenceIndex={currentSentenceIndex}
+                      currentTime={currentTime}
+                      isCompleted={true}
+                      lessonId={lessonId}
+                      onSentenceClick={handleSentenceClick}
+                      formatTime={formatTime}
+                      maskText={(text) => text}
+                    />
                   ))}
                 </div>
               </div>
@@ -346,11 +397,7 @@ const ShadowingPageContent = () => {
 };
 
 const ShadowingPage = () => {
-  return (
-    <ProtectedPage>
-      <ShadowingPageContent />
-    </ProtectedPage>
-  );
+  return <ShadowingPageContent />;
 };
 
 export default ShadowingPage;

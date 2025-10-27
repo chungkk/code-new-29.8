@@ -6,6 +6,31 @@ const nextConfig = {
     domains: ['localhost'],
   },
   // Removed 'output: export' to enable API routes for authentication
+  trailingSlash: true,
+  async rewrites() {
+    return [
+      {
+        source: '/index.html',
+        destination: '/',
+      },
+      {
+        source: '/dashboard.html',
+        destination: '/dashboard',
+      },
+      {
+        source: '/auth/login.html',
+        destination: '/auth/login',
+      },
+      {
+        source: '/auth/register.html',
+        destination: '/auth/register',
+      },
+      {
+        source: '/admin/dashboard.html',
+        destination: '/admin/dashboard',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig

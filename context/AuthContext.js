@@ -87,6 +87,39 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const refreshToken = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Refresh failed');
+      }
+
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Refresh token error:', error);
+      localStorage.removeItem('token');
+      setUser(null);
+      router.push('/auth/login');
+      return { success: false, error: error.message };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -94,7 +127,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );

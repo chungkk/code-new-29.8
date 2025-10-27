@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import ProtectedPage from '../../components/ProtectedPage';
+
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import Transcript from '../../components/Transcript';
+import SentenceListItem from '../../components/SentenceListItem';
+import VocabularyPopup from '../../components/VocabularyPopup';
 
 const DictationPageContent = () => {
   const router = useRouter();
@@ -18,6 +20,8 @@ const DictationPageContent = () => {
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [isTextHidden, setIsTextHidden] = useState(true);
+  const [lesson, setLesson] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   // Dictation specific states (from ckk)
   const [savedWords, setSavedWords] = useState([]);
@@ -34,19 +38,55 @@ const DictationPageContent = () => {
   const [completedWords, setCompletedWords] = useState({}); // { sentenceIndex: { wordIndex: correctWord } }
   const [progressLoaded, setProgressLoaded] = useState(false);
   
+  // Vocabulary popup states
+  const [showVocabPopup, setShowVocabPopup] = useState(false);
+  const [selectedWord, setSelectedWord] = useState('');
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  
   const audioRef = useRef(null);
 
-  const lessonData = {
-    bai_1: {
-      id: 'bai_1',
-      title: 'Patient Erde: Zustand kritisch',
-      audio: '/audio/bai_1.mp3',
-      json: '/text/bai_1.json',
-      displayTitle: 'Lektion 1: Patient Erde'
+  // Expose audioRef globally để components có thể pause khi phát từ
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.mainAudioRef = audioRef;
     }
-  };
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.mainAudioRef = null;
+      }
+    };
+  }, []);
 
-  const lesson = lessonData[lessonId];
+  // Fetch lesson data from API
+  useEffect(() => {
+    const fetchLesson = async () => {
+      if (!lessonId) return;
+      
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/lessons/${lessonId}`);
+        
+        if (!res.ok) {
+          throw new Error('Lesson not found');
+        }
+        
+        const data = await res.json();
+        setLesson(data);
+        console.log('Lesson loaded:', data);
+        
+        if (data.json) {
+          loadTranscript(data.json);
+        }
+      } catch (error) {
+        console.error('Error loading lesson:', error);
+        setLesson(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchLesson();
+  }, [lessonId]);
 
   // Load progress from database
   useEffect(() => {
@@ -106,44 +146,58 @@ const DictationPageContent = () => {
     loadProgress();
   }, [lessonId]);
 
-  // Load transcript
-  useEffect(() => {
-    if (lesson) {
-      loadTranscript(lesson.json);
-    } else {
-      console.error('Lesson không tồn tại:', lessonId);
-    }
-  }, [lesson, lessonId]);
 
-  // Audio event listeners
+
+  // Smooth time update with requestAnimationFrame
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
-        audio.pause();
-        setSegmentPlayEndTime(null);
+    let animationFrameId = null;
+
+    const updateTime = () => {
+      if (audio && !audio.paused) {
+        setCurrentTime(audio.currentTime);
+        
+        if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
+          audio.pause();
+          setSegmentPlayEndTime(null);
+        }
+        
+        animationFrameId = requestAnimationFrame(updateTime);
       }
     };
 
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      animationFrameId = requestAnimationFrame(updateTime);
+    };
+    
     const handlePause = () => {
       setIsPlaying(false);
       setSegmentPlayEndTime(null);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
+    
     const handleLoadedMetadata = () => setDuration(audio.duration);
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handlePause);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
+    // Initial time update
+    setCurrentTime(audio.currentTime);
+
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handlePause);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [segmentPlayEndTime]);
@@ -448,6 +502,48 @@ const DictationPageContent = () => {
     });
   }, []);
 
+  // Handle word click for popup (for completed words)
+  const handleWordClickForPopup = useCallback((word, event) => {
+    // Pause main audio nếu đang phát
+    if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
+      const audio = window.mainAudioRef.current;
+      if (!audio.paused) {
+        audio.pause();
+      }
+    }
+    
+    const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+    if (!cleanedWord) return;
+    
+    // Calculate popup position
+    const rect = event.target.getBoundingClientRect();
+    const popupWidth = 240;
+    const popupHeight = 230;
+    
+    let top = rect.top;
+    let left = rect.right + 15;
+    
+    // Check if popup would go off right edge
+    if (left + popupWidth / 2 > window.innerWidth - 20) {
+      left = rect.left - popupWidth / 2 - 15;
+      if (left - popupWidth / 2 < 20) {
+        left = rect.left + rect.width / 2;
+      }
+    }
+    
+    // Check vertical position
+    if (top + popupHeight > window.innerHeight - 20) {
+      top = window.innerHeight - popupHeight - 20;
+    }
+    if (top < 20) {
+      top = 20;
+    }
+    
+    setSelectedWord(cleanedWord);
+    setPopupPosition({ top, left });
+    setShowVocabPopup(true);
+  }, []);
+
   // Double-click hint functionality
   const handleInputClick = useCallback((input, correctWord) => {
     const currentTime = new Date().getTime();
@@ -639,7 +735,7 @@ const DictationPageContent = () => {
           // If entire sentence is completed, show all words
           if (isCompleted) {
             return `<span class="word-container completed">
-              <span class="correct-word completed-word" onclick="window.saveWord && window.saveWord('${pureWord}')">${pureWord}</span>
+              <span class="correct-word completed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
@@ -647,7 +743,7 @@ const DictationPageContent = () => {
           // If this specific word is completed, show it
           if (isWordCompleted) {
             return `<span class="word-container">
-              <span class="correct-word" onclick="window.saveWord && window.saveWord('${pureWord}')">${pureWord}</span>
+              <span class="correct-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
@@ -710,6 +806,7 @@ const DictationPageContent = () => {
         window.handleInputBlur = handleInputBlur;
         window.saveWord = saveWord;
         window.showHint = showHint;
+        window.handleWordClickForPopup = handleWordClickForPopup;
         window.disableArrowKeys = (e) => {
           // Prevent all arrow keys and space from being typed in input fields
           if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
@@ -718,15 +815,42 @@ const DictationPageContent = () => {
         };
       }
     }
-  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, completedSentences, completedWords, progressLoaded]);
+  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded]);
 
   const handleBackToHome = () => router.push('/');
 
+  if (loading) {
+    return (
+      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>⏳ Đang tải bài học...</h2>
+        </div>
+      </div>
+    );
+  }
+
   if (!lesson) {
     return (
-      <div className="main-container">
-        <h1>Lektion nicht gefunden</h1>
-        <button onClick={handleBackToHome}>Zurück zur Startseite</button>
+      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>❌ Không tìm thấy bài học</h1>
+          <p style={{ marginTop: '20px' }}>Bài học với ID "<strong>{lessonId}</strong>" không tồn tại.</p>
+          <button 
+            onClick={handleBackToHome}
+            style={{ 
+              marginTop: '30px', 
+              padding: '12px 24px', 
+              fontSize: '16px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            ← Về Trang Chủ
+          </button>
+        </div>
       </div>
     );
   }
@@ -785,8 +909,33 @@ const DictationPageContent = () => {
                       />
                     </div>
                     
-                    <div className="sentence-time">
-                      {formatTime(transcriptData[currentSentenceIndex].start)} - {formatTime(transcriptData[currentSentenceIndex].end)}
+                    <div 
+                      className={`sentence-time-container ${isPlaying ? 'playing' : ''}`}
+                      onClick={() => handleSentenceClick(
+                        transcriptData[currentSentenceIndex].start, 
+                        transcriptData[currentSentenceIndex].end
+                      )}
+                      title="Click để phát lại câu này"
+                    >
+                      <div className="time-progress-bar">
+                        <div 
+                          className="time-progress-fill"
+                          style={{
+                            width: isPlaying && transcriptData[currentSentenceIndex] 
+                              ? `${((currentTime - transcriptData[currentSentenceIndex].start) / 
+                                   (transcriptData[currentSentenceIndex].end - transcriptData[currentSentenceIndex].start)) * 100}%`
+                              : '0%'
+                          }}
+                        />
+                      </div>
+                      <div className="time-display">
+                        <span className="time-icon">{isPlaying ? '▶' : '⏸'}</span>
+                        <span className="time-current">{formatTime(currentTime)}</span>
+                        <span className="time-separator">/</span>
+                        <span className="time-total">
+                          {formatTime(transcriptData[currentSentenceIndex].start)} - {formatTime(transcriptData[currentSentenceIndex].end)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -801,42 +950,18 @@ const DictationPageContent = () => {
                 {/* Sentence List */}
                 <div className="sentence-list">
                   {transcriptData.map((segment, index) => (
-                    <div
+                    <SentenceListItem
                       key={index}
-                      className={`sentence-item ${
-                        currentSentenceIndex === index ? 'active' : ''
-                      } ${
-                        currentTime >= segment.start && currentTime < segment.end ? 'playing' : ''
-                      }`}
-                      onClick={() => handleSentenceClick(segment.start, segment.end)}
-                    >
-                      <div className="sentence-number">
-                        {index + 1}
-                      </div>
-                      <div className="sentence-content">
-                        <div className="sentence-text">
-                          {completedSentences.includes(index) 
-                            ? segment.text.trim() 
-                            : maskText(segment.text.trim())
-                          }
-                        </div>
-                        <div className="sentence-time">
-                          {formatTime(segment.start)} - {formatTime(segment.end)}
-                        </div>
-                      </div>
-                      <div className="sentence-actions">
-                        <button 
-                          className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSentenceClick(segment.start, segment.end);
-                          }}
-                          title="Diesen Satz abspielen"
-                        >
-                          ▶
-                        </button>
-                      </div>
-                    </div>
+                      segment={segment}
+                      index={index}
+                      currentSentenceIndex={currentSentenceIndex}
+                      currentTime={currentTime}
+                      isCompleted={completedSentences.includes(index)}
+                      lessonId={lessonId}
+                      onSentenceClick={handleSentenceClick}
+                      formatTime={formatTime}
+                      maskText={maskText}
+                    />
                   ))}
                 </div>
               </div>
@@ -850,16 +975,23 @@ const DictationPageContent = () => {
           isPlaying={isPlaying}
         />
       </div>
+
+      {showVocabPopup && (
+        <VocabularyPopup
+          word={selectedWord}
+          context={transcriptData[currentSentenceIndex]?.text || ''}
+          lessonId={lessonId}
+          onClose={() => setShowVocabPopup(false)}
+          position={popupPosition}
+          preTranslation=""
+        />
+      )}
     </>
   );
 };
 
 const DictationPage = () => {
-  return (
-    <ProtectedPage>
-      <DictationPageContent />
-    </ProtectedPage>
-  );
+  return <DictationPageContent />;
 };
 
 export default DictationPage;

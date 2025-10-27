@@ -30,16 +30,6 @@ const Header = () => {
             <span className="nav-icon">🏠</span>
             <span className="nav-text">Trang chủ</span>
           </button>
-
-          {user?.role === 'admin' && (
-            <button
-              className="nav-link"
-              onClick={() => router.push('/admin/dashboard')}
-            >
-              <span className="nav-icon">🛠️</span>
-              <span className="nav-text">Admin</span>
-            </button>
-          )}
         </nav>
 
         <div className="header-right">
@@ -79,57 +69,112 @@ const Header = () => {
                     </div>
                   </div>
 
-                  <div style={{ padding: '8px 0' }}>
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        router.push('/dashboard');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                    >
-                      <span style={{ fontSize: '18px' }}>📊</span>
-                      <span style={{ fontWeight: '500' }}>Quản lý học tập</span>
-                    </button>
+                   <div style={{ padding: '8px 0' }}>
+                     <button
+                       onClick={() => {
+                         setShowMenu(false);
+                         router.push('/dashboard');
+                       }}
+                       style={{
+                         width: '100%',
+                         padding: '12px 16px',
+                         background: 'none',
+                         border: 'none',
+                         textAlign: 'left',
+                         cursor: 'pointer',
+                         fontSize: '14px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '10px',
+                         transition: 'background 0.2s'
+                       }}
+                       onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                       onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                     >
+                       <span style={{ fontSize: '18px' }}>📊</span>
+                       <span style={{ fontWeight: '500' }}>Quản lý học tập</span>
+                     </button>
 
-                    <button
-                      onClick={() => {
-                        setShowMenu(false);
-                        router.push('/dashboard?tab=vocabulary');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                    >
-                      <span style={{ fontSize: '18px' }}>📚</span>
-                      <span style={{ fontWeight: '500' }}>Từ vựng của tôi</span>
-                    </button>
-                  </div>
+                     <button
+                       onClick={() => {
+                         setShowMenu(false);
+                         router.push('/dashboard?tab=vocabulary');
+                       }}
+                       style={{
+                         width: '100%',
+                         padding: '12px 16px',
+                         background: 'none',
+                         border: 'none',
+                         textAlign: 'left',
+                         cursor: 'pointer',
+                         fontSize: '14px',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '10px',
+                         transition: 'background 0.2s'
+                       }}
+                       onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                       onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                     >
+                       <span style={{ fontSize: '18px' }}>📚</span>
+                       <span style={{ fontWeight: '500' }}>Từ vựng của tôi</span>
+                     </button>
+
+                     {user.role === 'admin' && (
+                       <>
+                         <div style={{
+                           height: '1px',
+                           background: 'linear-gradient(90deg, transparent, #e0e0e0, transparent)',
+                           margin: '8px 16px'
+                         }} />
+                         <button
+                           onClick={() => {
+                             setShowMenu(false);
+                             router.push('/admin/dashboard');
+                           }}
+                           style={{
+                             width: '100%',
+                             padding: '12px 16px',
+                             background: 'none',
+                             border: 'none',
+                             textAlign: 'left',
+                             cursor: 'pointer',
+                             fontSize: '14px',
+                             display: 'flex',
+                             alignItems: 'center',
+                             gap: '10px',
+                             transition: 'all 0.2s',
+                             color: '#ff6b35',
+                             fontWeight: '600',
+                             borderRadius: '6px',
+                             margin: '0 4px'
+                           }}
+                           onMouseEnter={(e) => {
+                             e.currentTarget.style.background = 'linear-gradient(135deg, #fff3e0, #ffe0b2)';
+                             e.currentTarget.style.transform = 'translateX(2px)';
+                           }}
+                           onMouseLeave={(e) => {
+                             e.currentTarget.style.background = 'none';
+                             e.currentTarget.style.transform = 'translateX(0)';
+                           }}
+                         >
+                           <span style={{ fontSize: '18px' }}>🛠️</span>
+                           <span>Admin Dashboard</span>
+                           <span style={{
+                             marginLeft: 'auto',
+                             fontSize: '10px',
+                             background: '#ff6b35',
+                             color: 'white',
+                             padding: '2px 6px',
+                             borderRadius: '10px',
+                             fontWeight: 'bold'
+                           }}>
+                             ADMIN
+                           </span>
+                         </button>
+                       </>
+                     )}
+                   </div>
 
                   <div style={{ borderTop: '1px solid #eee', padding: '8px 0' }}>
                     <button

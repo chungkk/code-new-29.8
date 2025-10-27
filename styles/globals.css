@@ -87,7 +87,7 @@ body::before {
     max-width: 1200px;
     width: 100%;
     padding: 16px 12px 30px;
-    margin: 55px auto 0;
+    margin: 28px auto 0;
     position: relative;
     z-index: 1;
     flex: 1;
@@ -243,7 +243,7 @@ body::before {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 80px;
+    margin-top: 11px; /* COMPACT - Giảm 50% */
     margin-bottom: 0;
 }
 
@@ -253,7 +253,7 @@ body::before {
     margin: 0 auto;
     padding: 16px;
     border-radius: 0;
-    margin-top: 130px; /* Reduced from 170px - compact audio bar */
+    margin-top: 27px; /* COMPACT - Chỉ còn space cho audio bar */
     padding-bottom: 80px;
     flex: 1;
 }
@@ -261,7 +261,7 @@ body::before {
 /* Phần Audio Cố Định (Fixed Bar - TOP) - 🎨 Colorful - COMPACT */
 .fixed-audio-bar {
     position: fixed;
-    top: 80px;
+    top: 23px; /* COMPACT - Giảm 50% */
     left: 0;
     right: 0;
     width: auto;
@@ -269,7 +269,7 @@ body::before {
     color: white;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
-    padding: 10px 20px;
+    padding: 6px 16px; /* COMPACT */
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -288,14 +288,14 @@ body::before {
 .fixed-audio-bar h1 {
     color: white;
     margin: 0;
-    font-size: 1.1em;
+    font-size: 0.95em; /* COMPACT - Giảm từ 1.1em */
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
-    max-width: 400px;
+    max-width: 350px; /* Compact hơn */
 }
 
 @keyframes bounce {
@@ -647,19 +647,19 @@ body::before {
     }
     
     .fixed-audio-bar {
-        padding: 8px 12px;
+        padding: 5px 10px; /* COMPACT - Mobile */
     }
     
     .audio-content-wrapper {
         width: 95%;
-        gap: 10px;
+        gap: 8px; /* Less gap */
         flex-wrap: wrap;
     }
     
     .shadowing-app-container {
         padding: 10px;
-        margin-top: 150px; /* Compact audio bar for mobile */
-        padding-bottom: 90px; 
+        margin-top: 15px; /* COMPACT - Mobile - Giảm 50% */
+        padding-bottom: 90px;
     }
 
     .fixed-audio-bar h1 {
@@ -774,7 +774,7 @@ body::before {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 80px;
+    margin-top: 11px; /* COMPACT - Giảm 50% */
     margin-bottom: 0;
 }
 
@@ -783,10 +783,10 @@ body::before {
     width: 100%;
     margin: 0 auto;
     padding: 25px;
-    padding-top: 25px; 
+    padding-top: 25px;
     border-radius: 0;
     flex: 1;
-    margin-top: 170px; /* Offset cho header (80px) + audio bar mỏng (70px) + spacing (20px) */
+    margin-top: 27px; /* COMPACT - Chỉ còn space cho audio bar */
     padding-bottom: 50px; /* Space for footer */
 }
 
@@ -970,10 +970,10 @@ body::before {
 @media (max-width: 600px) {
     .dictation-app-container {
         padding: 10px;
-        margin-top: 170px; /* Offset cho header (80px) + audio bar mỏng (70px) + spacing (20px) */
+        margin-top: 15px; /* COMPACT - Mobile - Giảm 50% */
         padding-bottom: 90px;
     }
-    
+
     .popup-content {
         margin: 10px;
         max-height: 90vh;
@@ -1018,34 +1018,53 @@ body::before {
     align-items: flex-start;
 }
 
+.current-sentence-section {
+    position: sticky;
+    top: 120px;
+    z-index: 10;
+    align-self: flex-start;
+}
+
 .sentence-list-section {
     position: sticky;
-    top: 100px;
-    max-height: calc(100vh - 140px);
+    top: 70px;
+    max-height: calc(100vh - 90px);
     overflow-y: auto;
+    border-radius: 20px;
+    padding: 4px;
+    background: linear-gradient(135deg, #FF6B9D, #4ECDC4, #FFE66D);
+    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+}
+
+.sentence-list-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sentence-list-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
+.sentence-list-section::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FF6B9D, #4ECDC4);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.sentence-list-section::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4ECDC4, #6C5CE7);
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
 }
 
 .sentence-list-container {
     background: linear-gradient(135deg, #ffffff, #f8f9fa);
     border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.2);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
     padding: 16px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    border: none;
     position: relative;
-}
-
-.sentence-list-container::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(135deg, #4ECDC4, #FFE66D);
-    border-radius: 20px;
-    z-index: -1;
-    opacity: 0.5;
+    height: 100%;
 }
 
 .sentence-list-container h3 {
@@ -1134,8 +1153,14 @@ body::before {
 
 .sentence-text {
     font-size: 0.9em;
-    line-height: 1.4;
+    line-height: 1.6;
     margin-bottom: 3px;
+    word-wrap: break-word;
+}
+
+.sentence-text .hoverable-word,
+.sentence-text .clickable-word {
+    line-height: inherit;
 }
 
 .sentence-time {
@@ -1168,14 +1193,20 @@ body::before {
 /* Responsive cho danh sách câu */
 @media (max-width: 850px) {
     .shadowing-layout {
-        grid-template-columns: 1fr; /* Chuyển thành 1 cột */
+        grid-template-columns: 1fr;
+    }
+
+    .current-sentence-section {
+        position: sticky;
+        top: 110px;
     }
 
     .sentence-list-section {
         position: static;
         top: auto;
-        max-height: none;
+        max-height: 500px;
         margin-top: 25px;
+        border-radius: 16px;
     }
 }
 
@@ -1187,18 +1218,24 @@ body::before {
     width: 100%;
 }
 
+/* Dictation Text Area */
+.dictation-text {
+    line-height: 1.8; /* Tăng line-height cho dễ đọc */
+    text-align: center;
+}
+
 /* Dictation Input Container */
 .dictation-input-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    margin: 20px 0;
-    padding: 20px 10px;
+    gap: 3px; /* Giảm từ 4px */
+    margin: 16px 0; /* Giảm từ 20px */
+    padding: 16px 10px; /* Giảm từ 20px */
     background: var(--surface-color);
     border-radius: 12px;
-    min-height: 80px;
+    min-height: 70px; /* Giảm từ 80px */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     border: 2px solid var(--border-color);
 }
@@ -1207,7 +1244,7 @@ body::before {
 .word-input-container {
     position: relative;
     display: inline-block;
-    margin: 4px 2px;
+    margin: 3px 2px; /* Thu nhỏ - giảm từ 4px */
     transition: all 0.3s ease;
 }
 
@@ -1326,15 +1363,15 @@ body::before {
 /* Hint Button (Eye Icon) */
 .hint-btn {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 26px;
-    height: 26px;
+    top: -6px; /* Giảm từ -8px */
+    right: -6px; /* Giảm từ -8px */
+    width: 22px; /* Nhỏ hơn - giảm từ 26px */
+    height: 22px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: 2px solid #1a1a1a;
     color: white;
-    font-size: 14px;
+    font-size: 12px; /* Nhỏ hơn */
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1360,7 +1397,7 @@ body::before {
 .word-container {
     position: relative;
     display: inline-block;
-    margin: 4px 6px;
+    margin: 3px 4px; /* Thu nhỏ - giảm từ 4px 6px */
     vertical-align: middle;
 }
 
@@ -1371,13 +1408,13 @@ body::before {
 /* Word Input Field */
 .word-input {
     display: inline-block;
-    padding: 10px 16px;
-    min-width: 60px;
+    padding: 6px 10px; /* Thu nhỏ - giảm từ 10px 16px */
+    min-width: 50px; /* Nhỏ hơn - giảm từ 60px */
     border: 2px solid #667eea;
-    border-radius: 8px;
+    border-radius: 6px; /* Gọn hơn */
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
     color: #ffffff;
-    font-size: 1.1em;
+    font-size: 0.95em; /* Nhỏ hơn - giảm từ 1.1em */
     font-weight: 700;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
@@ -1390,13 +1427,14 @@ body::before {
 .word-input::placeholder {
     color: rgba(255, 255, 255, 0.3);
     font-weight: 600;
+    font-size: 0.9em; /* Nhỏ hơn */
 }
 
 .word-input:focus {
     border-color: #764ba2;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4), 0 0 0 3px rgba(102, 126, 234, 0.1);
-    transform: scale(1.05);
+    transform: scale(1.03); /* Giảm scale - từ 1.05 */
 }
 
 .word-input:hover:not(:focus) {
@@ -1419,12 +1457,12 @@ body::before {
 /* Correct Word Styles */
 .correct-word {
     display: inline-block;
-    padding: 8px 14px;
+    padding: 6px 10px; /* Thu nhỏ */
     background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
     color: #155724;
-    border-radius: 8px;
+    border-radius: 6px; /* Gọn hơn */
     font-weight: 700;
-    font-size: 1.1em;
+    font-size: 0.95em; /* Nhỏ hơn - giảm từ 1.1em */
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(132, 250, 176, 0.4);
@@ -1442,8 +1480,8 @@ body::before {
 .completed-word {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
-    padding: 10px 16px;
-    font-size: 1.15em;
+    padding: 6px 12px; /* Thu nhỏ */
+    font-size: 0.95em; /* Nhỏ hơn - giảm từ 1.15em */
     font-weight: 800;
     box-shadow: 0 4px 12px rgba(245, 87, 108, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.4);
@@ -1555,28 +1593,171 @@ body::before {
     padding: 20px;
 }
 
-/* Sentence Time Display */
+/* Sentence Time Container - Running Time Display */
+.sentence-time-container {
+    margin-top: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sentence-time-container:hover {
+    transform: translateY(-2px);
+}
+
+/* Time Progress Bar */
+.time-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(102, 126, 234, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: none; /* Loại bỏ transition - dùng RAF cho smooth */
+    position: relative;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+    will-change: width; /* Optimize animation với GPU */
+}
+
+.time-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Time Display */
+.time-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 20px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 0.85em;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.sentence-time-container:hover .time-display {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.sentence-time-container.playing .time-display {
+    border-color: #f5576c;
+    background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 87, 108, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(245, 87, 108, 0);
+    }
+}
+
+.time-icon {
+    font-size: 1.2em;
+    color: #764ba2;
+}
+
+.sentence-time-container.playing .time-icon {
+    color: #f5576c;
+    animation: bounce 0.6s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.time-current {
+    font-weight: 800;
+    color: #f5576c;
+    font-size: 1.1em;
+    min-width: 40px;
+    text-align: center;
+    transition: all 0.05s ease; /* Smooth text change */
+}
+
+.time-separator {
+    color: #999;
+    font-weight: 400;
+}
+
+.time-total {
+    color: #999;
+    font-size: 0.95em;
+}
+
+/* Old sentence-time for compatibility */
 .sentence-time {
     font-size: 0.85em;
     color: #aaa;
     font-weight: 600;
-    margin-top: 15px;
-    background: #2a2a2a;
-    padding: 6px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    margin-top: 12px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Responsive - Time Display */
+@media (max-width: 768px) {
+    .time-progress-bar {
+        height: 5px; /* Thinner on mobile */
+    }
+    
+    .time-display {
+        font-size: 0.75em; /* Smaller text */
+        padding: 6px 12px;
+        gap: 6px;
+    }
+    
+    .time-current {
+        font-size: 1em;
+        min-width: 35px;
+    }
+    
+    .time-icon {
+        font-size: 1.1em;
+    }
+    
+    .time-total {
+        font-size: 0.9em;
+    }
 }
 
 /* Mobile Responsive for Dictation */
 @media (max-width: 768px) {
     .dictation-input-container {
-        padding: 15px 8px;
+        padding: 12px 8px; /* Thu nhỏ */
         gap: 2px;
-        margin: 15px 0;
+        margin: 12px 0; /* Giảm */
     }
     
     .word-input-container {
-        margin: 3px 1px;
+        margin: 2px 1px; /* Thu nhỏ */
     }
     
     .char-display {
@@ -1584,10 +1765,10 @@ body::before {
     }
     
     .real-input {
-        min-width: 70px;
-        max-width: 180px;
-        height: 38px;
-        font-size: 1em;
+        min-width: 60px; /* Nhỏ hơn */
+        max-width: 160px; /* Nhỏ hơn */
+        height: 36px; /* Nhỏ hơn */
+        font-size: 0.95em; /* Nhỏ hơn */
         padding: 0 6px;
         border-bottom-width: 2px;
     }
@@ -1627,7 +1808,7 @@ body::before {
 @media (max-width: 600px) {
     .dictation-app-container {
         padding: 10px;
-        margin-top: 170px; /* Offset cho header (80px) + audio bar mỏng (70px) + spacing (20px) */
+        margin-top: 30px; /* COMPACT - Mobile - Giảm 50% */
         padding-bottom: 90px;
     }
     
@@ -1657,11 +1838,11 @@ body::before {
 .header-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 12px 20px;
+    padding: 6px 20px; /* COMPACT - Giảm 50% */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px; /* Giảm gap */
 }
 
 /* Logo */
@@ -1678,11 +1859,11 @@ body::before {
 }
 
 .logo-icon {
-    font-size: 1.8em;
+    font-size: 1.4em; /* COMPACT - Giảm từ 1.8em */
 }
 
 .logo-text {
-    font-size: 1.2em;
+    font-size: 1em; /* COMPACT - Giảm từ 1.2em */
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
@@ -1764,7 +1945,7 @@ body::before {
 
 /* Header Spacing for Content */
 .main-container {
-    margin-top: 100px;
+    margin-top: 50px;
     flex: 1;
 }
 
@@ -2091,4 +2272,363 @@ body::before {
         height: 32px;
         font-size: 14px;
     }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Text-to-Speech Animation */
+/* ---------------------------------------------------------------------- */
+
+.clickable-word.speaking {
+    background: linear-gradient(135deg, #4ECDC4, #6C5CE7);
+    color: white;
+    animation: pulse-speak 0.5s ease-in-out;
+}
+
+@keyframes pulse-speak {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.speaker-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 0.8em;
+    animation: speaker-bounce 0.5s ease-in-out infinite;
+}
+
+@keyframes speaker-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Clickable Word & Vocabulary Popup Styles */
+/* ---------------------------------------------------------------------- */
+
+.clickable-word {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    position: relative;
+}
+
+.clickable-word:hover {
+    background: linear-gradient(135deg, #FFE66D, #FFB199) !important;
+    color: #2d3436 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 230, 109, 0.4);
+    font-weight: 600;
+}
+
+.word-punctuation {
+    display: inline-block;
+    padding: 0 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Hoverable Word & Tooltip Styles (for Sentence List) */
+/* ---------------------------------------------------------------------- */
+
+.hoverable-word {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    position: relative;
+    color: inherit;
+}
+
+.hoverable-word:hover {
+    background: linear-gradient(135deg, #FFE66D, #FFB199) !important;
+    color: #2d3436 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 230, 109, 0.4);
+    font-weight: 600;
+}
+
+.hoverable-word.speaking {
+    background: linear-gradient(135deg, #4ECDC4, #6C5CE7) !important;
+    color: white !important;
+    animation: pulse-speak 0.5s ease-in-out;
+}
+
+.word-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: linear-gradient(135deg, #6C5CE7, #764ba2);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.5);
+    animation: tooltipFadeIn 0.2s ease;
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.word-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #764ba2;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+.vocabulary-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+    backdrop-filter: blur(2px);
+}
+
+.vocabulary-popup {
+    position: fixed;
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 6px 24px rgba(108, 92, 231, 0.3);
+    z-index: 10000;
+    min-width: 240px;
+    max-width: 280px;
+    animation: popupSlideIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vocabulary-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #FFE66D;
+    padding-bottom: 6px;
+}
+
+.vocabulary-popup-header h3 {
+    margin: 0;
+    font-size: 1em;
+    background: linear-gradient(135deg, #FF6B9D, #6C5CE7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #636e72;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.close-btn:hover {
+    background: #f8f9fa;
+    color: #F38181;
+    transform: rotate(90deg);
+}
+
+.vocabulary-popup-content {
+    margin: 8px 0;
+}
+
+.vocab-field {
+    margin-bottom: 8px;
+}
+
+.vocab-field label {
+    display: block;
+    font-weight: 600;
+    color: #2d3436;
+    margin-bottom: 3px;
+    font-size: 0.75em;
+}
+
+.vocab-word {
+    font-size: 1.05em;
+    font-weight: bold;
+    color: #6C5CE7;
+    padding: 5px 8px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 30%);
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.vocab-context {
+    font-style: italic;
+    color: #636e72;
+    background: #f8f9fa;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border-left: 2px solid #4ECDC4;
+    line-height: 1.25;
+    font-size: 0.75em;
+    max-height: 50px;
+    overflow-y: auto;
+}
+
+.vocab-field input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1.5px solid #dfe6e9;
+    border-radius: 5px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.vocab-field input:focus {
+    outline: none;
+    border-color: #6C5CE7;
+    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+}
+
+.vocabulary-popup-footer {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #dfe6e9;
+}
+
+.vocabulary-popup-footer button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85em;
+}
+
+.btn-cancel {
+    background: #f8f9fa;
+    color: #636e72;
+}
+
+.btn-cancel:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #4ECDC4, #6C5CE7);
+    color: white;
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .vocabulary-popup {
+        min-width: 220px;
+        max-width: calc(100vw - 40px);
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .vocabulary-popup {
+        min-width: 200px;
+        padding: 10px;
+    }
+    
+    .vocab-word {
+        font-size: 1em;
+    }
+    
+    .vocabulary-popup-header h3 {
+        font-size: 0.95em;
+    }
+}
+
+/* Translation Loading & Hints */
+.translation-loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #6C5CE7;
+    font-size: 0.95em;
+}
+
+.loading-spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.auto-translation-hint {
+    margin-top: 6px;
+    padding: 5px 8px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 30%);
+    border-radius: 4px;
+    font-size: 0.8em;
+    color: #2d3436;
+    border-left: 2px solid #FFE66D;
 }

@@ -5,7 +5,7 @@ import ProtectedPage from '../components/ProtectedPage';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
-import CreateLessonModal from '../components/CreateLessonModal';
+
 import styles from '../styles/dashboard.module.css';
 
 function UserDashboard() {
@@ -13,9 +13,9 @@ function UserDashboard() {
   const { user } = useAuth();
   const [progress, setProgress] = useState([]);
   const [vocabulary, setVocabulary] = useState([]);
-  const [lessons, setLessons] = useState([]);
-  const [activeTab, setActiveTab] = useState('progress');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [allLessons, setAllLessons] = useState([]);
+  const [activeTab, setActiveTab] = useState('all-lessons');
+  const [lessonFilter, setLessonFilter] = useState('all'); // 'all' or 'in-progress'
   
   // Check URL for tab parameter
   useEffect(() => {
@@ -33,45 +33,22 @@ function UserDashboard() {
     try {
       setLoading(true);
       
-      // Hardcoded lessons (fallback if database empty)
-      const hardcodedLessons = [
-        {
-          id: 'bai_1',
-          title: 'Patient Erde: Zustand kritisch',
-          audio: '/audio/bai_1.mp3',
-          json: '/text/bai_1.json',
-          displayTitle: 'Lektion 1: Patient Erde',
-          description: 'Thema: Umwelt, Klimawandel (DW)'
-        }
-      ];
-      
       // Load progress first
       const progressRes = await fetchWithAuth('/api/progress');
       const progressData = await progressRes.json();
-      console.log('Progress data:', progressData);
       setProgress(Array.isArray(progressData) ? progressData : []);
 
-      // Load all lessons
+      // Load ALL lessons (sorted by order)
       const lessonsRes = await fetch('/api/lessons');
-      let allLessons = await lessonsRes.json();
+      const lessonsData = await lessonsRes.json();
       
-      // Use hardcoded lessons if database is empty
-      if (!allLessons || allLessons.length === 0) {
-        allLessons = hardcodedLessons;
+      if (lessonsData && lessonsData.length > 0) {
+        // Sort by order ascending (bai_1, bai_2, bai_3...)
+        const sortedLessons = [...lessonsData].sort((a, b) => (a.order || 0) - (b.order || 0));
+        setAllLessons(sortedLessons);
+      } else {
+        setAllLessons([]);
       }
-      console.log('All lessons:', allLessons);
-      
-      // Filter to show only lessons that user has started (has progress)
-      const lessonIdsWithProgress = Array.isArray(progressData) 
-        ? [...new Set(progressData.map(p => p.lessonId))]
-        : [];
-      console.log('Lesson IDs with progress:', lessonIdsWithProgress);
-      
-      const lessonsWithProgress = allLessons.filter(lesson => 
-        lessonIdsWithProgress.includes(lesson.id)
-      );
-      console.log('Filtered lessons:', lessonsWithProgress);
-      setLessons(lessonsWithProgress);
 
       // Load vocabulary
       const vocabRes = await fetchWithAuth('/api/vocabulary');
@@ -110,6 +87,26 @@ function UserDashboard() {
     return sortedProgress[0].mode; // Return the mode with highest progress
   };
 
+  // Get filtered lessons based on current filter
+  const getFilteredLessons = () => {
+    if (lessonFilter === 'all') {
+      return allLessons;
+    } else if (lessonFilter === 'in-progress') {
+      // Show only lessons with progress > 0 and < 100
+      return allLessons.filter(lesson => {
+        const prog = calculateProgress(lesson.id);
+        return prog > 0 && prog < 100;
+      });
+    } else if (lessonFilter === 'completed') {
+      // Show only completed lessons
+      return allLessons.filter(lesson => calculateProgress(lesson.id) === 100);
+    } else if (lessonFilter === 'not-started') {
+      // Show only lessons not started
+      return allLessons.filter(lesson => calculateProgress(lesson.id) === 0);
+    }
+    return allLessons;
+  };
+
   const deleteVocabulary = async (id) => {
     if (!confirm('Xóa từ này?')) return;
 
@@ -126,10 +123,7 @@ function UserDashboard() {
     }
   };
 
-  const handleLessonCreated = (newLesson) => {
-    // Reload data after creating lesson
-    loadData();
-  };
+
 
   if (status === 'loading' || loading) {
     return (
@@ -155,82 +149,145 @@ function UserDashboard() {
               Theo dõi tiến độ học tập và quản lý từ vựng của bạn
             </p>
           </div>
-          
-          {user?.role === 'admin' && (
-            <button 
-              className={styles.createLessonBtn}
-              onClick={() => setShowCreateModal(true)}
-            >
-              ✍️ Viết Bài Mới
-            </button>
-          )}
         </div>
 
-        {/* Tabs */}
+        {/* Main Tabs */}
         <div className={styles.tabs}>
           <button
-            onClick={() => setActiveTab('progress')}
-            className={`${styles.tab} ${activeTab === 'progress' ? styles.active : ''}`}
+            onClick={() => setActiveTab('all-lessons')}
+            className={`${styles.tab} ${activeTab === 'all-lessons' ? styles.active : ''}`}
           >
-            📊 Tiến Độ Học
+            📚 Tất Cả Bài Học
           </button>
           <button
             onClick={() => setActiveTab('vocabulary')}
             className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.active : ''}`}
           >
-            📚 Từ Vựng ({vocabulary.length})
+            📝 Từ Vựng ({vocabulary.length})
           </button>
         </div>
 
-        {/* Progress Tab */}
-        {activeTab === 'progress' && (
+        {/* All Lessons Tab */}
+        {activeTab === 'all-lessons' && (
           <div>
-            <h2 style={{ marginBottom: '20px' }}>Tiến Độ Các Bài Học</h2>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: '20px',
+              flexWrap: 'wrap',
+              gap: '15px'
+            }}>
+              <h2 style={{ margin: 0 }}>Danh Sách Bài Học</h2>
+              
+              {/* Filter Buttons */}
+              <div style={{ 
+                display: 'flex', 
+                gap: '10px',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={() => setLessonFilter('all')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: lessonFilter === 'all' ? '2px solid #667eea' : '2px solid #e0e0e0',
+                    background: lessonFilter === 'all' ? '#667eea' : 'white',
+                    color: lessonFilter === 'all' ? 'white' : '#666',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  🗂️ Tất cả ({allLessons.length})
+                </button>
+                <button
+                  onClick={() => setLessonFilter('in-progress')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: lessonFilter === 'in-progress' ? '2px solid #f5576c' : '2px solid #e0e0e0',
+                    background: lessonFilter === 'in-progress' ? '#f5576c' : 'white',
+                    color: lessonFilter === 'in-progress' ? 'white' : '#666',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  📊 Đang học ({allLessons.filter(l => {
+                    const p = calculateProgress(l.id);
+                    return p > 0 && p < 100;
+                  }).length})
+                </button>
+                <button
+                  onClick={() => setLessonFilter('completed')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: lessonFilter === 'completed' ? '2px solid #4CAF50' : '2px solid #e0e0e0',
+                    background: lessonFilter === 'completed' ? '#4CAF50' : 'white',
+                    color: lessonFilter === 'completed' ? 'white' : '#666',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  ✅ Hoàn thành ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
+                </button>
+                <button
+                  onClick={() => setLessonFilter('not-started')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: lessonFilter === 'not-started' ? '2px solid #FF9800' : '2px solid #e0e0e0',
+                    background: lessonFilter === 'not-started' ? '#FF9800' : 'white',
+                    color: lessonFilter === 'not-started' ? 'white' : '#666',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  🆕 Chưa học ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
+                </button>
+              </div>
+            </div>
             
-            {lessons.length === 0 ? (
+            {getFilteredLessons().length === 0 ? (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>📚</div>
-                <h3 className={styles.emptyTitle}>Chưa có bài học nào</h3>
-                <p className={styles.emptyText}>Hãy bắt đầu học bài đầu tiên</p>
+                <h3 className={styles.emptyTitle}>Không có bài học nào</h3>
+                <p className={styles.emptyText}>
+                  {lessonFilter === 'in-progress' && 'Bạn chưa bắt đầu học bài nào'}
+                  {lessonFilter === 'completed' && 'Bạn chưa hoàn thành bài nào'}
+                  {lessonFilter === 'not-started' && 'Tất cả bài học đã được bắt đầu'}
+                  {lessonFilter === 'all' && 'Chưa có bài học nào trong hệ thống'}
+                </p>
               </div>
             ) : (
               <div className={styles.progressGrid}>
-                {lessons.map((lesson) => {
+                {getFilteredLessons().map((lesson) => {
                   const progressPercent = calculateProgress(lesson.id);
                   const primaryMode = getPrimaryMode(lesson.id);
                   return (
                     <div
                       key={lesson.id}
                       className={styles.lessonCard}
-                      onClick={() => router.push(`/${primaryMode}/${lesson.id}`)}
                     >
-                      <h3 className={styles.lessonTitle}>
-                        {lesson.displayTitle}
-                      </h3>
-                      
-                      {/* Mode Badge */}
-                      <div style={{ 
-                        display: 'inline-block',
-                        padding: '4px 12px',
-                        borderRadius: '12px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        marginBottom: '12px',
-                        background: primaryMode === 'dictation' 
-                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                          : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        color: 'white',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>
-                        {primaryMode === 'dictation' ? '✍️ Chính Tả' : '🎤 Shadowing'}
+                      <div style={{ marginBottom: '12px' }}>
+                        <h3 className={styles.lessonTitle}>
+                          {lesson.displayTitle || lesson.title}
+                        </h3>
+                        <p className={styles.lessonDescription}>
+                          {lesson.description || 'Không có mô tả'}
+                        </p>
                       </div>
                       
-                      <p className={styles.lessonDescription}>
-                        {lesson.description}
-                      </p>
-                      
-                      <div>
+                      {/* Progress */}
+                      <div style={{ marginBottom: '15px' }}>
                         <div style={{ 
                           display: 'flex', 
                           justifyContent: 'space-between',
@@ -252,16 +309,79 @@ function UserDashboard() {
                         </div>
                       </div>
 
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button
+                          onClick={() => router.push(`/shadowing/${lesson.id}`)}
+                          style={{
+                            flex: 1,
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                            color: 'white',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s',
+                            boxShadow: '0 2px 8px rgba(245, 87, 108, 0.3)'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
+                          🎤 Shadowing
+                        </button>
+                        <button
+                          onClick={() => router.push(`/dictation/${lesson.id}`)}
+                          style={{
+                            flex: 1,
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s',
+                            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
+                          ✍️ Dictation
+                        </button>
+                      </div>
+
+                      {/* Status Badge */}
                       {progressPercent === 100 && (
-                        <div className={`${styles.statusBadge} ${styles.completed}`}>
-                          <span>✅</span>
-                          <span>Hoàn thành</span>
+                        <div style={{
+                          position: 'absolute',
+                          top: '10px',
+                          right: '10px',
+                          background: '#4CAF50',
+                          color: 'white',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '700'
+                        }}>
+                          ✅ Hoàn thành
                         </div>
                       )}
                       {progressPercent === 0 && (
-                        <div className={`${styles.statusBadge} ${styles.notStarted}`}>
-                          <span>🆕</span>
-                          <span>Chưa bắt đầu</span>
+                        <div style={{
+                          position: 'absolute',
+                          top: '10px',
+                          right: '10px',
+                          background: '#FF9800',
+                          color: 'white',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: '700'
+                        }}>
+                          🆕 Mới
                         </div>
                       )}
                     </div>
@@ -350,13 +470,7 @@ function UserDashboard() {
           </div>
         )}
 
-        {/* Create Lesson Modal */}
-        {showCreateModal && (
-          <CreateLessonModal
-            onClose={() => setShowCreateModal(false)}
-            onLessonCreated={handleLessonCreated}
-          />
-        )}
+
       </div>
     </>
   );

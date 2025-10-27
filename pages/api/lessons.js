@@ -22,7 +22,18 @@ async function adminHandler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const lesson = new Lesson(req.body);
+      // Check if lesson with this id already exists
+      const existingLesson = await Lesson.findOne({ id: req.body.id });
+      if (existingLesson) {
+        return res.status(400).json({ message: 'Bài học với ID này đã tồn tại' });
+      }
+
+      // Get the highest order number and increment it
+      const maxOrderLesson = await Lesson.findOne().sort({ order: -1 });
+      const nextOrder = maxOrderLesson ? maxOrderLesson.order + 1 : 1;
+
+      const lessonData = { ...req.body, order: nextOrder };
+      const lesson = new Lesson(lessonData);
       await lesson.save();
       return res.status(201).json(lesson);
     } catch (error) {

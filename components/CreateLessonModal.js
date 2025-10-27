@@ -91,8 +91,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
           displayTitle: formData.displayTitle,
           description: formData.description,
           audio: audioData.url,
-          json: jsonData.url,
-          order: 999
+          json: jsonData.url
         })
       });
 
