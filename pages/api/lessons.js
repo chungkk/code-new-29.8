@@ -47,9 +47,15 @@ async function adminHandler(req, res) {
 
   if (req.method === 'PUT') {
     try {
-      const { _id: id, id: lessonId, ...updateData } = req.body;
-      await Lesson.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-      return res.status(200).json({ message: 'Cập nhật thành công' });
+      const { id, ...updateData } = req.body;
+      if (!id) {
+        return res.status(400).json({ message: 'ID là bắt buộc' });
+      }
+      const updatedLesson = await Lesson.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+      if (!updatedLesson) {
+        return res.status(404).json({ message: 'Không tìm thấy bài học' });
+      }
+      return res.status(200).json({ message: 'Cập nhật thành công', lesson: updatedLesson });
     } catch (error) {
       console.error('PUT error:', error);
       return res.status(400).json({ message: error.message });
