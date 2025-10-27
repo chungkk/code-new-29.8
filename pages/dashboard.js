@@ -111,15 +111,29 @@ function UserDashboard() {
     if (!confirm('Dieses Wort löschen?')) return;
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Nicht authentifiziert. Bitte melden Sie sich erneut an.');
+        return;
+      }
+
       const res = await fetch(`/api/vocabulary?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (res.ok) {
         setVocabulary(vocabulary.filter(v => v._id !== id));
+        toast.success('Wort erfolgreich gelöscht!');
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.message || 'Fehler beim Löschen des Wortes');
       }
     } catch (error) {
-      toast.error('Ein Fehler ist aufgetreten');
+      console.error('Error deleting vocabulary:', error);
+      toast.error('Ein Fehler ist aufgetreten beim Löschen');
     }
   };
 
@@ -403,70 +417,102 @@ function UserDashboard() {
                   Speichern Sie Wortschatz beim Lernen für spätere Wiederholung
                 </p>
               </div>
-            ) : (
-              <div className={styles.vocabTable}>
-                <div className={styles.vocabHeader}>
-                  <h2 className={styles.vocabHeaderTitle}>Wortschatzliste</h2>
-                  <div className={styles.vocabCount}>
-                    Gesamt: <strong>{vocabulary.length}</strong> Wörter
-                  </div>
-                </div>
-                
-                <div className={styles.tableWrapper}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>Wortschatz</th>
-                        <th>Bedeutung</th>
-                        <th>Kontext</th>
-                        <th>Lektion</th>
-                        <th style={{ textAlign: 'center' }}>Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {vocabulary.map((vocab) => (
-                        <tr key={vocab._id}>
-                          <td>
-                            <div className={styles.wordCell}>
-                              {vocab.word}
-                            </div>
-                          </td>
-                          <td style={{ fontWeight: '500' }}>
-                            {vocab.translation}
-                          </td>
-                          <td style={{ 
-                            fontSize: '14px',
-                            color: '#6c757d',
-                            maxWidth: '250px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            fontStyle: 'italic'
-                          }}>
-                            {vocab.context || '-'}
-                          </td>
-                          <td style={{ 
-                            fontSize: '14px',
-                            color: '#667eea',
-                            fontWeight: '600'
-                          }}>
-                            {vocab.lessonId || 'Unbekannt'}
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <button
-                              onClick={() => deleteVocabulary(vocab._id)}
-                              className={styles.deleteBtn}
-                            >
-                              🗑️ Löschen
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+             ) : (
+               <>
+                 <div className={styles.vocabTable}>
+                   <div className={styles.vocabHeader}>
+                     <h2 className={styles.vocabHeaderTitle}>Wortschatzliste</h2>
+                     <div className={styles.vocabCount}>
+                       Gesamt: <strong>{vocabulary.length}</strong> Wörter
+                     </div>
+                   </div>
+
+                   <div className={styles.tableWrapper}>
+                     <table className={styles.table}>
+                       <thead>
+                         <tr>
+                           <th>Wortschatz</th>
+                           <th>Bedeutung</th>
+                           <th>Kontext</th>
+                           <th>Lektion</th>
+                           <th style={{ textAlign: 'center' }}>Aktionen</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         {vocabulary.map((vocab) => (
+                           <tr key={vocab._id}>
+                             <td>
+                               <div className={styles.wordCell}>
+                                 {vocab.word}
+                               </div>
+                             </td>
+                             <td style={{ fontWeight: '500' }}>
+                               {vocab.translation}
+                             </td>
+                             <td style={{
+                               fontSize: '14px',
+                               color: '#6c757d',
+                               maxWidth: '250px',
+                               overflow: 'hidden',
+                               textOverflow: 'ellipsis',
+                               whiteSpace: 'nowrap',
+                               fontStyle: 'italic'
+                             }}>
+                               {vocab.context || '-'}
+                             </td>
+                             <td style={{
+                               fontSize: '14px',
+                               color: '#667eea',
+                               fontWeight: '600'
+                             }}>
+                               {vocab.lessonId || 'Unbekannt'}
+                             </td>
+                             <td style={{ textAlign: 'center' }}>
+                               <button
+                                 onClick={() => deleteVocabulary(vocab._id)}
+                                 className={styles.deleteBtn}
+                               >
+                                 🗑️ Löschen
+                               </button>
+                             </td>
+                           </tr>
+                         ))}
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+
+                 {/* Mobile Card View */}
+                 <div className={styles.vocabCards}>
+                   {vocabulary.map((vocab) => (
+                     <div key={vocab._id} className={styles.vocabCard}>
+                       <div className={styles.vocabCardWord}>
+                         {vocab.word}
+                       </div>
+                       <div className={styles.vocabCardTranslation}>
+                         {vocab.translation}
+                       </div>
+                       {vocab.context && (
+                         <div className={styles.vocabCardContext}>
+                           &ldquo;{vocab.context}&rdquo;
+                         </div>
+                       )}
+                       <div className={styles.vocabCardLesson}>
+                         Lektion: {vocab.lessonId || 'Unbekannt'}
+                       </div>
+                       <div className={styles.vocabCardActions}>
+                         <button
+                           onClick={() => deleteVocabulary(vocab._id)}
+                           className={styles.deleteBtn}
+                         >
+                           🗑️ Löschen
+                         </button>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </>
+             )}
           </div>
         )}
 

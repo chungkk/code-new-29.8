@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,199 +6,121 @@ const Header = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const dropdownRef = useRef(null);
   const isHomePage = router.pathname === '/';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setShowMenu(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
+    setShowMenu(false);
+  };
+
+  const handleMenuItemClick = (action) => {
+    setShowMenu(false);
+    action();
   };
 
   return (
-    <header className="app-header">
+    <header className={`app-header ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-content">
-        <div className="header-left">
-          <div className="logo" onClick={() => router.push('/')}>
-            <span className="logo-icon">🎓</span>
-            <span className="logo-text">Deutsch Shadowing</span>
-          </div>
+        <div className="logo" onClick={() => router.push('/')}>
+          <span className="logo-icon">🚀</span>
+          <span className="logo-text">LinguaLearn</span>
         </div>
-        
-        <nav className="header-nav">
-          <button
-            className={`nav-link ${isHomePage ? 'active' : ''}`}
-            onClick={() => router.push('/')}
-          >
-            <span className="nav-icon">🏠</span>
-             <span className="nav-text">Startseite</span>
-          </button>
-        </nav>
+
+        {/* Navigation removed for clean, modern design */}
 
         <div className="header-right">
           {user ? (
-            <div style={{ position: 'relative' }}>
+            <div className="user-menu-container" ref={dropdownRef}>
               <button
                 className="user-button"
                 onClick={() => setShowMenu(!showMenu)}
+                aria-expanded={showMenu}
+                aria-haspopup="true"
+                aria-label={`${showMenu ? 'Close' : 'Open'} user menu`}
               >
                 <span className="user-avatar">👤</span>
                 <span className="user-name">{user.name}</span>
               </button>
 
               {showMenu && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '10px',
-                  background: 'white',
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                  minWidth: '220px',
-                  zIndex: 1000,
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white'
-                  }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
-                      {user.name}
-                    </div>
-                    <div style={{ fontSize: '12px', opacity: 0.9 }}>
-                      {user.email}
-                    </div>
+                <div className="user-dropdown" role="menu">
+                  <div className="user-dropdown-header">
+                    <div className="user-dropdown-name">{user.name}</div>
+                    <div className="user-dropdown-email">{user.email}</div>
                   </div>
 
-                   <div style={{ padding: '8px 0' }}>
-                     <button
-                       onClick={() => {
-                         setShowMenu(false);
-                         router.push('/dashboard');
-                       }}
-                       style={{
-                         width: '100%',
-                         padding: '12px 16px',
-                         background: 'none',
-                         border: 'none',
-                         textAlign: 'left',
-                         cursor: 'pointer',
-                         fontSize: '14px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         gap: '10px',
-                         transition: 'background 0.2s'
-                       }}
-                       onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                       onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                     >
-                       <span style={{ fontSize: '18px' }}>📊</span>
-                        <span style={{ fontWeight: '500' }}>Lernen verwalten</span>
-                     </button>
-
-                     <button
-                       onClick={() => {
-                         setShowMenu(false);
-                         router.push('/dashboard?tab=vocabulary');
-                       }}
-                       style={{
-                         width: '100%',
-                         padding: '12px 16px',
-                         background: 'none',
-                         border: 'none',
-                         textAlign: 'left',
-                         cursor: 'pointer',
-                         fontSize: '14px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         gap: '10px',
-                         transition: 'background 0.2s'
-                       }}
-                       onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                       onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                     >
-                       <span style={{ fontSize: '18px' }}>📚</span>
-                        <span style={{ fontWeight: '500' }}>Mein Wortschatz</span>
-                     </button>
-
-                     {user.role === 'admin' && (
-                       <>
-                         <div style={{
-                           height: '1px',
-                           background: 'linear-gradient(90deg, transparent, #e0e0e0, transparent)',
-                           margin: '8px 16px'
-                         }} />
-                         <button
-                           onClick={() => {
-                             setShowMenu(false);
-                             router.push('/admin/dashboard');
-                           }}
-                           style={{
-                             width: '100%',
-                             padding: '12px 16px',
-                             background: 'none',
-                             border: 'none',
-                             textAlign: 'left',
-                             cursor: 'pointer',
-                             fontSize: '14px',
-                             display: 'flex',
-                             alignItems: 'center',
-                             gap: '10px',
-                             transition: 'all 0.2s',
-                             color: '#ff6b35',
-                             fontWeight: '600',
-                             borderRadius: '6px',
-                             margin: '0 4px'
-                           }}
-                           onMouseEnter={(e) => {
-                             e.currentTarget.style.background = 'linear-gradient(135deg, #fff3e0, #ffe0b2)';
-                             e.currentTarget.style.transform = 'translateX(2px)';
-                           }}
-                           onMouseLeave={(e) => {
-                             e.currentTarget.style.background = 'none';
-                             e.currentTarget.style.transform = 'translateX(0)';
-                           }}
-                         >
-                           <span style={{ fontSize: '18px' }}>🛠️</span>
-                           <span>Admin Dashboard</span>
-                           <span style={{
-                             marginLeft: 'auto',
-                             fontSize: '10px',
-                             background: '#ff6b35',
-                             color: 'white',
-                             padding: '2px 6px',
-                             borderRadius: '10px',
-                             fontWeight: 'bold'
-                           }}>
-                             ADMIN
-                           </span>
-                         </button>
-                       </>
-                     )}
-                   </div>
-
-                  <div style={{ borderTop: '1px solid #eee', padding: '8px 0' }}>
+                  <div className="user-dropdown-menu">
                     <button
-                      onClick={handleLogout}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        color: '#f44336',
-                        fontWeight: '500',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#ffebee'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                      className="dropdown-item"
+                      onClick={() => handleMenuItemClick(() => router.push('/dashboard'))}
+                      role="menuitem"
                     >
-                      <span style={{ fontSize: '18px' }}>🚪</span>
-                       <span>Abmelden</span>
+                      <span className="dropdown-item-icon">📊</span>
+                      <span className="dropdown-item-text">Lernen verwalten</span>
+                    </button>
+
+                    <button
+                      className="dropdown-item"
+                      onClick={() => handleMenuItemClick(() => router.push('/dashboard?tab=vocabulary'))}
+                      role="menuitem"
+                    >
+                      <span className="dropdown-item-icon">📚</span>
+                      <span className="dropdown-item-text">Mein Wortschatz</span>
+                    </button>
+
+                    {user.role === 'admin' && (
+                      <>
+                        <div className="dropdown-divider" />
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleMenuItemClick(() => router.push('/admin/dashboard'))}
+                          role="menuitem"
+                        >
+                          <span className="dropdown-item-icon">🛠️</span>
+                          <span className="dropdown-item-text">Admin Dashboard</span>
+                          <span className="dropdown-item-badge">ADMIN</span>
+                        </button>
+                      </>
+                    )}
+
+                    <div className="dropdown-divider" />
+                    <button
+                      className="dropdown-item logout"
+                      onClick={handleLogout}
+                      role="menuitem"
+                    >
+                      <span className="dropdown-item-icon">🚪</span>
+                      <span className="dropdown-item-text">Abmelden</span>
                     </button>
                   </div>
                 </div>
@@ -206,11 +128,11 @@ const Header = () => {
             </div>
           ) : (
             <button
-              className="user-button"
+              className="user-button login-button"
               onClick={() => router.push('/auth/login')}
             >
               <span className="nav-icon">🔑</span>
-               <span className="user-name">Anmelden</span>
+              <span className="user-name">Anmelden</span>
             </button>
           )}
         </div>

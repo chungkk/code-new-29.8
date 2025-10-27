@@ -1,14 +1,17 @@
 import React from 'react';
 
-const LessonCard = ({ lesson, onClick }) => {
+const LessonCard = ({ lesson, onClick, featured = false }) => {
   return (
-    <div className="lesson-card" onClick={onClick}>
+    <div className={`lesson-card ${featured ? 'featured' : ''}`} onClick={onClick}>
       <div className="lesson-header">
-        <h3>{lesson.displayTitle}</h3>
+        <h3 className="lesson-title">{lesson.displayTitle}</h3>
         <span className="level-badge">{lesson.level || 'A1'}</span>
       </div>
-      <p>{lesson.description}</p>
-      <button>Los geht&apos;s!</button>
+      <p className="lesson-description">{lesson.description}</p>
+      <button className="lesson-button">
+        <span className="button-icon">🚀</span>
+        Los geht&apos;s!
+      </button>
     </div>
   );
 };

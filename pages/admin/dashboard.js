@@ -37,6 +37,7 @@ function AdminDashboardContent() {
   const [activeTab, setActiveTab] = useState('lessons');
   const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });
   const [deletingFiles, setDeletingFiles] = useState(false);
+  const [formCollapsed, setFormCollapsed] = useState(false);
 
   useEffect(() => {
     fetchLessons();
@@ -493,15 +494,25 @@ function AdminDashboardContent() {
         {/* Form Section */}
         {showForm && (
           <div className={styles.formContainer}>
-            <h2 className={styles.formTitle}>
-               {editingLesson ? 'Lektion bearbeiten' : 'Neue Lektion hinzufügen'}
-            </h2>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>
+                  {editingLesson ? 'Lektion bearbeiten' : 'Neue Lektion hinzufügen'}
+              </h2>
+              <button
+                onClick={() => setFormCollapsed(!formCollapsed)}
+                className={styles.collapseButton}
+              >
+                {formCollapsed ? '🔽 Erweitern' : '🔼 Minimieren'}
+              </button>
+            </div>
 
-            {generalError && (
-              <div className={styles.errorMessage}>
-                ⚠️ {generalError}
-              </div>
-            )}
+            {!formCollapsed && (
+              <>
+                {generalError && (
+                  <div className={styles.errorMessage}>
+                    ⚠️ {generalError}
+                  </div>
+                )}
             
             <form onSubmit={handleSubmit} className={styles.formGrid}>
               <div className={styles.fullWidth}>
@@ -647,7 +658,9 @@ mit dem Top Thema`}
                    {uploading ? '⏳ Wird verarbeitet...' : (editingLesson ? '✏️ Aktualisieren' : '➕ Lektion hinzufügen')}
                  </button>
               </div>
-            </form>
+                </form>
+              </>
+            )}
           </div>
         )}
 

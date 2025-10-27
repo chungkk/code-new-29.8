@@ -53,7 +53,7 @@ const HomePage = () => {
       </Head>
       
       <div className="main-container">
-        <h1>Lektionsliste 📚</h1>
+
         <div className="lesson-cards-container">
           {lessons.map(lesson => (
             <LessonCard
