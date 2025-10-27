@@ -834,7 +834,7 @@ const DictationPageContent = () => {
       <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
           <h1>❌ Không tìm thấy bài học</h1>
-          <p style={{ marginTop: '20px' }}>Bài học với ID "<strong>{lessonId}</strong>" không tồn tại.</p>
+          <p style={{ marginTop: '20px' }}>Bài học với ID <strong>{lessonId}</strong> không tồn tại.</p>
           <button 
             onClick={handleBackToHome}
             style={{ 
