@@ -28,7 +28,7 @@ const Header = () => {
             onClick={() => router.push('/')}
           >
             <span className="nav-icon">🏠</span>
-            <span className="nav-text">Trang chủ</span>
+             <span className="nav-text">Startseite</span>
           </button>
         </nav>
 
@@ -92,7 +92,7 @@ const Header = () => {
                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                      >
                        <span style={{ fontSize: '18px' }}>📊</span>
-                       <span style={{ fontWeight: '500' }}>Quản lý học tập</span>
+                        <span style={{ fontWeight: '500' }}>Lernen verwalten</span>
                      </button>
 
                      <button
@@ -117,7 +117,7 @@ const Header = () => {
                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                      >
                        <span style={{ fontSize: '18px' }}>📚</span>
-                       <span style={{ fontWeight: '500' }}>Từ vựng của tôi</span>
+                        <span style={{ fontWeight: '500' }}>Mein Wortschatz</span>
                      </button>
 
                      {user.role === 'admin' && (
@@ -198,7 +198,7 @@ const Header = () => {
                       onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
                     >
                       <span style={{ fontSize: '18px' }}>🚪</span>
-                      <span>Đăng xuất</span>
+                       <span>Abmelden</span>
                     </button>
                   </div>
                 </div>
@@ -210,7 +210,7 @@ const Header = () => {
               onClick={() => router.push('/auth/login')}
             >
               <span className="nav-icon">🔑</span>
-              <span className="user-name">Đăng nhập</span>
+               <span className="user-name">Anmelden</span>
             </button>
           )}
         </div>

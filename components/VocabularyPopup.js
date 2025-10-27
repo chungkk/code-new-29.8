@@ -92,7 +92,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
 
   const handleSave = async () => {
     if (!translation.trim()) {
-      toast.error('Vui lòng nhập nghĩa từ');
+      toast.error('Bitte geben Sie die Bedeutung des Wortes ein');
       return;
     }
 
@@ -115,10 +115,10 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
 
       if (!res.ok) throw new Error('Failed to save vocabulary');
 
-      toast.success(`✓ Đã lưu từ: ${word}`);
+       toast.success(`✓ Wort gespeichert: ${word}`);
       onClose();
     } catch (error) {
-      toast.error('Lỗi khi lưu từ vựng');
+       toast.error('Fehler beim Speichern des Wortes');
     } finally {
       setSaving(false);
     }
@@ -136,29 +136,29 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
         }}
       >
         <div className="vocabulary-popup-header">
-          <h3>Lưu từ vựng</h3>
+           <h3>Wort speichern</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
         <div className="vocabulary-popup-content">
           <div className="vocab-field">
-            <label>Từ:</label>
+             <label>Wort:</label>
             <div className="vocab-word">{word}</div>
           </div>
 
           {context && (
             <div className="vocab-field">
-              <label>Ngữ cảnh:</label>
+               <label>Kontext:</label>
               <div className="vocab-context">{context}</div>
             </div>
           )}
 
           <div className="vocab-field">
-            <label>Nghĩa (Tiếng Việt):</label>
+             <label>Bedeutung (Vietnamesisch):</label>
             {loading ? (
               <div className="translation-loading">
                 <span className="loading-spinner">⏳</span>
-                <span>Đang dịch...</span>
+                 <span>Übersetze...</span>
               </div>
             ) : (
               <>
@@ -166,7 +166,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
                   type="text"
                   value={translation}
                   onChange={(e) => setTranslation(e.target.value)}
-                  placeholder="Nhập nghĩa tiếng Việt..."
+                   placeholder="Vietnamesische Bedeutung eingeben..."
                   autoFocus
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') handleSave();
@@ -174,7 +174,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
                 />
                 {autoTranslation && (
                   <div className="auto-translation-hint">
-                    💡 Gợi ý: {autoTranslation}
+                     💡 Vorschlag: {autoTranslation}
                   </div>
                 )}
               </>
@@ -184,14 +184,14 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
 
         <div className="vocabulary-popup-footer">
           <button className="btn-cancel" onClick={onClose}>
-            Hủy
+             Abbrechen
           </button>
           <button 
             className="btn-save" 
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? 'Đang lưu...' : 'Lưu'}
+             {saving ? 'Speichere...' : 'Speichern'}
           </button>
         </div>
       </div>

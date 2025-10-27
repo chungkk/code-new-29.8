@@ -43,7 +43,7 @@ async function adminHandler(req, res) {
 
   if (req.method === 'PUT') {
     try {
-      const { id, ...updateData } = req.body;
+      const { _id: id, ...updateData } = req.body;
       await Lesson.findByIdAndUpdate(id, updateData);
       return res.status(200).json({ message: 'Cập nhật thành công' });
     } catch (error) {

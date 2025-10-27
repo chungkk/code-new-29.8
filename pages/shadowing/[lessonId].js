@@ -301,7 +301,7 @@ const ShadowingPageContent = () => {
     return (
       <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h2>⏳ Đang tải bài học...</h2>
+          <h2>⏳ Lektion lädt...</h2>
         </div>
       </div>
     );
@@ -311,8 +311,8 @@ const ShadowingPageContent = () => {
     return (
       <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h1>❌ Không tìm thấy bài học</h1>
-          <p style={{ marginTop: '20px' }}>Bài học với ID <strong>{lessonId}</strong> không tồn tại.</p>
+          <h1>❌ Lektion nicht gefunden</h1>
+           <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
           <button 
             onClick={handleBackToHome}
             style={{ 
@@ -326,7 +326,7 @@ const ShadowingPageContent = () => {
               cursor: 'pointer'
             }}
           >
-            ← Về Trang Chủ
+            ← Zur Startseite
           </button>
         </div>
       </div>
@@ -343,7 +343,7 @@ const ShadowingPageContent = () => {
       <div className="shadowing-page">
         <audio ref={audioRef} controls style={{ display: 'none' }}>
           <source src={lesson.audio} type="audio/mp3" />
-          Trình duyệt của bạn không hỗ trợ thẻ audio.
+          Ihr Browser unterstützt das Audio-Tag nicht.
         </audio>
 
         <div className="shadowing-app-container" style={{ marginTop: '100px' }}>

@@ -7,16 +7,7 @@ import ModeSelectionPopup from '../components/ModeSelectionPopup';
 const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [lessons, setLessons] = useState([
-    {
-      id: 'bai_1',
-      title: 'Patient Erde: Zustand kritisch',
-      audio: '/audio/bai_1.mp3',
-      json: '/text/bai_1.json',
-      displayTitle: 'Lektion 1: Patient Erde',
-      description: 'Thema: Umwelt, Klimawandel (DW)'
-    }
-  ]);
+  const [lessons, setLessons] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +20,9 @@ const HomePage = () => {
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {
-          setLessons(data);
+          // Sort lessons by createdAt descending (newest first)
+          const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setLessons(sortedData);
         }
       }
     } catch (error) {

@@ -24,9 +24,13 @@ function AdminDashboardContent() {
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('lessons');
+  const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });
+  const [deletingFiles, setDeletingFiles] = useState(false);
 
   useEffect(() => {
     fetchLessons();
+    loadUnusedFiles();
   }, []);
 
   const validateSRT = (text) => {
@@ -64,9 +68,59 @@ function AdminDashboardContent() {
       setLessons(data);
     } catch (error) {
       console.error('Error fetching lessons:', error);
-      toast.error('Không thể tải danh sách bài học');
+      toast.error('Kann Lektionsliste nicht laden');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUnusedFiles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/unused-files', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnusedFiles(data);
+      }
+    } catch (error) {
+      console.error('Error loading unused files:', error);
+    }
+  };
+
+  const deleteUnusedFiles = async (files) => {
+    if (!confirm(`Sind Sie sicher, dass Sie ${files.length} ungenutzte Dateien löschen möchten?`)) return;
+
+    setDeletingFiles(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/unused-files', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ files })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`${data.deleted.length} Dateien gelöscht`);
+        if (data.errors.length > 0) {
+          toast.warning(`Löschfehler: ${data.errors.join(', ')}`);
+        }
+        loadUnusedFiles(); // Refresh
+      } else {
+        toast.error('Dateilöschfehler');
+      }
+    } catch (error) {
+      console.error('Error deleting files:', error);
+      toast.error('Dateilöschfehler');
+    } finally {
+      setDeletingFiles(false);
     }
   };
 
@@ -77,9 +131,9 @@ function AdminDashboardContent() {
 
     try {
       // Upload audio file (required)
-      if (!audioFile) {
-        throw new Error('Vui lòng chọn file audio');
-      }
+        if (!audioFile) {
+          throw new Error('Bitte wählen Sie eine Audio-Datei aus');
+        }
 
       const uploadFormData = new FormData();
       uploadFormData.append('file', audioFile);
@@ -103,7 +157,7 @@ function AdminDashboardContent() {
 
       // Convert SRT to JSON (required)
       if (!srtText.trim()) {
-        throw new Error('Vui lòng nhập SRT text');
+        throw new Error('Bitte geben Sie SRT-Text ein');
       }
 
       const token = localStorage.getItem('token');
@@ -132,7 +186,7 @@ function AdminDashboardContent() {
         json: jsonPath
       };
     } catch (error) {
-      throw new Error('Lỗi upload/convert: ' + error.message);
+        throw new Error('Upload/Konvertierungsfehler: ' + error.message);
     } finally {
       setUploading(false);
     }
@@ -146,10 +200,10 @@ function AdminDashboardContent() {
     const newErrors = {};
 
     // Validate required fields
-    if (!formData.id.trim()) newErrors.id = 'ID là bắt buộc';
-    if (!formData.title.trim()) newErrors.title = 'Tiêu đề là bắt buộc';
-    if (!formData.displayTitle.trim()) newErrors.displayTitle = 'Tiêu đề hiển thị là bắt buộc';
-    if (!formData.description.trim()) newErrors.description = 'Mô tả là bắt buộc';
+    if (!formData.id.trim()) newErrors.id = 'ID ist erforderlich';
+    if (!formData.title.trim()) newErrors.title = 'Titel ist erforderlich';
+    if (!formData.displayTitle.trim()) newErrors.displayTitle = 'Anzeigetitel ist erforderlich';
+    if (!formData.description.trim()) newErrors.description = 'Beschreibung ist erforderlich';
 
     // For new lessons, require both audio file and SRT text
     if (!editingLesson) {
@@ -159,7 +213,7 @@ function AdminDashboardContent() {
 
     // Validate SRT format if provided
     if (srtText.trim() && !validateSRT(srtText)) {
-      newErrors.srt = 'Định dạng SRT không hợp lệ';
+      newErrors.srt = 'Ungültiges SRT-Format';
     }
 
     setErrors(newErrors);
@@ -186,7 +240,7 @@ function AdminDashboardContent() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          setGeneralError('Token không tồn tại. Vui lòng đăng nhập lại.');
+          setGeneralError('Token existiert nicht. Bitte melden Sie sich erneut an.');
           return;
         }
 
@@ -198,21 +252,21 @@ function AdminDashboardContent() {
 
         if (!checkRes.ok) {
           if (checkRes.status === 401) {
-            setGeneralError('Token không hợp lệ. Vui lòng đăng nhập lại.');
+            setGeneralError('Ungültiges Token. Bitte melden Sie sich erneut an.');
             return;
           }
-          throw new Error('Không thể kiểm tra ID');
+          throw new Error('Kann ID nicht überprüfen');
         }
 
         const existingLessons = await checkRes.json();
         const idExists = existingLessons.some(lesson => lesson.id === formData.id);
         if (idExists) {
-          setGeneralError(`ID "${formData.id}" đã tồn tại. Vui lòng chọn ID khác.`);
+          setGeneralError(`ID "${formData.id}" existiert bereits. Bitte wählen Sie eine andere ID.`);
           return;
         }
       } catch (error) {
         console.error('Error checking existing lessons:', error);
-        setGeneralError('Lỗi kiểm tra ID: ' + error.message);
+        setGeneralError('Fehler bei ID-Überprüfung: ' + error.message);
         return;
       }
     }
@@ -220,15 +274,25 @@ function AdminDashboardContent() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setGeneralError('Token không tồn tại. Vui lòng đăng nhập lại.');
+        setGeneralError('Token existiert nicht. Bitte melden Sie sich erneut an.');
         return;
       }
 
-      const lessonData = {
-        ...formData,
-        audio: finalAudioPath,
-        json: finalJsonPath
-      };
+      let lessonData;
+      if (editingLesson) {
+        lessonData = {
+          id: formData.id,
+          title: formData.title,
+          displayTitle: formData.displayTitle,
+          description: formData.description
+        };
+      } else {
+        lessonData = {
+          ...formData,
+          audio: finalAudioPath,
+          json: finalJsonPath
+        };
+      }
 
       console.log('Lesson data to save:', lessonData);
 
@@ -247,10 +311,10 @@ function AdminDashboardContent() {
       if (!res.ok) {
         const errorData = await res.json();
         console.error('Save lesson error:', errorData);
-        throw new Error(errorData.message || 'Failed to save lesson');
+        throw new Error(errorData.message || 'Lektion konnte nicht gespeichert werden');
       }
 
-      toast.success(editingLesson ? 'Cập nhật thành công!' : 'Thêm bài học thành công!');
+      toast.success(editingLesson ? 'Erfolgreich aktualisiert!' : 'Lektion erfolgreich hinzugefügt!');
       setShowForm(false);
       setEditingLesson(null);
       resetForm();
@@ -273,12 +337,12 @@ function AdminDashboardContent() {
   };
 
   const handleDelete = async (lessonId) => {
-    if (!confirm('Bạn có chắc muốn xóa bài học này?')) return;
+    if (!confirm('Sind Sie sicher, dass Sie diese Lektion löschen möchten?')) return;
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Token không tồn tại. Vui lòng đăng nhập lại.');
+        toast.error('Token existiert nicht. Bitte melden Sie sich erneut an.');
         return;
       }
 
@@ -291,10 +355,10 @@ function AdminDashboardContent() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to delete lesson');
+        throw new Error(errorData.message || 'Lektion konnte nicht gelöscht werden');
       }
 
-      toast.success('Xóa thành công!');
+      toast.success('Erfolgreich gelöscht!');
       fetchLessons();
     } catch (error) {
       toast.error('Có lỗi xảy ra: ' + error.message);
@@ -315,7 +379,7 @@ function AdminDashboardContent() {
   };
 
   // Filter lessons based on search term
-  const filteredLessons = lessons.filter(lesson => 
+  const filteredLessons = lessons.filter(lesson =>
     lesson.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lesson.displayTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lesson.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -324,15 +388,15 @@ function AdminDashboardContent() {
   return (
     <>
       <Head>
-        <title>Admin Dashboard - Deutsch Shadowing</title>
+        <title>Admin-Dashboard - Deutsch Shadowing</title>
       </Head>
       
       <div className={styles.container}>
         {/* Header Section */}
         <div className={styles.header}>
           <div>
-            <h1 className={styles.title}>Bảng Điều Khiển Admin</h1>
-            <p className={styles.subtitle}>Quản lý bài học và nội dung</p>
+            <h1 className={styles.title}>Admin-Dashboard</h1>
+            <p className={styles.subtitle}>Lektionen und Inhalte verwalten</p>
           </div>
           <button
             onClick={() => {
@@ -342,31 +406,66 @@ function AdminDashboardContent() {
             }}
             className={styles.addButton}
           >
-            {showForm ? '✕ Đóng Form' : '+ Thêm Bài Học Mới'}
+            {showForm ? '✕ Formular schließen' : '+ Neue Lektion hinzufügen'}
           </button>
         </div>
 
-        {/* Statistics Section */}
-        <div className={styles.statsGrid}>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <button
+            onClick={() => setActiveTab('lessons')}
+            style={{
+              padding: '10px 20px',
+              border: activeTab === 'lessons' ? '2px solid #667eea' : '2px solid #e0e0e0',
+              background: activeTab === 'lessons' ? '#667eea' : 'white',
+              color: activeTab === 'lessons' ? 'white' : '#666',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            📚 Lektionen verwalten
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('files');
+              loadUnusedFiles();
+            }}
+            style={{
+              padding: '10px 20px',
+              border: activeTab === 'files' ? '2px solid #667eea' : '2px solid #e0e0e0',
+              background: activeTab === 'files' ? '#667eea' : 'white',
+              color: activeTab === 'files' ? 'white' : '#666',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            🗂️ Dateien verwalten ({unusedFiles.audio.length + unusedFiles.json.length})
+          </button>
+        </div>
+
+        {activeTab === 'lessons' && (
+          <>
+            {/* Statistics Section */}
+            <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>📚</div>
             <div className={styles.statContent}>
               <div className={styles.statValue}>{lessons.length}</div>
-              <div className={styles.statLabel}>Tổng Bài Học</div>
+               <div className={styles.statLabel}>Gesamt Lektionen</div>
             </div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>✅</div>
             <div className={styles.statContent}>
               <div className={styles.statValue}>{filteredLessons.length}</div>
-              <div className={styles.statLabel}>Kết Quả Tìm Kiếm</div>
+               <div className={styles.statLabel}>Suchergebnisse</div>
             </div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>🎯</div>
             <div className={styles.statContent}>
               <div className={styles.statValue}>{showForm ? '1' : '0'}</div>
-              <div className={styles.statLabel}>Đang Chỉnh Sửa</div>
+               <div className={styles.statLabel}>Wird bearbeitet</div>
             </div>
           </div>
         </div>
@@ -375,7 +474,7 @@ function AdminDashboardContent() {
         {showForm && (
           <div className={styles.formContainer}>
             <h2 className={styles.formTitle}>
-              {editingLesson ? 'Sửa Bài Học' : 'Thêm Bài Học Mới'}
+               {editingLesson ? 'Lektion bearbeiten' : 'Neue Lektion hinzufügen'}
             </h2>
 
             {generalError && (
@@ -386,73 +485,73 @@ function AdminDashboardContent() {
             
             <form onSubmit={handleSubmit} className={styles.formGrid}>
               <div className={styles.fullWidth}>
-                <label className={styles.label}>
-                  ID (ví dụ: bai_2)
-                </label>
+                 <label className={styles.label}>
+                   ID (z.B.: bai_2)
+                 </label>
                 <input
                   type="text"
                   value={formData.id}
                   onChange={(e) => setFormData({ ...formData, id: e.target.value })}
                   disabled={!!editingLesson}
                   className={`${styles.input} ${errors.id ? styles.error : ''}`}
-                  placeholder="Nhập ID duy nhất cho bài học"
+                   placeholder="Eindeutige ID für die Lektion eingeben"
                 />
                 {errors.id && <span className={styles.errorText}>{errors.id}</span>}
               </div>
 
               <div>
-                <label className={styles.label}>
-                  Tiêu đề (Title)
-                </label>
+                 <label className={styles.label}>
+                   Titel (Title)
+                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className={`${styles.input} ${errors.title ? styles.error : ''}`}
-                  placeholder="Tiêu đề nội bộ"
+                   placeholder="Interner Titel"
                 />
                 {errors.title && <span className={styles.errorText}>{errors.title}</span>}
               </div>
 
               <div>
-                <label className={styles.label}>
-                  Tiêu đề hiển thị (Display Title)
-                </label>
+                 <label className={styles.label}>
+                   Anzeigetitel (Display Title)
+                 </label>
                 <input
                   type="text"
                   value={formData.displayTitle}
                   onChange={(e) => setFormData({ ...formData, displayTitle: e.target.value })}
                   className={`${styles.input} ${errors.displayTitle ? styles.error : ''}`}
-                  placeholder="Tiêu đề hiển thị cho người dùng"
+                   placeholder="Anzeigetitel für Benutzer"
                 />
                 {errors.displayTitle && <span className={styles.errorText}>{errors.displayTitle}</span>}
               </div>
 
               <div className={styles.fullWidth}>
-                <label className={styles.label}>
-                  Mô tả (Description)
-                </label>
+                 <label className={styles.label}>
+                   Beschreibung (Description)
+                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className={`${styles.textarea} ${errors.description ? styles.error : ''}`}
-                  placeholder="Mô tả ngắn gọn về bài học"
+                   placeholder="Kurze Beschreibung der Lektion"
                 />
                 {errors.description && <span className={styles.errorText}>{errors.description}</span>}
-              </div>
+               </div>
 
-              {editingLesson && (
+               {editingLesson && (
                 <div className={`${styles.fullWidth} ${styles.editWarning}`}>
-                  <strong>Chế độ sửa:</strong> Bạn chỉ có thể sửa thông tin bài học. Audio và JSON không thể thay đổi.
+                   <strong>Bearbeitungsmodus:</strong> Sie können nur Lektionsinformationen bearbeiten. Audio und JSON können nicht geändert werden.
                 </div>
               )}
 
               {!editingLesson && (
                 <>
                   <div className={styles.fullWidth}>
-                    <label className={styles.label}>
-                      📤 Upload Audio File *
-                    </label>
+                     <label className={styles.label}>
+                       📤 Audio-Datei hochladen *
+                     </label>
                     <input
                       type="file"
                       accept="audio/*"
@@ -461,22 +560,22 @@ function AdminDashboardContent() {
                     />
                     {audioFile && (
                       <p className={styles.successText}>
-                        Đã chọn: {audioFile.name}
+                         Ausgewählt: {audioFile.name}
                       </p>
                     )}
                     {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
                   </div>
 
                   <div className={styles.fullWidth}>
-                    <label className={styles.label}>
-                      📝 SRT Text *
-                    </label>
+                     <label className={styles.label}>
+                       📝 SRT-Text *
+                     </label>
                     <textarea
                       value={srtText}
                       onChange={(e) => setSrtText(e.target.value)}
                       className={`${styles.textarea} ${errors.srt ? styles.error : ''}`}
                       style={{ minHeight: '200px', fontFamily: 'monospace' }}
-                      placeholder={`Ví dụ:
+                       placeholder={`Beispiel:
 1
 00:00:03,200 --> 00:00:04,766
 DW Deutsch lernen
@@ -487,20 +586,20 @@ mit dem Top Thema`}
                     />
                     {errors.srt && <span className={styles.errorText}>{errors.srt}</span>}
                     <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
-                      Nhập text theo định dạng SRT (SubRip Subtitle). File JSON sẽ tự động được tạo từ text này.
+                      Text im SRT-Format (SubRip Subtitle) eingeben. JSON-Datei wird automatisch aus diesem Text erstellt.
                     </p>
                   </div>
                 </>
               )}
 
               <div className={styles.fullWidth} style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className={styles.submitButton}
-                >
-                  {uploading ? '⏳ Đang xử lý...' : (editingLesson ? '✏️ Cập Nhật' : '➕ Thêm Bài Học')}
-                </button>
+                 <button
+                   type="submit"
+                   disabled={uploading}
+                   className={styles.submitButton}
+                 >
+                   {uploading ? '⏳ Wird verarbeitet...' : (editingLesson ? '✏️ Aktualisieren' : '➕ Lektion hinzufügen')}
+                 </button>
               </div>
             </form>
           </div>
@@ -509,17 +608,17 @@ mit dem Top Thema`}
         {/* Lessons List Section */}
         <div className={styles.lessonsSection}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Danh Sách Bài Học</h2>
-            <div className={styles.lessonCount}>
-              {filteredLessons.length} / {lessons.length} bài học
-            </div>
+          <h2 className={styles.sectionTitle}>Lektionsliste</h2>
+          <div className={styles.lessonCount}>
+            {filteredLessons.length} / {lessons.length} Lektionen
+          </div>
           </div>
 
           {/* Search Bar */}
           <div style={{ padding: '20px', borderBottom: '1px solid #f0f0f0' }}>
             <input
               type="text"
-              placeholder="🔍 Tìm kiếm theo ID, tiêu đề hoặc mô tả..."
+              placeholder="🔍 Nach ID, Titel oder Beschreibung suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.input}
@@ -528,48 +627,48 @@ mit dem Top Thema`}
           </div>
 
           {loading ? (
-            <div className={styles.loading}>Đang tải...</div>
+            <div className={styles.loading}>Lädt...</div>
           ) : filteredLessons.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>📚</div>
               <h3 className={styles.emptyTitle}>
-                {searchTerm ? 'Không tìm thấy bài học phù hợp' : 'Chưa có bài học nào'}
+                {searchTerm ? 'Keine passenden Lektionen gefunden' : 'Noch keine Lektionen vorhanden'}
               </h3>
               <p className={styles.emptyText}>
-                {searchTerm ? 'Thử tìm kiếm với từ khóa khác' : 'Hãy thêm bài học đầu tiên của bạn!'}
+                {searchTerm ? 'Versuchen Sie es mit einem anderen Suchbegriff' : 'Fügen Sie Ihre erste Lektion hinzu!'}
               </p>
             </div>
           ) : (
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Tiêu đề</th>
-                    <th>Mô tả</th>
-                    <th style={{ textAlign: 'center' }}>Thao tác</th>
-                  </tr>
+                    <tr>
+                       <th>ID</th>
+                       <th>Titel</th>
+                       <th>Beschreibung</th>
+                       <th style={{ textAlign: 'center' }}>Aktionen</th>
+                    </tr>
                 </thead>
                 <tbody>
                   {filteredLessons.map((lesson) => (
-                    <tr key={lesson._id}>
-                      <td className={styles.lessonId}>{lesson.id}</td>
-                      <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
-                      <td className={styles.lessonDescription}>{lesson.description}</td>
+                      <tr key={lesson._id}>
+                        <td className={styles.lessonId}>{lesson.id}</td>
+                        <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
+                        <td className={styles.lessonDescription}>{lesson.description}</td>
                       <td>
                         <div className={styles.actionButtons}>
-                          <button
-                            onClick={() => handleEdit(lesson)}
-                            className={styles.editButton}
-                          >
-                            Sửa
-                          </button>
-                          <button
-                            onClick={() => handleDelete(lesson._id)}
-                            className={styles.deleteButton}
-                          >
-                            Xóa
-                          </button>
+                           <button
+                             onClick={() => handleEdit(lesson)}
+                             className={styles.editButton}
+                           >
+                             Bearbeiten
+                           </button>
+                           <button
+                             onClick={() => handleDelete(lesson._id)}
+                             className={styles.deleteButton}
+                           >
+                             Löschen
+                           </button>
                         </div>
                       </td>
                     </tr>
@@ -579,6 +678,111 @@ mit dem Top Thema`}
             </div>
           )}
         </div>
+          </>
+        )}
+
+        {activeTab === 'files' && (
+          <div className={styles.lessonsSection}>
+             <div className={styles.sectionHeader}>
+               <h2 className={styles.sectionTitle}>Ungenutzte Dateien</h2>
+               <div className={styles.lessonCount}>
+                 {unusedFiles.audio.length + unusedFiles.json.length} Dateien
+               </div>
+             </div>
+
+            <div style={{ padding: '20px' }}>
+              <h3>Audio-Dateien ({unusedFiles.audio.length})</h3>
+              {unusedFiles.audio.length > 0 ? (
+                <div style={{ marginBottom: '20px' }}>
+                   <button
+                     onClick={() => deleteUnusedFiles(unusedFiles.audio)}
+                     disabled={deletingFiles}
+                     style={{
+                       padding: '10px 20px',
+                       background: deletingFiles ? '#ccc' : '#f44336',
+                       color: 'white',
+                       border: 'none',
+                       borderRadius: '8px',
+                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                       marginBottom: '10px'
+                     }}
+                   >
+                      {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle ungenutzten Audio löschen (${unusedFiles.audio.length})`}
+                   </button>
+                  <ul>
+                     {unusedFiles.audio.map(file => (
+                       <li key={file} style={{ marginBottom: '5px' }}>
+                         {file}
+                         <button
+                           onClick={() => deleteUnusedFiles([file])}
+                           disabled={deletingFiles}
+                           style={{
+                             marginLeft: '10px',
+                             padding: '2px 8px',
+                             background: deletingFiles ? '#ccc' : '#ff9800',
+                             color: 'white',
+                             border: 'none',
+                             borderRadius: '4px',
+                             cursor: deletingFiles ? 'not-allowed' : 'pointer'
+                           }}
+                         >
+                           {deletingFiles ? '...' : 'Xóa'}
+                         </button>
+                       </li>
+                     ))}
+                  </ul>
+                </div>
+              ) : (
+                 <p>Keine ungenutzten Audio-Dateien.</p>
+              )}
+
+              <h3>JSON/Text-Dateien ({unusedFiles.json.length})</h3>
+              {unusedFiles.json.length > 0 ? (
+                <div>
+                   <button
+                     onClick={() => deleteUnusedFiles(unusedFiles.json)}
+                     disabled={deletingFiles}
+                     style={{
+                       padding: '10px 20px',
+                       background: deletingFiles ? '#ccc' : '#f44336',
+                       color: 'white',
+                       border: 'none',
+                       borderRadius: '8px',
+                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                       marginBottom: '10px'
+                     }}
+                   >
+                      {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle ungenutzten JSON löschen (${unusedFiles.json.length})`}
+                   </button>
+                  <ul>
+                     {unusedFiles.json.map(file => (
+                       <li key={file} style={{ marginBottom: '5px' }}>
+                         {file}
+                         <button
+                           onClick={() => deleteUnusedFiles([file])}
+                           disabled={deletingFiles}
+                           style={{
+                             marginLeft: '10px',
+                             padding: '2px 8px',
+                             background: deletingFiles ? '#ccc' : '#ff9800',
+                             color: 'white',
+                             border: 'none',
+                             borderRadius: '4px',
+                             cursor: deletingFiles ? 'not-allowed' : 'pointer'
+                           }}
+                         >
+                           {deletingFiles ? '...' : 'Xóa'}
+                         </button>
+                       </li>
+                     ))}
+                  </ul>
+                </div>
+              ) : (
+                 <p>Keine ungenutzten JSON-Dateien.</p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

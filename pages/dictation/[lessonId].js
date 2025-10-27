@@ -753,7 +753,7 @@ const DictationPageContent = () => {
             <button 
               class="hint-btn" 
               onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
-              title="Hiển thị gợi ý"
+              title="Hinweise anzeigen"
               type="button"
             >
               👁️
@@ -823,7 +823,7 @@ const DictationPageContent = () => {
     return (
       <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h2>⏳ Đang tải bài học...</h2>
+          <h2>⏳ Lektion lädt...</h2>
         </div>
       </div>
     );
@@ -833,8 +833,8 @@ const DictationPageContent = () => {
     return (
       <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <h1>❌ Không tìm thấy bài học</h1>
-          <p style={{ marginTop: '20px' }}>Bài học với ID <strong>{lessonId}</strong> không tồn tại.</p>
+          <h1>❌ Lektion nicht gefunden</h1>
+           <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
           <button 
             onClick={handleBackToHome}
             style={{ 
@@ -848,7 +848,7 @@ const DictationPageContent = () => {
               cursor: 'pointer'
             }}
           >
-            ← Về Trang Chủ
+            ← Zur Startseite
           </button>
         </div>
       </div>
@@ -915,7 +915,7 @@ const DictationPageContent = () => {
                         transcriptData[currentSentenceIndex].start, 
                         transcriptData[currentSentenceIndex].end
                       )}
-                      title="Click để phát lại câu này"
+                      title="Klicken, um diesen Satz wiederzugeben"
                     >
                       <div className="time-progress-bar">
                         <div 

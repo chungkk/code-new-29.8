@@ -1,15 +1,5 @@
 [
     {
-        "text": "DW Deutsch lernen",
-        "start": 3.2,
-        "end": 4.766
-    },
-    {
-        "text": "mit dem Top Thema",
-        "start": 5.866,
-        "end": 7.133
-    },
-    {
         "text": "Patient Erde Zustand kritisch",
         "start": 8.933,
         "end": 11.533
@@ -75,8 +65,13 @@
         "end": 43.1
     },
     {
-        "text": "bereits 7 von 9 entscheidenden Grenzwerten überschritten",
+        "text": "bereits 7 von 9",
         "start": 43.2,
+        "end": 44.533
+    },
+    {
+        "text": "entscheidenden Grenzwerten überschritten",
+        "start": 44.666,
         "end": 46.966
     },
     {
@@ -110,12 +105,17 @@
         "end": 62.2
     },
     {
-        "text": "arbeiten viele internationale Forscherinnen und Forscher mit",
+        "text": "arbeiten viele",
         "start": 62.5,
+        "end": 63.3
+    },
+    {
+        "text": "internationale Forscherinnen und Forscher mit",
+        "start": 63.466,
         "end": 66.066
     },
     {
-        "text": "Boris sackscheski",
+        "text": "Boris sackchefski",
         "start": 66.4,
         "end": 67.766
     },
@@ -135,13 +135,13 @@
         "end": 73.4
     },
     {
-        "text": "bei dem mehrere ernste gesundheitliche Probleme auf einmal",
+        "text": "bei dem mehrere ernste gesundheitliche Probleme",
         "start": 73.666,
-        "end": 77.466
+        "end": 76.733
     },
     {
-        "text": "festgestellt wurden",
-        "start": 77.733,
+        "text": "auf einmal festgestellt wurden",
+        "start": 76.933,
         "end": 78.766
     },
     {
@@ -215,8 +215,13 @@
         "end": 117.9
     },
     {
-        "text": "denn das Artensterben und die Zerstörung von Lebensräumen",
+        "text": "denn das",
         "start": 118.366,
+        "end": 118.9
+    },
+    {
+        "text": "Artensterben und die Zerstörung von Lebensräumen",
+        "start": 118.9,
         "end": 121.766
     },
     {
@@ -240,8 +245,13 @@
         "end": 129.366
     },
     {
-        "text": "sind 1 großes Problem für das Leben auf unserem Planeten",
+        "text": "sind 1 großes Problem",
         "start": 129.566,
+        "end": 130.866
+    },
+    {
+        "text": "für das Leben auf unserem Planeten",
+        "start": 130.966,
         "end": 133
     },
     {
@@ -275,13 +285,13 @@
         "end": 146.766
     },
     {
-        "text": "Ozon Schicht haben sich in den letzten Jahren verbessert",
+        "text": "Ozon Schicht haben sich in den letzten Jahren",
         "start": 146.933,
-        "end": 150.2
+        "end": 149.5
     },
     {
-        "text": "das wird nicht ausreichen",
-        "start": 151,
+        "text": "verbessert das wird nicht ausreichen",
+        "start": 149.666,
         "end": 152.366
     },
     {
@@ -295,8 +305,13 @@
         "end": 158.966
     },
     {
-        "text": "denn nicht nur negative Effekte verstärken sich gegenseitig",
+        "text": "denn nicht nur negative",
         "start": 159.7,
+        "end": 160.9
+    },
+    {
+        "text": "Effekte verstärken sich gegenseitig",
+        "start": 161.066,
         "end": 163.133
     },
     {

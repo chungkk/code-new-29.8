@@ -108,7 +108,7 @@ function UserDashboard() {
   };
 
   const deleteVocabulary = async (id) => {
-    if (!confirm('Xóa từ này?')) return;
+    if (!confirm('Dieses Wort löschen?')) return;
 
     try {
       const res = await fetch(`/api/vocabulary?id=${id}`, {
@@ -119,7 +119,7 @@ function UserDashboard() {
         setVocabulary(vocabulary.filter(v => v._id !== id));
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra');
+      toast.error('Ein Fehler ist aufgetreten');
     }
   };
 
@@ -128,7 +128,7 @@ function UserDashboard() {
   if (status === 'loading' || loading) {
     return (
       <div className={styles.loading}>
-        <div>⏳ Đang tải...</div>
+        <div>⏳ Lädt...</div>
       </div>
     );
   }
@@ -143,10 +143,10 @@ function UserDashboard() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>
-              Xin chào, {user?.name}! 👋
+              Hallo, {user?.name}! 👋
             </h1>
             <p className={styles.subtitle}>
-              Theo dõi tiến độ học tập và quản lý từ vựng của bạn
+              Verfolgen Sie Ihren Lernfortschritt und verwalten Sie Ihren Wortschatz
             </p>
           </div>
         </div>
@@ -157,13 +157,13 @@ function UserDashboard() {
             onClick={() => setActiveTab('all-lessons')}
             className={`${styles.tab} ${activeTab === 'all-lessons' ? styles.active : ''}`}
           >
-            📚 Tất Cả Bài Học
+            📚 Alle Lektionen
           </button>
           <button
             onClick={() => setActiveTab('vocabulary')}
             className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.active : ''}`}
           >
-            📝 Từ Vựng ({vocabulary.length})
+            📝 Wortschatz ({vocabulary.length})
           </button>
         </div>
 
@@ -178,7 +178,7 @@ function UserDashboard() {
               flexWrap: 'wrap',
               gap: '15px'
             }}>
-              <h2 style={{ margin: 0 }}>Danh Sách Bài Học</h2>
+              <h2 style={{ margin: 0 }}>Lektionsliste</h2>
               
               {/* Filter Buttons */}
               <div style={{ 
@@ -200,7 +200,7 @@ function UserDashboard() {
                     transition: 'all 0.3s'
                   }}
                 >
-                  🗂️ Tất cả ({allLessons.length})
+                  🗂️ Alle ({allLessons.length})
                 </button>
                 <button
                   onClick={() => setLessonFilter('in-progress')}
@@ -216,7 +216,7 @@ function UserDashboard() {
                     transition: 'all 0.3s'
                   }}
                 >
-                  📊 Đang học ({allLessons.filter(l => {
+                  📊 In Bearbeitung ({allLessons.filter(l => {
                     const p = calculateProgress(l.id);
                     return p > 0 && p < 100;
                   }).length})
@@ -235,7 +235,7 @@ function UserDashboard() {
                     transition: 'all 0.3s'
                   }}
                 >
-                  ✅ Hoàn thành ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
+                  ✅ Abgeschlossen ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
                 </button>
                 <button
                   onClick={() => setLessonFilter('not-started')}
@@ -251,7 +251,7 @@ function UserDashboard() {
                     transition: 'all 0.3s'
                   }}
                 >
-                  🆕 Chưa học ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
+                  🆕 Nicht begonnen ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
                 </button>
               </div>
             </div>
@@ -259,12 +259,12 @@ function UserDashboard() {
             {getFilteredLessons().length === 0 ? (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>📚</div>
-                <h3 className={styles.emptyTitle}>Không có bài học nào</h3>
+                <h3 className={styles.emptyTitle}>Keine Lektionen vorhanden</h3>
                 <p className={styles.emptyText}>
-                  {lessonFilter === 'in-progress' && 'Bạn chưa bắt đầu học bài nào'}
-                  {lessonFilter === 'completed' && 'Bạn chưa hoàn thành bài nào'}
-                  {lessonFilter === 'not-started' && 'Tất cả bài học đã được bắt đầu'}
-                  {lessonFilter === 'all' && 'Chưa có bài học nào trong hệ thống'}
+                  {lessonFilter === 'in-progress' && 'Sie haben noch keine Lektion begonnen'}
+                  {lessonFilter === 'completed' && 'Sie haben noch keine Lektion abgeschlossen'}
+                  {lessonFilter === 'not-started' && 'Alle Lektionen wurden bereits begonnen'}
+                  {lessonFilter === 'all' && 'Noch keine Lektionen im System'}
                 </p>
               </div>
             ) : (
@@ -282,7 +282,7 @@ function UserDashboard() {
                           {lesson.displayTitle || lesson.title}
                         </h3>
                         <p className={styles.lessonDescription}>
-                          {lesson.description || 'Không có mô tả'}
+                          {lesson.description || 'Keine Beschreibung'}
                         </p>
                       </div>
                       
@@ -295,7 +295,7 @@ function UserDashboard() {
                           alignItems: 'center'
                         }}>
                           <span style={{ fontSize: '13px', color: '#999', fontWeight: '600' }}>
-                            Tiến độ
+                            Fortschritt
                           </span>
                           <span className={styles.progressPercent}>
                             {progressPercent}%
@@ -366,7 +366,7 @@ function UserDashboard() {
                           fontSize: '11px',
                           fontWeight: '700'
                         }}>
-                          ✅ Hoàn thành
+                          ✅ Abgeschlossen
                         </div>
                       )}
                       {progressPercent === 0 && (
@@ -381,7 +381,7 @@ function UserDashboard() {
                           fontSize: '11px',
                           fontWeight: '700'
                         }}>
-                          🆕 Mới
+                          🆕 Neu
                         </div>
                       )}
                     </div>
@@ -398,17 +398,17 @@ function UserDashboard() {
             {vocabulary.length === 0 ? (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>📚</div>
-                <h3 className={styles.emptyTitle}>Chưa có từ vựng nào</h3>
+                <h3 className={styles.emptyTitle}>Noch kein Wortschatz vorhanden</h3>
                 <p className={styles.emptyText}>
-                  Lưu từ vựng khi học bài để ôn tập sau này
+                  Speichern Sie Wortschatz beim Lernen für spätere Wiederholung
                 </p>
               </div>
             ) : (
               <div className={styles.vocabTable}>
                 <div className={styles.vocabHeader}>
-                  <h2 className={styles.vocabHeaderTitle}>Danh Sách Từ Vựng</h2>
+                  <h2 className={styles.vocabHeaderTitle}>Wortschatzliste</h2>
                   <div className={styles.vocabCount}>
-                    Tổng: <strong>{vocabulary.length}</strong> từ
+                    Gesamt: <strong>{vocabulary.length}</strong> Wörter
                   </div>
                 </div>
                 
@@ -416,11 +416,11 @@ function UserDashboard() {
                   <table className={styles.table}>
                     <thead>
                       <tr>
-                        <th>Từ vựng</th>
-                        <th>Nghĩa</th>
-                        <th>Ngữ cảnh</th>
-                        <th>Bài học</th>
-                        <th style={{ textAlign: 'center' }}>Thao tác</th>
+                        <th>Wortschatz</th>
+                        <th>Bedeutung</th>
+                        <th>Kontext</th>
+                        <th>Lektion</th>
+                        <th style={{ textAlign: 'center' }}>Aktionen</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -450,14 +450,14 @@ function UserDashboard() {
                             color: '#667eea',
                             fontWeight: '600'
                           }}>
-                            {vocab.lessonId || 'Không rõ'}
+                            {vocab.lessonId || 'Unbekannt'}
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <button
                               onClick={() => deleteVocabulary(vocab._id)}
                               className={styles.deleteBtn}
                             >
-                              🗑️ Xóa
+                              🗑️ Löschen
                             </button>
                           </td>
                         </tr>

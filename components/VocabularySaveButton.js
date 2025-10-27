@@ -13,7 +13,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
   const handleSave = async () => {
     if (!translation.trim()) {
-      toast.warning('Vui lòng nhập nghĩa của từ');
+      toast.warning('Bitte geben Sie die Bedeutung des Wortes ein');
       return;
     }
 
@@ -30,15 +30,15 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
       });
 
       if (res.ok) {
-        toast.success('Đã lưu từ vựng!');
+        toast.success('Wortschatz gespeichert!');
         setShowPopup(false);
         setTranslation('');
       } else {
         const data = await res.json();
-        toast.error('Lỗi: ' + data.message);
+        toast.error('Fehler: ' + data.message);
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra');
+      toast.error('Ein Fehler ist aufgetreten');
     } finally {
       setSaving(false);
     }
@@ -58,7 +58,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
           fontSize: '12px',
           marginLeft: '5px'
         }}
-        title="Lưu từ vựng"
+        title="Wortschatz speichern"
       >
         💾
       </button>
@@ -84,12 +84,12 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
             width: '90%'
           }}>
             <h3 style={{ marginBottom: '15px' }}>
-              Lưu Từ Vựng
+              Wortschatz speichern
             </h3>
             
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Từ:
+                Wort:
               </label>
               <div style={{ 
                 padding: '10px',
@@ -106,7 +106,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
             {context && (
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Ngữ cảnh:
+                  Kontext:
                 </label>
                 <div style={{ 
                   padding: '10px',
@@ -123,13 +123,13 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Nghĩa (tiếng Việt): *
+                Bedeutung (Vietnamesisch): *
               </label>
               <input
                 type="text"
                 value={translation}
                 onChange={(e) => setTranslation(e.target.value)}
-                placeholder="Nhập nghĩa của từ..."
+                placeholder="Bedeutung des Wortes eingeben..."
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -156,7 +156,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                   fontWeight: 'bold'
                 }}
               >
-                {saving ? 'Đang lưu...' : 'Lưu'}
+                {saving ? 'Speichere...' : 'Speichern'}
               </button>
               <button
                 onClick={() => {

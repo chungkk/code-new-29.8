@@ -42,7 +42,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
     try {
       // Validate
       if (!formData.id || !formData.title || !formData.displayTitle || !formData.audioFile || !formData.jsonFile) {
-        throw new Error('Vui lòng điền đầy đủ thông tin và upload file');
+        throw new Error('Bitte füllen Sie alle Informationen aus und laden Sie die Dateien hoch');
       }
 
       // Upload audio file
@@ -58,7 +58,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
       });
 
       if (!audioRes.ok) {
-        throw new Error('Upload audio thất bại');
+         throw new Error('Audio-Upload fehlgeschlagen');
       }
 
       const audioData = await audioRes.json();
@@ -76,7 +76,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
       });
 
       if (!jsonRes.ok) {
-        throw new Error('Upload JSON thất bại');
+         throw new Error('JSON-Upload fehlgeschlagen');
       }
 
       const jsonData = await jsonRes.json();
@@ -97,7 +97,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
 
       if (!lessonRes.ok) {
         const errorData = await lessonRes.json();
-        throw new Error(errorData.message || 'Tạo bài học thất bại');
+         throw new Error(errorData.message || 'Tạo bài học thất bại');
       }
 
       setUploadProgress(100);
@@ -108,7 +108,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
         onLessonCreated(newLesson);
       }
       
-      alert('✅ Tạo bài học thành công!');
+       alert('✅ Lektion erfolgreich erstellt!');
       onClose();
     } catch (err) {
       console.error('Create lesson error:', err);
@@ -122,50 +122,50 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>✍️ Tạo Bài Học Mới</h2>
+           <h2>✍️ Neue Lektion erstellen</h2>
           <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label>ID Bài Học *</label>
+             <label>Lektions-ID *</label>
             <input
               type="text"
               name="id"
               value={formData.id}
               onChange={handleChange}
-              placeholder="Ví dụ: bai_2"
+               placeholder="Beispiel: bai_2"
               required
             />
-            <small>ID duy nhất cho bài học (không dấu, viết thường)</small>
+             <small>Eindeutige ID für die Lektion (keine Akzente, Kleinbuchstaben)</small>
           </div>
 
           <div className={styles.formGroup}>
-            <label>Tiêu Đề *</label>
+             <label>Titel *</label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Ví dụ: Patient Erde: Zustand kritisch"
+               placeholder="Beispiel: Patient Erde: Zustand kritisch"
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Tên Hiển Thị *</label>
+             <label>Anzeigename *</label>
             <input
               type="text"
               name="displayTitle"
               value={formData.displayTitle}
               onChange={handleChange}
-              placeholder="Ví dụ: Lektion 2: Umwelt"
+               placeholder="Beispiel: Lektion 2: Umwelt"
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Mô Tả</label>
+             <label>Beschreibung</label>
             <textarea
               name="description"
               value={formData.description}
@@ -176,7 +176,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Audio File (MP3) *</label>
+             <label>Audio-Datei (MP3) *</label>
             <input
               type="file"
               name="audioFile"
@@ -192,7 +192,7 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label>JSON File (Transcript) *</label>
+             <label>JSON-Datei (Transkript) *</label>
             <input
               type="file"
               name="jsonFile"
@@ -230,14 +230,14 @@ export default function CreateLessonModal({ onClose, onLessonCreated }) {
               className={styles.cancelBtn}
               disabled={loading}
             >
-              Hủy
+               Abbrechen
             </button>
             <button 
               type="submit"
               className={styles.submitBtn}
               disabled={loading}
             >
-              {loading ? '⏳ Đang tạo...' : '✅ Tạo Bài Học'}
+               {loading ? '⏳ Erstelle...' : '✅ Lektion erstellen'}
             </button>
           </div>
         </form>

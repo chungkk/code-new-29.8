@@ -25,7 +25,7 @@ export default function Login() {
         background: '#f5f5f5'
       }}>
         <div style={{ fontSize: '24px', color: '#667eea' }}>
-          ⏳ Đang tải...
+           ⏳ Lädt...
         </div>
       </div>
     );
@@ -38,7 +38,7 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Đăng nhập - Deutsch Shadowing</title>
+         <title>Anmelden - Deutsch Shadowing</title>
       </Head>
 
       <div style={{
@@ -67,7 +67,7 @@ export default function Login() {
               🎓 Deutsch Shadowing
             </h1>
             <p style={{ color: '#666', fontSize: '16px' }}>
-              Đăng nhập để tiếp tục học
+               Melden Sie sich an, um weiterzulernen
             </p>
           </div>
 
@@ -75,13 +75,13 @@ export default function Login() {
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <p style={{ color: '#666', fontSize: '14px' }}>
-              Chưa có tài khoản?{' '}
+               Noch kein Konto?{' '}
               <Link href="/auth/register" style={{
                 color: '#667eea',
                 textDecoration: 'none',
                 fontWeight: 'bold'
               }}>
-                Đăng ký ngay
+                 Jetzt registrieren
               </Link>
             </p>
           </div>

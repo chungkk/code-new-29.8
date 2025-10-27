@@ -35,7 +35,7 @@ export default function AuthForm({ mode }) {
         setError(result.error);
       }
     } catch (error) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+       setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function AuthForm({ mode }) {
             fontWeight: 'bold',
             color: '#333'
           }}>
-            Tên *
+             Name *
           </label>
           <input
             type="text"
@@ -67,7 +67,7 @@ export default function AuthForm({ mode }) {
               fontSize: '16px',
               boxSizing: 'border-box'
             }}
-            placeholder="Nhập tên của bạn"
+             placeholder="Geben Sie Ihren Namen ein"
           />
         </div>
       )}
@@ -79,7 +79,7 @@ export default function AuthForm({ mode }) {
           fontWeight: 'bold',
           color: '#333'
         }}>
-          Email *
+           E-Mail *
         </label>
         <input
           type="email"
@@ -95,7 +95,7 @@ export default function AuthForm({ mode }) {
             fontSize: '16px',
             boxSizing: 'border-box'
           }}
-          placeholder="Nhập email của bạn"
+           placeholder="Geben Sie Ihre E-Mail ein"
         />
       </div>
 
@@ -106,7 +106,7 @@ export default function AuthForm({ mode }) {
           fontWeight: 'bold',
           color: '#333'
         }}>
-          Mật khẩu *
+           Passwort *
         </label>
         <input
           type="password"
@@ -123,7 +123,7 @@ export default function AuthForm({ mode }) {
             fontSize: '16px',
             boxSizing: 'border-box'
           }}
-          placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+           placeholder="Geben Sie Ihr Passwort ein (mindestens 6 Zeichen)"
         />
       </div>
 
@@ -156,7 +156,7 @@ export default function AuthForm({ mode }) {
           transition: 'background 0.3s'
         }}
       >
-        {loading ? 'Đang xử lý...' : (mode === 'login' ? 'Đăng nhập' : 'Đăng ký')}
+         {loading ? 'Wird verarbeitet...' : (mode === 'login' ? 'Anmelden' : 'Registrieren')}
       </button>
     </form>
   );

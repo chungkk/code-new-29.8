@@ -25,7 +25,7 @@ export default function Register() {
         background: '#f5f5f5'
       }}>
         <div style={{ fontSize: '24px', color: '#667eea' }}>
-          ⏳ Đang tải...
+           ⏳ Lädt...
         </div>
       </div>
     );
@@ -38,7 +38,7 @@ export default function Register() {
   return (
     <>
       <Head>
-        <title>Đăng ký - Deutsch Shadowing</title>
+         <title>Registrieren - Deutsch Shadowing</title>
       </Head>
 
       <div style={{
@@ -67,7 +67,7 @@ export default function Register() {
               🎓 Deutsch Shadowing
             </h1>
             <p style={{ color: '#666', fontSize: '16px' }}>
-              Tạo tài khoản để bắt đầu học
+               Erstellen Sie ein Konto, um zu beginnen
             </p>
           </div>
 
@@ -75,13 +75,13 @@ export default function Register() {
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <p style={{ color: '#666', fontSize: '14px' }}>
-              Đã có tài khoản?{' '}
+               Haben Sie bereits ein Konto?{' '}
               <Link href="/auth/login" style={{
                 color: '#667eea',
                 textDecoration: 'none',
                 fontWeight: 'bold'
               }}>
-                Đăng nhập
+                 Anmelden
               </Link>
             </p>
           </div>
