@@ -615,6 +615,15 @@ const DictationPageContent = () => {
     }, 200);
   }, [completedSentences, currentSentenceIndex, completedWords, saveProgress]);
 
+  // Update input background
+  const updateInputBackground = useCallback((input, correctWord) => {
+    if (input.value.toLowerCase() === correctWord.substring(0, input.value.length).toLowerCase()) {
+      input.style.backgroundColor = "lightgreen";
+    } else {
+      input.style.backgroundColor = "red";
+    }
+  }, []);
+
   // Check word function
   const checkWord = useCallback((input, correctWord, wordIndex) => {
     const sanitizedCorrectWord = correctWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
@@ -651,15 +660,6 @@ const DictationPageContent = () => {
       updateInputBackground(input, sanitizedCorrectWord);
     }
   }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion]);
-
-  // Update input background
-  const updateInputBackground = useCallback((input, correctWord) => {
-    if (input.value.toLowerCase() === correctWord.substring(0, input.value.length).toLowerCase()) {
-      input.style.backgroundColor = "lightgreen";
-    } else {
-      input.style.backgroundColor = "red";
-    }
-  }, []);
 
   // Mask text function - replace letters with asterisks
   const maskText = useCallback((text) => {
