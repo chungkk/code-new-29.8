@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const lessons = await Lesson.find().sort({ order: 1 });
-      return res.status(200).json(lessons);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.status(200).json(lessons.filter(l => l && l._id));
     } catch (error) {
       console.error('Get lessons error:', error);
       return res.status(500).json({ message: error.message });
@@ -32,10 +33,13 @@ async function adminHandler(req, res) {
       const maxOrderLesson = await Lesson.findOne().sort({ order: -1 });
       const nextOrder = maxOrderLesson ? maxOrderLesson.order + 1 : 1;
 
-      const lessonData = { ...req.body, order: nextOrder };
-      const lesson = new Lesson(lessonData);
-      await lesson.save();
-      return res.status(201).json(lesson);
+       const lessonData = { ...req.body, order: nextOrder };
+       const lesson = new Lesson(lessonData);
+       if (!lesson.id || typeof lesson.id !== 'string' || lesson.id.trim() === '') {
+         return res.status(400).json({ message: 'ID is required and must be a non-empty string' });
+       }
+       await lesson.save();
+       return res.status(201).json(lesson);
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }
@@ -43,10 +47,11 @@ async function adminHandler(req, res) {
 
   if (req.method === 'PUT') {
     try {
-      const { _id: id, ...updateData } = req.body;
-      await Lesson.findByIdAndUpdate(id, updateData);
+      const { _id: id, id: lessonId, ...updateData } = req.body;
+      await Lesson.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
       return res.status(200).json({ message: 'Cập nhật thành công' });
     } catch (error) {
+      console.error('PUT error:', error);
       return res.status(400).json({ message: error.message });
     }
   }

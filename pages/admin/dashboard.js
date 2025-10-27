@@ -15,8 +15,18 @@ function AdminDashboardContent() {
     id: '',
     title: '',
     displayTitle: '',
-    description: ''
+    description: '',
+    level: 'A1'
   });
+
+  const generateIdFromTitle = (title) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // remove special chars except spaces
+      .replace(/\s+/g, '-') // replace spaces with -
+      .replace(/-+/g, '-') // replace multiple - with single
+      .replace(/^-|-$/g, ''); // remove leading/trailing -
+  };
   const [audioFile, setAudioFile] = useState(null);
   const [srtText, setSrtText] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -63,8 +73,12 @@ function AdminDashboardContent() {
   const fetchLessons = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/lessons');
-      const data = await res.json();
+      const res = await fetch(`/api/lessons?t=${Date.now()}`, {
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      const data = (await res.json() || []).filter(l => l && l._id);
       setLessons(data);
     } catch (error) {
       console.error('Error fetching lessons:', error);
@@ -204,6 +218,7 @@ function AdminDashboardContent() {
     if (!formData.title.trim()) newErrors.title = 'Titel ist erforderlich';
     if (!formData.displayTitle.trim()) newErrors.displayTitle = 'Anzeigetitel ist erforderlich';
     if (!formData.description.trim()) newErrors.description = 'Beschreibung ist erforderlich';
+    if (!formData.level) newErrors.level = 'Niveau ist erforderlich';
 
     // For new lessons, require both audio file and SRT text
     if (!editingLesson) {
@@ -258,7 +273,7 @@ function AdminDashboardContent() {
           throw new Error('Kann ID nicht überprüfen');
         }
 
-        const existingLessons = await checkRes.json();
+        const existingLessons = (await checkRes.json() || []).filter(l => l && l._id);
         const idExists = existingLessons.some(lesson => lesson.id === formData.id);
         if (idExists) {
           setGeneralError(`ID "${formData.id}" existiert bereits. Bitte wählen Sie eine andere ID.`);
@@ -278,37 +293,39 @@ function AdminDashboardContent() {
         return;
       }
 
-      let lessonData;
-      if (editingLesson) {
-        lessonData = {
-          id: formData.id,
-          title: formData.title,
-          displayTitle: formData.displayTitle,
-          description: formData.description
-        };
-      } else {
-        lessonData = {
-          ...formData,
-          audio: finalAudioPath,
-          json: finalJsonPath
-        };
-      }
+       let lessonData;
+       if (editingLesson) {
+         lessonData = {
+           title: formData.title,
+           displayTitle: formData.displayTitle,
+           description: formData.description,
+           level: formData.level
+         };
+       } else {
+         lessonData = {
+           ...formData,
+           audio: finalAudioPath,
+           json: finalJsonPath
+         };
+       }
 
-      console.log('Lesson data to save:', lessonData);
+
 
       const url = '/api/lessons';
       const method = editingLesson ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editingLesson ? { id: editingLesson._id, ...lessonData } : lessonData)
-      });
+       const requestBody = editingLesson ? { id: editingLesson._id, ...lessonData } : lessonData;
+       const res = await fetch(url, {
+         method,
+         headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${token}`
+         },
+         body: JSON.stringify(requestBody)
+       });
 
-      if (!res.ok) {
+
+       if (!res.ok) {
         const errorData = await res.json();
         console.error('Save lesson error:', errorData);
         throw new Error(errorData.message || 'Lektion konnte nicht gespeichert werden');
@@ -330,7 +347,8 @@ function AdminDashboardContent() {
       id: lesson.id,
       title: lesson.title,
       displayTitle: lesson.displayTitle,
-      description: lesson.description
+      description: lesson.description,
+      level: lesson.level || 'A1'
     });
     // Note: Audio and JSON paths are stored in lesson but not editable
     setShowForm(true);
@@ -370,7 +388,8 @@ function AdminDashboardContent() {
       id: '',
       title: '',
       displayTitle: '',
-      description: ''
+      description: '',
+      level: 'A1'
     });
     setAudioFile(null);
     setSrtText('');
@@ -382,7 +401,8 @@ function AdminDashboardContent() {
   const filteredLessons = lessons.filter(lesson =>
     lesson.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lesson.displayTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lesson.description.toLowerCase().includes(searchTerm.toLowerCase())
+    lesson.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (lesson.level && lesson.level.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -485,17 +505,17 @@ function AdminDashboardContent() {
             
             <form onSubmit={handleSubmit} className={styles.formGrid}>
               <div className={styles.fullWidth}>
-                 <label className={styles.label}>
-                   ID (z.B.: bai_2)
-                 </label>
-                <input
-                  type="text"
-                  value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                  disabled={!!editingLesson}
-                  className={`${styles.input} ${errors.id ? styles.error : ''}`}
-                   placeholder="Eindeutige ID für die Lektion eingeben"
-                />
+                  <label className={styles.label}>
+                    ID (wird automatisch aus Titel generiert)
+                  </label>
+                 <input
+                   type="text"
+                   value={formData.id}
+                   onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                   disabled={!!editingLesson}
+                   className={`${styles.input} ${errors.id ? styles.error : ''}`}
+                    placeholder="Eindeutige ID für die Lektion eingeben"
+                 />
                 {errors.id && <span className={styles.errorText}>{errors.id}</span>}
               </div>
 
@@ -503,31 +523,57 @@ function AdminDashboardContent() {
                  <label className={styles.label}>
                    Titel (Title)
                  </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className={`${styles.input} ${errors.title ? styles.error : ''}`}
-                   placeholder="Interner Titel"
-                />
+                 <input
+                   type="text"
+                   value={formData.title}
+                   onChange={(e) => {
+                     const newTitle = e.target.value;
+                     const newId = editingLesson ? formData.id : generateIdFromTitle(newTitle);
+                     setFormData({ ...formData, title: newTitle, id: newId });
+                   }}
+                   className={`${styles.input} ${errors.title ? styles.error : ''}`}
+                    placeholder="Interner Titel"
+                 />
                 {errors.title && <span className={styles.errorText}>{errors.title}</span>}
               </div>
 
-              <div>
-                 <label className={styles.label}>
-                   Anzeigetitel (Display Title)
-                 </label>
-                <input
-                  type="text"
-                  value={formData.displayTitle}
-                  onChange={(e) => setFormData({ ...formData, displayTitle: e.target.value })}
-                  className={`${styles.input} ${errors.displayTitle ? styles.error : ''}`}
-                   placeholder="Anzeigetitel für Benutzer"
-                />
-                {errors.displayTitle && <span className={styles.errorText}>{errors.displayTitle}</span>}
-              </div>
+               <div>
+                  <label className={styles.label}>
+                    Anzeigetitel (Display Title)
+                  </label>
+                 <input
+                   type="text"
+                   value={formData.displayTitle}
+                   onChange={(e) => setFormData({ ...formData, displayTitle: e.target.value })}
+                   className={`${styles.input} ${errors.displayTitle ? styles.error : ''}`}
+                    placeholder="Anzeigetitel für Benutzer"
+                 />
+                 {errors.displayTitle && <span className={styles.errorText}>{errors.displayTitle}</span>}
+               </div>
 
-              <div className={styles.fullWidth}>
+               <div>
+                 <label className={styles.label}>
+                   Niveau (Level)
+                 </label>
+                 <select
+                   value={formData.level}
+                   onChange={(e) => {
+                     console.log('Level changed to:', e.target.value);
+                     setFormData({ ...formData, level: e.target.value });
+                   }}
+                   className={`${styles.input} ${errors.level ? styles.error : ''}`}
+                 >
+                   <option value="A1">A1 - Anfänger</option>
+                   <option value="A2">A2 - Elementar</option>
+                   <option value="B1">B1 - Mittelstufe</option>
+                   <option value="B2">B2 - Oberstufe</option>
+                   <option value="C1">C1 - Fortgeschritten</option>
+                   <option value="C2">C2 - Muttersprachlich</option>
+                 </select>
+                 {errors.level && <span className={styles.errorText}>{errors.level}</span>}
+               </div>
+
+               <div className={styles.fullWidth}>
                  <label className={styles.label}>
                    Beschreibung (Description)
                  </label>
@@ -618,7 +664,7 @@ mit dem Top Thema`}
           <div style={{ padding: '20px', borderBottom: '1px solid #f0f0f0' }}>
             <input
               type="text"
-              placeholder="🔍 Nach ID, Titel oder Beschreibung suchen..."
+              placeholder="🔍 Nach ID, Titel, Beschreibung oder Niveau suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.input}
@@ -642,20 +688,22 @@ mit dem Top Thema`}
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
-                    <tr>
-                       <th>ID</th>
-                       <th>Titel</th>
-                       <th>Beschreibung</th>
-                       <th style={{ textAlign: 'center' }}>Aktionen</th>
-                    </tr>
+                     <tr>
+                        <th>ID</th>
+                        <th>Titel</th>
+                        <th>Beschreibung</th>
+                        <th>Niveau</th>
+                        <th style={{ textAlign: 'center' }}>Aktionen</th>
+                     </tr>
                 </thead>
                 <tbody>
                   {filteredLessons.map((lesson) => (
-                      <tr key={lesson._id}>
-                        <td className={styles.lessonId}>{lesson.id}</td>
-                        <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
-                        <td className={styles.lessonDescription}>{lesson.description}</td>
-                      <td>
+                       <tr key={lesson._id}>
+                         <td className={styles.lessonId}>{lesson.id}</td>
+                         <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
+                         <td className={styles.lessonDescription}>{lesson.description}</td>
+                         <td><span className={styles.levelBadge}>{lesson.level || 'A1'}</span></td>
+                       <td>
                         <div className={styles.actionButtons}>
                            <button
                              onClick={() => handleEdit(lesson)}

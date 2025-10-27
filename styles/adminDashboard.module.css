@@ -416,6 +416,17 @@
   line-height: 1.5;
 }
 
+.levelBadge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .actionButtons {
   display: flex;
   gap: 8px;
