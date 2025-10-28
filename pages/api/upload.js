@@ -34,22 +34,29 @@ export default async function handler(req, res) {
     });
 
     const [fields, files] = await form.parse(req);
-    
+
     const file = files.file?.[0];
     const type = fields.type?.[0];
+    const url = fields.url?.[0];
 
-    if (!file) {
-      return res.status(400).json({ message: 'Không có file được upload' });
+    if (type === 'url') {
+      if (!url) {
+        return res.status(400).json({ message: 'URL is required for type url' });
+      }
+    } else {
+      if (!file) {
+        return res.status(400).json({ message: 'Không có file được upload' });
+      }
     }
 
     // Determine target directory based on type
     let targetDir;
     let urlPrefix;
-    
-    if (type === 'audio') {
+
+    if (type === 'audio' || (type === 'url' && fields.audioType?.[0] === 'audio')) {
       targetDir = path.join(process.cwd(), 'public', 'audio');
       urlPrefix = '/audio';
-    } else if (type === 'json') {
+    } else if (type === 'json' || (type === 'url' && fields.audioType?.[0] === 'json')) {
       targetDir = path.join(process.cwd(), 'public', 'text');
       urlPrefix = '/text';
     } else {
@@ -61,25 +68,45 @@ export default async function handler(req, res) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
-    // Generate unique filename
-    const originalName = file.originalFilename || 'file';
-    const ext = path.extname(originalName);
-    const baseName = path.basename(originalName, ext);
-    const timestamp = Date.now();
-    const fileName = `${baseName}_${timestamp}${ext}`;
-    const targetPath = path.join(targetDir, fileName);
+    let fileName, targetPath, fileSize;
 
-    // Move file to target directory
-    fs.copyFileSync(file.filepath, targetPath);
-    fs.unlinkSync(file.filepath); // Clean up temp file
+    if (type === 'url') {
+      // Fetch from URL
+      const response = await fetch(url);
+      if (!response.ok) {
+        return res.status(400).json({ message: 'Failed to fetch from URL' });
+      }
+      const buffer = await response.arrayBuffer();
+      const contentType = response.headers.get('content-type') || '';
+      const ext = contentType.includes('audio') ? '.mp3' : path.extname(url) || '.mp3';
+      const baseName = path.basename(url, path.extname(url)) || 'audio';
+      const timestamp = Date.now();
+      fileName = `${baseName}_${timestamp}${ext}`;
+      targetPath = path.join(targetDir, fileName);
+      fs.writeFileSync(targetPath, Buffer.from(buffer));
+      fileSize = buffer.byteLength;
+    } else {
+      // Generate unique filename
+      const originalName = file.originalFilename || 'file';
+      const ext = path.extname(originalName);
+      const baseName = path.basename(originalName, ext);
+      const timestamp = Date.now();
+      fileName = `${baseName}_${timestamp}${ext}`;
+      targetPath = path.join(targetDir, fileName);
 
-    const url = `${urlPrefix}/${fileName}`;
+      // Move file to target directory
+      fs.copyFileSync(file.filepath, targetPath);
+      fs.unlinkSync(file.filepath); // Clean up temp file
+      fileSize = file.size;
+    }
+
+    const fileUrl = `${urlPrefix}/${fileName}`;
 
     return res.status(200).json({
       success: true,
-      url,
+      url: fileUrl,
       fileName,
-      size: file.size
+      size: fileSize
     });
 
   } catch (error) {

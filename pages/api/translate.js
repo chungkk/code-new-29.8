@@ -94,10 +94,10 @@ async function translateWithOpenAI(text, context = '') {
 
 Từ: ${text}
 
-Chỉ trả về bản dịch tiếng Việt, không giải thích thêm. Nếu là danh từ thì không cần mạo từ.`
+Trả về 2-3 nghĩa tiếng Việt phổ biến, ngăn cách bằng dấu phẩy. Ví dụ: "nhà, ngôi nhà, tòa nhà". Không giải thích thêm.`
     : `Dịch từ tiếng Đức sang tiếng Việt: ${text}
 
-Chỉ trả về bản dịch tiếng Việt, không giải thích thêm. Nếu là danh từ thì không cần mạo từ.`;
+Trả về 2-3 nghĩa tiếng Việt phổ biến, ngăn cách bằng dấu phẩy. Ví dụ: "nhà, ngôi nhà, tòa nhà". Không giải thích thêm.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -218,12 +218,34 @@ export default async function handler(req, res) {
     let translation = '';
     let method = '';
 
-    // PRIORITY 1: Google Translate (Best for Vietnamese)
+    // PRIORITY 1: OpenAI GPT-4 mini (High quality, context-aware)
+    if (OPENAI_API_KEY) {
+      try {
+        translation = await translateWithOpenAI(cleanText, context);
+        method = 'openai-gpt4';
+
+        if (translation && translation !== cleanText) {
+          console.log(`✅ OpenAI: ${cleanText} → ${translation}`);
+          return res.status(200).json({
+            success: true,
+            originalText: cleanText,
+            translation: translation,
+            method,
+            sourceLang,
+            targetLang
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ OpenAI failed, trying next...', error.message);
+      }
+    }
+
+    // PRIORITY 2: Google Translate (Best for Vietnamese)
     if (GOOGLE_TRANSLATE_API_KEY) {
       try {
         translation = await translateWithGoogle(cleanText, sourceLang, targetLang);
         method = 'google-translate';
-        
+
         if (translation && translation !== cleanText) {
           console.log(`✅ Google Translate: ${cleanText} → ${translation}`);
           return res.status(200).json({
@@ -240,7 +262,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // PRIORITY 2: DeepL (Best for German, but no Vietnamese support yet)
+    // PRIORITY 3: DeepL (Best for German, but no Vietnamese support yet)
     // Skip for now since DeepL doesn't support Vietnamese
     // Uncomment when DeepL adds Vietnamese
     /*
@@ -248,7 +270,7 @@ export default async function handler(req, res) {
       try {
         translation = await translateWithDeepL(cleanText, sourceLang, targetLang);
         method = 'deepl';
-        
+
         if (translation && translation !== cleanText) {
           console.log(`✅ DeepL: ${cleanText} → ${translation}`);
           return res.status(200).json({
@@ -265,28 +287,6 @@ export default async function handler(req, res) {
       }
     }
     */
-
-    // PRIORITY 3: OpenAI GPT-4 mini (High quality, context-aware)
-    if (OPENAI_API_KEY) {
-      try {
-        translation = await translateWithOpenAI(cleanText, context);
-        method = 'openai-gpt4';
-        
-        if (translation && translation !== cleanText) {
-          console.log(`✅ OpenAI: ${cleanText} → ${translation}`);
-          return res.status(200).json({
-            success: true,
-            originalText: cleanText,
-            translation: translation,
-            method,
-            sourceLang,
-            targetLang
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ OpenAI failed, trying next...', error.message);
-      }
-    }
 
     // PRIORITY 4: Groq AI with improved prompt (Free but less accurate)
     if (GROQ_API_KEY) {

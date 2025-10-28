@@ -154,33 +154,45 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
             </div>
           )}
 
-          <div className="vocab-field">
-             <label>Bedeutung (Vietnamesisch):</label>
-            {loading ? (
-              <div className="translation-loading">
-                <span className="loading-spinner">⏳</span>
-                 <span>Übersetze...</span>
-              </div>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  value={translation}
-                  onChange={(e) => setTranslation(e.target.value)}
-                   placeholder="Vietnamesische Bedeutung eingeben..."
-                  autoFocus
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') handleSave();
-                  }}
-                />
-                {autoTranslation && (
-                  <div className="auto-translation-hint">
-                     💡 Vorschlag: {autoTranslation}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+           <div className="vocab-field">
+              <label>Bedeutung (Vietnamesisch):</label>
+             {loading ? (
+               <div className="translation-loading">
+                 <span className="loading-spinner">⏳</span>
+                  <span>Übersetze...</span>
+               </div>
+             ) : (
+               <>
+                 <input
+                   type="text"
+                   value={translation}
+                   onChange={(e) => setTranslation(e.target.value)}
+                    placeholder="Vietnamesische Bedeutung eingeben..."
+                   autoFocus
+                   onKeyPress={(e) => {
+                     if (e.key === 'Enter') handleSave();
+                   }}
+                 />
+                 {autoTranslation && (
+                   <div className="translation-suggestions">
+                     <div className="suggestions-label">💡 Vorschläge:</div>
+                     <div className="suggestions-list">
+                       {autoTranslation.split(',').map((meaning, index) => (
+                         <button
+                           key={index}
+                           className="suggestion-item"
+                           onClick={() => setTranslation(meaning.trim())}
+                           title="Click để chọn nghĩa này"
+                         >
+                           {meaning.trim()}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+               </>
+             )}
+           </div>
         </div>
 
         <div className="vocabulary-popup-footer">

@@ -28,6 +28,8 @@ function AdminDashboardContent() {
       .replace(/^-|-$/g, ''); // remove leading/trailing -
   };
   const [audioFile, setAudioFile] = useState(null);
+  const [audioSource, setAudioSource] = useState('file');
+  const [audioUrl, setAudioUrl] = useState('');
   const [srtText, setSrtText] = useState('');
   const [uploading, setUploading] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -141,15 +143,23 @@ function AdminDashboardContent() {
   };
 
   const handleTranscribe = async () => {
-    if (!audioFile) {
-      toast.error('Bitte wählen Sie zuerst eine Audio-Datei aus');
+    if (audioSource === 'file' && !audioFile) {
+      toast.error('Bitte wählen Sie eine Audio-Datei aus');
+      return;
+    }
+    if (audioSource === 'url' && !audioUrl.trim()) {
+      toast.error('Bitte geben Sie eine Audio-URL ein');
       return;
     }
 
     setTranscribing(true);
     try {
       const formData = new FormData();
-      formData.append('audio', audioFile);
+      if (audioSource === 'url') {
+        formData.append('url', audioUrl);
+      } else {
+        formData.append('audio', audioFile);
+      }
 
       const token = localStorage.getItem('token');
       const res = await fetch('/api/transcribe', {
@@ -183,13 +193,22 @@ function AdminDashboardContent() {
 
     try {
       // Upload audio file (required)
-        if (!audioFile) {
-          throw new Error('Bitte wählen Sie eine Audio-Datei aus');
-        }
+      if (audioSource === 'file' && !audioFile) {
+        throw new Error('Bitte wählen Sie eine Audio-Datei aus');
+      }
+      if (audioSource === 'url' && !audioUrl.trim()) {
+        throw new Error('Bitte geben Sie eine Audio-URL ein');
+      }
 
       const uploadFormData = new FormData();
-      uploadFormData.append('file', audioFile);
-      uploadFormData.append('type', 'audio');
+      if (audioSource === 'url') {
+        uploadFormData.append('type', 'url');
+        uploadFormData.append('url', audioUrl);
+        uploadFormData.append('audioType', 'audio');
+      } else {
+        uploadFormData.append('file', audioFile);
+        uploadFormData.append('type', 'audio');
+      }
 
       const audioRes = await fetch('/api/upload', {
         method: 'POST',
@@ -252,15 +271,16 @@ function AdminDashboardContent() {
     const newErrors = {};
 
     // Validate required fields
-    if (!formData.id.trim()) newErrors.id = 'ID ist erforderlich';
+    if (editingLesson && !formData.id.trim()) newErrors.id = 'ID ist erforderlich';
     if (!formData.title.trim()) newErrors.title = 'Titel ist erforderlich';
     if (!formData.displayTitle.trim()) newErrors.displayTitle = 'Anzeigetitel ist erforderlich';
     if (!formData.description.trim()) newErrors.description = 'Beschreibung ist erforderlich';
     if (!formData.level) newErrors.level = 'Niveau ist erforderlich';
 
-    // For new lessons, require both audio file and SRT text
+    // For new lessons, require both audio file/URL and SRT text
     if (!editingLesson) {
-      if (!audioFile) newErrors.audio = 'File audio là bắt buộc';
+      if (audioSource === 'file' && !audioFile) newErrors.audio = 'Audio file là bắt buộc';
+      if (audioSource === 'url' && !audioUrl.trim()) newErrors.audio = 'Audio URL là bắt buộc';
       if (!srtText.trim()) newErrors.srt = 'SRT text là bắt buộc';
     }
 
@@ -430,6 +450,8 @@ function AdminDashboardContent() {
       level: 'A1'
     });
     setAudioFile(null);
+    setAudioSource('file');
+    setAudioUrl('');
     setSrtText('');
     setErrors({});
     setGeneralError('');
@@ -552,20 +574,22 @@ function AdminDashboardContent() {
                 )}
             
             <form onSubmit={handleSubmit} className={styles.formGrid}>
-              <div className={styles.fullWidth}>
-                  <label className={styles.label}>
-                    ID (wird automatisch aus Titel generiert)
-                  </label>
-                 <input
-                   type="text"
-                   value={formData.id}
-                   onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                   disabled={!!editingLesson}
-                   className={`${styles.input} ${errors.id ? styles.error : ''}`}
-                    placeholder="Eindeutige ID für die Lektion eingeben"
-                 />
-                {errors.id && <span className={styles.errorText}>{errors.id}</span>}
-              </div>
+               {editingLesson && (
+                 <div className={styles.fullWidth}>
+                   <label className={styles.label}>
+                     ID (wird automatisch aus Titel generiert)
+                   </label>
+                  <input
+                    type="text"
+                    value={formData.id}
+                    onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                    disabled={!!editingLesson}
+                    className={`${styles.input} ${errors.id ? styles.error : ''}`}
+                     placeholder="Eindeutige ID für die Lektion eingeben"
+                  />
+                 {errors.id && <span className={styles.errorText}>{errors.id}</span>}
+               </div>
+               )}
 
               <div>
                  <label className={styles.label}>
@@ -640,36 +664,71 @@ function AdminDashboardContent() {
                 </div>
               )}
 
-              {!editingLesson && (
-                <>
-                  <div className={styles.fullWidth}>
-                     <label className={styles.label}>
-                       📤 Audio-Datei hochladen *
-                     </label>
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      onChange={(e) => setAudioFile(e.target.files[0])}
-                      className={`${styles.fileInput} ${errors.audio ? styles.error : ''}`}
-                    />
-                    {audioFile && (
-                      <p className={styles.successText}>
-                         Ausgewählt: {audioFile.name}
-                      </p>
-                    )}
-                    {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
-                  </div>
+               {!editingLesson && (
+                 <>
+                   <div className={styles.fullWidth}>
+                      <label className={styles.label}>
+                        📤 Audio-Quelle *
+                      </label>
+                      <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <input
+                            type="radio"
+                            value="file"
+                            checked={audioSource === 'file'}
+                            onChange={(e) => setAudioSource(e.target.value)}
+                          />
+                          Datei hochladen
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <input
+                            type="radio"
+                            value="url"
+                            checked={audioSource === 'url'}
+                            onChange={(e) => setAudioSource(e.target.value)}
+                          />
+                          URL eingeben
+                        </label>
+                      </div>
+                      {audioSource === 'file' ? (
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={(e) => setAudioFile(e.target.files[0])}
+                          className={`${styles.fileInput} ${errors.audio ? styles.error : ''}`}
+                        />
+                      ) : (
+                        <input
+                          type="url"
+                          value={audioUrl}
+                          onChange={(e) => setAudioUrl(e.target.value)}
+                          placeholder="https://example.com/audio.mp3"
+                          className={`${styles.input} ${errors.audio ? styles.error : ''}`}
+                        />
+                      )}
+                     {audioFile && audioSource === 'file' && (
+                       <p className={styles.successText}>
+                          Ausgewählt: {audioFile.name}
+                       </p>
+                     )}
+                     {audioUrl && audioSource === 'url' && (
+                       <p className={styles.successText}>
+                          URL: {audioUrl}
+                       </p>
+                     )}
+                     {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
+                   </div>
 
                    <div className={styles.fullWidth}>
                       <label className={styles.label}>
                         📝 SRT-Text *
                       </label>
                      <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                       <button
-                         type="button"
-                         onClick={handleTranscribe}
-                         disabled={transcribing || !audioFile}
-                         style={{
+                        <button
+                          type="button"
+                          onClick={handleTranscribe}
+                          disabled={transcribing || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))}
+                          style={{
                            padding: '8px 16px',
                            background: transcribing ? '#ccc' : '#007bff',
                            color: 'white',

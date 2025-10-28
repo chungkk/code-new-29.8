@@ -28,12 +28,29 @@ export default async function handler(req, res) {
 
     const [fields, files] = await form.parse(req);
 
-    if (!files.audio || !files.audio[0]) {
-      return res.status(400).json({ message: 'No audio file provided' });
+    let filePath;
+    if (fields.url && fields.url[0]) {
+      // Fetch from URL
+      const url = fields.url[0];
+      const response = await fetch(url);
+      if (!response.ok) {
+        return res.status(400).json({ message: 'Failed to fetch audio from URL' });
+      }
+      const buffer = await response.arrayBuffer();
+      const tempDir = path.join(process.cwd(), 'public/audio');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      const tempFileName = `temp_${Date.now()}.mp3`;
+      filePath = path.join(tempDir, tempFileName);
+      fs.writeFileSync(filePath, Buffer.from(buffer));
+    } else {
+      if (!files.audio || !files.audio[0]) {
+        return res.status(400).json({ message: 'No audio file provided' });
+      }
+      const audioFile = files.audio[0];
+      filePath = audioFile.filepath;
     }
-
-    const audioFile = files.audio[0];
-    const filePath = audioFile.filepath;
 
     // Transcribe using OpenAI Whisper
     const transcription = await openai.audio.transcriptions.create({
