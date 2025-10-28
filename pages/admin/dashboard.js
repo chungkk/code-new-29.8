@@ -30,6 +30,7 @@ function AdminDashboardContent() {
   const [audioFile, setAudioFile] = useState(null);
   const [srtText, setSrtText] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
@@ -136,6 +137,42 @@ function AdminDashboardContent() {
       toast.error('Dateilöschfehler');
     } finally {
       setDeletingFiles(false);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!audioFile) {
+      toast.error('Bitte wählen Sie zuerst eine Audio-Datei aus');
+      return;
+    }
+
+    setTranscribing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/transcribe', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Transcription failed');
+      }
+
+      const data = await res.json();
+      setSrtText(data.srt);
+      toast.success('SRT erfolgreich aus Audio generiert!');
+    } catch (error) {
+      console.error('Transcription error:', error);
+      toast.error('Fehler bei der Transkription: ' + error.message);
+    } finally {
+      setTranscribing(false);
     }
   };
 
@@ -623,16 +660,34 @@ function AdminDashboardContent() {
                     {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
                   </div>
 
-                  <div className={styles.fullWidth}>
-                     <label className={styles.label}>
-                       📝 SRT-Text *
-                     </label>
-                    <textarea
-                      value={srtText}
-                      onChange={(e) => setSrtText(e.target.value)}
-                      className={`${styles.textarea} ${errors.srt ? styles.error : ''}`}
-                      style={{ minHeight: '200px', fontFamily: 'monospace' }}
-                       placeholder={`Beispiel:
+                   <div className={styles.fullWidth}>
+                      <label className={styles.label}>
+                        📝 SRT-Text *
+                      </label>
+                     <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                       <button
+                         type="button"
+                         onClick={handleTranscribe}
+                         disabled={transcribing || !audioFile}
+                         style={{
+                           padding: '8px 16px',
+                           background: transcribing ? '#ccc' : '#007bff',
+                           color: 'white',
+                           border: 'none',
+                           borderRadius: '4px',
+                           cursor: transcribing || !audioFile ? 'not-allowed' : 'pointer',
+                           fontSize: '14px'
+                         }}
+                       >
+                         {transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren'}
+                       </button>
+                     </div>
+                     <textarea
+                       value={srtText}
+                       onChange={(e) => setSrtText(e.target.value)}
+                       className={`${styles.textarea} ${errors.srt ? styles.error : ''}`}
+                       style={{ minHeight: '200px', fontFamily: 'monospace' }}
+                        placeholder={`Beispiel:
 1
 00:00:03,200 --> 00:00:04,766
 DW Deutsch lernen
@@ -640,24 +695,24 @@ DW Deutsch lernen
 2
 00:00:05,866 --> 00:00:07,133
 mit dem Top Thema`}
-                    />
-                    {errors.srt && <span className={styles.errorText}>{errors.srt}</span>}
-                    <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
-                      Text im SRT-Format (SubRip Subtitle) eingeben. JSON-Datei wird automatisch aus diesem Text erstellt.
-                    </p>
-                  </div>
+                     />
+                     {errors.srt && <span className={styles.errorText}>{errors.srt}</span>}
+                     <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
+                       Text im SRT-Format (SubRip Subtitle) eingeben oder automatisch aus Audio generieren. JSON-Datei wird automatisch aus diesem Text erstellt.
+                     </p>
+                   </div>
                 </>
               )}
 
-              <div className={styles.fullWidth} style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                 <button
-                   type="submit"
-                   disabled={uploading}
-                   className={styles.submitButton}
-                 >
-                   {uploading ? '⏳ Wird verarbeitet...' : (editingLesson ? '✏️ Aktualisieren' : '➕ Lektion hinzufügen')}
-                 </button>
-              </div>
+               <div className={styles.fullWidth} style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <button
+                    type="submit"
+                    disabled={uploading || transcribing}
+                    className={styles.submitButton}
+                  >
+                    {uploading ? '⏳ Wird verarbeitet...' : (editingLesson ? '✏️ Aktualisieren' : '➕ Lektion hinzufügen')}
+                  </button>
+               </div>
                 </form>
               </>
             )}
