@@ -671,51 +671,84 @@ function AdminDashboardContent() {
                         📤 Audio-Quelle *
                       </label>
                       <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <input
-                            type="radio"
-                            value="file"
-                            checked={audioSource === 'file'}
-                            onChange={(e) => setAudioSource(e.target.value)}
-                          />
-                          Datei hochladen
-                        </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <input
-                            type="radio"
-                            value="url"
-                            checked={audioSource === 'url'}
-                            onChange={(e) => setAudioSource(e.target.value)}
-                          />
-                          URL eingeben
-                        </label>
+                         <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                           <input
+                             type="radio"
+                             value="file"
+                             checked={audioSource === 'file'}
+                             onChange={(e) => {
+                               setAudioSource(e.target.value);
+                               if (e.target.value === 'file') setAudioUrl('');
+                             }}
+                           />
+                           Datei hochladen
+                         </label>
+                         <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                           <input
+                             type="radio"
+                             value="url"
+                             checked={audioSource === 'url'}
+                             onChange={(e) => {
+                               setAudioSource(e.target.value);
+                               if (e.target.value === 'url') setAudioFile(null);
+                             }}
+                           />
+                           URL eingeben
+                         </label>
                       </div>
-                      {audioSource === 'file' ? (
-                        <input
-                          type="file"
-                          accept="audio/*"
-                          onChange={(e) => setAudioFile(e.target.files[0])}
-                          className={`${styles.fileInput} ${errors.audio ? styles.error : ''}`}
-                        />
-                      ) : (
-                        <input
-                          type="url"
-                          value={audioUrl}
-                          onChange={(e) => setAudioUrl(e.target.value)}
-                          placeholder="https://example.com/audio.mp3"
-                          className={`${styles.input} ${errors.audio ? styles.error : ''}`}
-                        />
-                      )}
-                     {audioFile && audioSource === 'file' && (
-                       <p className={styles.successText}>
-                          Ausgewählt: {audioFile.name}
-                       </p>
-                     )}
-                     {audioUrl && audioSource === 'url' && (
-                       <p className={styles.successText}>
-                          URL: {audioUrl}
-                       </p>
-                     )}
+                       {audioSource === 'file' ? (
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                           <input
+                             type="file"
+                             accept="audio/*"
+                             onChange={(e) => setAudioFile(e.target.files[0])}
+                             className={`${styles.fileInput} ${errors.audio ? styles.error : ''}`}
+                           />
+                           {audioFile && <span>Ausgewählt: {audioFile.name}</span>}
+                           <button
+                             onClick={() => setAudioFile(null)}
+                             disabled={!audioFile}
+                             style={{
+                               padding: '4px 8px',
+                               background: audioFile ? '#f44336' : '#ccc',
+                               color: 'white',
+                               border: 'none',
+                               borderRadius: '4px',
+                               cursor: audioFile ? 'pointer' : 'not-allowed',
+                               fontSize: '12px'
+                             }}
+                           >
+                             ✕
+                           </button>
+                         </div>
+                       ) : (
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                           <input
+                             type="url"
+                             value={audioUrl}
+                             onChange={(e) => setAudioUrl(e.target.value)}
+                             placeholder="https://example.com/audio.mp3"
+                             className={`${styles.input} ${errors.audio ? styles.error : ''}`}
+                           />
+                           {audioUrl.trim() && <span>URL: {audioUrl}</span>}
+                           <button
+                             onClick={() => setAudioUrl('')}
+                             disabled={!audioUrl.trim()}
+                             style={{
+                               padding: '4px 8px',
+                               background: audioUrl.trim() ? '#f44336' : '#ccc',
+                               color: 'white',
+                               border: 'none',
+                               borderRadius: '4px',
+                               cursor: audioUrl.trim() ? 'pointer' : 'not-allowed',
+                               fontSize: '12px'
+                             }}
+                           >
+                             ✕
+                           </button>
+                         </div>
+                       )}
+
                      {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
                    </div>
 
@@ -734,10 +767,10 @@ function AdminDashboardContent() {
                            color: 'white',
                            border: 'none',
                            borderRadius: '4px',
-                           cursor: transcribing || !audioFile ? 'not-allowed' : 'pointer',
+                           cursor: transcribing || (!audioFile && !(audioSource === 'url' && audioUrl.trim())) ? 'not-allowed' : 'pointer',
                            fontSize: '14px'
                          }}
-                       >
+                        >
                          {transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren'}
                        </button>
                      </div>
