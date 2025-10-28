@@ -8,6 +8,8 @@ const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [lessons, setLessons] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +29,23 @@ const HomePage = () => {
       }
     } catch (error) {
       console.error('Error loading lessons:', error);
+    }
+  };
+
+  const totalPages = Math.ceil(lessons.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentLessons = lessons.slice(startIndex, endIndex);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
@@ -55,7 +74,7 @@ const HomePage = () => {
       <div className="main-container">
 
         <div className="lesson-cards-container">
-          {lessons.map(lesson => (
+          {currentLessons.map(lesson => (
             <LessonCard
               key={lesson.id}
               lesson={lesson}
@@ -63,6 +82,28 @@ const HomePage = () => {
             />
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="pagination-controls">
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="pagination-btn"
+            >
+              ‹ Zurück
+            </button>
+            <span className="pagination-info">
+              Seite {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="pagination-btn"
+            >
+              Weiter ›
+            </button>
+          </div>
+        )}
 
         {showPopup && selectedLesson && (
           <ModeSelectionPopup
