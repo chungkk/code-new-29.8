@@ -30,6 +30,7 @@ function AdminDashboardContent() {
   const [audioFile, setAudioFile] = useState(null);
   const [audioSource, setAudioSource] = useState('file');
   const [audioUrl, setAudioUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [srtText, setSrtText] = useState('');
   const [uploading, setUploading] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -281,6 +282,7 @@ function AdminDashboardContent() {
     if (!editingLesson) {
       if (audioSource === 'file' && !audioFile) newErrors.audio = 'Audio file là bắt buộc';
       if (audioSource === 'url' && !audioUrl.trim()) newErrors.audio = 'Audio URL là bắt buộc';
+      if (audioSource === 'youtube' && !youtubeUrl.trim()) newErrors.audio = 'YouTube URL là bắt buộc';
       if (!srtText.trim()) newErrors.srt = 'SRT text là bắt buộc';
     }
 
@@ -296,12 +298,41 @@ function AdminDashboardContent() {
     // Upload audio and convert SRT
     let finalAudioPath = '';
     let finalJsonPath = '';
+    let finalYoutubeUrl = '';
 
     if (!editingLesson) {
       try {
-        const uploadResult = await handleFileUpload();
-        finalAudioPath = uploadResult.audio;
-        finalJsonPath = uploadResult.json;
+        if (audioSource === 'youtube') {
+          // For YouTube, just save the URL directly
+          finalYoutubeUrl = youtubeUrl.trim();
+          finalAudioPath = ''; // No audio file for YouTube
+          
+          // Still need to convert SRT to JSON
+          const token = localStorage.getItem('token');
+          const srtRes = await fetch('/api/convert-srt', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              srtText: srtText,
+              lessonId: formData.id
+            })
+          });
+
+          if (!srtRes.ok) {
+            const errorData = await srtRes.json();
+            throw new Error(errorData.message || 'Convert SRT failed');
+          }
+
+          const srtData = await srtRes.json();
+          finalJsonPath = srtData.url;
+        } else {
+          const uploadResult = await handleFileUpload();
+          finalAudioPath = uploadResult.audio;
+          finalJsonPath = uploadResult.json;
+        }
       } catch (error) {
         setGeneralError(error.message);
         return;
@@ -362,8 +393,9 @@ function AdminDashboardContent() {
        } else {
          lessonData = {
            ...formData,
-           audio: finalAudioPath,
-           json: finalJsonPath
+           audio: finalAudioPath || 'youtube',
+           json: finalJsonPath,
+           youtubeUrl: finalYoutubeUrl || undefined
          };
        }
 
@@ -452,6 +484,7 @@ function AdminDashboardContent() {
     setAudioFile(null);
     setAudioSource('file');
     setAudioUrl('');
+    setYoutubeUrl('');
     setSrtText('');
     setErrors({});
     setGeneralError('');
@@ -690,10 +723,28 @@ function AdminDashboardContent() {
                              checked={audioSource === 'url'}
                              onChange={(e) => {
                                setAudioSource(e.target.value);
-                               if (e.target.value === 'url') setAudioFile(null);
+                               if (e.target.value === 'url') {
+                                 setAudioFile(null);
+                                 setYoutubeUrl('');
+                               }
                              }}
                            />
                            URL eingeben
+                         </label>
+                         <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                           <input
+                             type="radio"
+                             value="youtube"
+                             checked={audioSource === 'youtube'}
+                             onChange={(e) => {
+                               setAudioSource(e.target.value);
+                               if (e.target.value === 'youtube') {
+                                 setAudioFile(null);
+                                 setAudioUrl('');
+                               }
+                             }}
+                           />
+                           YouTube Video
                          </label>
                       </div>
                        {audioSource === 'file' ? (
@@ -721,7 +772,7 @@ function AdminDashboardContent() {
                              ✕
                            </button>
                          </div>
-                       ) : (
+                       ) : audioSource === 'url' ? (
                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                            <input
                              type="url"
@@ -747,6 +798,32 @@ function AdminDashboardContent() {
                              ✕
                            </button>
                          </div>
+                       ) : (
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                           <input
+                             type="url"
+                             value={youtubeUrl}
+                             onChange={(e) => setYoutubeUrl(e.target.value)}
+                             placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
+                             className={`${styles.input} ${errors.audio ? styles.error : ''}`}
+                           />
+                           {youtubeUrl.trim() && <span>YouTube: {youtubeUrl}</span>}
+                           <button
+                             onClick={() => setYoutubeUrl('')}
+                             disabled={!youtubeUrl.trim()}
+                             style={{
+                               padding: '4px 8px',
+                               background: youtubeUrl.trim() ? '#f44336' : '#ccc',
+                               color: 'white',
+                               border: 'none',
+                               borderRadius: '4px',
+                               cursor: youtubeUrl.trim() ? 'pointer' : 'not-allowed',
+                               fontSize: '12px'
+                             }}
+                           >
+                             ✕
+                           </button>
+                         </div>
                        )}
 
                      {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
@@ -760,18 +837,18 @@ function AdminDashboardContent() {
                         <button
                           type="button"
                           onClick={handleTranscribe}
-                          disabled={transcribing || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))}
+                          disabled={transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))}
                           style={{
                            padding: '8px 16px',
-                           background: transcribing ? '#ccc' : '#007bff',
+                           background: (transcribing || audioSource === 'youtube') ? '#ccc' : '#007bff',
                            color: 'white',
                            border: 'none',
                            borderRadius: '4px',
-                           cursor: transcribing || (!audioFile && !(audioSource === 'url' && audioUrl.trim())) ? 'not-allowed' : 'pointer',
+                           cursor: (transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))) ? 'not-allowed' : 'pointer',
                            fontSize: '14px'
                          }}
                         >
-                         {transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren'}
+                         {audioSource === 'youtube' ? '❌ YouTube không hỗ trợ auto-transcribe' : (transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren')}
                        </button>
                      </div>
                      <textarea

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import AudioControls from '../../components/AudioControls';
@@ -23,19 +23,109 @@ const ShadowingPageContent = () => {
   const [loading, setLoading] = useState(true);
   
   const audioRef = useRef(null);
+  const youtubePlayerRef = useRef(null);
+  const [isYouTube, setIsYouTube] = useState(false);
   const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.mainAudioRef = audioRef;
+      window.mainYoutubePlayerRef = youtubePlayerRef;
     }
     return () => {
       if (typeof window !== 'undefined') {
         window.mainAudioRef = null;
+        window.mainYoutubePlayerRef = null;
       }
     };
   }, []);
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Initialize YouTube player
+  useEffect(() => {
+    if (!lesson || !lesson.youtubeUrl) {
+      setIsYouTube(false);
+      return;
+    }
+
+    setIsYouTube(true);
+    const videoId = getYouTubeVideoId(lesson.youtubeUrl);
+    if (!videoId) return;
+
+    // Load YouTube iframe API
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+        height: '0',
+        width: '0',
+        videoId: videoId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onReady: (event) => {
+            setDuration(event.target.getDuration());
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
+          }
+        }
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+        height: '0',
+        width: '0',
+        videoId: videoId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onReady: (event) => {
+            setDuration(event.target.getDuration());
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
+          }
+        }
+      });
+    }
+
+    return () => {
+      if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
+        youtubePlayerRef.current.destroy();
+      }
+    };
+  }, [lesson]);
 
   // Fetch lesson data from API
   useEffect(() => {
@@ -70,59 +160,88 @@ const ShadowingPageContent = () => {
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (!player || !player.getCurrentTime) return;
 
-    let animationFrameId = null;
+      let animationFrameId = null;
 
-    const updateTime = () => {
-      if (audio && !audio.paused) {
-        setCurrentTime(audio.currentTime);
-        
-        // Auto-stop when segment ends
-        if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
-          audio.pause();
-          setSegmentPlayEndTime(null);
+      const updateTime = () => {
+        if (player && player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+          const currentTime = player.getCurrentTime();
+          setCurrentTime(currentTime);
+          
+          if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
+            player.pauseVideo();
+            setSegmentPlayEndTime(null);
+          }
+          
+          animationFrameId = requestAnimationFrame(updateTime);
         }
-        
-        animationFrameId = requestAnimationFrame(updateTime);
-      }
-    };
+      };
 
-    const handlePlay = () => {
-      setIsPlaying(true);
       animationFrameId = requestAnimationFrame(updateTime);
-    };
-    
-    const handlePause = () => {
-      setIsPlaying(false);
-      setSegmentPlayEndTime(null);
-      setSegmentEndTimeLocked(false);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-    
-    const handleLoadedMetadata = () => setDuration(audio.duration);
 
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handlePause);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      return () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      };
+    } else {
+      const audio = audioRef.current;
+      if (!audio) return;
 
-    // Initial time update
-    setCurrentTime(audio.currentTime);
+      let animationFrameId = null;
 
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handlePause);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-    };
-  }, [segmentPlayEndTime]);
+      const updateTime = () => {
+        if (audio && !audio.paused) {
+          setCurrentTime(audio.currentTime);
+          
+          // Auto-stop when segment ends
+          if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
+            audio.pause();
+            setSegmentPlayEndTime(null);
+          }
+          
+          animationFrameId = requestAnimationFrame(updateTime);
+        }
+      };
+
+      const handlePlay = () => {
+        setIsPlaying(true);
+        animationFrameId = requestAnimationFrame(updateTime);
+      };
+      
+      const handlePause = () => {
+        setIsPlaying(false);
+        setSegmentPlayEndTime(null);
+        setSegmentEndTimeLocked(false);
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      };
+      
+      const handleLoadedMetadata = () => setDuration(audio.duration);
+
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handlePause);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+      // Initial time update
+      setCurrentTime(audio.currentTime);
+
+      return () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+        audio.removeEventListener('ended', handlePause);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, [segmentPlayEndTime, isYouTube]);
 
   // Tìm câu hiện tại dựa trên thời gian
   useEffect(() => {
@@ -169,6 +288,14 @@ const ShadowingPageContent = () => {
     }
     setSegmentPlayEndTime(endTime);
     setSegmentEndTimeLocked(true);
+
+    // Update currentSentenceIndex to match the clicked sentence
+    const clickedIndex = transcriptData.findIndex(
+      (item) => item.start === startTime && item.end === endTime
+    );
+    if (clickedIndex !== -1) {
+      setCurrentSentenceIndex(clickedIndex);
+    }
   };
 
   const goToPreviousSentence = () => {
@@ -289,9 +416,20 @@ const ShadowingPageContent = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleSeek, handlePlayPause, goToPreviousSentence, goToNextSentence]);
+   }, [handleSeek, handlePlayPause, goToPreviousSentence, goToNextSentence]);
 
-  const formatTime = (seconds) => {
+   // Handle progress bar click
+   const handleProgressClick = useCallback((e) => {
+     const rect = e.target.getBoundingClientRect();
+     const clickX = e.clientX - rect.left;
+     const percentage = clickX / rect.width;
+     const newTime = percentage * duration;
+     if (audioRef.current) {
+       audioRef.current.currentTime = newTime;
+     }
+   }, [duration]);
+
+   const formatTime = (seconds) => {
     if (!isFinite(seconds)) return '0:00';
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -346,14 +484,91 @@ const ShadowingPageContent = () => {
       </Head>
 
       <div className="shadowing-page dark-theme">
-        <audio ref={audioRef} controls style={{ display: 'none' }}>
-          <source src={lesson.audio} type="audio/mp3" />
-          Ihr Browser unterstützt das Audio-Tag nicht.
-        </audio>
+        {!isYouTube && (
+          <audio ref={audioRef} controls style={{ display: 'none' }}>
+            <source src={lesson.audio} type="audio/mp3" />
+            Ihr Browser unterstützt das Audio-Tag nicht.
+          </audio>
+        )}
+        
+        {isYouTube && <div id="youtube-player-shadowing"></div>}
 
-        <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
-          <div className="shadowing-layout">
-            <div className="current-sentence-section">
+          <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
+            <div className="shadowing-layout">
+              {/* LEFT SIDE: Medien */}
+              <div className="medien-section">
+                <div className="medien-container">
+                  <div className="media-player">
+                     <div className="media-artwork">
+                       <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
+                         {isYouTube && youtubePlayerRef.current ? (
+                           <iframe
+                             width="280"
+                             height="280"
+                             src={`https://www.youtube.com/embed/${getYouTubeVideoId(lesson.youtubeUrl)}?controls=0&disablekb=1&fs=0&modestbranding=1&playsinline=1`}
+                             frameBorder="0"
+                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                             style={{ 
+                               position: 'absolute',
+                               top: 0,
+                               left: 0,
+                               width: '100%',
+                               height: '100%',
+                               pointerEvents: 'none'
+                             }}
+                           ></iframe>
+                         ) : (
+                           <svg viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                           </svg>
+                         )}
+                       </div>
+                     </div>
+                     
+                     <div className="media-info">
+                       <div className="media-title">Lektion {lessonId}</div>
+                       <div className="media-artist">Deutschunterricht</div>
+                     </div>
+
+                    <div className="media-progress-container">
+                      <div className="media-progress" onClick={handleProgressClick}>
+                        <div className="media-progress-fill" style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
+                      </div>
+                      <div className="media-time">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+
+                     <div className="media-controls">
+                       <button className="media-btn media-btn-small" onClick={goToPreviousSentence} title="Vorheriger Satz">
+                         <svg viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                         </svg>
+                       </button>
+                       <button className="media-btn media-btn-large" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
+                         {isPlaying ? (
+                           <svg viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                           </svg>
+                         ) : (
+                           <svg viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M8 5v14l11-7z"/>
+                           </svg>
+                         )}
+                       </button>
+                       <button className="media-btn media-btn-small" onClick={goToNextSentence} title="Nächster Satz">
+                         <svg viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                         </svg>
+                       </button>
+                     </div>
+                  </div>
+                </div>
+              </div>
+
+             {/* MIDDLE: Aktueller Satz */}
+             <div className="current-sentence-section">
               <div className="current-sentence-container">
                 <h3>Aktueller Satz</h3>
                 <Transcript

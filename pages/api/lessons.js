@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   
   if (req.method === 'GET') {
     try {
-      const lessons = await Lesson.find().sort({ order: 1 });
+      const lessons = await Lesson.find().sort({ order: -1 });
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       return res.status(200).json(lessons.filter(l => l && l._id));
     } catch (error) {
