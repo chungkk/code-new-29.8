@@ -65,8 +65,19 @@ async function adminHandler(req, res) {
   if (req.method === 'DELETE') {
     try {
       const { id } = req.query;
-      await Lesson.findByIdAndDelete(id);
-      return res.status(200).json({ message: 'Xóa thành công' });
+      const { ids } = req.body; // Support deleting multiple lessons
+
+      if (ids && Array.isArray(ids)) {
+        // Delete multiple lessons
+        await Lesson.deleteMany({ _id: { $in: ids } });
+        return res.status(200).json({ message: `Xóa ${ids.length} bài học thành công` });
+      } else if (id) {
+        // Delete single lesson
+        await Lesson.findByIdAndDelete(id);
+        return res.status(200).json({ message: 'Xóa thành công' });
+      } else {
+        return res.status(400).json({ message: 'ID hoặc danh sách IDs là bắt buộc' });
+      }
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }

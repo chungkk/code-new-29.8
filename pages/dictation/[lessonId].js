@@ -260,6 +260,7 @@ const DictationPageContent = () => {
 
           if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
             player.pauseVideo();
+            setIsPlaying(false);
             setSegmentPlayEndTime(null);
           }
         }
@@ -270,6 +271,7 @@ const DictationPageContent = () => {
 
           if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
             audio.pause();
+            setIsPlaying(false);
             setSegmentPlayEndTime(null);
           }
         }
@@ -399,12 +401,12 @@ const DictationPageContent = () => {
       newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
       audio.currentTime = newTime;
 
-      // Update segment end time if playing
-      if (!audio.paused) {
-        setSegmentPlayEndTime(currentSegment.end);
-      }
-    }
-  }, [transcriptData, currentSentenceIndex, isYouTube]);
+       // Update segment end time if playing
+       if (!audio.paused) {
+         setSegmentPlayEndTime(currentSegment.end);
+       }
+     }
+   }, [transcriptData, currentSentenceIndex, isYouTube]);
 
   const handlePlayPause = useCallback(() => {
     if (isYouTube) {
@@ -454,12 +456,12 @@ const DictationPageContent = () => {
           setIsPlaying(true);
           setSegmentEndTimeLocked(false);
         }
-      } else {
-        audio.pause();
-        setIsPlaying(false);
-      }
-    }
-  }, [transcriptData, currentSentenceIndex, isYouTube]);
+       } else {
+         audio.pause();
+         setIsPlaying(false);
+       }
+     }
+   }, [transcriptData, currentSentenceIndex, isYouTube]);
 
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {
@@ -543,7 +545,7 @@ const DictationPageContent = () => {
         break;
       default: break;
     }
-  }, [handleSeek, handlePlayPause, goToPreviousSentence, goToNextSentence]);
+   }, [handleSeek, handlePlayPause, goToPreviousSentence, goToNextSentence, isYouTube, duration]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleGlobalKeyDown);
@@ -569,9 +571,8 @@ const DictationPageContent = () => {
       if (!player) return;
 
       player.seekTo(startTime);
-      if (player.getPlayerState && player.getPlayerState() !== window.YT.PlayerState.PLAYING) {
-        player.playVideo();
-      }
+      player.playVideo();
+      setIsPlaying(true);
       setSegmentPlayEndTime(endTime);
       setSegmentEndTimeLocked(true);
     } else {
@@ -579,9 +580,8 @@ const DictationPageContent = () => {
       if (!audio) return;
 
       audio.currentTime = startTime;
-      if (audio.paused) {
-        audio.play();
-      }
+      audio.play();
+      setIsPlaying(true);
       setSegmentPlayEndTime(endTime);
       setSegmentEndTimeLocked(true);
     }

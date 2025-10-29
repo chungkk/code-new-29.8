@@ -179,6 +179,7 @@ const ShadowingPageContent = () => {
 
           if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
             player.pauseVideo();
+            setIsPlaying(false);
             setSegmentPlayEndTime(null);
           }
         }
@@ -190,6 +191,7 @@ const ShadowingPageContent = () => {
           // Auto-stop when segment ends
           if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
             audio.pause();
+            setIsPlaying(false);
             setSegmentPlayEndTime(null);
           }
         }
@@ -289,15 +291,14 @@ const ShadowingPageContent = () => {
     }
   };
 
-  const handleSentenceClick = useCallback((startTime, endTime) => {
+   const handleSentenceClick = useCallback((startTime, endTime) => {
     if (isYouTube) {
       const player = youtubePlayerRef.current;
       if (!player) return;
 
       player.seekTo(startTime);
-      if (player.getPlayerState && player.getPlayerState() !== window.YT.PlayerState.PLAYING) {
-        player.playVideo();
-      }
+      player.playVideo();
+      setIsPlaying(true);
       setSegmentPlayEndTime(endTime);
       setSegmentEndTimeLocked(true);
     } else {
@@ -305,9 +306,8 @@ const ShadowingPageContent = () => {
       if (!audio) return;
 
       audio.currentTime = startTime;
-      if (audio.paused) {
-        audio.play();
-      }
+      audio.play();
+      setIsPlaying(true);
       setSegmentPlayEndTime(endTime);
       setSegmentEndTimeLocked(true);
     }
@@ -328,7 +328,7 @@ const ShadowingPageContent = () => {
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
 
   const goToNextSentence = useCallback(() => {
     if (currentSentenceIndex < transcriptData.length - 1) {
@@ -337,7 +337,7 @@ const ShadowingPageContent = () => {
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
 
   const handleSeek = useCallback((direction) => {
     if (isYouTube) {

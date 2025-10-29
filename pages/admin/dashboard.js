@@ -9,6 +9,7 @@ import styles from '../../styles/adminDashboard.module.css';
 function AdminDashboardContent() {
   const router = useRouter();
   const [lessons, setLessons] = useState([]);
+  const [selectedLessons, setSelectedLessons] = useState(new Set());
   const [showForm, setShowForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
   const [formData, setFormData] = useState({
@@ -42,11 +43,17 @@ function AdminDashboardContent() {
   const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });
   const [deletingFiles, setDeletingFiles] = useState(false);
   const [formCollapsed, setFormCollapsed] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchLessons();
     loadUnusedFiles();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when search term changes
+  }, [searchTerm]);
 
   const validateSRT = (text) => {
     if (!text.trim()) return true; // optional
@@ -85,6 +92,7 @@ function AdminDashboardContent() {
       });
       const data = (await res.json() || []).filter(l => l && l._id);
       setLessons(data);
+      setSelectedLessons(new Set()); // Clear selection when lessons are refreshed
     } catch (error) {
       console.error('Error fetching lessons:', error);
       toast.error('Kann Lektionsliste nicht laden');
@@ -473,6 +481,67 @@ function AdminDashboardContent() {
     }
   };
 
+  const handleSelectAll = () => {
+    if (selectedLessons.size === paginatedLessons.length) {
+      // Unselect all on current page
+      const newSelected = new Set(selectedLessons);
+      paginatedLessons.forEach(lesson => newSelected.delete(lesson._id));
+      setSelectedLessons(newSelected);
+    } else {
+      // Select all on current page
+      const newSelected = new Set(selectedLessons);
+      paginatedLessons.forEach(lesson => newSelected.add(lesson._id));
+      setSelectedLessons(newSelected);
+    }
+  };
+
+  const handleSelectLesson = (lessonId) => {
+    const newSelected = new Set(selectedLessons);
+    if (newSelected.has(lessonId)) {
+      newSelected.delete(lessonId);
+    } else {
+      newSelected.add(lessonId);
+    }
+    setSelectedLessons(newSelected);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedLessons.size === 0) {
+      toast.error('Bitte wählen Sie mindestens eine Lektion aus');
+      return;
+    }
+
+    if (!confirm(`Sind Sie sicher, dass Sie ${selectedLessons.size} Lektion(en) löschen möchten?`)) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Token existiert nicht. Bitte melden Sie sich erneut an.');
+        return;
+      }
+
+      const res = await fetch('/api/lessons', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids: Array.from(selectedLessons) })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Lektionen konnten nicht gelöscht werden');
+      }
+
+      toast.success(`${selectedLessons.size} Lektion(en) erfolgreich gelöscht!`);
+      setSelectedLessons(new Set());
+      fetchLessons();
+    } catch (error) {
+      toast.error('Có lỗi xảy ra: ' + error.message);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       id: '',
@@ -497,6 +566,11 @@ function AdminDashboardContent() {
     lesson.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (lesson.level && lesson.level.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Pagination
+  const totalPages = Math.ceil(filteredLessons.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedLessons = filteredLessons.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <>
@@ -543,17 +617,33 @@ function AdminDashboardContent() {
           >
             🗂️ Dateien verwalten ({unusedFiles.audio.length + unusedFiles.json.length})
           </button>
-          <div style={{ flex: 1 }}></div> {/* Spacer */}
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditingLesson(null);
-              resetForm();
-            }}
-            className={styles.addButton}
-          >
-            {showForm ? '✕ Formular schließen' : '+ Neue Lektion hinzufügen'}
-          </button>
+           <div style={{ flex: 1 }}></div> {/* Spacer */}
+           {selectedLessons.size > 0 && (
+             <button
+               onClick={handleDeleteSelected}
+               style={{
+                 padding: '10px 20px',
+                 background: '#f44336',
+                 color: 'white',
+                 border: 'none',
+                 borderRadius: '8px',
+                 cursor: 'pointer',
+                 marginRight: '10px'
+               }}
+             >
+               🗑️ {selectedLessons.size} löschen
+             </button>
+           )}
+           <button
+             onClick={() => {
+               setShowForm(!showForm);
+               setEditingLesson(null);
+               resetForm();
+             }}
+             className={styles.addButton}
+           >
+             {showForm ? '✕ Formular schließen' : '+ Neue Lektion hinzufügen'}
+           </button>
         </div>
 
         {activeTab === 'lessons' && (
@@ -567,13 +657,13 @@ function AdminDashboardContent() {
                <div className={styles.statLabel}>Gesamt Lektionen</div>
             </div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>✅</div>
-            <div className={styles.statContent}>
-              <div className={styles.statValue}>{filteredLessons.length}</div>
-               <div className={styles.statLabel}>Suchergebnisse</div>
-            </div>
-          </div>
+           <div className={styles.statCard}>
+             <div className={styles.statIcon}>✅</div>
+             <div className={styles.statContent}>
+               <div className={styles.statValue}>{paginatedLessons.length}</div>
+                <div className={styles.statLabel}>Auf dieser Seite</div>
+             </div>
+           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>🎯</div>
             <div className={styles.statContent}>
@@ -890,12 +980,12 @@ mit dem Top Thema`}
 
         {/* Lessons List Section */}
         <div className={styles.lessonsSection}>
-          <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Lektionsliste</h2>
-          <div className={styles.lessonCount}>
-            {filteredLessons.length} / {lessons.length} Lektionen
-          </div>
-          </div>
+           <div className={styles.sectionHeader}>
+           <h2 className={styles.sectionTitle}>Lektionsliste</h2>
+           <div className={styles.lessonCount}>
+             {paginatedLessons.length} / {filteredLessons.length} / {lessons.length} Lektionen
+           </div>
+           </div>
 
           {/* Search Bar */}
           <div style={{ padding: '20px', borderBottom: '1px solid #f0f0f0' }}>
@@ -921,48 +1011,101 @@ mit dem Top Thema`}
                 {searchTerm ? 'Versuchen Sie es mit einem anderen Suchbegriff' : 'Fügen Sie Ihre erste Lektion hinzu!'}
               </p>
             </div>
-          ) : (
-            <div className={styles.tableWrapper}>
-              <table className={styles.table}>
-                <thead>
-                     <tr>
-                        <th>ID</th>
-                        <th>Titel</th>
-                        <th>Beschreibung</th>
-                        <th>Niveau</th>
-                        <th style={{ textAlign: 'center' }}>Aktionen</th>
-                     </tr>
-                </thead>
-                <tbody>
-                  {filteredLessons.map((lesson) => (
-                       <tr key={lesson._id}>
-                         <td className={styles.lessonId}>{lesson.id}</td>
-                         <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
-                         <td className={styles.lessonDescription}>{lesson.description}</td>
-                         <td><span className={styles.levelBadge}>{lesson.level || 'A1'}</span></td>
-                       <td>
-                        <div className={styles.actionButtons}>
-                           <button
-                             onClick={() => handleEdit(lesson)}
-                             className={styles.editButton}
-                           >
-                             Bearbeiten
-                           </button>
-                           <button
-                             onClick={() => handleDelete(lesson._id)}
-                             className={styles.deleteButton}
-                           >
-                             Löschen
-                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+           ) : (
+             <>
+               <div className={styles.tableWrapper}>
+                 <table className={styles.table}>
+                   <thead>
+                        <tr>
+                           <th style={{ width: '40px' }}>
+                             <input
+                               type="checkbox"
+                               checked={paginatedLessons.length > 0 && paginatedLessons.every(lesson => selectedLessons.has(lesson._id))}
+                               onChange={handleSelectAll}
+                             />
+                           </th>
+                           <th>ID</th>
+                           <th>Titel</th>
+                           <th>Beschreibung</th>
+                           <th>Niveau</th>
+                           <th style={{ textAlign: 'center' }}>Aktionen</th>
+                        </tr>
+                   </thead>
+                   <tbody>
+                     {paginatedLessons.map((lesson) => (
+                          <tr key={lesson._id}>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={selectedLessons.has(lesson._id)}
+                                onChange={() => handleSelectLesson(lesson._id)}
+                              />
+                            </td>
+                            <td className={styles.lessonId}>{lesson.id}</td>
+                            <td className={styles.lessonDisplayTitle}>{lesson.displayTitle}</td>
+                            <td className={styles.lessonDescription}>{lesson.description}</td>
+                            <td><span className={styles.levelBadge}>{lesson.level || 'A1'}</span></td>
+                          <td>
+                           <div className={styles.actionButtons}>
+                              <button
+                                onClick={() => handleEdit(lesson)}
+                                className={styles.editButton}
+                              >
+                                Bearbeiten
+                              </button>
+                              <button
+                                onClick={() => handleDelete(lesson._id)}
+                                className={styles.deleteButton}
+                              >
+                                Löschen
+                              </button>
+                           </div>
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+               {totalPages > 1 && (
+                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '20px', padding: '20px' }}>
+                   <button
+                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                     disabled={currentPage === 1}
+                     style={{
+                       padding: '8px 12px',
+                       background: currentPage === 1 ? '#ccc' : '#007bff',
+                       color: 'white',
+                       border: 'none',
+                       borderRadius: '4px',
+                       cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                     }}
+                   >
+                     ‹ Vorherige
+                   </button>
+
+                   <span style={{ margin: '0 10px' }}>
+                     Seite {currentPage} von {totalPages} ({filteredLessons.length} Lektionen)
+                   </span>
+
+                   <button
+                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                     disabled={currentPage === totalPages}
+                     style={{
+                       padding: '8px 12px',
+                       background: currentPage === totalPages ? '#ccc' : '#007bff',
+                       color: 'white',
+                       border: 'none',
+                       borderRadius: '4px',
+                       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                     }}
+                   >
+                     Nächste ›
+                   </button>
+                 </div>
+               )}
+             </>
+           )}
+         </div>
           </>
         )}
 
