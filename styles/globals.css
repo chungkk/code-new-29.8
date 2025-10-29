@@ -1254,7 +1254,7 @@ body::before {
     padding: 32px 28px;
     border: 1px solid rgba(255, 255, 255, 0.8);
     position: relative;
-    min-height: 600px;
+    min-height: 700px;
 }
 
 .media-player {
@@ -1265,8 +1265,8 @@ body::before {
 }
 
 .media-artwork {
-    width: 280px;
-    height: 280px;
+    width: calc(100% + 56px);
+    aspect-ratio: 16 / 9;
     border-radius: 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
@@ -1275,6 +1275,8 @@ body::before {
     box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
     overflow: hidden;
     position: relative;
+    margin-left: -28px;
+    margin-right: -28px;
 }
 
 .artwork-inner {
@@ -1335,8 +1337,9 @@ body::before {
     height: 100%;
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     border-radius: 2px;
-    transition: width 0.1s ease;
+    transition: transform 0.15s ease-out;
     position: relative;
+    transform-origin: left center;
 }
 
 .media-time {
@@ -2039,10 +2042,10 @@ body::before {
     height: 100%;
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
-    transition: none; /* Loại bỏ transition - dùng RAF cho smooth */
+    transition: transform 0.15s ease-out;
     position: relative;
     box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
-    will-change: width; /* Optimize animation với GPU */
+    transform-origin: left center;
 }
 
 .time-progress-fill::after {

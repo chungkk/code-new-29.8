@@ -74,16 +74,16 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
           onClick={() => onSentenceClick(currentItem.start, currentItem.end)}
           title="Click để phát lại câu này"
         >
-          <div className="time-progress-bar">
-            <div
-              className="time-progress-fill"
-              style={{
-                width: isPlaying && currentItem
-                  ? `${((currentTime - currentItem.start) / (currentItem.end - currentItem.start)) * 100}%`
-                  : '0%'
-              }}
-            />
-          </div>
+           <div className="time-progress-bar">
+             <div
+               className="time-progress-fill"
+               style={{
+                 transform: `scaleX(${isPlaying && currentItem
+                   ? (currentTime - currentItem.start) / (currentItem.end - currentItem.start)
+                   : 0})`
+               }}
+             />
+           </div>
           <div className="time-display">
             <span className="time-icon">{isPlaying ? '▶' : '⏸'}</span>
             <span className="time-current">{formatTime(currentTime)}</span>

@@ -19,8 +19,9 @@ const DictationPageContent = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
-  const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
-  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+   const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
+   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+   const [isManualNavigation, setIsManualNavigation] = useState(false);
   const [isTextHidden, setIsTextHidden] = useState(true);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,21 +91,24 @@ const DictationPageContent = () => {
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
 
-    window.onYouTubeIframeAPIReady = () => {
-      youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
-        videoId: videoId,
-        playerVars: {
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-        },
-        events: {
-          onReady: (event) => {
-            setDuration(event.target.getDuration());
-          },
+     window.onYouTubeIframeAPIReady = () => {
+       youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+         height: '0',
+         width: '0',
+         videoId: videoId,
+         playerVars: {
+           controls: 0,
+           disablekb: 1,
+           fs: 0,
+           modestbranding: 1,
+         },
+         events: {
+           onReady: (event) => {
+             setDuration(event.target.getDuration());
+             const container = document.getElementById('youtube-player');
+             const rect = container.getBoundingClientRect();
+             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
+           },
           onStateChange: (event) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true);
@@ -117,20 +121,23 @@ const DictationPageContent = () => {
     };
 
     if (window.YT && window.YT.Player) {
-      youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
-        videoId: videoId,
-        playerVars: {
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-        },
-        events: {
-          onReady: (event) => {
-            setDuration(event.target.getDuration());
-          },
+       youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+         height: '0',
+         width: '0',
+         videoId: videoId,
+         playerVars: {
+           controls: 0,
+           disablekb: 1,
+           fs: 0,
+           modestbranding: 1,
+         },
+         events: {
+           onReady: (event) => {
+             setDuration(event.target.getDuration());
+             const container = document.getElementById('youtube-player');
+             const rect = container.getBoundingClientRect();
+             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
+           },
           onStateChange: (event) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true);
@@ -242,91 +249,86 @@ const DictationPageContent = () => {
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
-    if (isYouTube) {
-      const player = youtubePlayerRef.current;
-      if (!player || !player.getCurrentTime) return;
+    let animationFrameId = null;
 
-      let animationFrameId = null;
-
-      const updateTime = () => {
+    const updateTime = () => {
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
         if (player && player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
           const currentTime = player.getCurrentTime();
           setCurrentTime(currentTime);
-          
+
           if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
             player.pauseVideo();
             setSegmentPlayEndTime(null);
           }
-          
-          animationFrameId = requestAnimationFrame(updateTime);
         }
-      };
-
-      animationFrameId = requestAnimationFrame(updateTime);
-
-      return () => {
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-      };
-    } else {
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      let animationFrameId = null;
-
-      const updateTime = () => {
+      } else {
+        const audio = audioRef.current;
         if (audio && !audio.paused) {
           setCurrentTime(audio.currentTime);
-          
+
           if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
             audio.pause();
             setSegmentPlayEndTime(null);
           }
-          
-          animationFrameId = requestAnimationFrame(updateTime);
         }
-      };
+      }
 
-      const handlePlay = () => {
-        setIsPlaying(true);
+      if (isPlaying) {
         animationFrameId = requestAnimationFrame(updateTime);
-      };
-      
-      const handlePause = () => {
-        setIsPlaying(false);
-        setSegmentPlayEndTime(null);
-        setSegmentEndTimeLocked(false);
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-      };
-      
-      const handleLoadedMetadata = () => setDuration(audio.duration);
+      }
+    };
 
-      audio.addEventListener('play', handlePlay);
-      audio.addEventListener('pause', handlePause);
-      audio.addEventListener('ended', handlePause);
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-      // Initial time update
-      setCurrentTime(audio.currentTime);
-
-      return () => {
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-        audio.removeEventListener('play', handlePlay);
-        audio.removeEventListener('pause', handlePause);
-        audio.removeEventListener('ended', handlePause);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
+    if (isPlaying) {
+      animationFrameId = requestAnimationFrame(updateTime);
     }
-  }, [segmentPlayEndTime, isYouTube]);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [isPlaying, segmentPlayEndTime, isYouTube]);
+
+  // Audio event listeners
+  useEffect(() => {
+    if (isYouTube) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      setSegmentPlayEndTime(null);
+      setSegmentEndTimeLocked(false);
+    };
+
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handlePause);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    // Initial time update
+    setCurrentTime(audio.currentTime);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handlePause);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [isYouTube]);
 
   // Auto-update current sentence based on audio time
   useEffect(() => {
-    if (!transcriptData.length) return;
+    if (!transcriptData.length || isManualNavigation) return;
     const currentIndex = transcriptData.findIndex(
       (item) => currentTime >= item.start && currentTime < item.end
     );
@@ -334,66 +336,124 @@ const DictationPageContent = () => {
       setCurrentSentenceIndex(currentIndex);
 
       // Khi câu thay đổi và đang phát, update endTime của câu mới (chỉ khi không lock)
-      const audio = audioRef.current;
-      if (audio && !audio.paused && !segmentEndTimeLocked) {
-        const newSentence = transcriptData[currentIndex];
-        setSegmentPlayEndTime(newSentence.end);
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
+        if (player && player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING && !segmentEndTimeLocked) {
+          const newSentence = transcriptData[currentIndex];
+          setSegmentPlayEndTime(newSentence.end);
+        }
+      } else {
+        const audio = audioRef.current;
+        if (audio && !audio.paused && !segmentEndTimeLocked) {
+          const newSentence = transcriptData[currentIndex];
+          setSegmentPlayEndTime(newSentence.end);
+        }
       }
     }
-  }, [currentTime, transcriptData, currentSentenceIndex, segmentEndTimeLocked]);
+  }, [currentTime, transcriptData, currentSentenceIndex, segmentEndTimeLocked, isYouTube, isManualNavigation]);
 
   // Audio control functions
   const handleSeek = useCallback((direction) => {
-    const audio = audioRef.current;
-    if (!audio || !isFinite(audio.duration)) return;
-    
-    const seekTime = 3;
-    const currentSegment = transcriptData[currentSentenceIndex];
-    
-    if (!currentSegment) return;
-    
-    // Calculate new position but constrain it within current segment
-    let newTime = audio.currentTime;
-    if (direction === 'backward') {
-      newTime = audio.currentTime - seekTime;
-    } else if (direction === 'forward') {
-      newTime = audio.currentTime + seekTime;
-    }
-    
-    // Constrain the new time to current segment boundaries
-    newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
-    audio.currentTime = newTime;
-    
-    // Update segment end time if playing
-    if (!audio.paused) {
-      setSegmentPlayEndTime(currentSegment.end);
-    }
-  }, [transcriptData, currentSentenceIndex]);
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (!player || !player.getCurrentTime) return;
 
-  const handlePlayPause = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.paused) {
-      // Kiểm tra nếu đang ở cuối câu (hoặc sau endTime), reset về đầu câu
-      if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
-        const currentSentence = transcriptData[currentSentenceIndex];
+      const seekTime = 3;
+      const currentSegment = transcriptData[currentSentenceIndex];
 
-        // Nếu currentTime >= endTime của câu, reset về đầu câu
-        if (audio.currentTime >= currentSentence.end - 0.05) {
-          audio.currentTime = currentSentence.start;
-        }
+      if (!currentSegment) return;
 
-        audio.play();
-        setSegmentPlayEndTime(currentSentence.end);
-        setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
-      } else {
-        audio.play();
-        setSegmentEndTimeLocked(false);
+      let newTime = player.getCurrentTime();
+      if (direction === 'backward') {
+        newTime = player.getCurrentTime() - seekTime;
+      } else if (direction === 'forward') {
+        newTime = player.getCurrentTime() + seekTime;
+      }
+
+      // Constrain the new time to current segment boundaries
+      newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
+      player.seekTo(newTime);
+
+      // Update segment end time if playing
+      if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        setSegmentPlayEndTime(currentSegment.end);
       }
     } else {
-      audio.pause();
+      const audio = audioRef.current;
+      if (!audio || !isFinite(audio.duration)) return;
+
+      const seekTime = 3;
+      const currentSegment = transcriptData[currentSentenceIndex];
+
+      if (!currentSegment) return;
+
+      // Calculate new position but constrain it within current segment
+      let newTime = audio.currentTime;
+      if (direction === 'backward') {
+        newTime = audio.currentTime - seekTime;
+      } else if (direction === 'forward') {
+        newTime = audio.currentTime + seekTime;
+      }
+
+      // Constrain the new time to current segment boundaries
+      newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
+      audio.currentTime = newTime;
+
+      // Update segment end time if playing
+      if (!audio.paused) {
+        setSegmentPlayEndTime(currentSegment.end);
+      }
     }
-  }, [transcriptData, currentSentenceIndex]);
+  }, [transcriptData, currentSentenceIndex, isYouTube]);
+
+  const handlePlayPause = useCallback(() => {
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (!player) return;
+
+      if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
+          const currentSentence = transcriptData[currentSentenceIndex];
+
+          if (player.getCurrentTime && player.getCurrentTime() >= currentSentence.end - 0.05) {
+            player.seekTo(currentSentence.start);
+          }
+
+          player.playVideo();
+          setSegmentPlayEndTime(currentSentence.end);
+          setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
+        } else {
+          player.playVideo();
+          setSegmentEndTimeLocked(false);
+        }
+      }
+    } else {
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (audio.paused) {
+        // Kiểm tra nếu đang ở cuối câu (hoặc sau endTime), reset về đầu câu
+        if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
+          const currentSentence = transcriptData[currentSentenceIndex];
+
+          // Nếu currentTime >= endTime của câu, reset về đầu câu
+          if (audio.currentTime >= currentSentence.end - 0.05) {
+            audio.currentTime = currentSentence.start;
+          }
+
+          audio.play();
+          setSegmentPlayEndTime(currentSentence.end);
+          setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
+        } else {
+          audio.play();
+          setSegmentEndTimeLocked(false);
+        }
+      } else {
+        audio.pause();
+      }
+    }
+  }, [transcriptData, currentSentenceIndex, isYouTube]);
 
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {
@@ -431,13 +491,12 @@ const DictationPageContent = () => {
 
   // Global keyboard shortcuts
   const handleGlobalKeyDown = useCallback((event) => {
-    const audio = audioRef.current;
-    const isAudioReady = audio && isFinite(audio.duration);
-    
+    const isMediaReady = isYouTube ? (youtubePlayerRef.current && duration > 0) : (audioRef.current && isFinite(audioRef.current.duration));
+
     // Check if focus is on an input field
     const activeElement = document.activeElement;
     const isInputFocused = activeElement && (
-      activeElement.tagName === 'INPUT' || 
+      activeElement.tagName === 'INPUT' ||
       activeElement.tagName === 'TEXTAREA' ||
       activeElement.contentEditable === 'true'
     );
@@ -445,21 +504,21 @@ const DictationPageContent = () => {
     switch (event.key) {
       case 'ArrowLeft':
         // Arrow left should always work for seek backward, even when input is focused
-        if (isAudioReady) {
+        if (isMediaReady) {
           event.preventDefault();
           handleSeek('backward');
         }
         break;
       case 'ArrowRight':
         // Arrow right should always work for seek forward, even when input is focused
-        if (isAudioReady) {
+        if (isMediaReady) {
           event.preventDefault();
           handleSeek('forward');
         }
         break;
       case ' ':
         // Space key should always work for play/pause, even when input is focused
-        if (isAudioReady) {
+        if (isMediaReady) {
           event.preventDefault();
           handlePlayPause();
         }
@@ -498,13 +557,28 @@ const DictationPageContent = () => {
   };
 
   // Audio control functions
-  const handleSentenceClick = (startTime, endTime) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = startTime;
-    if (audio.paused) audio.play();
-    setSegmentPlayEndTime(endTime);
-    setSegmentEndTimeLocked(true);
+  const handleSentenceClick = useCallback((startTime, endTime) => {
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (!player) return;
+
+      player.seekTo(startTime);
+      if (player.getPlayerState && player.getPlayerState() !== window.YT.PlayerState.PLAYING) {
+        player.playVideo();
+      }
+      setSegmentPlayEndTime(endTime);
+      setSegmentEndTimeLocked(true);
+    } else {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      audio.currentTime = startTime;
+      if (audio.paused) {
+        audio.play();
+      }
+      setSegmentPlayEndTime(endTime);
+      setSegmentEndTimeLocked(true);
+    }
 
     // Update currentSentenceIndex to match the clicked sentence
     const clickedIndex = transcriptData.findIndex(
@@ -512,8 +586,11 @@ const DictationPageContent = () => {
     );
     if (clickedIndex !== -1) {
       setCurrentSentenceIndex(clickedIndex);
+      setIsManualNavigation(true);
+      // Reset flag after time update
+      setTimeout(() => setIsManualNavigation(false), 200);
     }
-   };
+  }, [transcriptData, isYouTube]);
 
    // Handle progress bar click
    const handleProgressClick = useCallback((e) => {
@@ -521,10 +598,17 @@ const DictationPageContent = () => {
      const clickX = e.clientX - rect.left;
      const percentage = clickX / rect.width;
      const newTime = percentage * duration;
-     if (audioRef.current) {
-       audioRef.current.currentTime = newTime;
+     if (isYouTube) {
+       const player = youtubePlayerRef.current;
+       if (player && player.seekTo) {
+         player.seekTo(newTime);
+       }
+     } else {
+       if (audioRef.current) {
+         audioRef.current.currentTime = newTime;
+       }
      }
-   }, [duration]);
+   }, [duration, isYouTube]);
 
    const formatTime = (seconds) => {
     if (!isFinite(seconds)) return '0:00';
@@ -1017,7 +1101,7 @@ const DictationPageContent = () => {
           </audio>
         )}
         
-        {isYouTube && <div id="youtube-player"></div>}
+
 
          <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
            <div className="shadowing-layout">
@@ -1025,41 +1109,27 @@ const DictationPageContent = () => {
              <div className="medien-section">
                <div className="medien-container">
                  <div className="media-player">
-                    <div className="media-artwork">
-                      <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
-                        {isYouTube && youtubePlayerRef.current ? (
-                          <iframe
-                            width="280"
-                            height="280"
-                            src={`https://www.youtube.com/embed/${getYouTubeVideoId(lesson.youtubeUrl)}?controls=0&disablekb=1&fs=0&modestbranding=1&playsinline=1`}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            style={{ 
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              pointerEvents: 'none'
-                            }}
-                          ></iframe>
-                        ) : (
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                          </svg>
-                        )}
-                      </div>
-                    </div>
+                      <div className="media-artwork">
+                       <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
+                         {isYouTube ? (
+                           <div id="youtube-player" style={{ width: '100%', height: '100%' }}></div>
+                         ) : (
+                           <svg viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                           </svg>
+                         )}
+                       </div>
+                     </div>
                     
                     <div className="media-info">
                       <div className="media-title">Lektion {lessonId}</div>
                       <div className="media-artist">Deutschunterricht</div>
                     </div>
 
-                   <div className="media-progress-container">
-                     <div className="media-progress" onClick={handleProgressClick}>
-                       <div className="media-progress-fill" style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
-                     </div>
+                    <div className="media-progress-container">
+                      <div className="media-progress" onClick={handleProgressClick}>
+                        <div className="media-progress-fill" style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
+                      </div>
                      <div className="media-time">
                        <span>{formatTime(currentTime)}</span>
                        <span>{formatTime(duration)}</span>
@@ -1140,17 +1210,17 @@ const DictationPageContent = () => {
                       )}
                       title="Klicken, um diesen Satz wiederzugeben"
                     >
-                      <div className="time-progress-bar">
-                        <div 
-                          className="time-progress-fill"
-                          style={{
-                            width: isPlaying && transcriptData[currentSentenceIndex] 
-                              ? `${((currentTime - transcriptData[currentSentenceIndex].start) / 
-                                   (transcriptData[currentSentenceIndex].end - transcriptData[currentSentenceIndex].start)) * 100}%`
-                              : '0%'
-                          }}
-                        />
-                      </div>
+                       <div className="time-progress-bar">
+                         <div
+                           className="time-progress-fill"
+                           style={{
+                             transform: `scaleX(${isPlaying && transcriptData[currentSentenceIndex]
+                               ? (currentTime - transcriptData[currentSentenceIndex].start) /
+                                 (transcriptData[currentSentenceIndex].end - transcriptData[currentSentenceIndex].start)
+                               : 0})`
+                           }}
+                         />
+                       </div>
                       <div className="time-display">
                         <span className="time-icon">{isPlaying ? '▶' : '⏸'}</span>
                         <span className="time-current">{formatTime(currentTime)}</span>
