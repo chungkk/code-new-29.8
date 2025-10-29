@@ -399,6 +399,7 @@ const ShadowingPageContent = () => {
 
       if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
         player.pauseVideo();
+        setIsPlaying(false);
       } else {
         if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
           const currentSentence = transcriptData[currentSentenceIndex];
@@ -408,6 +409,7 @@ const ShadowingPageContent = () => {
           }
 
           player.playVideo();
+          setIsPlaying(true);
           setSegmentPlayEndTime(currentSentence.end);
           setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
 
@@ -418,6 +420,7 @@ const ShadowingPageContent = () => {
           });
         } else {
           player.playVideo();
+          setIsPlaying(true);
           setSegmentEndTimeLocked(false);
         }
       }
@@ -434,6 +437,7 @@ const ShadowingPageContent = () => {
           }
 
           audio.play();
+          setIsPlaying(true);
           setSegmentPlayEndTime(currentSentence.end);
           setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
 
@@ -444,10 +448,12 @@ const ShadowingPageContent = () => {
           });
         } else {
           audio.play();
+          setIsPlaying(true);
           setSegmentEndTimeLocked(false);
         }
       } else {
         audio.pause();
+        setIsPlaying(false);
       }
     }
   }, [transcriptData, currentSentenceIndex, isYouTube, saveProgress]);
