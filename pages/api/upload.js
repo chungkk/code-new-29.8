@@ -59,8 +59,11 @@ export default async function handler(req, res) {
     } else if (type === 'json' || (type === 'url' && fields.audioType?.[0] === 'json')) {
       targetDir = path.join(process.cwd(), 'public', 'text');
       urlPrefix = '/text';
+    } else if (type === 'thumbnail') {
+      targetDir = path.join(process.cwd(), 'public', 'thumbnails');
+      urlPrefix = '/thumbnails';
     } else {
-      return res.status(400).json({ message: 'Type không hợp lệ (audio hoặc json)' });
+      return res.status(400).json({ message: 'Type không hợp lệ (audio, json, hoặc thumbnail)' });
     }
 
     // Create directory if not exists

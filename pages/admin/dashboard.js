@@ -33,9 +33,12 @@ function AdminDashboardContent() {
   const [audioUrl, setAudioUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [srtText, setSrtText] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [transcribing, setTranscribing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+   const [uploading, setUploading] = useState(false);
+   const [transcribing, setTranscribing] = useState(false);
+   const [fetchingYouTubeSRT, setFetchingYouTubeSRT] = useState(false);
+   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -193,12 +196,49 @@ function AdminDashboardContent() {
     } finally {
       setTranscribing(false);
     }
-  };
+   };
 
-  const handleFileUpload = async () => {
+   const handleGetYouTubeSRT = async () => {
+     if (!youtubeUrl.trim()) {
+       toast.error('Bitte geben Sie eine YouTube-URL ein');
+       return;
+     }
+
+     setFetchingYouTubeSRT(true);
+     try {
+       const token = localStorage.getItem('token');
+       const res = await fetch('/api/get-youtube-srt', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${token}`
+         },
+         body: JSON.stringify({
+           youtubeUrl: youtubeUrl.trim()
+         })
+       });
+
+       if (!res.ok) {
+         const errorData = await res.json();
+         throw new Error(errorData.message || 'Failed to get SRT from YouTube');
+       }
+
+       const data = await res.json();
+       setSrtText(data.srt);
+       toast.success(data.message || `SRT erfolgreich von YouTube geladen! (${data.itemCount} Zeilen)`);
+     } catch (error) {
+       console.error('YouTube SRT error:', error);
+       toast.error('Fehler beim Laden von SRT von YouTube: ' + error.message);
+     } finally {
+       setFetchingYouTubeSRT(false);
+     }
+   };
+
+   const handleFileUpload = async () => {
     setUploading(true);
     let audioPath = '';
     let jsonPath = '';
+    let thumbnailPath = '';
 
     try {
       // Upload audio file (required)
@@ -235,6 +275,26 @@ function AdminDashboardContent() {
       const audioData = await audioRes.json();
       audioPath = audioData.url;
 
+      // Upload thumbnail if provided (optional for audio files)
+      if (thumbnailFile) {
+        const thumbnailFormData = new FormData();
+        thumbnailFormData.append('file', thumbnailFile);
+        thumbnailFormData.append('type', 'thumbnail');
+
+        const thumbnailRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: thumbnailFormData
+        });
+
+        if (thumbnailRes.ok) {
+          const thumbnailData = await thumbnailRes.json();
+          thumbnailPath = thumbnailData.url;
+        }
+      }
+
       // Convert SRT to JSON (required)
       if (!srtText.trim()) {
         throw new Error('Bitte geben Sie SRT-Text ein');
@@ -263,7 +323,8 @@ function AdminDashboardContent() {
 
       return {
         audio: audioPath,
-        json: jsonPath
+        json: jsonPath,
+        thumbnail: thumbnailPath
       };
     } catch (error) {
         throw new Error('Upload/Konvertierungsfehler: ' + error.message);
@@ -307,6 +368,7 @@ function AdminDashboardContent() {
     let finalAudioPath = '';
     let finalJsonPath = '';
     let finalYoutubeUrl = '';
+    let finalThumbnailPath = '';
 
     if (!editingLesson) {
       try {
@@ -340,6 +402,7 @@ function AdminDashboardContent() {
           const uploadResult = await handleFileUpload();
           finalAudioPath = uploadResult.audio;
           finalJsonPath = uploadResult.json;
+          finalThumbnailPath = uploadResult.thumbnail;
         }
       } catch (error) {
         setGeneralError(error.message);
@@ -403,7 +466,8 @@ function AdminDashboardContent() {
            ...formData,
            audio: finalAudioPath || 'youtube',
            json: finalJsonPath,
-           youtubeUrl: finalYoutubeUrl || undefined
+           youtubeUrl: finalYoutubeUrl || undefined,
+           thumbnail: finalThumbnailPath || undefined
          };
        }
 
@@ -554,9 +618,12 @@ function AdminDashboardContent() {
     setAudioSource('file');
     setAudioUrl('');
     setYoutubeUrl('');
-    setSrtText('');
-    setErrors({});
-    setGeneralError('');
+     setSrtText('');
+     setThumbnailFile(null);
+     setThumbnailPreview(null);
+     setErrors({});
+     setGeneralError('');
+     setFetchingYouTubeSRT(false);
   };
 
   // Filter lessons based on search term
@@ -897,50 +964,139 @@ function AdminDashboardContent() {
                              placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
                              className={`${styles.input} ${errors.audio ? styles.error : ''}`}
                            />
-                           {youtubeUrl.trim() && <span>YouTube: {youtubeUrl}</span>}
-                           <button
-                             onClick={() => setYoutubeUrl('')}
-                             disabled={!youtubeUrl.trim()}
-                             style={{
-                               padding: '4px 8px',
-                               background: youtubeUrl.trim() ? '#f44336' : '#ccc',
-                               color: 'white',
-                               border: 'none',
-                               borderRadius: '4px',
-                               cursor: youtubeUrl.trim() ? 'pointer' : 'not-allowed',
-                               fontSize: '12px'
-                             }}
-                           >
-                             ✕
-                           </button>
+                            {youtubeUrl.trim() && <span>YouTube: {youtubeUrl}</span>}
+                            <button
+                              onClick={() => setYoutubeUrl('')}
+                              disabled={!youtubeUrl.trim()}
+                              style={{
+                                padding: '4px 8px',
+                                background: youtubeUrl.trim() ? '#f44336' : '#ccc',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: youtubeUrl.trim() ? 'pointer' : 'not-allowed',
+                                fontSize: '12px'
+                              }}
+                            >
+                              ✕
+                            </button>
+                            {youtubeUrl.trim() && (
+                              <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+                                💡 Video phải có phụ đề tự động (CC) hoặc thủ công. Nếu không có, bạn có thể tải SRT từ YouTube thủ công và paste vào ô SRT text.
+                              </div>
+                            )}
                          </div>
                        )}
 
                      {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
                    </div>
 
+                   {/* Thumbnail Upload Section - Only for audio files, not YouTube */}
+                   {audioSource !== 'youtube' && (
+                     <div className={styles.fullWidth}>
+                       <label className={styles.label}>
+                         🖼️ Thumbnail Bild (Optional für Audio)
+                       </label>
+                       <p style={{ fontSize: '12px', color: '#6c757d', marginBottom: '10px' }}>
+                         Laden Sie ein Thumbnail-Bild für Audio-Dateien hoch. Für YouTube-Videos wird automatisch das Video-Thumbnail verwendet.
+                       </p>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                         <input
+                           type="file"
+                           accept="image/*"
+                           onChange={(e) => {
+                             const file = e.target.files[0];
+                             setThumbnailFile(file);
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onloadend = () => {
+                                 setThumbnailPreview(reader.result);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           }}
+                           className={styles.fileInput}
+                         />
+                         {thumbnailFile && <span>Ausgewählt: {thumbnailFile.name}</span>}
+                         {thumbnailFile && (
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setThumbnailFile(null);
+                               setThumbnailPreview(null);
+                             }}
+                             style={{
+                               padding: '4px 8px',
+                               background: '#f44336',
+                               color: 'white',
+                               border: 'none',
+                               borderRadius: '4px',
+                               cursor: 'pointer',
+                               fontSize: '12px'
+                             }}
+                           >
+                             ✕
+                           </button>
+                         )}
+                       </div>
+                       {thumbnailPreview && (
+                         <div style={{ marginTop: '10px' }}>
+                           <p style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>Vorschau:</p>
+                           <img
+                             src={thumbnailPreview}
+                             alt="Thumbnail preview"
+                             style={{
+                               maxWidth: '300px',
+                               maxHeight: '200px',
+                               borderRadius: '8px',
+                               border: '2px solid #e0e0e0'
+                             }}
+                           />
+                         </div>
+                       )}
+                     </div>
+                   )}
+
                    <div className={styles.fullWidth}>
                       <label className={styles.label}>
                         📝 SRT-Text *
                       </label>
-                     <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                        <button
-                          type="button"
-                          onClick={handleTranscribe}
-                          disabled={transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))}
-                          style={{
-                           padding: '8px 16px',
-                           background: (transcribing || audioSource === 'youtube') ? '#ccc' : '#007bff',
-                           color: 'white',
-                           border: 'none',
-                           borderRadius: '4px',
-                           cursor: (transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))) ? 'not-allowed' : 'pointer',
-                           fontSize: '14px'
-                         }}
-                        >
-                         {audioSource === 'youtube' ? '❌ YouTube không hỗ trợ auto-transcribe' : (transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren')}
-                       </button>
-                     </div>
+                      <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                         <button
+                           type="button"
+                           onClick={handleTranscribe}
+                           disabled={transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))}
+                           style={{
+                            padding: '8px 16px',
+                            background: (transcribing || audioSource === 'youtube') ? '#ccc' : '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: (transcribing || audioSource === 'youtube' || (!audioFile && !(audioSource === 'url' && audioUrl.trim()))) ? 'not-allowed' : 'pointer',
+                            fontSize: '14px'
+                          }}
+                         >
+                          {audioSource === 'youtube' ? '❌ YouTube không hỗ trợ auto-transcribe' : (transcribing ? '⏳ Generiere SRT...' : '🎙️ SRT aus Audio generieren')}
+                        </button>
+                        {audioSource === 'youtube' && (
+                          <button
+                            type="button"
+                            onClick={handleGetYouTubeSRT}
+                            disabled={fetchingYouTubeSRT || !youtubeUrl.trim()}
+                            style={{
+                              padding: '8px 16px',
+                              background: fetchingYouTubeSRT ? '#ccc' : '#28a745',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: (fetchingYouTubeSRT || !youtubeUrl.trim()) ? 'not-allowed' : 'pointer',
+                              fontSize: '14px'
+                            }}
+                          >
+                            {fetchingYouTubeSRT ? '⏳ Lade SRT...' : '📺 SRT von YouTube laden'}
+                          </button>
+                        )}
+                      </div>
                      <textarea
                        value={srtText}
                        onChange={(e) => setSrtText(e.target.value)}
@@ -966,7 +1122,7 @@ mit dem Top Thema`}
                <div className={styles.fullWidth} style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <button
                     type="submit"
-                    disabled={uploading || transcribing}
+                    disabled={uploading || transcribing || fetchingYouTubeSRT}
                     className={styles.submitButton}
                   >
                     {uploading ? '⏳ Wird verarbeitet...' : (editingLesson ? '✏️ Aktualisieren' : '➕ Lektion hinzufügen')}
