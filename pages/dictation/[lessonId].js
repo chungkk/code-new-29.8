@@ -1116,10 +1116,13 @@ const DictationPageContent = () => {
                <div className="medien-container">
                  <div className="media-player">
                       <div className="media-artwork">
-                       <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
-                         {isYouTube ? (
-                           <div id="youtube-player" style={{ width: '100%', height: '100%' }}></div>
-                         ) : (
+                        <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
+                          {isYouTube ? (
+                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                              <div id="youtube-player" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
+                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
+                            </div>
+                          ) : (
                            <svg viewBox="0 0 24 24" fill="currentColor">
                              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                            </svg>

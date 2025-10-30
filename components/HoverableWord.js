@@ -60,16 +60,24 @@ const HoverableWord = ({ word, onWordClick }) => {
      setShowTooltip(false);
    };
 
-  const handleClick = (e) => {
-    e.stopPropagation();
-    
-    // Pause main audio nếu đang phát để tránh chồng chéo
-    if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
-      const audio = window.mainAudioRef.current;
-      if (!audio.paused) {
-        audio.pause();
-      }
-    }
+   const handleClick = (e) => {
+     e.stopPropagation();
+
+     // Pause main audio nếu đang phát để tránh chồng chéo
+     if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
+       const audio = window.mainAudioRef.current;
+       if (!audio.paused) {
+         audio.pause();
+       }
+     }
+
+     // Pause YouTube player nếu đang phát
+     if (typeof window !== 'undefined' && window.mainYoutubePlayerRef?.current) {
+       const player = window.mainYoutubePlayerRef.current;
+       if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+         player.pauseVideo();
+       }
+     }
     
     // Speak the word
     setIsSpeaking(true);
