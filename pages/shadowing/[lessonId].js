@@ -320,11 +320,11 @@ const ShadowingPageContent = () => {
           seekTime = pausedPositions[clickedIndex];
         }
 
-        if (isYouTube) {
-          const player = youtubePlayerRef.current;
-          if (!player) return;
-          player.seekTo(seekTime);
-          player.playVideo();
+         if (isYouTube) {
+           const player = youtubePlayerRef.current;
+           if (!player) return;
+           if (player.seekTo) player.seekTo(seekTime);
+           player.playVideo();
         } else {
           const audio = audioRef.current;
           if (!audio) return;
@@ -381,9 +381,9 @@ const ShadowingPageContent = () => {
         newTime = player.getCurrentTime() + seekTime;
       }
 
-      // Constrain the new time to current segment boundaries
-      newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
-      player.seekTo(newTime);
+       // Constrain the new time to current segment boundaries
+       newTime = Math.max(currentSegment.start, Math.min(currentSegment.end - 0.1, newTime));
+       if (player.seekTo) player.seekTo(newTime);
 
       // Update segment end time if playing
       if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
@@ -429,9 +429,9 @@ const ShadowingPageContent = () => {
         if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
           const currentSentence = transcriptData[currentSentenceIndex];
 
-          if (player.getCurrentTime && player.getCurrentTime() >= currentSentence.end - 0.05) {
-            player.seekTo(currentSentence.start);
-          }
+           if (player.getCurrentTime && player.getCurrentTime() >= currentSentence.end - 0.05) {
+             if (player.seekTo) player.seekTo(currentSentence.start);
+           }
 
           player.playVideo();
           setIsPlaying(true);
