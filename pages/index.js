@@ -1,8 +1,8 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import LessonCard from '../components/LessonCard';
-const ModeSelectionPopup = React.lazy(() => import('../components/ModeSelectionPopup'));
+import ModeSelectionPopup from '../components/ModeSelectionPopup';
 
 const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -199,13 +199,11 @@ const HomePage = () => {
         )}
 
         {showPopup && selectedLesson && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <ModeSelectionPopup
-              lesson={selectedLesson}
-              onClose={handleClosePopup}
-              onSelectMode={handleModeSelect}
-            />
-          </Suspense>
+          <ModeSelectionPopup
+            lesson={selectedLesson}
+            onClose={handleClosePopup}
+            onSelectMode={handleModeSelect}
+          />
         )}
       </div>
     </>

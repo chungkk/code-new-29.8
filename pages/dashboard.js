@@ -139,7 +139,7 @@ function UserDashboard() {
 
 
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className={styles.loading}>
         <div>⏳ Lädt...</div>

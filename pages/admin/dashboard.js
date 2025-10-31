@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Image from 'next/image';
 import ProtectedPage from '../../components/ProtectedPage';
 import { fetchWithAuth } from '../../lib/api';
 import { toast } from 'react-toastify';
@@ -1129,24 +1128,19 @@ function AdminDashboardContent() {
                          )}
                        </div>
                        {thumbnailPreview && (
-                          <div style={{ marginTop: '10px' }}>
-                            <p style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>Vorschau:</p>
-                            <div style={{
-                              position: 'relative',
-                              width: '300px',
-                              height: '200px',
-                              borderRadius: '8px',
-                              border: '2px solid #e0e0e0',
-                              overflow: 'hidden'
-                            }}>
-                              <Image
-                                src={thumbnailPreview}
-                                alt="Thumbnail preview"
-                                fill
-                                style={{ objectFit: 'cover' }}
-                              />
-                            </div>
-                          </div>
+                         <div style={{ marginTop: '10px' }}>
+                           <p style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>Vorschau:</p>
+                           <img
+                             src={thumbnailPreview}
+                             alt="Thumbnail preview"
+                             style={{
+                               maxWidth: '300px',
+                               maxHeight: '200px',
+                               borderRadius: '8px',
+                               border: '2px solid #e0e0e0'
+                             }}
+                           />
+                         </div>
                        )}
                      </div>
                    )}
