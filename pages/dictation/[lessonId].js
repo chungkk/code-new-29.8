@@ -928,9 +928,12 @@ const DictationPageContent = () => {
     return text.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, '*');
   }, []);
 
-  // Handle input focus - hide placeholder
+  // Handle input focus - keep placeholder visible
   const handleInputFocus = useCallback((input, correctWord) => {
-    input.placeholder = '';
+    // Keep placeholder showing the masked word length
+    if (input.value === '') {
+      input.placeholder = '*'.repeat(correctWord.length);
+    }
   }, []);
 
   // Handle input blur - show placeholder if empty
@@ -1288,6 +1291,8 @@ const DictationPageContent = () => {
                       onSentenceClick={handleSentenceClick}
                       formatTime={formatTime}
                       maskText={maskText}
+                      isTextHidden={true}
+                      completedWords={completedWords[index] || {}}
                     />
                   ))}
                 </div>

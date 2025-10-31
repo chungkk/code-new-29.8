@@ -11,10 +11,41 @@ const SentenceListItem = ({
   onSentenceClick,
   formatTime,
   maskText,
-  isTextHidden
+  isTextHidden,
+  completedWords
 }) => {
   const renderSentenceText = () => {
     if (isTextHidden && !isCompleted) {
+      // If we have completed words for this sentence, show them
+      if (completedWords && Object.keys(completedWords).length > 0) {
+        const words = segment.text.trim().split(/\s+/);
+        return words.map((word, wordIndex) => {
+          const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+          const punctuation = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
+
+          // If this word is completed, show it normally
+          if (completedWords[wordIndex]) {
+            return (
+              <span key={wordIndex}>
+                <HoverableWord word={pureWord} />
+                {punctuation}
+                {wordIndex < words.length - 1 ? ' ' : ''}
+              </span>
+            );
+          }
+
+          // Otherwise show masked
+          return (
+            <span key={wordIndex}>
+              {maskText(pureWord)}
+              {punctuation}
+              {wordIndex < words.length - 1 ? ' ' : ''}
+            </span>
+          );
+        });
+      }
+
+      // No completed words, mask everything
       return maskText(segment.text.trim());
     }
 

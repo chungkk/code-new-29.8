@@ -1849,9 +1849,10 @@ body::before {
 }
 
 .word-input::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 600;
     font-size: 0.9em; /* Nhỏ hơn */
+    letter-spacing: 2px; /* Thêm spacing giữa các dấu * */
 }
 
 .word-input:focus {
@@ -1859,6 +1860,11 @@ body::before {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4), 0 0 0 3px rgba(102, 126, 234, 0.1);
     transform: scale(1.03); /* Giảm scale - từ 1.05 */
+}
+
+.word-input:focus::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
 }
 
 .word-input:hover:not(:focus) {
