@@ -1159,8 +1159,8 @@ const DictationPageContent = () => {
                      </div>
                     
                     <div className="media-info">
-                      <div className="media-title">Lektion {lessonId}</div>
-                      <div className="media-artist">Deutschunterricht</div>
+                      <div className="media-title">{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
+                      <div className="media-artist">{lesson.description || 'Deutschunterricht'}</div>
                     </div>
 
                     <div className="media-progress-container">

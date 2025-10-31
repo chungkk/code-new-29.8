@@ -1307,6 +1307,12 @@ body::before {
     margin-bottom: 6px;
     letter-spacing: -0.3px;
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: 2.6em;
 }
 
 .media-artist {
@@ -1314,6 +1320,9 @@ body::before {
     font-weight: 400;
     color: #8e8e93;
     letter-spacing: -0.2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .media-progress-container {
