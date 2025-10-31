@@ -19,9 +19,10 @@ const DictationPageContent = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
-   const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
-   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
-   const [isManualNavigation, setIsManualNavigation] = useState(false);
+  const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
+    const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+    const [isManualNavigation, setIsManualNavigation] = useState(false);
+    const [pausedPositions, setPausedPositions] = useState({}); // { sentenceIndex: pausedTime }
   const [isTextHidden, setIsTextHidden] = useState(true);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -566,37 +567,61 @@ const DictationPageContent = () => {
 
   // Audio control functions
   const handleSentenceClick = useCallback((startTime, endTime) => {
-    if (isYouTube) {
-      const player = youtubePlayerRef.current;
-      if (!player) return;
-
-      player.seekTo(startTime);
-      player.playVideo();
-      setIsPlaying(true);
-      setSegmentPlayEndTime(endTime);
-      setSegmentEndTimeLocked(true);
-    } else {
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      audio.currentTime = startTime;
-      audio.play();
-      setIsPlaying(true);
-      setSegmentPlayEndTime(endTime);
-      setSegmentEndTimeLocked(true);
-    }
-
-    // Update currentSentenceIndex to match the clicked sentence
+    // Find the clicked sentence index
     const clickedIndex = transcriptData.findIndex(
       (item) => item.start === startTime && item.end === endTime
     );
-    if (clickedIndex !== -1) {
-      setCurrentSentenceIndex(clickedIndex);
-      setIsManualNavigation(true);
-      // Reset flag after time update
-      setTimeout(() => setIsManualNavigation(false), 200);
+    if (clickedIndex === -1) return;
+
+    const isCurrentlyPlayingThisSentence = isPlaying && currentTime >= startTime && currentTime < endTime;
+
+    if (isCurrentlyPlayingThisSentence) {
+      // Pause the current sentence
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
+        if (player) player.pauseVideo();
+      } else {
+        const audio = audioRef.current;
+        if (audio) audio.pause();
+      }
+      setIsPlaying(false);
+      // Save paused position
+      setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
+    } else {
+      // Play or resume the sentence
+      let seekTime = startTime;
+      if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
+        seekTime = pausedPositions[clickedIndex];
+      }
+
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
+        if (!player) return;
+        player.seekTo(seekTime);
+        player.playVideo();
+      } else {
+        const audio = audioRef.current;
+        if (!audio) return;
+        audio.currentTime = seekTime;
+        audio.play();
+      }
+      setIsPlaying(true);
+      setSegmentPlayEndTime(endTime);
+      setSegmentEndTimeLocked(true);
+      // Clear paused position when starting play
+      setPausedPositions(prev => {
+        const newPositions = { ...prev };
+        delete newPositions[clickedIndex];
+        return newPositions;
+      });
     }
-  }, [transcriptData, isYouTube]);
+
+    // Update currentSentenceIndex to match the clicked sentence
+    setCurrentSentenceIndex(clickedIndex);
+    setIsManualNavigation(true);
+    // Reset flag after time update
+    setTimeout(() => setIsManualNavigation(false), 200);
+  }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions]);
 
    // Handle progress bar click
    const handleProgressClick = useCallback((e) => {
@@ -1217,7 +1242,7 @@ const DictationPageContent = () => {
                         transcriptData[currentSentenceIndex].start, 
                         transcriptData[currentSentenceIndex].end
                       )}
-                      title="Klicken, um diesen Satz wiederzugeben"
+                       title="Klicken, um diesen Satz abzuspielen oder zu pausieren"
                     >
                        <div className="time-progress-bar">
                          <div

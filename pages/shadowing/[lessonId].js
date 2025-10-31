@@ -20,6 +20,7 @@ const ShadowingPageContent = () => {
   const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [lesson, setLesson] = useState(null);
+  const [pausedPositions, setPausedPositions] = useState({}); // { sentenceIndex: pausedTime }
   const [loading, setLoading] = useState(true);
   
   const audioRef = useRef(null);
@@ -291,35 +292,59 @@ const ShadowingPageContent = () => {
     }
   };
 
-   const handleSentenceClick = useCallback((startTime, endTime) => {
-    if (isYouTube) {
-      const player = youtubePlayerRef.current;
-      if (!player) return;
+    const handleSentenceClick = useCallback((startTime, endTime) => {
+      // Find the clicked sentence index
+      const clickedIndex = transcriptData.findIndex(
+        (item) => item.start === startTime && item.end === endTime
+      );
+      if (clickedIndex === -1) return;
 
-      player.seekTo(startTime);
-      player.playVideo();
-      setIsPlaying(true);
-      setSegmentPlayEndTime(endTime);
-      setSegmentEndTimeLocked(true);
-    } else {
-      const audio = audioRef.current;
-      if (!audio) return;
+      const isCurrentlyPlayingThisSentence = isPlaying && currentTime >= startTime && currentTime < endTime;
 
-      audio.currentTime = startTime;
-      audio.play();
-      setIsPlaying(true);
-      setSegmentPlayEndTime(endTime);
-      setSegmentEndTimeLocked(true);
-    }
+      if (isCurrentlyPlayingThisSentence) {
+        // Pause the current sentence
+        if (isYouTube) {
+          const player = youtubePlayerRef.current;
+          if (player) player.pauseVideo();
+        } else {
+          const audio = audioRef.current;
+          if (audio) audio.pause();
+        }
+        setIsPlaying(false);
+        // Save paused position
+        setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
+      } else {
+        // Play or resume the sentence
+        let seekTime = startTime;
+        if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
+          seekTime = pausedPositions[clickedIndex];
+        }
 
-    // Update currentSentenceIndex to match the clicked sentence
-    const clickedIndex = transcriptData.findIndex(
-      (item) => item.start === startTime && item.end === endTime
-    );
-    if (clickedIndex !== -1) {
+        if (isYouTube) {
+          const player = youtubePlayerRef.current;
+          if (!player) return;
+          player.seekTo(seekTime);
+          player.playVideo();
+        } else {
+          const audio = audioRef.current;
+          if (!audio) return;
+          audio.currentTime = seekTime;
+          audio.play();
+        }
+        setIsPlaying(true);
+        setSegmentPlayEndTime(endTime);
+        setSegmentEndTimeLocked(true);
+        // Clear paused position when starting play
+        setPausedPositions(prev => {
+          const newPositions = { ...prev };
+          delete newPositions[clickedIndex];
+          return newPositions;
+        });
+      }
+
+      // Update currentSentenceIndex to match the clicked sentence
       setCurrentSentenceIndex(clickedIndex);
-    }
-  }, [transcriptData, isYouTube]);
+    }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions]);
 
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {

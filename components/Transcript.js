@@ -72,7 +72,7 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
         <div
           className={`sentence-time-container ${isPlaying ? 'playing' : ''}`}
           onClick={() => onSentenceClick(currentItem.start, currentItem.end)}
-          title="Click để phát lại câu này"
+           title="Click để phát hoặc tạm dừng câu này"
         >
            <div className="time-progress-bar">
              <div

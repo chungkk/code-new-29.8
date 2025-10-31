@@ -13,16 +13,16 @@ def get_transcript(video_id):
         # Try to find manually created transcript first, then generated
         transcript = None
 
-        # Try manually created transcripts
+        # Try manually created transcripts in German only
         try:
-            transcript = transcript_list.find_manually_created_transcript(['en', 'de', 'es', 'fr', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'])
+            transcript = transcript_list.find_manually_created_transcript(['de'])
         except:
             pass
 
-        # If no manually created, try generated transcripts
+        # If no manually created German, try generated transcripts in German only
         if not transcript:
             try:
-                transcript = transcript_list.find_generated_transcript(['en', 'de', 'es', 'fr', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'])
+                transcript = transcript_list.find_generated_transcript(['de'])
             except:
                 pass
 
@@ -41,24 +41,18 @@ def get_transcript(video_id):
 
 def convert_to_srt(transcript):
     srt = ''
-    previous_end = 0.0
+    group_size = 3  # Ghép mỗi 3 item thành một entry để tạo câu dài hơn
 
-    for i, item in enumerate(transcript, 1):
-        start = item.start
-        duration = item.duration
-        end = start + duration
+    for i in range(0, len(transcript), group_size):
+        group = transcript[i:i + group_size]
+        start = group[0].start
+        text = ' '.join(item.text for item in group)
 
-        # Ensure no overlapping by adjusting start time if necessary
-        if start < previous_end:
-            start = previous_end
-
-        # Recalculate end time
-        end = start + duration
-
-        # Update previous_end for next iteration
-        previous_end = end
-
-        text = item.text
+        # Set end to the start of the next group, or start + duration of last item if last group
+        if i + group_size < len(transcript):
+            end = transcript[i + group_size].start
+        else:
+            end = group[-1].start + group[-1].duration
 
         # Format time
         def format_time(seconds):
@@ -68,7 +62,7 @@ def convert_to_srt(transcript):
             ms = int((seconds % 1) * 1000)
             return f"{hours:02d}:{minutes:02d}:{secs:02d},{ms:03d}"
 
-        srt += f"{i}\n"
+        srt += f"{(i // group_size) + 1}\n"
         srt += f"{format_time(start)} --> {format_time(end)}\n"
         srt += f"{text}\n\n"
 
@@ -84,10 +78,12 @@ if __name__ == "__main__":
 
     if transcript:
         srt_text = convert_to_srt(transcript)
+        group_size = 3
+        item_count = (len(transcript) + group_size - 1) // group_size
         result = {
             "success": True,
             "srt": srt_text,
-            "itemCount": len(transcript)
+            "itemCount": item_count
         }
         print(json.dumps(result))
     else:

@@ -54,7 +54,7 @@ const SentenceListItem = ({
             e.stopPropagation();
             onSentenceClick(segment.start, segment.end);
           }}
-          title="Diesen Satz abspielen"
+           title="Diesen Satz abspielen oder pausieren"
         >
           ▶
         </button>
