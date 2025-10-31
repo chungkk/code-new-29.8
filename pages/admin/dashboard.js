@@ -43,8 +43,9 @@ function AdminDashboardContent() {
   const [generalError, setGeneralError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('lessons');
-  const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });
-  const [deletingFiles, setDeletingFiles] = useState(false);
+   const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });
+   const [oldFiles, setOldFiles] = useState({ audio: [], json: [] });
+   const [deletingFiles, setDeletingFiles] = useState(false);
   const [formCollapsed, setFormCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -118,6 +119,92 @@ function AdminDashboardContent() {
       }
     } catch (error) {
       console.error('Error loading unused files:', error);
+    }
+  };
+
+  const loadOldFiles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/old-files?days=3', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOldFiles(data);
+      }
+    } catch (error) {
+      console.error('Error loading old files:', error);
+    }
+  };
+
+  const deleteOldFiles = async () => {
+    if (!confirm('Sind Sie sicher, dass Sie alle Dateien älter als 3 Tage löschen möchten?')) return;
+
+    setDeletingFiles(true);
+    try {
+      const token = localStorage.getItem('token');
+      const allOldFiles = [...oldFiles.audio, ...oldFiles.json];
+      if (allOldFiles.length === 0) {
+        toast.info('Keine alten Dateien zum Löschen gefunden.');
+        return;
+      }
+
+      const res = await fetch('/api/unused-files', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ files: allOldFiles })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`${data.deleted.length} alte Dateien gelöscht`);
+        if (data.errors.length > 0) {
+          toast.warning(`Löschfehler: ${data.errors.join(', ')}`);
+        }
+        loadUnusedFiles();
+        loadOldFiles();
+      } else {
+        toast.error('Fehler beim Löschen alter Dateien');
+      }
+    } catch (error) {
+      console.error('Error deleting old files:', error);
+      toast.error('Fehler beim Löschen alter Dateien');
+    } finally {
+      setDeletingFiles(false);
+    }
+  };
+
+  const runScheduledCleanup = async () => {
+    if (!confirm('Möchten Sie die geplante Bereinigung jetzt ausführen?')) return;
+
+    setDeletingFiles(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/run-cleanup', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Bereinigung abgeschlossen: ${data.deletedCount} Dateien gelöscht`);
+        loadUnusedFiles();
+        loadOldFiles();
+      } else {
+        toast.error('Fehler bei der Bereinigung');
+      }
+    } catch (error) {
+      console.error('Error running cleanup:', error);
+      toast.error('Fehler bei der Bereinigung');
+    } finally {
+      setDeletingFiles(false);
     }
   };
 
@@ -668,11 +755,12 @@ function AdminDashboardContent() {
           >
             📚 Lektionen verwalten
           </button>
-          <button
-            onClick={() => {
-              setActiveTab('files');
-              loadUnusedFiles();
-            }}
+           <button
+             onClick={() => {
+               setActiveTab('files');
+               loadUnusedFiles();
+               loadOldFiles();
+             }}
             style={{
               padding: '10px 20px',
               border: activeTab === 'files' ? '2px solid #667eea' : '2px solid #e0e0e0',
@@ -1266,107 +1354,198 @@ mit dem Top Thema`}
         )}
 
         {activeTab === 'files' && (
-          <div className={styles.lessonsSection}>
-             <div className={styles.sectionHeader}>
-               <h2 className={styles.sectionTitle}>Ungenutzte Dateien</h2>
-               <div className={styles.lessonCount}>
-                 {unusedFiles.audio.length + unusedFiles.json.length} Dateien
+           <div className={styles.lessonsSection}>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>📁 Dateien verwalten</h2>
+                <div className={styles.lessonCount}>
+                  {unusedFiles.audio.length + unusedFiles.json.length} ungenutzte Dateien
+                </div>
+              </div>
+
+             <div style={{ padding: '20px' }}>
+               {/* Auto-delete section */}
+               <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
+                 <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⏰ Automatische Bereinigung</h3>
+                 <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#856404' }}>
+                   Dateien werden automatisch nach 3 Tagen gelöscht, wenn sie nicht verwendet werden.
+                   Sie können auch manuell alle alten Dateien löschen.
+                 </p>
+                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                   <button
+                     onClick={() => deleteOldFiles()}
+                     disabled={deletingFiles}
+                     style={{
+                       padding: '8px 16px',
+                       background: deletingFiles ? '#ccc' : '#ffc107',
+                       color: '#212529',
+                       border: 'none',
+                       borderRadius: '6px',
+                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                       fontWeight: 'bold'
+                     }}
+                   >
+                     {deletingFiles ? '⏳ Lösche alte Dateien...' : `🗑️ Alte Dateien löschen (${oldFiles.audio.length + oldFiles.json.length})`}
+                   </button>
+                   <button
+                     onClick={() => runScheduledCleanup()}
+                     disabled={deletingFiles}
+                     style={{
+                       padding: '8px 16px',
+                       background: deletingFiles ? '#ccc' : '#17a2b8',
+                       color: 'white',
+                       border: 'none',
+                       borderRadius: '6px',
+                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                       fontSize: '12px'
+                     }}
+                   >
+                     🔄 Jetzt bereinigen
+                   </button>
+                 </div>
+               </div>
+
+               {/* Audio Files Section */}
+               <div style={{ marginBottom: '30px' }}>
+                 <h3 style={{ borderBottom: '2px solid #007bff', paddingBottom: '5px', marginBottom: '15px' }}>
+                   🎵 Audio-Dateien ({unusedFiles.audio.length})
+                 </h3>
+                 {unusedFiles.audio.length > 0 ? (
+                   <div>
+                     <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                       <button
+                         onClick={() => deleteUnusedFiles(unusedFiles.audio)}
+                         disabled={deletingFiles}
+                         style={{
+                           padding: '10px 20px',
+                           background: deletingFiles ? '#ccc' : '#dc3545',
+                           color: 'white',
+                           border: 'none',
+                           borderRadius: '8px',
+                           cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                           fontWeight: 'bold'
+                         }}
+                       >
+                         {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle Audio löschen (${unusedFiles.audio.length})`}
+                       </button>
+                       <button
+                         onClick={() => loadUnusedFiles()}
+                         style={{
+                           padding: '10px 20px',
+                           background: '#6c757d',
+                           color: 'white',
+                           border: 'none',
+                           borderRadius: '8px',
+                           cursor: 'pointer'
+                         }}
+                       >
+                         🔄 Aktualisieren
+                       </button>
+                     </div>
+                     <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '8px', padding: '10px' }}>
+                       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                         {unusedFiles.audio.map(file => (
+                           <div key={file} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#f8f9fa', borderRadius: '4px' }}>
+                             <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>{file}</span>
+                             <button
+                               onClick={() => deleteUnusedFiles([file])}
+                               disabled={deletingFiles}
+                               style={{
+                                 padding: '4px 8px',
+                                 background: deletingFiles ? '#ccc' : '#ff6b6b',
+                                 color: 'white',
+                                 border: 'none',
+                                 borderRadius: '4px',
+                                 cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                                 fontSize: '12px'
+                               }}
+                             >
+                               {deletingFiles ? '...' : '✕'}
+                             </button>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+                 ) : (
+                   <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                     <div style={{ fontSize: '48px', marginBottom: '10px' }}>🎵</div>
+                     <p>Keine ungenutzten Audio-Dateien gefunden.</p>
+                   </div>
+                 )}
+               </div>
+
+               {/* JSON Files Section */}
+               <div>
+                 <h3 style={{ borderBottom: '2px solid #28a745', paddingBottom: '5px', marginBottom: '15px' }}>
+                   📄 JSON/Text-Dateien ({unusedFiles.json.length})
+                 </h3>
+                 {unusedFiles.json.length > 0 ? (
+                   <div>
+                     <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                       <button
+                         onClick={() => deleteUnusedFiles(unusedFiles.json)}
+                         disabled={deletingFiles}
+                         style={{
+                           padding: '10px 20px',
+                           background: deletingFiles ? '#ccc' : '#dc3545',
+                           color: 'white',
+                           border: 'none',
+                           borderRadius: '8px',
+                           cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                           fontWeight: 'bold'
+                         }}
+                       >
+                         {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle JSON löschen (${unusedFiles.json.length})`}
+                       </button>
+                       <button
+                         onClick={() => loadUnusedFiles()}
+                         style={{
+                           padding: '10px 20px',
+                           background: '#6c757d',
+                           color: 'white',
+                           border: 'none',
+                           borderRadius: '8px',
+                           cursor: 'pointer'
+                         }}
+                       >
+                         🔄 Aktualisieren
+                       </button>
+                     </div>
+                     <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '8px', padding: '10px' }}>
+                       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+                         {unusedFiles.json.map(file => (
+                           <div key={file} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: '#f8f9fa', borderRadius: '4px' }}>
+                             <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>{file}</span>
+                             <button
+                               onClick={() => deleteUnusedFiles([file])}
+                               disabled={deletingFiles}
+                               style={{
+                                 padding: '4px 8px',
+                                 background: deletingFiles ? '#ccc' : '#ff6b6b',
+                                 color: 'white',
+                                 border: 'none',
+                                 borderRadius: '4px',
+                                 cursor: deletingFiles ? 'not-allowed' : 'pointer',
+                                 fontSize: '12px'
+                               }}
+                             >
+                               {deletingFiles ? '...' : '✕'}
+                             </button>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+                 ) : (
+                   <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                     <div style={{ fontSize: '48px', marginBottom: '10px' }}>📄</div>
+                     <p>Keine ungenutzten JSON-Dateien gefunden.</p>
+                   </div>
+                 )}
                </div>
              </div>
-
-            <div style={{ padding: '20px' }}>
-              <h3>Audio-Dateien ({unusedFiles.audio.length})</h3>
-              {unusedFiles.audio.length > 0 ? (
-                <div style={{ marginBottom: '20px' }}>
-                   <button
-                     onClick={() => deleteUnusedFiles(unusedFiles.audio)}
-                     disabled={deletingFiles}
-                     style={{
-                       padding: '10px 20px',
-                       background: deletingFiles ? '#ccc' : '#f44336',
-                       color: 'white',
-                       border: 'none',
-                       borderRadius: '8px',
-                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
-                       marginBottom: '10px'
-                     }}
-                   >
-                      {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle ungenutzten Audio löschen (${unusedFiles.audio.length})`}
-                   </button>
-                  <ul>
-                     {unusedFiles.audio.map(file => (
-                       <li key={file} style={{ marginBottom: '5px' }}>
-                         {file}
-                         <button
-                           onClick={() => deleteUnusedFiles([file])}
-                           disabled={deletingFiles}
-                           style={{
-                             marginLeft: '10px',
-                             padding: '2px 8px',
-                             background: deletingFiles ? '#ccc' : '#ff9800',
-                             color: 'white',
-                             border: 'none',
-                             borderRadius: '4px',
-                             cursor: deletingFiles ? 'not-allowed' : 'pointer'
-                           }}
-                         >
-                           {deletingFiles ? '...' : 'Xóa'}
-                         </button>
-                       </li>
-                     ))}
-                  </ul>
-                </div>
-              ) : (
-                 <p>Keine ungenutzten Audio-Dateien.</p>
-              )}
-
-              <h3>JSON/Text-Dateien ({unusedFiles.json.length})</h3>
-              {unusedFiles.json.length > 0 ? (
-                <div>
-                   <button
-                     onClick={() => deleteUnusedFiles(unusedFiles.json)}
-                     disabled={deletingFiles}
-                     style={{
-                       padding: '10px 20px',
-                       background: deletingFiles ? '#ccc' : '#f44336',
-                       color: 'white',
-                       border: 'none',
-                       borderRadius: '8px',
-                       cursor: deletingFiles ? 'not-allowed' : 'pointer',
-                       marginBottom: '10px'
-                     }}
-                   >
-                      {deletingFiles ? '⏳ Wird gelöscht...' : `🗑️ Alle ungenutzten JSON löschen (${unusedFiles.json.length})`}
-                   </button>
-                  <ul>
-                     {unusedFiles.json.map(file => (
-                       <li key={file} style={{ marginBottom: '5px' }}>
-                         {file}
-                         <button
-                           onClick={() => deleteUnusedFiles([file])}
-                           disabled={deletingFiles}
-                           style={{
-                             marginLeft: '10px',
-                             padding: '2px 8px',
-                             background: deletingFiles ? '#ccc' : '#ff9800',
-                             color: 'white',
-                             border: 'none',
-                             borderRadius: '4px',
-                             cursor: deletingFiles ? 'not-allowed' : 'pointer'
-                           }}
-                         >
-                           {deletingFiles ? '...' : 'Xóa'}
-                         </button>
-                       </li>
-                     ))}
-                  </ul>
-                </div>
-              ) : (
-                 <p>Keine ungenutzten JSON-Dateien.</p>
-              )}
-            </div>
-          </div>
-        )}
+           </div>
+         )}
       </div>
     </>
   );

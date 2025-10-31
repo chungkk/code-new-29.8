@@ -23,19 +23,19 @@ const LessonCard = ({ lesson, onClick, featured = false }) => {
         {/* Footer with mode badges */}
         <div className="lesson-card-footer">
           <div className="mode-badges">
-            <span className="mode-badge dictation">
-              <span className="mode-icon">✍️</span> Dictation
-            </span>
-            <span className="mode-badge shadowing">
-              <span className="mode-icon">🗣️</span> Shadowing
-            </span>
+             <span className="mode-badge dictation">
+               <span className="mode-icon">✍️</span> Diktat
+             </span>
+             <span className="mode-badge shadowing">
+               <span className="mode-icon">🗣️</span> Shadowing
+             </span>
           </div>
-          {lesson.youtubeUrl && (
-            <span className="source-indicator">Youtube</span>
-          )}
-          <span className="lesson-duration">
-            {lesson.duration || '02:30 minutes'}
-          </span>
+           {lesson.youtubeUrl && (
+             <span className="source-indicator">YouTube</span>
+           )}
+           <span className="lesson-duration">
+             {lesson.duration || '02:30 Min'}
+           </span>
         </div>
       </div>
     </div>
