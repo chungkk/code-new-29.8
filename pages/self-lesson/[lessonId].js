@@ -25,6 +25,8 @@ const SelfLessonPageContent = () => {
     const [isManualNavigation, setIsManualNavigation] = useState(false);
     const [pausedPositions, setPausedPositions] = useState({}); // { sentenceIndex: pausedTime }
   const [isTextHidden, setIsTextHidden] = useState(true);
+
+  const toggleTextVisibility = () => setIsTextHidden(!isTextHidden);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModePopup, setShowModePopup] = useState(false);
@@ -1024,7 +1026,7 @@ const SelfLessonPageContent = () => {
   }, [saveWord, checkSentenceCompletion, saveWordCompletion]);
 
   // Process text for dictation
-  const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted) => {
+  const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted, isTextHidden) => {
     const sentences = sentence.split(/\n+/);
     
     const processedSentences = sentences.map((sentence) => {
@@ -1058,31 +1060,37 @@ const SelfLessonPageContent = () => {
             </span>`;
           }
           
-          // Otherwise show input with hint button
-          return `<span class="word-container">
-            <button 
-              class="hint-btn" 
-              onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
-              title="Hinweise anzeigen"
-              type="button"
-            >
-              👁️
-            </button>
-            <input 
-              type="text" 
-              class="word-input" 
-              data-word-id="word-${wordIndex}"
-              oninput="window.checkWord(this, '${pureWord}', ${wordIndex})" 
-              onclick="window.handleInputClick(this, '${pureWord}')" 
-              onkeydown="window.disableArrowKeys(event)" 
-              onfocus="window.handleInputFocus(this, '${pureWord}')"
-              onblur="window.handleInputBlur(this, '${pureWord}')"
-              maxlength="${pureWord.length}" 
-              size="${pureWord.length}" 
-              placeholder="${'*'.repeat(pureWord.length)}"
-            />
-            <span class="word-punctuation">${nonAlphaNumeric}</span>
-          </span>`;
+           // Otherwise show input with hint button or full text if not hidden
+           if (!isTextHidden) {
+             return `<span class="word-container">
+               <span class="correct-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
+               <span class="word-punctuation">${nonAlphaNumeric}</span>
+             </span>`;
+           }
+           return `<span class="word-container">
+             <button
+               class="hint-btn"
+               onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
+               title="Hinweise anzeigen"
+               type="button"
+             >
+               👁️
+             </button>
+             <input
+               type="text"
+               class="word-input"
+               data-word-id="word-${wordIndex}"
+               oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
+               onclick="window.handleInputClick(this, '${pureWord}')"
+               onkeydown="window.disableArrowKeys(event)"
+               onfocus="window.handleInputFocus(this, '${pureWord}')"
+               onblur="window.handleInputBlur(this, '${pureWord}')"
+               maxlength="${pureWord.length}"
+               size="${pureWord.length}"
+               placeholder="${'*'.repeat(pureWord.length)}"
+             />
+             <span class="word-punctuation">${nonAlphaNumeric}</span>
+           </span>`;
         }
         return `<span>${word}</span>`;
       });
@@ -1106,7 +1114,7 @@ const SelfLessonPageContent = () => {
         allCompletedWords: completedWords
       });
       
-      const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
+       const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted, isTextHidden);
       setProcessedText(processed);
       
       if (typeof window !== 'undefined') {
@@ -1125,7 +1133,7 @@ const SelfLessonPageContent = () => {
         };
       }
     }
-  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded]);
+   }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, isTextHidden]);
 
   const handleBackToHome = () => router.push('/');
 
@@ -1194,25 +1202,9 @@ const SelfLessonPageContent = () => {
         
 
 
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <button
-              onClick={handleShowModePopup}
-              style={{
-                padding: '10px 20px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Lernmodus wählen
-            </button>
-          </div>
 
-          <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
+
+           <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
            <div className="shadowing-layout">
              {/* LEFT SIDE: Medien */}
              <div className="medien-section">
@@ -1275,10 +1267,10 @@ const SelfLessonPageContent = () => {
                </div>
              </div>
 
-             {/* MIDDLE: Aktueller Satz */}
-             <div className="current-sentence-section">
-              <div className="current-sentence-container">
-                <h3>Aktueller Satz</h3>
+              {/* MIDDLE: Aktueller Satz */}
+              <div className="current-sentence-section" style={{ flex: '1.5' }}>
+               <div className="current-sentence-container">
+                 <h3>Aktueller Satz</h3>
                 
                 {/* Current Sentence Dictation Input */}
                 {transcriptData[currentSentenceIndex] && (
@@ -1308,10 +1300,11 @@ const SelfLessonPageContent = () => {
                     </div>
                     
                     <div className="dictation-input-area">
-                      <div 
-                        className="dictation-text"
-                        dangerouslySetInnerHTML={{ __html: processedText }}
-                      />
+                     <div
+                       className="dictation-text"
+                       style={{ lineHeight: '1.6', wordWrap: 'break-word' }}
+                       dangerouslySetInnerHTML={{ __html: processedText }}
+                     />
                     </div>
                     
                     <div 
@@ -1347,28 +1340,29 @@ const SelfLessonPageContent = () => {
               </div>
             </div>
             
-             {/* RIGHT SIDE: Satzliste */}
-              <div className="sentence-list-section">
+              {/* RIGHT SIDE: Satzliste */}
+               <div className="sentence-list-section" style={{ flex: '1.2' }}>
                 <div className="sentence-list-container">
                   <h3>Satzliste</h3>
                 
-                {/* Sentence List */}
-                <div className="sentence-list">
-                  {transcriptData.map((segment, index) => (
-                    <SentenceListItem
-                      key={index}
-                      segment={segment}
-                      index={index}
-                      currentSentenceIndex={currentSentenceIndex}
-                      currentTime={currentTime}
-                      isCompleted={completedSentences.includes(index)}
-                      lessonId={lessonId}
-                      onSentenceClick={handleSentenceClick}
-                      formatTime={formatTime}
-                      maskText={maskText}
-                    />
-                  ))}
-                </div>
+                 {/* Sentence List */}
+                 <div className="sentence-list" style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '10px' }}>
+                   {transcriptData.map((segment, index) => (
+                     <SentenceListItem
+                       key={index}
+                       segment={segment}
+                       index={index}
+                       currentSentenceIndex={currentSentenceIndex}
+                       currentTime={currentTime}
+                       isCompleted={completedSentences.includes(index)}
+                       lessonId={lessonId}
+                       onSentenceClick={handleSentenceClick}
+                       formatTime={formatTime}
+                       maskText={maskText}
+                       isTextHidden={isTextHidden}
+                     />
+                   ))}
+                 </div>
               </div>
             </div>
           </div>
@@ -1392,15 +1386,47 @@ const SelfLessonPageContent = () => {
           />
         )}
 
-        {showModePopup && lesson && (
-          <ModeSelectionPopup
-            lesson={lesson}
-            onClose={handleCloseModePopup}
-            onSelectMode={handleModeSelect}
-          />
-        )}
-      </>
-    );
+         {showModePopup && lesson && (
+           <ModeSelectionPopup
+             lesson={lesson}
+             onClose={handleCloseModePopup}
+             onSelectMode={handleModeSelect}
+           />
+         )}
+
+         {/* Fixed Modus Toggle Button */}
+         <button
+           onClick={toggleTextVisibility}
+           style={{
+             position: 'fixed',
+             top: '120px',
+             right: '20px',
+             padding: '12px 20px',
+             background: isTextHidden
+               ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+               : 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+             color: 'white',
+             border: 'none',
+             borderRadius: '25px',
+             cursor: 'pointer',
+             fontSize: '14px',
+             fontWeight: 'bold',
+             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+             zIndex: 1000,
+             transition: 'all 0.3s ease',
+             display: 'flex',
+             alignItems: 'center',
+             gap: '8px'
+           }}
+           onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+           onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+           title={isTextHidden ? 'Text anzeigen' : 'Text verbergen'}
+         >
+           <span>👁️</span>
+           <span>{isTextHidden ? 'Versteckt' : 'Sichtbar'}</span>
+         </button>
+       </>
+     );
   };
 
 const SelfLessonPage = () => {

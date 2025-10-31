@@ -1413,6 +1413,7 @@ body::before {
     top: 120px;
     z-index: 10;
     align-self: flex-start;
+    max-height: calc(100vh - 140px);
     border-radius: 20px;
     padding: 4px;
     background: linear-gradient(135deg, #FF6B9D, #4ECDC4, #FFE66D);

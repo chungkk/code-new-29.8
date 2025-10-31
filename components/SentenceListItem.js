@@ -1,19 +1,20 @@
 import React from 'react';
 import HoverableWord from './HoverableWord';
 
-const SentenceListItem = ({ 
-  segment, 
-  index, 
+const SentenceListItem = ({
+  segment,
+  index,
   currentSentenceIndex,
   currentTime,
   isCompleted,
   lessonId,
   onSentenceClick,
   formatTime,
-  maskText
+  maskText,
+  isTextHidden
 }) => {
   const renderSentenceText = () => {
-    if (!isCompleted) {
+    if (isTextHidden && !isCompleted) {
       return maskText(segment.text.trim());
     }
 
@@ -39,14 +40,14 @@ const SentenceListItem = ({
       <div className="sentence-number">
         {index + 1}
       </div>
-      <div className="sentence-content">
-        <div className="sentence-text">
-          {renderSentenceText()}
-        </div>
-        <div className="sentence-time">
-          {formatTime(segment.start)} - {formatTime(segment.end)}
-        </div>
-      </div>
+       <div className="sentence-content">
+         <div className="sentence-text" style={{ fontSize: '14px', lineHeight: '1.2', whiteSpace: 'normal' }}>
+           {renderSentenceText()}
+         </div>
+         <div className="sentence-time" style={{ fontSize: '12px' }}>
+           {formatTime(segment.start)} - {formatTime(segment.end)}
+         </div>
+       </div>
       <div className="sentence-actions">
         <button 
           className="action-btn"
