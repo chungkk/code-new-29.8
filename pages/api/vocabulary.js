@@ -2,7 +2,6 @@ import { requireAuth } from '../../lib/authMiddleware';
 import { Vocabulary } from '../../lib/models/Vocabulary';
 
 async function handler(req, res) {
-  const userId = req.user._id.toString();
 
   if (req.method === 'GET') {
     try {

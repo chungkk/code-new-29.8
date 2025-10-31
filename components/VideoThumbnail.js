@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 // Helper function to extract YouTube video ID from various URL formats
 const getYouTubeVideoId = (url) => {
@@ -25,9 +26,11 @@ const VideoThumbnail = ({ lesson, className = '' }) => {
 
       return (
         <div className={`video-thumbnail ${className}`}>
-          <img
+          <Image
             src={thumbnailUrl}
             alt={lesson.displayTitle}
+            width={480}
+            height={360}
             onError={(e) => {
               // Fallback to medium quality if high quality fails
               e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
@@ -45,9 +48,11 @@ const VideoThumbnail = ({ lesson, className = '' }) => {
   if (lesson.thumbnail) {
     return (
       <div className={`video-thumbnail ${className}`}>
-        <img
+        <Image
           src={lesson.thumbnail}
           alt={lesson.displayTitle}
+          width={480}
+          height={360}
         />
       </div>
     );
