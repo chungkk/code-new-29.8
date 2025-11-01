@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "German Shadowing App - Next.js Version",
   "private": true,
-   "scripts": {
-     "dev": "next dev",
-     "build": "next build",
-     "start": "npm run cleanup-files & next start",
-     "lint": "next lint",
-     "export": "next export",
-     "cleanup-files": "node scripts/cleanup-files.js"
-   },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "npm run cleanup-files & next start",
+    "lint": "next lint",
+    "export": "next export",
+    "cleanup-files": "node scripts/cleanup-files.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
@@ -19,6 +19,7 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
     "next": "^14.0.0",
+    "next-auth": "^4.24.13",
     "node-cron": "^4.2.1",
     "openai": "^6.7.0",
     "react": "^18.2.0",

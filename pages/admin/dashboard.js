@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import ProtectedPage from '../../components/ProtectedPage';
+import { useTheme } from '../../context/ThemeContext';
 import { fetchWithAuth } from '../../lib/api';
 import { toast } from 'react-toastify';
+import { SkeletonStats, SkeletonTable } from '../../components/SkeletonLoader';
+import { NoLessonsFound } from '../../components/EmptyState';
 import styles from '../../styles/adminDashboard.module.css';
 
 function AdminDashboardContent() {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [lessons, setLessons] = useState([]);
   const [selectedLessons, setSelectedLessons] = useState(new Set());
   const [showForm, setShowForm] = useState(false);
@@ -735,8 +739,14 @@ function AdminDashboardContent() {
       <div className={styles.container}>
         {/* Header Section */}
         <div className={styles.header}>
-          <div>
+          <div className={styles.headerContent}>
             <h1 className={styles.title}>Admin-Dashboard</h1>
+            <p className={styles.subtitle}>Verwalten Sie Lektionen, Audio und Dateien</p>
+          </div>
+          <div className={styles.headerActions}>
+            <button onClick={toggleTheme} className={styles.themeToggle} title="Theme wechseln">
+              {theme === 'dark' ? '☀️ Hell' : '🌙 Dunkel'}
+            </button>
           </div>
         </div>
 
@@ -1232,14 +1242,13 @@ mit dem Top Thema`}
            </div>
 
           {/* Search Bar */}
-          <div style={{ padding: '20px', borderBottom: '1px solid #f0f0f0' }}>
+          <div className={styles.searchContainer}>
             <input
               type="text"
               placeholder="🔍 Nach ID, Titel, Beschreibung oder Niveau suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.input}
-              style={{ maxWidth: '500px' }}
+              className={styles.searchInput}
             />
           </div>
 
@@ -1362,11 +1371,11 @@ mit dem Top Thema`}
                 </div>
               </div>
 
-             <div style={{ padding: '20px' }}>
+             <div className={styles.filesContent}>
                {/* Auto-delete section */}
-               <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
-                 <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⏰ Automatische Bereinigung</h3>
-                 <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#856404' }}>
+               <div className={styles.autoDeleteSection}>
+                 <h3 className={styles.autoDeleteTitle}>⏰ Automatische Bereinigung</h3>
+                 <p className={styles.autoDeleteText}>
                    Dateien werden automatisch nach 3 Tagen gelöscht, wenn sie nicht verwendet werden.
                    Sie können auch manuell alle alten Dateien löschen.
                  </p>
@@ -1405,8 +1414,8 @@ mit dem Top Thema`}
                </div>
 
                {/* Audio Files Section */}
-               <div style={{ marginBottom: '30px' }}>
-                 <h3 style={{ borderBottom: '2px solid #007bff', paddingBottom: '5px', marginBottom: '15px' }}>
+               <div className={styles.fileTypeSection}>
+                 <h3 className={styles.fileTypeHeader}>
                    🎵 Audio-Dateien ({unusedFiles.audio.length})
                  </h3>
                  {unusedFiles.audio.length > 0 ? (
@@ -1475,8 +1484,8 @@ mit dem Top Thema`}
                </div>
 
                {/* JSON Files Section */}
-               <div>
-                 <h3 style={{ borderBottom: '2px solid #28a745', paddingBottom: '5px', marginBottom: '15px' }}>
+               <div className={styles.fileTypeSection}>
+                 <h3 className={styles.fileTypeHeader}>
                    📄 JSON/Text-Dateien ({unusedFiles.json.length})
                  </h3>
                  {unusedFiles.json.length > 0 ? (

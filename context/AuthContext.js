@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
+import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from 'next-auth/react';
 
 const AuthContext = createContext();
 
@@ -7,10 +8,32 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    checkUser();
-  }, []);
+    if (status === 'loading') {
+      setLoading(true);
+      return;
+    }
+
+    if (session) {
+      // Nếu có session từ NextAuth (Google login)
+      setUser({
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role
+      });
+      // Lưu custom token để tương thích với hệ thống JWT hiện tại
+      if (session.customToken) {
+        localStorage.setItem('token', session.customToken);
+      }
+      setLoading(false);
+    } else {
+      // Kiểm tra JWT token truyền thống
+      checkUser();
+    }
+  }, [session, status]);
 
   const checkUser = async () => {
     const token = localStorage.getItem('token');
@@ -120,14 +143,28 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const loginWithGoogle = async () => {
+    try {
+      await nextAuthSignIn('google', { callbackUrl: '/dashboard' });
+      return { success: true };
+    } catch (error) {
+      console.error('Google login error:', error);
+      return { success: false, error: 'Google login failed' };
+    }
+  };
+
+  const logout = async () => {
     localStorage.removeItem('token');
     setUser(null);
+    // Nếu đang dùng NextAuth session, đăng xuất NextAuth
+    if (session) {
+      await nextAuthSignOut({ redirect: false });
+    }
     router.push('/auth/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshToken, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

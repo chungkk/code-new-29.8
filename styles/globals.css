@@ -1,48 +1,275 @@
 :root {
-    /* 🎨 RETRO VINTAGE THEME - Classic & Elegant */
+    /* 🎨 MODERN MINIMALIST DESIGN SYSTEM - 2025 */
 
-    /* Main Colors - Soft Pastels */
-    --primary-color: #D4A574;      /* Warm Beige */
-    --secondary-color: #A8DADC;    /* Soft Mint */
-    --accent-color: #F4A261;       /* Terracotta */
-    --success-color: #B5E48C;      /* Sage Green */
-    --warning-color: #F4E285;      /* Cream Yellow */
-    --danger-color: #E76F51;       /* Coral */
-    --purple-color: #C77DFF;       /* Lavender */
-    --blue-color: #457B9D;         /* Steel Blue */
+    /* ========================================
+       SPACING SCALE (8px base)
+       ======================================== */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
 
-    /* Backgrounds - Vibrant & Cheerful */
-    --bg-color: linear-gradient(135deg, #667eea 0%, #764ba2 20%, #f093fb 40%, #f5576c 60%, #4facfe 80%, #00f2fe 100%);
-    --bg-color-solid: #F7F3E9;     /* Cream */
-    --surface-color: rgba(255, 255, 255, 0.95);       /* Semi-transparent white cards */
-    --surface-gradient: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    /* ========================================
+       TYPOGRAPHY SCALE
+       ======================================== */
+    --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-serif: Georgia, 'Times New Roman', serif;
+    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 30px;
+    --font-size-4xl: 36px;
+    --font-size-5xl: 48px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* ========================================
+       BORDER RADIUS
+       ======================================== */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* ========================================
+       LIGHT MODE COLORS
+       ======================================== */
+    /* Primary Brand Colors */
+    --primary-50: #f0f9ff;
+    --primary-100: #e0f2fe;
+    --primary-200: #bae6fd;
+    --primary-300: #7dd3fc;
+    --primary-400: #38bdf8;
+    --primary-500: #0ea5e9;
+    --primary-600: #0284c7;
+    --primary-700: #0369a1;
+    --primary-800: #075985;
+    --primary-900: #0c4a6e;
+
+    /* Accent Colors */
+    --accent-50: #fdf4ff;
+    --accent-100: #fae8ff;
+    --accent-200: #f5d0fe;
+    --accent-300: #f0abfc;
+    --accent-400: #e879f9;
+    --accent-500: #d946ef;
+    --accent-600: #c026d3;
+    --accent-700: #a21caf;
+    --accent-800: #86198f;
+    --accent-900: #701a75;
+
+    /* Success Colors */
+    --success-50: #f0fdf4;
+    --success-100: #dcfce7;
+    --success-200: #bbf7d0;
+    --success-300: #86efac;
+    --success-400: #4ade80;
+    --success-500: #22c55e;
+    --success-600: #16a34a;
+    --success-700: #15803d;
+    --success-800: #166534;
+    --success-900: #14532d;
+
+    /* Warning Colors */
+    --warning-50: #fffbeb;
+    --warning-100: #fef3c7;
+    --warning-200: #fde68a;
+    --warning-300: #fcd34d;
+    --warning-400: #fbbf24;
+    --warning-500: #f59e0b;
+    --warning-600: #d97706;
+    --warning-700: #b45309;
+    --warning-800: #92400e;
+    --warning-900: #78350f;
+
+    /* Danger Colors */
+    --danger-50: #fef2f2;
+    --danger-100: #fee2e2;
+    --danger-200: #fecaca;
+    --danger-300: #fca5a5;
+    --danger-400: #f87171;
+    --danger-500: #ef4444;
+    --danger-600: #dc2626;
+    --danger-700: #b91c1c;
+    --danger-800: #991b1b;
+    --danger-900: #7f1d1d;
+
+    /* Neutral/Gray Scale */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    /* ========================================
+       THEME COLORS (Light Mode Default)
+       ======================================== */
+    --primary-color: var(--primary-500);
+    --primary-hover: var(--primary-600);
+    --primary-light: var(--primary-100);
+
+    --secondary-color: var(--accent-500);
+    --accent-color: var(--accent-600);
+    --success-color: var(--success-500);
+    --warning-color: var(--warning-500);
+    --danger-color: var(--danger-500);
+    --purple-color: #a855f7;
+    --blue-color: var(--primary-600);
+
+    /* Background Colors */
+    --bg-color: var(--gray-50);
+    --bg-color-secondary: var(--gray-100);
+    --bg-color-solid: #ffffff;
+    --surface-color: #ffffff;
+    --surface-hover: var(--gray-50);
+
+    /* Gradient Backgrounds */
+    --bg-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --bg-gradient-success: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    --bg-gradient-rainbow: linear-gradient(135deg, #667eea 0%, #764ba2 20%, #f093fb 40%, #f5576c 60%, #4facfe 80%, #00f2fe 100%);
+
+    --surface-gradient: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
 
     /* Text Colors */
-    --text-color: #2F2F2F;         /* Deep charcoal */
-    --text-color-light: #6B6B6B;   /* Medium gray */
-    --text-color-white: #FFFFFF;   /* White text */
+    --text-color: var(--gray-900);
+    --text-color-secondary: var(--gray-600);
+    --text-color-light: var(--gray-500);
+    --text-color-white: #ffffff;
+    --text-color-muted: var(--gray-400);
 
-    /* Borders & Shadows - Classic */
-    --border-color: #D4A574;
-    --border-colorful: linear-gradient(90deg, #D4A574, #A8DADC, #F4A261);
-    --box-shadow: 0 4px 12px rgba(212, 165, 116, 0.2);
-    --box-shadow-hover: 0 6px 18px rgba(212, 165, 116, 0.3);
-    --glow-pink: 0 0 15px rgba(212, 165, 116, 0.4);
-    --glow-blue: 0 0 15px rgba(168, 218, 220, 0.4);
-    --glow-yellow: 0 0 15px rgba(244, 162, 97, 0.4);
+    /* Border Colors */
+    --border-color: var(--gray-200);
+    --border-color-hover: var(--gray-300);
+    --border-color-focus: var(--primary-500);
+
+    /* ========================================
+       SHADOWS & EFFECTS
+       ======================================== */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    --box-shadow: var(--shadow-md);
+    --box-shadow-hover: var(--shadow-lg);
+    --box-shadow-focus: 0 0 0 3px rgba(14, 165, 233, 0.1);
+
+    /* Colored Shadows */
+    --shadow-primary: 0 10px 25px -5px rgba(14, 165, 233, 0.3);
+    --shadow-success: 0 10px 25px -5px rgba(34, 197, 94, 0.3);
+    --shadow-warning: 0 10px 25px -5px rgba(245, 158, 11, 0.3);
+    --shadow-danger: 0 10px 25px -5px rgba(239, 68, 68, 0.3);
+
+    /* Glows */
+    --glow-primary: 0 0 20px rgba(14, 165, 233, 0.4);
+    --glow-accent: 0 0 20px rgba(217, 70, 239, 0.4);
+    --glow-success: 0 0 20px rgba(34, 197, 94, 0.4);
+
+    /* Legacy Support */
+    --glow-pink: var(--glow-accent);
+    --glow-blue: var(--glow-primary);
+    --glow-yellow: var(--shadow-warning);
+    --border-colorful: linear-gradient(90deg, var(--primary-500), var(--accent-500), var(--warning-500));
+
+    /* ========================================
+       TRANSITIONS
+       ======================================== */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slowest: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ========================================
+       Z-INDEX SCALE
+       ======================================== */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+[data-theme="dark"] {
+    /* Dark Mode Backgrounds */
+    --bg-color: #0f1419;
+    --bg-color-secondary: #1a1f2e;
+    --bg-color-solid: #161b22;
+    --surface-color: #1f2937;
+    --surface-hover: #374151;
+    --surface-gradient: linear-gradient(135deg, rgba(31, 41, 55, 0.98) 0%, rgba(55, 65, 81, 0.95) 100%);
+
+    /* Dark Mode Text */
+    --text-color: #f9fafb;
+    --text-color-secondary: #d1d5db;
+    --text-color-light: #9ca3af;
+    --text-color-muted: #6b7280;
+
+    /* Dark Mode Borders */
+    --border-color: #374151;
+    --border-color-hover: #4b5563;
+
+    /* Dark Mode Shadows */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+
+    --box-shadow: var(--shadow-md);
+    --box-shadow-hover: var(--shadow-xl);
+
+    /* Dark Mode - Keep brand colors vibrant */
+    --primary-color: var(--primary-400);
+    --primary-hover: var(--primary-500);
+    --primary-light: var(--primary-900);
 }
 
 body {
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: var(--font-family-sans);
     background: var(--bg-color);
     background-attachment: fixed;
     color: var(--text-color);
-    line-height: 1.6;
+    line-height: var(--line-height-normal);
     margin: 0;
     padding: 0;
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    transition: background-color var(--transition-base), color var(--transition-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .App {

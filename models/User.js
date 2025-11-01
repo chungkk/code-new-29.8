@@ -16,8 +16,19 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Vui lòng nhập mật khẩu'],
+    required: function() {
+      return !this.isGoogleUser;
+    },
     minlength: 6
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
   },
    role: {
      type: String,
@@ -36,7 +47,8 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+  // Chỉ hash password nếu password tồn tại và được modified
+  if (!this.password || !this.isModified('password')) {
     return next();
   }
 

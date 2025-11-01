@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 export default function Login() {
   const { user, loading } = useAuth();
@@ -72,6 +73,19 @@ export default function Login() {
           </div>
 
           <AuthForm mode="login" />
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            margin: '20px 0',
+            gap: '10px'
+          }}>
+            <div style={{ flex: 1, height: '1px', background: '#ddd' }}></div>
+            <span style={{ color: '#666', fontSize: '14px' }}>oder</span>
+            <div style={{ flex: 1, height: '1px', background: '#ddd' }}></div>
+          </div>
+
+          <GoogleSignInButton />
 
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <p style={{ color: '#666', fontSize: '14px' }}>
