@@ -21,7 +21,15 @@ function UserDashboard() {
   const [filterLesson, setFilterLesson] = useState('all');
   const [allLessons, setAllLessons] = useState([]);
   const [activeTab, setActiveTab] = useState('all-lessons');
-  
+
+  // Password change form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   // Check URL for tab parameter
   useEffect(() => {
     if (router.query.tab) {
@@ -69,11 +77,57 @@ function UserDashboard() {
   const calculateProgress = (lessonId) => {
     const lessonProgress = progress.filter(p => p.lessonId === lessonId);
     if (lessonProgress.length === 0) return 0;
-    
+
     // Get max completion percent across all modes (shadowing/dictation)
     const maxProgress = Math.max(...lessonProgress.map(p => p.completionPercent || 0));
-    
+
     return Math.min(100, maxProgress);
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Neue Passwörter stimmen nicht überein!');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('Neues Passwort muss mindestens 6 Zeichen lang sein!');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Passwort erfolgreich geändert!');
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Fehler beim Ändern des Passworts');
+      }
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast.error('Fehler beim Ändern des Passworts');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
 
@@ -586,26 +640,77 @@ function UserDashboard() {
                </div>
              </div>
 
-             {/* Profile Card */}
-             <div className={styles.settingCard}>
-               <div className={styles.settingCardHeader}>
-                 <div className={styles.settingCardIcon}>👤</div>
-                 <h3 className={styles.settingCardTitle}>Profil</h3>
-               </div>
-               <div className={styles.settingCardBody}>
-                 <div className={styles.profileInfo}>
-                   <div className={styles.profileItem}>
-                     <span className={styles.profileLabel}>Name:</span>
-                     <span className={styles.profileValue}>{user?.name}</span>
-                   </div>
-                   <div className={styles.profileItem}>
-                     <span className={styles.profileLabel}>E-Mail:</span>
-                     <span className={styles.profileValue}>{user?.email}</span>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
+              {/* Profile Card */}
+              <div className={styles.settingCard}>
+                <div className={styles.settingCardHeader}>
+                  <div className={styles.settingCardIcon}>👤</div>
+                  <h3 className={styles.settingCardTitle}>Profil</h3>
+                </div>
+                <div className={styles.settingCardBody}>
+                  <div className={styles.profileInfo}>
+                    <div className={styles.profileItem}>
+                      <span className={styles.profileLabel}>Name:</span>
+                      <span className={styles.profileValue}>{user?.name}</span>
+                    </div>
+                    <div className={styles.profileItem}>
+                      <span className={styles.profileLabel}>E-Mail:</span>
+                      <span className={styles.profileValue}>{user?.email}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Change Card */}
+              <div className={styles.settingCard}>
+                <div className={styles.settingCardHeader}>
+                  <div className={styles.settingCardIcon}>🔒</div>
+                  <h3 className={styles.settingCardTitle}>Passwort ändern</h3>
+                </div>
+                <div className={styles.settingCardBody}>
+                  <form onSubmit={handlePasswordChange} className={styles.passwordForm}>
+                    <div className={styles.passwordField}>
+                      <label className={styles.passwordLabel}>Aktuelles Passwort</label>
+                      <input
+                        type="password"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                        className={styles.passwordInput}
+                        required
+                      />
+                    </div>
+                    <div className={styles.passwordField}>
+                      <label className={styles.passwordLabel}>Neues Passwort</label>
+                      <input
+                        type="password"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                        className={styles.passwordInput}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <div className={styles.passwordField}>
+                      <label className={styles.passwordLabel}>Neues Passwort bestätigen</label>
+                      <input
+                        type="password"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                        className={styles.passwordInput}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={passwordLoading}
+                      className={styles.passwordSubmitBtn}
+                    >
+                      {passwordLoading ? '🔄 Ändern...' : '🔒 Passwort ändern'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
          )}
 
 

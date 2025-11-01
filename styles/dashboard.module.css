@@ -1085,3 +1085,70 @@
   color: var(--text-color);
   font-weight: var(--font-weight-medium);
 }
+
+/* ========================================
+   PASSWORD CHANGE FORM
+   ======================================== */
+.passwordForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.passwordField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.passwordLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color-secondary);
+}
+
+.passwordInput {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.passwordInput:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.passwordSubmitBtn {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.passwordSubmitBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.passwordSubmitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.passwordSubmitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

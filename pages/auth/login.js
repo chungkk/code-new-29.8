@@ -42,14 +42,15 @@ export default function Login() {
          <title>Anmelden - Deutsch Shadowing</title>
       </Head>
 
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px'
-      }}>
+       <div style={{
+         minHeight: '100vh',
+         display: 'flex',
+         alignItems: 'center',
+         justifyContent: 'center',
+         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+         padding: '20px',
+         paddingTop: '80px'
+       }}>
         <div style={{
           background: 'white',
           padding: '40px',
