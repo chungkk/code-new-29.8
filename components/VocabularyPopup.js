@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTranslation = '' }) => {
+  const { user } = useAuth();
   const [translation, setTranslation] = useState(preTranslation);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!preTranslation);
@@ -22,7 +24,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
             text: word,
             context: context || '', // Pass context for better AI translation
             sourceLang: 'de',
-            targetLang: 'vi'
+            targetLang: user?.nativeLanguage || 'vi'
           })
         });
 
@@ -49,7 +51,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
     if (word && !preTranslation) {
       fetchTranslation();
     }
-  }, [word, context, preTranslation]);
+  }, [word, context, preTranslation, user?.nativeLanguage]);
 
   useEffect(() => {
     const handleEscape = (e) => {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { speakText } from '../lib/textToSpeech';
+import { useAuth } from '../context/AuthContext';
 
 const HoverableWord = ({ word, onWordClick }) => {
+  const { user } = useAuth();
   const [showTooltip, setShowTooltip] = useState(false);
   const [translation, setTranslation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,17 +32,17 @@ const HoverableWord = ({ word, onWordClick }) => {
      if (!translation && !loading) {
        setLoading(true);
        try {
-         const response = await fetch('/api/translate', {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-           body: JSON.stringify({
-             text: pureWord,
-             sourceLang: 'de',
-             targetLang: 'vi'
-           })
-         });
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: pureWord,
+              sourceLang: 'de',
+              targetLang: user?.nativeLanguage || 'vi'
+            })
+          });
 
          if (response.ok) {
            const data = await response.json();

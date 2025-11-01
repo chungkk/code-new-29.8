@@ -19,15 +19,20 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Vui lòng nhập mật khẩu'],
     minlength: 6
   },
-  role: {
-    type: String,
-    enum: ['member', 'admin'],
-    default: 'member'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+   role: {
+     type: String,
+     enum: ['member', 'admin'],
+     default: 'member'
+   },
+   nativeLanguage: {
+     type: String,
+     default: 'vi',
+     enum: ['vi', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'] // Add more as needed
+   },
+   createdAt: {
+     type: Date,
+     default: Date.now
+   }
 });
 
 UserSchema.pre('save', async function(next) {

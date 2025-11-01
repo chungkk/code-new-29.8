@@ -12,6 +12,20 @@ const GOOGLE_TRANSLATE_API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY || '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 
+const LANGUAGE_NAMES = {
+  vi: 'Tiếng Việt',
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  it: 'Italian',
+  pt: 'Portuguese',
+  ru: 'Russian',
+  ja: 'Japanese',
+  ko: 'Korean',
+  zh: 'Chinese'
+};
+
 /**
  * Translate using DeepL (BEST for German, especially DE→VI)
  * Free tier: 500,000 characters/month
@@ -84,20 +98,22 @@ async function translateWithGoogle(text, sourceLang, targetLang) {
 /**
  * Translate using OpenAI GPT-4 (high quality but expensive)
  */
-async function translateWithOpenAI(text, context = '') {
+async function translateWithOpenAI(text, context = '', targetLang = 'vi') {
   if (!OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY not configured');
   }
 
+  const targetLanguageName = LANGUAGE_NAMES[targetLang] || 'the target language';
+
   const prompt = context
-    ? `Dịch từ tiếng Đức sang tiếng Việt. Từ này xuất hiện trong ngữ cảnh: "${context}"
+    ? `Translate from German to ${targetLanguageName}. This word appears in context: "${context}"
 
-Từ: ${text}
+Word: ${text}
 
-Trả về 2-3 nghĩa tiếng Việt phổ biến, ngăn cách bằng dấu phẩy. Ví dụ: "nhà, ngôi nhà, tòa nhà". Không giải thích thêm.`
-    : `Dịch từ tiếng Đức sang tiếng Việt: ${text}
+Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Example: "house, home, building". No explanations.`
+    : `Translate from German to ${targetLanguageName}: ${text}
 
-Trả về 2-3 nghĩa tiếng Việt phổ biến, ngăn cách bằng dấu phẩy. Ví dụ: "nhà, ngôi nhà, tòa nhà". Không giải thích thêm.`;
+Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Example: "house, home, building". No explanations.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -133,20 +149,22 @@ Trả về 2-3 nghĩa tiếng Việt phổ biến, ngăn cách bằng dấu ph�
 /**
  * Translate using Groq AI (improved prompt for better German-Vietnamese)
  */
-async function translateWithGroq(text, context = '') {
+async function translateWithGroq(text, context = '', targetLang = 'vi') {
   if (!GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY not configured');
   }
 
+  const targetLanguageName = LANGUAGE_NAMES[targetLang] || 'the target language';
+
   const prompt = context
-    ? `Dịch từ tiếng Đức sang tiếng Việt. Từ này xuất hiện trong ngữ cảnh: "${context}"
+    ? `Translate from German to ${targetLanguageName}. This word appears in context: "${context}"
 
-Từ cần dịch: ${text}
+Word to translate: ${text}
 
-CHỈ trả về nghĩa tiếng Việt, KHÔNG giải thích, KHÔNG thêm bất kỳ văn bản nào khác. Nếu là danh từ thì KHÔNG thêm mạo từ (der/die/das). Bản dịch phải ngắn gọn, tự nhiên và chính xác.`
-    : `Dịch từ tiếng Đức sang tiếng Việt: ${text}
+ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional text. If it's a noun, DO NOT add articles (der/die/das). Translation must be concise, natural and accurate.`
+    : `Translate from German to ${targetLanguageName}: ${text}
 
-CHỈ trả về nghĩa tiếng Việt, KHÔNG giải thích, KHÔNG thêm bất kỳ văn bản nào khác. Nếu là danh từ thì KHÔNG thêm mạo từ (der/die/das). Bản dịch phải ngắn gọn, tự nhiên và chính xác.`;
+ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional text. If it's a noun, DO NOT add articles (der/die/das). Translation must be concise, natural and accurate.`;
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -159,7 +177,7 @@ CHỈ trả về nghĩa tiếng Việt, KHÔNG giải thích, KHÔNG thêm bất
       messages: [
         {
           role: 'system',
-          content: 'Bạn là chuyên gia dịch thuật Đức-Việt với 20 năm kinh nghiệm. Bạn luôn cung cấp bản dịch chính xác, tự nhiên và phù hợp với ngữ cảnh. CHỈ trả về bản dịch tiếng Việt, KHÔNG thêm giải thích hay văn bản khác.',
+          content: `You are an expert German-${targetLanguageName} translator with 20 years of experience. You always provide accurate, natural translations that fit the context. ONLY return the ${targetLanguageName} translation, NO explanations or additional text.`,
         },
         {
           role: 'user',
@@ -221,7 +239,7 @@ export default async function handler(req, res) {
     // PRIORITY 1: OpenAI GPT-4 mini (High quality, context-aware)
     if (OPENAI_API_KEY) {
       try {
-        translation = await translateWithOpenAI(cleanText, context);
+        translation = await translateWithOpenAI(cleanText, context, targetLang);
         method = 'openai-gpt4';
 
         if (translation && translation !== cleanText) {
@@ -291,7 +309,7 @@ export default async function handler(req, res) {
     // PRIORITY 4: Groq AI with improved prompt (Free but less accurate)
     if (GROQ_API_KEY) {
       try {
-        translation = await translateWithGroq(cleanText, context);
+        translation = await translateWithGroq(cleanText, context, targetLang);
         method = 'groq-llama';
         
         if (translation && translation !== cleanText) {

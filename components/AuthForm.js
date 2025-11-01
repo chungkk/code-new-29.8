@@ -6,7 +6,8 @@ export default function AuthForm({ mode }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    nativeLanguage: 'vi'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -69,6 +70,46 @@ export default function AuthForm({ mode }) {
             }}
              placeholder="Geben Sie Ihren Namen ein"
           />
+        </div>
+      )}
+
+      {mode === 'register' && (
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '5px',
+            fontWeight: 'bold',
+            color: '#333'
+          }}>
+            Native Language *
+          </label>
+          <select
+            name="nativeLanguage"
+            value={formData.nativeLanguage}
+            onChange={handleChange}
+            required
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #ddd',
+              borderRadius: '6px',
+              fontSize: '16px',
+              boxSizing: 'border-box',
+              background: 'white'
+            }}
+          >
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+            <option value="ru">Русский</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="zh">中文</option>
+          </select>
         </div>
       )}
 

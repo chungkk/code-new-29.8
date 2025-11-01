@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    const { name, email, password } = req.body;
+    const { name, email, password, nativeLanguage = 'vi' } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Tên, email và mật khẩu là bắt buộc' });
@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     const user = new User({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      password
+      password,
+      nativeLanguage
     });
 
     await user.save();
@@ -37,7 +38,8 @@ export default async function handler(req, res) {
       userId: user._id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      nativeLanguage: user.nativeLanguage
     });
 
     res.status(201).json({
@@ -46,7 +48,8 @@ export default async function handler(req, res) {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        nativeLanguage: user.nativeLanguage
       }
     });
   } catch (error) {

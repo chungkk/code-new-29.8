@@ -239,12 +239,18 @@ function UserDashboard() {
           >
             📚 Alle Lektionen
           </button>
-          <button
-            onClick={() => setActiveTab('vocabulary')}
-            className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.active : ''}`}
-          >
-            📝 Wortschatz ({vocabulary.length})
-          </button>
+           <button
+             onClick={() => setActiveTab('vocabulary')}
+             className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.active : ''}`}
+           >
+             📝 Wortschatz ({vocabulary.length})
+           </button>
+           <button
+             onClick={() => setActiveTab('settings')}
+             className={`${styles.tab} ${activeTab === 'settings' ? styles.active : ''}`}
+           >
+             ⚙️ Einstellungen
+           </button>
         </div>
 
         {/* All Lessons Tab */}
@@ -597,13 +603,102 @@ function UserDashboard() {
                    ))
                    )}
                  </div>
-               </>
-             )}
-          </div>
-        )}
+                </>
+              )}
+           </div>
+         )}
+
+         {/* Settings Tab */}
+         {activeTab === 'settings' && (
+           <div>
+             <div className={styles.lessonsContainer}>
+               <div className={styles.lessonsHeader}>
+                 <h2 className={styles.lessonsHeaderTitle}>⚙️ Einstellungen</h2>
+               </div>
+
+               <div style={{
+                 background: 'white',
+                 padding: '30px',
+                 borderRadius: '12px',
+                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                 marginTop: '20px'
+               }}>
+                 <h3 style={{ marginBottom: '20px', color: '#333' }}>Spracheinstellungen</h3>
+
+                 <div style={{ marginBottom: '20px' }}>
+                   <label style={{
+                     display: 'block',
+                     marginBottom: '8px',
+                     fontWeight: 'bold',
+                     color: '#333'
+                   }}>
+                     Muttersprache (für Übersetzungen):
+                   </label>
+                   <select
+                     value={user?.nativeLanguage || 'vi'}
+                     onChange={async (e) => {
+                       try {
+                         const response = await fetch('/api/auth/update-profile', {
+                           method: 'PUT',
+                           headers: {
+                             'Content-Type': 'application/json',
+                             'Authorization': `Bearer ${localStorage.getItem('token')}`
+                           },
+                           body: JSON.stringify({
+                             nativeLanguage: e.target.value
+                           })
+                         });
+
+                         if (response.ok) {
+                           toast.success('Sprache aktualisiert! Änderungen werden beim nächsten Laden wirksam.');
+                           // Refresh user data
+                           window.location.reload();
+                         } else {
+                           toast.error('Fehler beim Aktualisieren der Sprache');
+                         }
+                       } catch (error) {
+                         console.error('Update error:', error);
+                         toast.error('Fehler beim Aktualisieren der Sprache');
+                       }
+                     }}
+                     style={{
+                       width: '100%',
+                       maxWidth: '300px',
+                       padding: '12px',
+                       border: '1px solid #ddd',
+                       borderRadius: '6px',
+                       fontSize: '16px',
+                       background: 'white'
+                     }}
+                   >
+                     <option value="vi">Tiếng Việt</option>
+                     <option value="en">English</option>
+                     <option value="es">Español</option>
+                     <option value="fr">Français</option>
+                     <option value="de">Deutsch</option>
+                     <option value="it">Italiano</option>
+                     <option value="pt">Português</option>
+                     <option value="ru">Русский</option>
+                     <option value="ja">日本語</option>
+                     <option value="ko">한국어</option>
+                     <option value="zh">中文</option>
+                   </select>
+                   <p style={{
+                     marginTop: '8px',
+                     fontSize: '14px',
+                     color: '#666',
+                     maxWidth: '500px'
+                   }}>
+                     Wählen Sie Ihre Muttersprache aus. Übersetzungen von Wörtern und Vokabeln werden in diese Sprache angezeigt.
+                   </p>
+                 </div>
+               </div>
+             </div>
+           </div>
+         )}
 
 
-      </div>
+       </div>
     </>
   );
 }

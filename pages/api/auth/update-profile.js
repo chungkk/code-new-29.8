@@ -3,7 +3,7 @@ import User from '../../../models/User';
 import { verifyToken } from '../../../lib/jwt';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'PUT') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
@@ -21,7 +21,24 @@ export default async function handler(req, res) {
 
     await connectDB();
 
-    const user = await User.findById(decoded.userId).select('-password');
+    const { nativeLanguage } = req.body;
+
+    if (!nativeLanguage) {
+      return res.status(400).json({ message: 'Native language là bắt buộc' });
+    }
+
+    // Validate language code
+    const validLanguages = ['vi', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'];
+    if (!validLanguages.includes(nativeLanguage)) {
+      return res.status(400).json({ message: 'Ngôn ngữ không hợp lệ' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      decoded.userId,
+      { nativeLanguage },
+      { new: true, select: '-password' }
+    );
+
     if (!user) {
       return res.status(404).json({ message: 'Người dùng không tồn tại' });
     }
@@ -36,7 +53,7 @@ export default async function handler(req, res) {
       }
     });
   } catch (error) {
-    console.error('Me error:', error);
+    console.error('Update profile error:', error);
     res.status(500).json({ message: 'Lỗi server' });
   }
 }
