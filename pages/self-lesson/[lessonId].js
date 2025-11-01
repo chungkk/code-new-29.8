@@ -508,39 +508,81 @@ const SelfLessonPageContent = () => {
      }
    }, [transcriptData, currentSentenceIndex, isYouTube]);
 
+  // Audio control functions
+  const handleSentenceClick = useCallback((startTime, endTime) => {
+    // Find the clicked sentence index
+    const clickedIndex = transcriptData.findIndex(
+      (item) => item.start === startTime && item.end === endTime
+    );
+    if (clickedIndex === -1) return;
+
+    const isCurrentlyPlayingThisSentence = isPlaying && currentSentenceIndex === clickedIndex;
+
+    if (isCurrentlyPlayingThisSentence) {
+      // Pause the current sentence
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
+        if (player) player.pauseVideo();
+      } else {
+        const audio = audioRef.current;
+        if (audio) audio.pause();
+      }
+      setIsPlaying(false);
+      // Save paused position
+      setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
+    } else {
+      // Play or resume the sentence
+      let seekTime = startTime;
+      if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
+        seekTime = pausedPositions[clickedIndex];
+      }
+
+       if (isYouTube) {
+         const player = youtubePlayerRef.current;
+         if (!player) return;
+         if (player.seekTo) player.seekTo(seekTime);
+         player.playVideo();
+      } else {
+        const audio = audioRef.current;
+        if (!audio) return;
+        audio.currentTime = seekTime;
+        audio.play();
+      }
+      setIsPlaying(true);
+      setSegmentPlayEndTime(endTime);
+      setSegmentEndTimeLocked(true);
+      // Clear paused position when starting play
+      setPausedPositions(prev => {
+        const newPositions = { ...prev };
+        delete newPositions[clickedIndex];
+        return newPositions;
+      });
+    }
+
+    // Update currentSentenceIndex to match the clicked sentence
+    setCurrentSentenceIndex(clickedIndex);
+    setIsManualNavigation(true);
+    // Reset flag after time update
+    setTimeout(() => setIsManualNavigation(false), 200);
+  }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex]);
+
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {
       const newIndex = currentSentenceIndex - 1;
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
-      const audio = audioRef.current;
-      if (audio) {
-        audio.currentTime = item.start;
-        if (audio.paused) {
-          audio.play();
-        }
-        setSegmentPlayEndTime(item.end);
-        setSegmentEndTimeLocked(true);
-      }
+      handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
 
   const goToNextSentence = useCallback(() => {
     if (currentSentenceIndex < transcriptData.length - 1) {
       const newIndex = currentSentenceIndex + 1;
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
-      const audio = audioRef.current;
-      if (audio) {
-        audio.currentTime = item.start;
-        if (audio.paused) {
-          audio.play();
-        }
-        setSegmentPlayEndTime(item.end);
-        setSegmentEndTimeLocked(true);
-      }
+      handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
 
   // Global keyboard shortcuts
   const handleGlobalKeyDown = useCallback((event) => {
@@ -609,63 +651,7 @@ const SelfLessonPageContent = () => {
     }
   };
 
-  // Audio control functions
-  const handleSentenceClick = useCallback((startTime, endTime) => {
-    // Find the clicked sentence index
-    const clickedIndex = transcriptData.findIndex(
-      (item) => item.start === startTime && item.end === endTime
-    );
-    if (clickedIndex === -1) return;
 
-    const isCurrentlyPlayingThisSentence = isPlaying && currentTime >= startTime && currentTime < endTime;
-
-    if (isCurrentlyPlayingThisSentence) {
-      // Pause the current sentence
-      if (isYouTube) {
-        const player = youtubePlayerRef.current;
-        if (player) player.pauseVideo();
-      } else {
-        const audio = audioRef.current;
-        if (audio) audio.pause();
-      }
-      setIsPlaying(false);
-      // Save paused position
-      setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
-    } else {
-      // Play or resume the sentence
-      let seekTime = startTime;
-      if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
-        seekTime = pausedPositions[clickedIndex];
-      }
-
-       if (isYouTube) {
-         const player = youtubePlayerRef.current;
-         if (!player) return;
-         if (player.seekTo) player.seekTo(seekTime);
-         player.playVideo();
-      } else {
-        const audio = audioRef.current;
-        if (!audio) return;
-        audio.currentTime = seekTime;
-        audio.play();
-      }
-      setIsPlaying(true);
-      setSegmentPlayEndTime(endTime);
-      setSegmentEndTimeLocked(true);
-      // Clear paused position when starting play
-      setPausedPositions(prev => {
-        const newPositions = { ...prev };
-        delete newPositions[clickedIndex];
-        return newPositions;
-      });
-    }
-
-    // Update currentSentenceIndex to match the clicked sentence
-    setCurrentSentenceIndex(clickedIndex);
-    setIsManualNavigation(true);
-    // Reset flag after time update
-    setTimeout(() => setIsManualNavigation(false), 200);
-  }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions]);
 
    // Handle progress bar click
    const handleProgressClick = useCallback((e) => {

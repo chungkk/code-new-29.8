@@ -299,7 +299,7 @@ const ShadowingPageContent = () => {
       );
       if (clickedIndex === -1) return;
 
-      const isCurrentlyPlayingThisSentence = isPlaying && currentTime >= startTime && currentTime < endTime;
+      const isCurrentlyPlayingThisSentence = isPlaying && currentSentenceIndex === clickedIndex;
 
       if (isCurrentlyPlayingThisSentence) {
         // Pause the current sentence
@@ -314,7 +314,7 @@ const ShadowingPageContent = () => {
         // Save paused position
         setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
       } else {
-        // Play or resume the sentence
+        // Play or resume the sentence (either a different sentence or the same paused sentence)
         let seekTime = startTime;
         if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
           seekTime = pausedPositions[clickedIndex];
@@ -344,7 +344,7 @@ const ShadowingPageContent = () => {
 
       // Update currentSentenceIndex to match the clicked sentence
       setCurrentSentenceIndex(clickedIndex);
-    }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions]);
+    }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex]);
 
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {

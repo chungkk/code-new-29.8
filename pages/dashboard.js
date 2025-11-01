@@ -5,6 +5,7 @@ import ProtectedPage from '../components/ProtectedPage';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
+import { speakText } from '../lib/textToSpeech';
 
 import styles from '../styles/dashboard.module.css';
 
@@ -13,6 +14,8 @@ function UserDashboard() {
   const { user } = useAuth();
   const [progress, setProgress] = useState([]);
   const [vocabulary, setVocabulary] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterLesson, setFilterLesson] = useState('all');
   const [allLessons, setAllLessons] = useState([]);
   const [activeTab, setActiveTab] = useState('all-lessons');
   const [lessonFilter, setLessonFilter] = useState('all'); // 'all' or 'in-progress'
@@ -107,6 +110,69 @@ function UserDashboard() {
     return allLessons;
   };
 
+  // Filter vocabulary by search term and lesson
+  const getFilteredVocabulary = () => {
+    let filtered = vocabulary;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(vocab =>
+        vocab.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vocab.translation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (vocab.context && vocab.context.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Filter by lesson
+    if (filterLesson !== 'all') {
+      filtered = filtered.filter(vocab => vocab.lessonId === filterLesson);
+    }
+
+    return filtered;
+  };
+
+  // Get unique lessons from vocabulary
+  const getUniqueLessons = () => {
+    const lessons = [...new Set(vocabulary.map(v => v.lessonId))].filter(Boolean);
+    return lessons.sort((a, b) => {
+      const numA = parseInt(a.replace(/\D/g, ''));
+      const numB = parseInt(b.replace(/\D/g, ''));
+      return numA - numB;
+    });
+  };
+
+  // Export vocabulary to CSV
+  const exportToCSV = () => {
+    const filtered = getFilteredVocabulary();
+    const csvContent = [
+      ['Wort', 'Übersetzung', 'Kontext', 'Lektion'].join(','),
+      ...filtered.map(v => [
+        v.word,
+        v.translation,
+        v.context || '',
+        v.lessonId || ''
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `wortschatz_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  // Speak word pronunciation
+  const speakWord = (word) => {
+    speakText(word, 'de-DE', 0.9, 1);
+  };
+
+  // Navigate to lesson
+  const goToLesson = (lessonId) => {
+    if (lessonId) {
+      router.push(`/shadowing/${lessonId}`);
+    }
+  };
+
   const deleteVocabulary = async (id) => {
     if (!confirm('Dieses Wort löschen?')) return;
 
@@ -184,51 +250,71 @@ function UserDashboard() {
         {/* All Lessons Tab */}
         {activeTab === 'all-lessons' && (
           <div>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '20px',
-              flexWrap: 'wrap',
-              gap: '15px'
-            }}>
-              <h2 style={{ margin: 0 }}>Lektionsliste</h2>
-              
-              {/* Filter Buttons */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '10px',
-                flexWrap: 'wrap'
-              }}>
-                 <button
-                   onClick={() => setLessonFilter('all')}
-                   className={`${styles.filterBtn} ${styles.all} ${lessonFilter === 'all' ? styles.active : ''}`}
-                 >
-                   🗂️ Alle ({allLessons.length})
-                 </button>
-                 <button
-                   onClick={() => setLessonFilter('in-progress')}
-                   className={`${styles.filterBtn} ${styles.inProgress} ${lessonFilter === 'in-progress' ? styles.active : ''}`}
-                 >
-                   📊 In Bearbeitung ({allLessons.filter(l => {
-                     const p = calculateProgress(l.id);
-                     return p > 0 && p < 100;
-                   }).length})
-                 </button>
-                 <button
-                   onClick={() => setLessonFilter('completed')}
-                   className={`${styles.filterBtn} ${styles.completed} ${lessonFilter === 'completed' ? styles.active : ''}`}
-                 >
-                   ✅ Abgeschlossen ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
-                 </button>
-                 <button
-                   onClick={() => setLessonFilter('not-started')}
-                   className={`${styles.filterBtn} ${styles.notStarted} ${lessonFilter === 'not-started' ? styles.active : ''}`}
-                 >
-                   🆕 Nicht begonnen ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
-                 </button>
+            <div className={styles.lessonsContainer}>
+              {/* Header with Stats */}
+              <div className={styles.lessonsHeader}>
+                <div className={styles.lessonsHeaderLeft}>
+                  <h2 className={styles.lessonsHeaderTitle}>📚 Lektionsliste</h2>
+                  <div className={styles.lessonsStats}>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Gesamt:</span>
+                      <span className={styles.statValue}>{allLessons.length}</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Abgeschlossen:</span>
+                      <span className={styles.statValue}>
+                        {allLessons.filter(l => calculateProgress(l.id) === 100).length}
+                      </span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>In Bearbeitung:</span>
+                      <span className={styles.statValue}>
+                        {allLessons.filter(l => {
+                          const p = calculateProgress(l.id);
+                          return p > 0 && p < 100;
+                        }).length}
+                      </span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Angezeigt:</span>
+                      <span className={styles.statValue}>{getFilteredLessons().length}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+
+              {/* Filter Buttons */}
+              <div className={styles.lessonsControls}>
+                <div className={styles.filterButtonGroup}>
+                  <button
+                    onClick={() => setLessonFilter('all')}
+                    className={`${styles.filterBtn} ${styles.all} ${lessonFilter === 'all' ? styles.active : ''}`}
+                  >
+                    🗂️ Alle ({allLessons.length})
+                  </button>
+                  <button
+                    onClick={() => setLessonFilter('in-progress')}
+                    className={`${styles.filterBtn} ${styles.inProgress} ${lessonFilter === 'in-progress' ? styles.active : ''}`}
+                  >
+                    📊 In Bearbeitung ({allLessons.filter(l => {
+                      const p = calculateProgress(l.id);
+                      return p > 0 && p < 100;
+                    }).length})
+                  </button>
+                  <button
+                    onClick={() => setLessonFilter('completed')}
+                    className={`${styles.filterBtn} ${styles.completed} ${lessonFilter === 'completed' ? styles.active : ''}`}
+                  >
+                    ✅ Abgeschlossen ({allLessons.filter(l => calculateProgress(l.id) === 100).length})
+                  </button>
+                  <button
+                    onClick={() => setLessonFilter('not-started')}
+                    className={`${styles.filterBtn} ${styles.notStarted} ${lessonFilter === 'not-started' ? styles.active : ''}`}
+                  >
+                    🆕 Nicht begonnen ({allLessons.filter(l => calculateProgress(l.id) === 0).length})
+                  </button>
+                </div>
+              </div>
             
             {getFilteredLessons().length === 0 ? (
               <div className={styles.emptyState}>
@@ -318,6 +404,7 @@ function UserDashboard() {
                 })}
               </div>
             )}
+            </div>
           </div>
         )}
 
@@ -336,29 +423,93 @@ function UserDashboard() {
                <>
                  <div className={styles.vocabTable}>
                    <div className={styles.vocabHeader}>
-                     <h2 className={styles.vocabHeaderTitle}>Wortschatzliste</h2>
-                     <div className={styles.vocabCount}>
-                       Gesamt: <strong>{vocabulary.length}</strong> Wörter
+                     <div className={styles.vocabHeaderLeft}>
+                       <h2 className={styles.vocabHeaderTitle}>📚 Wortschatzliste</h2>
+                       <div className={styles.vocabStats}>
+                         <div className={styles.statItem}>
+                           <span className={styles.statLabel}>Gesamt:</span>
+                           <span className={styles.statValue}>{vocabulary.length}</span>
+                         </div>
+                         <div className={styles.statItem}>
+                           <span className={styles.statLabel}>Angezeigt:</span>
+                           <span className={styles.statValue}>{getFilteredVocabulary().length}</span>
+                         </div>
+                         <div className={styles.statItem}>
+                           <span className={styles.statLabel}>Lektionen:</span>
+                           <span className={styles.statValue}>{getUniqueLessons().length}</span>
+                         </div>
+                       </div>
+                     </div>
+                     <button onClick={exportToCSV} className={styles.exportBtn}>
+                       📥 Exportieren
+                     </button>
+                   </div>
+
+                   {/* Search and Filter Bar */}
+                   <div className={styles.vocabControls}>
+                     <div className={styles.searchBox}>
+                       <span className={styles.searchIcon}>🔍</span>
+                       <input
+                         type="text"
+                         placeholder="Wort, Übersetzung oder Kontext suchen..."
+                         value={searchTerm}
+                         onChange={(e) => setSearchTerm(e.target.value)}
+                         className={styles.searchInput}
+                       />
+                       {searchTerm && (
+                         <button
+                           onClick={() => setSearchTerm('')}
+                           className={styles.clearBtn}
+                         >
+                           ✕
+                         </button>
+                       )}
+                     </div>
+
+                     <div className={styles.filterGroup}>
+                       <label className={styles.filterLabel}>Lektion:</label>
+                       <select
+                         value={filterLesson}
+                         onChange={(e) => setFilterLesson(e.target.value)}
+                         className={styles.filterSelect}
+                       >
+                         <option value="all">Alle Lektionen</option>
+                         {getUniqueLessons().map(lesson => (
+                           <option key={lesson} value={lesson}>{lesson}</option>
+                         ))}
+                       </select>
                      </div>
                    </div>
 
                    <div className={styles.tableWrapper}>
-                     <table className={styles.table}>
-                       <thead>
-                         <tr>
-                           <th>Wortschatz</th>
-                           <th>Bedeutung</th>
-                           <th>Kontext</th>
-                           <th>Lektion</th>
-                           <th style={{ textAlign: 'center' }}>Aktionen</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         {vocabulary.map((vocab) => (
+                     {getFilteredVocabulary().length === 0 ? (
+                       <div className={styles.noResults}>
+                         <div className={styles.noResultsIcon}>🔍</div>
+                         <h3>Keine Ergebnisse gefunden</h3>
+                         <p>Versuchen Sie andere Suchbegriffe oder Filter</p>
+                       </div>
+                     ) : (
+                       <table className={styles.table}>
+                         <thead>
+                           <tr>
+                             <th>Wortschatz</th>
+                             <th>Bedeutung</th>
+                             <th>Kontext</th>
+                             <th>Lektion</th>
+                             <th style={{ textAlign: 'center' }}>Aktionen</th>
+                           </tr>
+                         </thead>
+                         <tbody>
+                           {getFilteredVocabulary().map((vocab) => (
                            <tr key={vocab._id}>
                              <td>
-                               <div className={styles.wordCell}>
-                                 {vocab.word}
+                               <div
+                                 className={styles.wordCell}
+                                 onClick={() => speakWord(vocab.word)}
+                                 style={{ cursor: 'pointer' }}
+                                 title="Klicken Sie, um die Aussprache zu hören"
+                               >
+                                 🔊 {vocab.word}
                                </div>
                              </td>
                              <td style={{ fontWeight: '500' }}>
@@ -375,12 +526,14 @@ function UserDashboard() {
                              }}>
                                {vocab.context || '-'}
                              </td>
-                             <td style={{
-                               fontSize: '14px',
-                               color: '#667eea',
-                               fontWeight: '600'
-                             }}>
-                               {vocab.lessonId || 'Unbekannt'}
+                             <td>
+                               <button
+                                 className={styles.lessonLink}
+                                 onClick={() => goToLesson(vocab.lessonId)}
+                                 title="Zur Lektion gehen"
+                               >
+                                 📖 {vocab.lessonId || 'Unbekannt'}
+                               </button>
                              </td>
                              <td style={{ textAlign: 'center' }}>
                                <button
@@ -392,17 +545,30 @@ function UserDashboard() {
                              </td>
                            </tr>
                          ))}
-                       </tbody>
-                     </table>
+                         </tbody>
+                       </table>
+                     )}
                    </div>
                  </div>
 
                  {/* Mobile Card View */}
                  <div className={styles.vocabCards}>
-                   {vocabulary.map((vocab) => (
+                   {getFilteredVocabulary().length === 0 ? (
+                     <div className={styles.noResults}>
+                       <div className={styles.noResultsIcon}>🔍</div>
+                       <h3>Keine Ergebnisse gefunden</h3>
+                       <p>Versuchen Sie andere Suchbegriffe oder Filter</p>
+                     </div>
+                   ) : (
+                     getFilteredVocabulary().map((vocab) => (
                      <div key={vocab._id} className={styles.vocabCard}>
-                       <div className={styles.vocabCardWord}>
-                         {vocab.word}
+                       <div
+                         className={styles.vocabCardWord}
+                         onClick={() => speakWord(vocab.word)}
+                         style={{ cursor: 'pointer' }}
+                         title="Klicken Sie, um die Aussprache zu hören"
+                       >
+                         🔊 {vocab.word}
                        </div>
                        <div className={styles.vocabCardTranslation}>
                          {vocab.translation}
@@ -412,9 +578,13 @@ function UserDashboard() {
                            &ldquo;{vocab.context}&rdquo;
                          </div>
                        )}
-                       <div className={styles.vocabCardLesson}>
-                         Lektion: {vocab.lessonId || 'Unbekannt'}
-                       </div>
+                       <button
+                         className={styles.vocabCardLessonBtn}
+                         onClick={() => goToLesson(vocab.lessonId)}
+                         title="Zur Lektion gehen"
+                       >
+                         📖 Lektion: {vocab.lessonId || 'Unbekannt'}
+                       </button>
                        <div className={styles.vocabCardActions}>
                          <button
                            onClick={() => deleteVocabulary(vocab._id)}
@@ -424,7 +594,8 @@ function UserDashboard() {
                          </button>
                        </div>
                      </div>
-                   ))}
+                   ))
+                   )}
                  </div>
                </>
              )}

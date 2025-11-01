@@ -129,6 +129,7 @@
   animation: slideUp 0.7s ease-out;
   position: relative;
   z-index: 1;
+  padding: 24px;
 }
 
 .lessonCard {
@@ -477,6 +478,64 @@
   margin-bottom: 12px;
 }
 
+.vocabCardLessonBtn {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.vocabCardLessonBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.lessonLink {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.lessonLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.wordCell {
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.wordCell:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.05);
+}
+
+.vocabCardWord {
+  transition: all 0.3s ease;
+}
+
+.vocabCardWord:hover {
+  transform: scale(1.05);
+  color: #764ba2;
+}
+
 .vocabCardActions {
   display: flex;
   justify-content: flex-end;
@@ -490,6 +549,15 @@
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border-radius: 20px 20px 0 0;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.vocabHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
 }
 
 .vocabHeaderTitle {
@@ -498,16 +566,233 @@
   margin: 0;
 }
 
-.vocabCount {
-  background: rgba(255, 255, 255, 0.2);
+.vocabStats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.statLabel {
+  opacity: 0.9;
+}
+
+.statValue {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.exportBtn {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.exportBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.vocabControls {
+  display: flex;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.searchBox {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  font-size: 18px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 44px 12px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.clearBtn {
+  position: absolute;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #e0e0e0;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.clearBtn:hover {
+  background: #d0d0d0;
+  transform: scale(1.1);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterLabel {
   font-weight: 600;
   font-size: 14px;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.noResults {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.noResultsIcon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.noResults h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.noResults p {
+  font-size: 14px;
+  color: #6c757d;
 }
 
 .tableWrapper {
   overflow-x: auto;
+}
+
+/* Lessons Container Styles */
+.lessonsContainer {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  animation: fadeIn 0.7s ease-in;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.lessonsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 20px 20px 0 0;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.lessonsHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.lessonsHeaderTitle {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.lessonsStats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lessonsControls {
+  display: flex;
+  justify-content: center;
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.filterButtonGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .table {
@@ -832,5 +1117,93 @@
 
   .vocabCards {
     display: grid;
+  }
+
+  .vocabHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .vocabHeaderLeft {
+    width: 100%;
+  }
+
+  .vocabHeaderTitle {
+    font-size: 20px;
+  }
+
+  .vocabStats {
+    gap: 8px;
+  }
+
+  .statItem {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .statValue {
+    font-size: 14px;
+  }
+
+  .exportBtn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .vocabControls {
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .searchBox {
+    min-width: 100%;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .lessonsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .lessonsHeaderLeft {
+    width: 100%;
+  }
+
+  .lessonsHeaderTitle {
+    font-size: 20px;
+  }
+
+  .lessonsStats {
+    gap: 8px;
+  }
+
+  .lessonsControls {
+    padding: 16px;
+  }
+
+  .filterButtonGroup {
+    gap: 8px;
+  }
+
+  .filterBtn {
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  .progressGrid {
+    padding: 16px;
+    gap: 16px;
   }
 }
