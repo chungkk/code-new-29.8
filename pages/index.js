@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
 import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
 
@@ -108,13 +108,20 @@ const HomePage = () => {
     }
   };
 
+  // Structured data for homepage
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' }
+  ]);
+
   return (
     <>
-      <Head>
-        <title>Lektionsliste - Deutsch Shadowing</title>
-        <meta name="description" content="Wählen Sie eine Lektion zum Üben" />
-      </Head>
-      
+      <SEO
+        title="Deutsch Shadowing - Lerne Deutsch mit YouTube Videos"
+        description="Verbessere dein Deutsch durch Shadowing und Diktat-Übungen mit authentischen YouTube-Videos. Über 100+ interaktive Lektionen für alle Niveaus A1-C2."
+        keywords="Deutsch lernen, Shadowing, Diktat, YouTube Deutsch lernen, Aussprache üben, Deutsch Übungen, German learning, Deutsch A1-C2, Hörverstehen"
+        structuredData={breadcrumbData}
+      />
+
       <div className="main-container">
 
         {/* Self-create lesson form */}

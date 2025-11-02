@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
@@ -1106,13 +1106,37 @@ const DictationPageContent = () => {
     );
   }
 
+  // Generate structured data for this lesson
+  const videoData = lesson.youtubeUrl ? generateVideoStructuredData({
+    ...lesson,
+    title: lesson.displayTitle || lesson.title,
+    description: `Diktat Übung: ${lesson.title}. Verbessere dein Hörverstehen und Schreiben durch Diktat-Übungen.`,
+    thumbnail: lesson.thumbnail,
+    videoUrl: lesson.youtubeUrl,
+    duration: duration ? `PT${Math.floor(duration)}S` : undefined,
+  }) : null;
+
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Diktat', url: '/dictation' },
+    { name: lesson.displayTitle || lesson.title, url: `/dictation/${lessonId}` }
+  ]);
+
+  const structuredDataArray = videoData
+    ? [videoData, breadcrumbData]
+    : [breadcrumbData];
+
   return (
     <>
-      <Head>
-        <title>{lesson.displayTitle} - Diktat</title>
-        <meta name="description" content={`Diktat Übung: ${lesson.title}`} />
-      </Head>
-      
+      <SEO
+        title={`${lesson.displayTitle || lesson.title} - Deutsch Diktat Übung`}
+        description={`Übe dein deutsches Hörverstehen und Schreiben mit dieser Diktat-Lektion: ${lesson.title}. Höre zu und schreibe, was du hörst.`}
+        keywords={`Diktat ${lesson.title}, Deutsch Diktat üben, Deutsch Hörverstehen, ${lesson.displayTitle}, Deutsch Schreiben üben`}
+        image={lesson.thumbnail || undefined}
+        type="video.other"
+        structuredData={structuredDataArray}
+      />
+
       <div className="shadowing-page">
         {!isYouTube && (
           <audio ref={audioRef} controls style={{ display: 'none' }}>

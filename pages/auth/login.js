@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
@@ -39,9 +39,12 @@ export default function Login() {
 
   return (
     <>
-      <Head>
-         <title>Anmelden - Deutsch Shadowing</title>
-      </Head>
+      <SEO
+        title="Anmelden - Deutsch Shadowing"
+        description="Melden Sie sich an, um Ihre Deutsch-Lernreise fortzusetzen. Greifen Sie auf personalisierte Lektionen, Fortschrittsverfolgung und Wortschatz zu."
+        keywords="Deutsch Shadowing Login, Anmelden, Deutsch lernen Login"
+        noindex={true}
+      />
 
        <div style={{
          minHeight: '100vh',

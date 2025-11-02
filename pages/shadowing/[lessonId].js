@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
 import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
@@ -613,12 +613,36 @@ const ShadowingPageContent = () => {
     );
   }
 
+  // Generate structured data for this lesson
+  const videoData = lesson.youtubeUrl ? generateVideoStructuredData({
+    ...lesson,
+    title: lesson.displayTitle || lesson.title,
+    description: `Shadowing Übung: ${lesson.title}. Verbessere deine deutsche Aussprache durch aktives Nachsprechen.`,
+    thumbnail: lesson.thumbnail,
+    videoUrl: lesson.youtubeUrl,
+    duration: duration ? `PT${Math.floor(duration)}S` : undefined,
+  }) : null;
+
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Shadowing', url: '/shadowing' },
+    { name: lesson.displayTitle || lesson.title, url: `/shadowing/${lessonId}` }
+  ]);
+
+  const structuredDataArray = videoData
+    ? [videoData, breadcrumbData]
+    : [breadcrumbData];
+
   return (
     <>
-      <Head>
-        <title>{lesson.displayTitle} - Shadowing</title>
-        <meta name="description" content={`Shadowing Übung: ${lesson.title}`} />
-      </Head>
+      <SEO
+        title={`${lesson.displayTitle || lesson.title} - Deutsch Shadowing Übung`}
+        description={`Übe deine deutsche Aussprache mit dieser Shadowing-Lektion: ${lesson.title}. Höre zu und sprich nach, um dein Deutsch zu verbessern.`}
+        keywords={`Shadowing ${lesson.title}, Deutsch Aussprache üben, Deutsch Shadowing, ${lesson.displayTitle}, Deutsch Hörverstehen`}
+        image={lesson.thumbnail || undefined}
+        type="video.other"
+        structuredData={structuredDataArray}
+      />
 
       <div className="shadowing-page dark-theme">
         {!isYouTube && (

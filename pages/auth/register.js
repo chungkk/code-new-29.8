@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
@@ -77,9 +77,12 @@ export default function Register() {
 
   return (
     <>
-      <Head>
-         <title>Registrieren - Deutsch Shadowing</title>
-      </Head>
+      <SEO
+        title="Registrieren - Deutsch Shadowing"
+        description="Erstellen Sie ein kostenloses Konto und starten Sie Ihre Deutsch-Lernreise mit interaktiven Shadowing und Diktat-Übungen."
+        keywords="Deutsch Shadowing Registrierung, Konto erstellen, Deutsch lernen kostenlos, Deutsch lernen App"
+        noindex={true}
+      />
 
        <div style={styles.container}>
          <div style={styles.card} className="card">

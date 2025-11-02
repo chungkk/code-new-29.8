@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
 import ProtectedPage from '../components/ProtectedPage';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -240,11 +240,21 @@ function UserDashboard() {
     );
   }
 
+  // Structured data for dashboard
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Dashboard', url: '/dashboard' }
+  ]);
+
   return (
     <>
-      <Head>
-        <title>Dashboard - Deutsch Shadowing</title>
-      </Head>
+      <SEO
+        title="Mein Dashboard - Deutsch Shadowing"
+        description="Verfolgen Sie Ihren Deutsch-Lernfortschritt, verwalten Sie Ihren persönlichen Wortschatz und überprüfen Sie Ihre abgeschlossenen Lektionen."
+        keywords="Deutsch Dashboard, Lernfortschritt, Wortschatz, Vokabeln speichern, Deutsch Übungsverlauf"
+        structuredData={breadcrumbData}
+        noindex={true}
+      />
 
       <div className={styles.container}>
         {/* Simplified Header */}

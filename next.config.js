@@ -2,11 +2,88 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+
+  // Enable compression for better performance
+  compress: true,
+
+  // Optimize images
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'i.ytimg.com', 'img.youtube.com', 'yt3.ggpht.com'],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+
+  // Performance optimizations
+  poweredByHeader: false, // Remove X-Powered-By header for security
+
   // Removed 'output: export' to enable API routes for authentication
   // trailingSlash: true,  // Commented out to fix Vercel API routes
+
+  // Headers for security and caching
+  async headers() {
+    return [
+      {
+        // Cache static assets
+        source: '/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache images
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache audio and video files
+        source: '/audio/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        // Security headers for all routes
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ];
+  },
+
+  // Rewrites for backward compatibility
   async rewrites() {
     return [
       {
@@ -28,6 +105,18 @@ const nextConfig = {
       {
         source: '/admin/dashboard.html',
         destination: '/admin/dashboard',
+      },
+    ];
+  },
+
+  // Redirects for SEO
+  async redirects() {
+    return [
+      // Redirect trailing slash for consistency
+      {
+        source: '/:path+/',
+        destination: '/:path+',
+        permanent: true,
       },
     ];
   },
