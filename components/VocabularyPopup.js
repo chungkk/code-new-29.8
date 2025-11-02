@@ -10,6 +10,29 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
   const [autoTranslation, setAutoTranslation] = useState(preTranslation);
   const popupRef = useRef(null);
 
+  // Get language name in German
+  const getLanguageName = (langCode) => {
+    const languageNames = {
+      'vi': 'Vietnamesisch',
+      'en': 'Englisch',
+      'fr': 'Französisch',
+      'es': 'Spanisch',
+      'zh': 'Chinesisch',
+      'ja': 'Japanisch',
+      'ko': 'Koreanisch',
+      'ru': 'Russisch',
+      'ar': 'Arabisch',
+      'pt': 'Portugiesisch',
+      'it': 'Italienisch',
+      'nl': 'Niederländisch',
+      'pl': 'Polnisch',
+      'tr': 'Türkisch',
+      'th': 'Thailändisch',
+      'hi': 'Hindi'
+    };
+    return languageNames[langCode] || 'Ihre Sprache';
+  };
+
   // Fetch auto translation when popup opens (if not already provided)
   useEffect(() => {
     const fetchTranslation = async () => {
@@ -157,7 +180,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
           )}
 
            <div className="vocab-field">
-              <label>Bedeutung (Vietnamesisch):</label>
+              <label>Bedeutung ({getLanguageName(user?.nativeLanguage || 'vi')}):</label>
              {loading ? (
                <div className="translation-loading">
                  <span className="loading-spinner">⏳</span>
@@ -169,7 +192,7 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
                    type="text"
                    value={translation}
                    onChange={(e) => setTranslation(e.target.value)}
-                    placeholder="Vietnamesische Bedeutung eingeben..."
+                    placeholder={`${getLanguageName(user?.nativeLanguage || 'vi')} Bedeutung eingeben...`}
                    autoFocus
                    onKeyPress={(e) => {
                      if (e.key === 'Enter') handleSave();

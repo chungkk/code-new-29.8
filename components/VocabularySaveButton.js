@@ -11,6 +11,29 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
   if (!user) return null;
 
+  // Get language name in German
+  const getLanguageName = (langCode) => {
+    const languageNames = {
+      'vi': 'Vietnamesisch',
+      'en': 'Englisch',
+      'fr': 'Französisch',
+      'es': 'Spanisch',
+      'zh': 'Chinesisch',
+      'ja': 'Japanisch',
+      'ko': 'Koreanisch',
+      'ru': 'Russisch',
+      'ar': 'Arabisch',
+      'pt': 'Portugiesisch',
+      'it': 'Italienisch',
+      'nl': 'Niederländisch',
+      'pl': 'Polnisch',
+      'tr': 'Türkisch',
+      'th': 'Thailändisch',
+      'hi': 'Hindi'
+    };
+    return languageNames[langCode] || 'Ihre Sprache';
+  };
+
   const handleSave = async () => {
     if (!translation.trim()) {
       toast.warning('Bitte geben Sie die Bedeutung des Wortes ein');
@@ -123,13 +146,13 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Bedeutung (Vietnamesisch): *
+                Bedeutung ({getLanguageName(user?.nativeLanguage || 'vi')}): *
               </label>
               <input
                 type="text"
                 value={translation}
                 onChange={(e) => setTranslation(e.target.value)}
-                placeholder="Bedeutung des Wortes eingeben..."
+                placeholder={`${getLanguageName(user?.nativeLanguage || 'vi')} Bedeutung eingeben...`}
                 style={{
                   width: '100%',
                   padding: '10px',
