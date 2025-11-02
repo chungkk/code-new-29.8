@@ -16,21 +16,19 @@ const VideoThumbnail = ({ lesson, className = '' }) => {
   if (lesson.youtubeUrl) {
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (videoId) {
-      // YouTube provides various thumbnail sizes:
-      // - maxresdefault.jpg (highest quality)
-      // - hqdefault.jpg (high quality)
-      // - mqdefault.jpg (medium quality)
-      // - sddefault.jpg (standard quality)
-      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      // Use medium quality for faster loading (320x180, ~30KB vs ~100KB for hqdefault)
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
       return (
         <div className={`video-thumbnail ${className}`}>
           <img
             src={thumbnailUrl}
-            alt={lesson.displayTitle}
+            alt={lesson.displayTitle || lesson.title}
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
-              // Fallback to medium quality if high quality fails
-              e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+              // Fallback to default quality if medium quality fails
+              e.target.src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
             }}
           />
           <div className="youtube-badge">
@@ -47,7 +45,9 @@ const VideoThumbnail = ({ lesson, className = '' }) => {
       <div className={`video-thumbnail ${className}`}>
         <img
           src={lesson.thumbnail}
-          alt={lesson.displayTitle}
+          alt={lesson.displayTitle || lesson.title}
+          loading="lazy"
+          decoding="async"
         />
       </div>
     );

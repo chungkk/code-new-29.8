@@ -9,6 +9,8 @@ const HomePage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 12;
   const router = useRouter();
 
@@ -18,29 +20,25 @@ const HomePage = () => {
   const [createError, setCreateError] = useState('');
 
   useEffect(() => {
-    fetchLessons();
-  }, []);
+    fetchLessons(currentPage);
+  }, [currentPage]);
 
-  const fetchLessons = async () => {
+  const fetchLessons = async (page = 1) => {
     try {
-      const res = await fetch('/api/lessons');
+      setLoading(true);
+      const res = await fetch(`/api/lessons?page=${page}&limit=${itemsPerPage}`);
       if (res.ok) {
         const data = await res.json();
-        if (data && data.length > 0) {
-          // Sort lessons by createdAt descending (newest first)
-          const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setLessons(sortedData);
-        }
+        setLessons(data.lessons || []);
+        setTotalPages(data.totalPages || 1);
+        // No need to sort - backend already sorted by createdAt descending
       }
     } catch (error) {
       console.error('Error loading lessons:', error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const totalPages = Math.ceil(lessons.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentLessons = lessons.slice(startIndex, endIndex);
 
   const nextPage = () => {
     if (currentPage < totalPages) {
@@ -173,15 +171,21 @@ const HomePage = () => {
           )}
         </div>
 
-        <div className="lesson-cards-container">
-          {currentLessons.map(lesson => (
-            <LessonCard
-              key={lesson.id}
-              lesson={lesson}
-              onClick={() => handleLessonClick(lesson)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', fontSize: '18px', color: '#666' }}>
+            <div style={{ marginBottom: '10px' }}>⏳ Lade Lektionen...</div>
+          </div>
+        ) : (
+          <div className="lesson-cards-container">
+            {lessons.map(lesson => (
+              <LessonCard
+                key={lesson.id}
+                lesson={lesson}
+                onClick={() => handleLessonClick(lesson)}
+              />
+            ))}
+          </div>
+        )}
 
         {totalPages > 1 && (
           <div className="pagination-controls">

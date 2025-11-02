@@ -4,12 +4,33 @@ import connectDB from '../../lib/mongodb';
 
 export default async function handler(req, res) {
   await connectDB();
-  
+
   if (req.method === 'GET') {
     try {
-      const lessons = await Lesson.find().sort({ order: -1 });
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      return res.status(200).json(lessons.filter(l => l && l._id));
+      // Get pagination parameters
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 12;
+      const skip = (page - 1) * limit;
+
+      // Parallel queries for better performance
+      const [lessons, total] = await Promise.all([
+        Lesson.find()
+          .sort({ createdAt: -1 }) // Sort by newest first
+          .skip(skip)
+          .limit(limit)
+          .lean(), // Returns plain JS objects (faster than Mongoose documents)
+        Lesson.countDocuments()
+      ]);
+
+      // Cache for 5 minutes, allow stale content while revalidating
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+
+      return res.status(200).json({
+        lessons: lessons.filter(l => l && l._id),
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
     } catch (error) {
       console.error('Get lessons error:', error);
       return res.status(500).json({ message: error.message });
