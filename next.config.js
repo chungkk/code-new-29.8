@@ -6,7 +6,7 @@ const nextConfig = {
     domains: ['localhost'],
   },
   // Removed 'output: export' to enable API routes for authentication
-  trailingSlash: true,
+  // trailingSlash: true,  // Commented out to fix Vercel API routes
   async rewrites() {
     return [
       {

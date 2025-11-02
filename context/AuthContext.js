@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
         role: session.user.role
       });
       // Lưu custom token để tương thích với hệ thống JWT hiện tại
-      if (session.customToken) {
+      if (session.customToken && typeof window !== 'undefined') {
         localStorage.setItem('token', session.customToken);
       }
       setLoading(false);
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
   }, [session, status]);
 
   const checkUser = async () => {
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
     if (!token) {
       setLoading(false);
@@ -54,11 +54,15 @@ export function AuthProvider({ children }) {
         const data = await res.json();
         setUser(data.user);
       } else {
-        localStorage.removeItem('token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
       }
     } catch (error) {
       console.error('❌ Check user error:', error);
-      localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
     } finally {
       setLoading(false);
     }
@@ -78,7 +82,9 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || 'Đăng nhập thất bại');
       }
 
-      localStorage.setItem('token', data.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', data.token);
+      }
       setUser(data.user);
 
       return { success: true };
@@ -101,7 +107,9 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || 'Đăng ký thất bại');
       }
 
-      localStorage.setItem('token', data.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', data.token);
+      }
       setUser(data.user);
 
       return { success: true };
@@ -112,7 +120,7 @@ export function AuthProvider({ children }) {
 
   const refreshToken = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
         throw new Error('No token found');
       }
@@ -130,13 +138,17 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || 'Refresh failed');
       }
 
-      localStorage.setItem('token', data.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', data.token);
+      }
       setUser(data.user);
 
       return { success: true };
     } catch (error) {
       console.error('Refresh token error:', error);
-      localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
       setUser(null);
       router.push('/auth/login');
       return { success: false, error: error.message };
@@ -154,7 +166,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
     setUser(null);
     // Nếu đang dùng NextAuth session, đăng xuất NextAuth
     if (session) {
