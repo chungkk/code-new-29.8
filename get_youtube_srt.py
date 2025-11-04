@@ -102,6 +102,7 @@ def convert_to_srt(transcript):
         last_end = None
 
     max_words = 16
+    min_words = 6  # Keep very short sentences merged for better study context
 
     for index, item in enumerate(processed_items):
         start = float(get_value(item, 'start', 0) or 0)
@@ -120,7 +121,12 @@ def convert_to_srt(transcript):
 
         has_sentence_end = bool(sentence_end_pattern.search(current_text))
         word_count = len(current_text.split())
-        should_finalize = has_sentence_end or word_count >= max_words
+        should_finalize = False
+
+        if word_count >= max_words:
+            should_finalize = True
+        elif has_sentence_end and (word_count >= min_words or index == len(processed_items) - 1):
+            should_finalize = True
 
         if should_finalize:
             effective_end = last_end
