@@ -40,9 +40,9 @@ export default function Login() {
   return (
     <>
       <SEO
-        title="Anmelden - Deutsch Shadowing"
+        title="Anmelden - Papageil"
         description="Melden Sie sich an, um Ihre Deutsch-Lernreise fortzusetzen. Greifen Sie auf personalisierte Lektionen, Fortschrittsverfolgung und Wortschatz zu."
-        keywords="Deutsch Shadowing Login, Anmelden, Deutsch lernen Login"
+        keywords="Papageil Login, Anmelden, Deutsch lernen Login"
         noindex={true}
       />
 
@@ -70,7 +70,7 @@ export default function Login() {
               color: '#333',
               marginBottom: '10px'
             }}>
-              🎓 Deutsch Shadowing
+              🦜 Papageil
             </h1>
             <p style={{ color: '#666', fontSize: '16px' }}>
                Melden Sie sich an, um weiterzulernen

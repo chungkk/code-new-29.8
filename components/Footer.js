@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className="app-footer colorful-cheerful">
       <div className="footer-content">
         <div className="footer-section">
-          <h3 className="footer-title">🎓 Deutsch Shadowing</h3>
+          <h3 className="footer-title">🦜 Papageil</h3>
           <p className="footer-description">
             Effektiv Deutsch lernen mit Shadowing- und Diktatmethoden
           </p>
@@ -52,11 +52,11 @@ const Footer = () => {
           <ul className="footer-contact">
             <li>
               <span className="contact-icon">📧</span>
-              <span>hallo@deutschshadowing.de</span>
+              <span>contact@papageil.net</span>
             </li>
             <li>
               <span className="contact-icon">🌐</span>
-              <span>www.deutschshadowing.de</span>
+              <span>www.papageil.net</span>
             </li>
             <li>
               <span className="contact-icon">📍</span>
@@ -69,7 +69,7 @@ const Footer = () => {
       <div className="footer-bottom">
         <div className="footer-bottom-content">
           <p className="copyright">
-            © {currentYear} Deutsch Shadowing. Gemacht mit <span className="heart">💖</span> für Sprachlerner
+            © {currentYear} Papageil. Gemacht mit <span className="heart">💖</span> für Sprachlerner
           </p>
           <div className="footer-bottom-links">
             <a href="#">Nutzungsbedingungen</a>

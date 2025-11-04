@@ -1,4 +1,4 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net';
 
 function generateSiteMap(lessons) {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -49,7 +49,7 @@ function generateSiteMap(lessons) {
     ${lesson.thumbnail ? `
     <image:image>
       <image:loc>${lesson.thumbnail}</image:loc>
-      <image:title>${lesson.title || 'Deutsch Shadowing Lesson'}</image:title>
+      <image:title>${lesson.title || 'Papageil - Deutsch Lernen Lektion'}</image:title>
     </image:image>` : ''}
   </url>
   <url>
@@ -77,11 +77,9 @@ export async function getServerSideProps({ res }) {
 
     let lessons = [];
     if (response.ok) {
-      lessons = await response.json();
-      // Ensure lessons is an array
-      if (!Array.isArray(lessons)) {
-        lessons = [];
-      }
+      const data = await response.json();
+      // Handle both old array format and new object format
+      lessons = Array.isArray(data) ? data : (data.lessons || []);
     }
 
     // Generate the XML sitemap

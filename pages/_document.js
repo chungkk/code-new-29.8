@@ -25,10 +25,10 @@ export default function Document() {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'EducationalOrganization',
-              name: 'Deutsch Shadowing',
+              name: 'Papageil - Deutsch Lernen',
               description: 'Lerne Deutsch mit Shadowing und Diktat Methoden. Interaktive Übungen mit YouTube-Videos für alle Niveaus.',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com',
-              logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com'}/logo.png`,
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net',
+              logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net'}/logo.png`,
               sameAs: [
                 // Add your social media URLs here
                 'https://facebook.com/your-page',
@@ -50,11 +50,11 @@ export default function Document() {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Deutsch Shadowing',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com',
+              name: 'Papageil - Deutsch Lernen',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net',
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com'}/search?q={search_term_string}`,
+                target: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net'}/search?q={search_term_string}`,
                 'query-input': 'required name=search_term_string'
               }
             })

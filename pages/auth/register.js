@@ -78,9 +78,9 @@ export default function Register() {
   return (
     <>
       <SEO
-        title="Registrieren - Deutsch Shadowing"
+        title="Registrieren - Papageil"
         description="Erstellen Sie ein kostenloses Konto und starten Sie Ihre Deutsch-Lernreise mit interaktiven Shadowing und Diktat-Übungen."
-        keywords="Deutsch Shadowing Registrierung, Konto erstellen, Deutsch lernen kostenlos, Deutsch lernen App"
+        keywords="Papageil Registrierung, Konto erstellen, Deutsch lernen kostenlos, Deutsch lernen App"
         noindex={true}
       />
 
@@ -105,7 +105,7 @@ export default function Register() {
                  marginBottom: '20px',
                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                }}>
-                 Deutsch Shadowing
+                 🦜 Papageil
                </h2>
                <p style={{
                  fontSize: '18px',

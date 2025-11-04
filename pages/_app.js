@@ -27,7 +27,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       <ThemeProvider>
         <AuthProvider>
           <Head>
-            <title>Deutsch Shadowing - German Learning App</title>
+            <title>Papageil - German Learning App</title>
             <meta name="description" content="Learn German with Shadowing and Dictation methods" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <link rel="icon" href="/favicon.ico" />

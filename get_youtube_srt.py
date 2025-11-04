@@ -101,9 +101,6 @@ def convert_to_srt(transcript):
         current_start = None
         last_end = None
 
-    max_words = 16
-    min_words = 6  # Keep very short sentences merged for better study context
-
     for index, item in enumerate(processed_items):
         start = float(get_value(item, 'start', 0) or 0)
         end = item.get('end')
@@ -120,33 +117,18 @@ def convert_to_srt(transcript):
         last_end = end if end is not None else last_end
 
         has_sentence_end = bool(sentence_end_pattern.search(current_text))
-        word_count = len(current_text.split())
-        should_finalize = False
-
-        if word_count >= max_words:
-            should_finalize = True
-        elif has_sentence_end and (word_count >= min_words or index == len(processed_items) - 1):
-            should_finalize = True
+        should_finalize = has_sentence_end
 
         if should_finalize:
-            effective_end = last_end
-            if effective_end is None and index + 1 < len(processed_items):
+            if index + 1 < len(processed_items):
                 next_start = float(processed_items[index + 1].get('start', start) or start)
                 effective_end = next_start
-            if effective_end is None:
-                effective_end = start + max(duration, 0.5)
+            else:
+                effective_end = last_end or (start + max(duration, 2.0))
             finalize_entry(effective_end)
 
     if current_text:
-        effective_end = last_end
-        if effective_end is None:
-            if processed_items:
-                last_item = processed_items[-1]
-                fallback_start = float(last_item.get('start', 0) or 0)
-                fallback_duration = float((last_item.get('end') - fallback_start) if last_item.get('end') is not None else 0)
-                effective_end = fallback_start + max(fallback_duration, 0.5)
-            else:
-                effective_end = (current_start or 0) + 0.5
+        effective_end = last_end or ((current_start or 0) + 2.0)
         if current_start is None:
             current_start = float(processed_items[-1].get('start', 0) or 0) if processed_items else 0
         finalize_entry(effective_end)

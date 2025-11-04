@@ -55,9 +55,16 @@ function UserDashboard() {
       const lessonsRes = await fetch('/api/lessons');
       const lessonsData = await lessonsRes.json();
       
-      if (lessonsData && lessonsData.length > 0) {
-        // Sort by order ascending (bai_1, bai_2, bai_3...)
-        const sortedLessons = [...lessonsData].sort((a, b) => (a.order || 0) - (b.order || 0));
+      // Handle both old array format and new object format
+      const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
+      
+      if (lessons && lessons.length > 0) {
+        // Sort by newest first (createdAt descending)
+        const sortedLessons = [...lessons].sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA; // Newest first
+        });
         setAllLessons(sortedLessons);
       } else {
         setAllLessons([]);
@@ -249,7 +256,7 @@ function UserDashboard() {
   return (
     <>
       <SEO
-        title="Mein Dashboard - Deutsch Shadowing"
+        title="Mein Dashboard - Papageil"
         description="Verfolgen Sie Ihren Deutsch-Lernfortschritt, verwalten Sie Ihren persönlichen Wortschatz und überprüfen Sie Ihre abgeschlossenen Lektionen."
         keywords="Deutsch Dashboard, Lernfortschritt, Wortschatz, Vokabeln speichern, Deutsch Übungsverlauf"
         structuredData={breadcrumbData}

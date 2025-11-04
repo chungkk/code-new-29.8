@@ -1,16 +1,16 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deutsch-shadowing.com';
-const SITE_NAME = 'Deutsch Shadowing';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net';
+const SITE_NAME = 'Papageil - Deutsch Lernen';
 
 export default function SEO({
-  title = 'Deutsch Shadowing - Lerne Deutsch mit YouTube Videos',
+  title = 'Papageil - Lerne Deutsch mit YouTube Videos',
   description = 'Verbessere dein Deutsch durch Shadowing und Diktat-Übungen mit authentischen YouTube-Videos. Über 100+ Lektionen für alle Niveaus A1-C2.',
   keywords = 'Deutsch lernen, Shadowing, Diktat, YouTube, Aussprache, Deutsch Übungen, German learning, Language learning',
   image = `${SITE_URL}/og-image.jpg`,
   type = 'website',
-  author = 'Deutsch Shadowing Team',
+  author = 'Papageil Team',
   publishedTime,
   modifiedTime,
   canonical,
@@ -138,7 +138,7 @@ export function generateVideoStructuredData(lesson) {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: lesson.title,
-    description: lesson.description || 'Deutsch Shadowing Übung',
+    description: lesson.description || 'Papageil - Deutsch Lernen Übung',
     thumbnailUrl: lesson.thumbnail,
     uploadDate: lesson.createdAt,
     duration: lesson.duration,

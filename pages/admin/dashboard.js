@@ -98,7 +98,11 @@ function AdminDashboardContent() {
           'Cache-Control': 'no-cache'
         }
       });
-      const data = (await res.json() || []).filter(l => l && l._id);
+      const responseData = await res.json();
+      // Handle both old array format and new object format
+      const data = Array.isArray(responseData) 
+        ? responseData.filter(l => l && l._id)
+        : (responseData.lessons || []).filter(l => l && l._id);
       setLessons(data);
       setSelectedLessons(new Set()); // Clear selection when lessons are refreshed
     } catch (error) {
@@ -524,7 +528,12 @@ function AdminDashboardContent() {
           throw new Error('Kann ID nicht überprüfen');
         }
 
-        const existingLessons = (await checkRes.json() || []).filter(l => l && l._id);
+        const responseData = await checkRes.json();
+        // Handle both old array format and new object format
+        const lessonsArray = Array.isArray(responseData) 
+          ? responseData 
+          : (responseData.lessons || []);
+        const existingLessons = lessonsArray.filter(l => l && l._id);
         const idExists = existingLessons.some(lesson => lesson.id === formData.id);
         if (idExists) {
           setGeneralError(`ID "${formData.id}" existiert bereits. Bitte wählen Sie eine andere ID.`);
@@ -733,7 +742,7 @@ function AdminDashboardContent() {
   return (
     <>
       <Head>
-        <title>Admin-Dashboard - Deutsch Shadowing</title>
+        <title>Admin-Dashboard - Papageil</title>
       </Head>
       
       <div className={styles.container}>

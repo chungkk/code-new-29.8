@@ -114,7 +114,7 @@ const HomePage = () => {
   return (
     <>
       <SEO
-        title="Deutsch Shadowing - Lerne Deutsch mit YouTube Videos"
+        title="Papageil - Lerne Deutsch mit YouTube Videos"
         description="Verbessere dein Deutsch durch Shadowing und Diktat-Übungen mit authentischen YouTube-Videos. Über 100+ interaktive Lektionen für alle Niveaus A1-C2."
         keywords="Deutsch lernen, Shadowing, Diktat, YouTube Deutsch lernen, Aussprache üben, Deutsch Übungen, German learning, Deutsch A1-C2, Hörverstehen"
         structuredData={breadcrumbData}
