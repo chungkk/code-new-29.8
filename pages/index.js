@@ -11,6 +11,7 @@ const HomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
   const itemsPerPage = 12;
   const router = useRouter();
 
@@ -20,13 +21,26 @@ const HomePage = () => {
   const [createError, setCreateError] = useState('');
 
   useEffect(() => {
-    fetchLessons(currentPage);
-  }, [currentPage]);
+    fetchLessons(currentPage, difficultyFilter);
+  }, [currentPage, difficultyFilter]);
 
-  const fetchLessons = async (page = 1) => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [difficultyFilter]);
+
+  const fetchLessons = async (page = 1, difficulty = difficultyFilter) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/lessons?page=${page}&limit=${itemsPerPage}`);
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: itemsPerPage.toString()
+      });
+
+      if (difficulty && difficulty !== 'all') {
+        queryParams.set('difficulty', difficulty);
+      }
+
+      const res = await fetch(`/api/lessons?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setLessons(data.lessons || []);
@@ -111,6 +125,19 @@ const HomePage = () => {
     { name: 'Home', url: '/' }
   ]);
 
+  const difficultyOptions = [
+    {
+      value: 'beginner',
+      title: 'For Beginners',
+      description: 'Focus on basic pronunciation and listening to simple words and sentences'
+    },
+    {
+      value: 'experienced',
+      title: 'For Experienced Learners',
+      description: 'Enhance skills with natural speaking speed and more complex topics'
+    }
+  ];
+
   return (
     <>
       <SEO
@@ -121,6 +148,24 @@ const HomePage = () => {
       />
 
       <div className="main-container">
+
+        {/* Difficulty toggle */}
+        <div className="difficulty-toggle">
+          {difficultyOptions.map((option) => {
+            const isActive = difficultyFilter === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                className={`difficulty-toggle__option ${isActive ? 'active' : ''}`}
+                onClick={() => setDifficultyFilter(isActive ? 'all' : option.value)}
+              >
+                <span className="difficulty-toggle__title">{option.title}</span>
+                <span className="difficulty-toggle__description">{option.description}</span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Self-create lesson form */}
         <div style={{

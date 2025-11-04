@@ -11,15 +11,23 @@ export default async function handler(req, res) {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 12;
       const skip = (page - 1) * limit;
+      const difficulty = req.query.difficulty;
+      const beginnerLevels = ['A1', 'A2'];
+
+      const levelFilter = difficulty === 'beginner'
+        ? { level: { $in: beginnerLevels } }
+        : difficulty === 'experienced'
+          ? { level: { $nin: beginnerLevels } }
+          : {};
 
       // Parallel queries for better performance
       const [lessons, total] = await Promise.all([
-        Lesson.find()
+        Lesson.find(levelFilter)
           .sort({ createdAt: -1 }) // Sort by newest first
           .skip(skip)
           .limit(limit)
           .lean(), // Returns plain JS objects (faster than Mongoose documents)
-        Lesson.countDocuments()
+        Lesson.countDocuments(levelFilter)
       ]);
 
       // Cache for 5 minutes, allow stale content while revalidating
