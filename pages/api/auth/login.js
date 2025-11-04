@@ -21,6 +21,10 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
+    if (user.isGoogleUser && !user.password) {
+      return res.status(400).json({ message: 'Tài khoản này đăng ký bằng Google, vui lòng chọn đăng nhập với Google' });
+    }
+
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
