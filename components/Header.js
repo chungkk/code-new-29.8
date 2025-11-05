@@ -9,7 +9,12 @@ const Header = () => {
   const { currentTheme, nextTheme, toggleTheme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,7 +98,7 @@ const Header = () => {
               title={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
             >
               <span className="action-theme-emoji" aria-hidden="true">
-                {currentTheme?.emoji || '🎨'}
+                {mounted ? (currentTheme?.emoji || '🎨') : '🎨'}
               </span>
             </button>
           </div>
