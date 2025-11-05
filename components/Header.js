@@ -49,9 +49,18 @@ const Header = () => {
     action();
   };
 
+  const authState = user ? 'authenticated' : 'guest';
+  const headerClassName = [
+    'app-header',
+    'neo-header',
+    isScrolled ? 'scrolled' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <header className={`app-header neo-header ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="header-content">
+    <header className={headerClassName} data-auth-state={authState}>
+      <div className="header-content" data-auth-state={authState}>
         <button
           type="button"
           className="brand"
@@ -73,7 +82,7 @@ const Header = () => {
           </span>
         </button>
 
-        <div className="header-right">
+        <div className="header-right" data-auth-state={authState}>
           <div className="header-actions" aria-label="Quick actions" role="group">
             {/* Theme toggle */}
             <button

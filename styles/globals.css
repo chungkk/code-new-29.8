@@ -4380,34 +4380,156 @@ body::before {
 }
 
 @media (max-width: 768px) {
+    .app-header {
+        border-bottom: none;
+        box-shadow: 0 18px 36px rgba(67, 97, 238, 0.28);
+    }
+
     .header-content {
-        padding: 10px 16px;
+        padding: 12px 16px;
         gap: 12px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .header-content[data-auth-state="guest"] {
+        gap: 14px;
     }
 
     .brand {
-        padding: 8px 12px;
-        gap: 10px;
+        flex: 1;
+        padding: 10px 16px;
+        gap: 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 12px 28px rgba(63, 131, 248, 0.32);
+        min-width: 0;
+    }
+
+    .brand:hover {
+        transform: none;
+        box-shadow: 0 12px 28px rgba(63, 131, 248, 0.32);
+        border-color: rgba(255, 255, 255, 0.32);
+        background: rgba(255, 255, 255, 0.18);
     }
 
     .brand-emblem {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+    }
+
+    .brand-primary {
+        font-size: 1rem;
     }
 
     .brand-secondary {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.14em;
+        color: rgba(228, 243, 255, 0.85);
     }
 
     .header-right {
         order: 2;
-        margin-left: auto;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
         gap: 12px;
     }
 
+    .header-right[data-auth-state="guest"] {
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
     .header-actions {
+        display: flex;
+    }
+
+    .header-actions .action-chip {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.16) 100%);
+        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.38);
+        color: #f5f8ff;
+        backdrop-filter: blur(16px);
+    }
+
+    .header-actions .action-chip:hover {
+        transform: translateY(0);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: 0 16px 32px rgba(59, 130, 246, 0.48);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.22) 100%);
+    }
+
+    .header-actions .action-theme-emoji {
+        font-size: 18px;
+    }
+
+    .user-button {
+        padding: 10px 16px 10px 10px;
+        gap: 10px;
+        border-radius: 999px;
+        min-height: 44px;
+        border: none;
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.22);
+        color: #f5f8ff;
+    }
+
+    .user-button:hover {
+        transform: translateY(0);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.28);
+        border: none;
+        background: rgba(255, 255, 255, 0.22);
+    }
+
+    .user-button .user-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        font-size: 1rem;
+        background: rgba(15, 23, 42, 0.35);
+        box-shadow: none;
+    }
+
+    .user-role {
         display: none;
+    }
+
+    .user-button .user-name {
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
+    }
+
+    .user-button.login-button {
+        background: linear-gradient(120deg, #4b5fff 0%, #7b4cff 55%, #1fa5ff 100%);
+        box-shadow: 0 18px 38px rgba(67, 97, 238, 0.45);
+        color: #f7f9ff;
+    }
+
+    .user-button.login-button:hover {
+        box-shadow: 0 22px 40px rgba(67, 97, 238, 0.52);
+        background: linear-gradient(120deg, #5268ff 0%, #8a57ff 55%, #3cb3ff 100%);
+    }
+
+    .user-button.login-button .user-avatar {
+        background: rgba(255, 255, 255, 0.28);
+        color: #1a2146;
+        font-size: 1.05rem;
+    }
+
+    .user-button.login-button .user-name {
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    .user-menu-container {
+        flex-shrink: 0;
     }
 
     .primary-nav {
@@ -4416,7 +4538,8 @@ body::before {
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 4px;
-        margin-top: 4px;
+        margin-top: 6px;
+        gap: 10px;
     }
 
     .primary-nav::-webkit-scrollbar {
@@ -4429,21 +4552,6 @@ body::before {
 
     .nav-label {
         font-size: 0.92rem;
-    }
-
-    .user-button {
-        padding: 6px 10px 6px 6px;
-        gap: 8px;
-    }
-
-    .user-role {
-        display: none;
-    }
-
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        font-size: 0.95rem;
     }
 
     .user-dropdown {
@@ -4479,45 +4587,48 @@ body::before {
 
 @media (max-width: 480px) {
     .header-content {
-        padding: 8px 12px;
+        padding: 10px 14px;
     }
 
     .brand {
-        padding: 6px 10px;
-        gap: 8px;
-    }
-
-    .brand-emblem {
-        width: 30px;
-        height: 30px;
-    }
-
-    .brand-primary {
-        font-size: 0.95rem;
-    }
-
-    .primary-nav {
+        padding: 8px 14px;
         gap: 10px;
     }
 
-    .nav-item {
-        padding: 7px 10px;
+    .brand-emblem {
+        width: 32px;
+        height: 32px;
     }
 
-    .nav-icon-wrapper {
-        width: 30px;
-        height: 30px;
+    .brand-primary {
+        font-size: 0.98rem;
+    }
+
+    .brand-secondary {
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+    }
+
+    .header-actions .action-chip {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
     }
 
     .user-button {
-        padding: 6px 8px 6px 6px;
-        font-size: 0.85rem;
+        padding: 8px 14px 8px 10px;
+        font-size: 0.9rem;
     }
 
-    .user-avatar {
-        width: 30px;
-        height: 30px;
-        font-size: 0.85rem;
+    .user-button .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
+    }
+
+    .user-button.login-button {
+        min-width: 0;
+        padding-right: 16px;
     }
 
     .user-dropdown {
