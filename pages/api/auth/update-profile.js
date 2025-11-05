@@ -21,21 +21,35 @@ export default async function handler(req, res) {
 
     await connectDB();
 
-    const { nativeLanguage } = req.body;
+    const { nativeLanguage, level } = req.body;
 
-    if (!nativeLanguage) {
-      return res.status(400).json({ message: 'Native language là bắt buộc' });
+    if (!nativeLanguage && !level) {
+      return res.status(400).json({ message: 'Ít nhất một trường cần được cập nhật' });
     }
 
-    // Validate language code
-    const validLanguages = ['vi', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'];
-    if (!validLanguages.includes(nativeLanguage)) {
-      return res.status(400).json({ message: 'Ngôn ngữ không hợp lệ' });
+    const updateData = {};
+
+    // Validate language code if provided
+    if (nativeLanguage) {
+      const validLanguages = ['vi', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'];
+      if (!validLanguages.includes(nativeLanguage)) {
+        return res.status(400).json({ message: 'Ngôn ngữ không hợp lệ' });
+      }
+      updateData.nativeLanguage = nativeLanguage;
+    }
+
+    // Validate level if provided
+    if (level) {
+      const validLevels = ['beginner', 'experienced', 'all'];
+      if (!validLevels.includes(level)) {
+        return res.status(400).json({ message: 'Trình độ không hợp lệ' });
+      }
+      updateData.level = level;
     }
 
     const user = await User.findByIdAndUpdate(
       decoded.userId,
-      { nativeLanguage },
+      updateData,
       { new: true, select: '-password' }
     );
 
@@ -49,7 +63,8 @@ export default async function handler(req, res) {
         name: user.name,
         email: user.email,
         role: user.role,
-        nativeLanguage: user.nativeLanguage
+        nativeLanguage: user.nativeLanguage,
+        level: user.level
       }
     });
   } catch (error) {

@@ -30,6 +30,7 @@ export const authOptions = {
               googleId: profile.sub,
               role: 'member',  // Sửa từ 'user' thành 'member' để match schema
               nativeLanguage: 'vi',
+              level: 'beginner', // Default level for new Google users
               // Không cần password cho Google login
               isGoogleUser: true
             });
@@ -70,7 +71,9 @@ export const authOptions = {
               userId: dbUser._id,
               email: dbUser.email,
               name: dbUser.name,
-              role: dbUser.role
+              role: dbUser.role,
+              nativeLanguage: dbUser.nativeLanguage,
+              level: dbUser.level
             });
           }
         } catch (error) {

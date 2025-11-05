@@ -40,6 +40,11 @@ const UserSchema = new mongoose.Schema({
      default: 'vi',
      enum: ['vi', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'] // Add more as needed
    },
+   level: {
+     type: String,
+     default: 'beginner',
+     enum: ['beginner', 'experienced', 'all']
+   },
    createdAt: {
      type: Date,
      default: Date.now

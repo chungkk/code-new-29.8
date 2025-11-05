@@ -657,6 +657,51 @@ function UserDashboard() {
                </div>
              </div>
 
+             {/* Level Setting Card */}
+             <div className={styles.settingCard}>
+               <div className={styles.settingCardHeader}>
+                 <div className={styles.settingCardIcon}>📊</div>
+                 <h3 className={styles.settingCardTitle}>Dein Deutsch-Niveau</h3>
+               </div>
+               <div className={styles.settingCardBody}>
+                 <select
+                   value={user?.level || 'beginner'}
+                   onChange={async (e) => {
+                     try {
+                       const response = await fetch('/api/auth/update-profile', {
+                         method: 'PUT',
+                         headers: {
+                           'Content-Type': 'application/json',
+                           'Authorization': `Bearer ${localStorage.getItem('token')}`
+                         },
+                         body: JSON.stringify({
+                           level: e.target.value
+                         })
+                       });
+
+                       if (response.ok) {
+                         toast.success('Niveau aktualisiert!');
+                         window.location.reload();
+                       } else {
+                         toast.error('Fehler beim Aktualisieren');
+                       }
+                     } catch (error) {
+                       console.error('Update error:', error);
+                       toast.error('Fehler beim Aktualisieren');
+                     }
+                   }}
+                   className={styles.settingSelect}
+                 >
+                   <option value="beginner">🌱 Anfänger (A1-A2)</option>
+                   <option value="experienced">🚀 Fortgeschritten (B1+)</option>
+                   <option value="all">🎯 Alle Niveaus</option>
+                 </select>
+                 <p className={styles.settingHint}>
+                   Lektionen auf der Startseite werden automatisch nach deinem gewählten Niveau gefiltert
+                 </p>
+               </div>
+             </div>
+
               {/* Profile Card */}
               <div className={styles.settingCard}>
                 <div className={styles.settingCardHeader}>

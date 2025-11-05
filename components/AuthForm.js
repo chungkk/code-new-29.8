@@ -8,7 +8,8 @@ export default function AuthForm({ mode }) {
     email: '',
     password: '',
     confirmPassword: '',
-    nativeLanguage: 'vi'
+    nativeLanguage: 'vi',
+    level: 'beginner'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,7 +61,7 @@ export default function AuthForm({ mode }) {
       if (mode === 'login') {
         result = await login(formData.email, formData.password);
       } else {
-        result = await register(formData.name, formData.email, formData.password);
+        result = await register(formData.name, formData.email, formData.password, formData.level);
       }
 
       if (!result.success) {
@@ -173,6 +174,63 @@ export default function AuthForm({ mode }) {
                pointerEvents: 'none'
              }}>🌍</span>
            </div>
+         </div>
+       )}
+
+       {mode === 'register' && (
+         <div style={{ marginBottom: '25px' }}>
+           <label style={{
+             display: 'block',
+             marginBottom: '8px',
+             fontWeight: '600',
+             color: '#333',
+             fontSize: '14px'
+           }}>
+             📊 Dein Deutsch-Niveau *
+           </label>
+           <div style={{ position: 'relative' }}>
+             <select
+               name="level"
+               value={formData.level}
+               onChange={handleChange}
+               required
+               style={{
+                 width: '100%',
+                 padding: '15px 15px 15px 45px',
+                 border: '2px solid #e1e5e9',
+                 borderRadius: '10px',
+                 fontSize: '16px',
+                 boxSizing: 'border-box',
+                 background: 'white',
+                 transition: 'all 0.3s ease',
+                 outline: 'none',
+                 cursor: 'pointer'
+               }}
+               onFocus={(e) => e.target.style.borderColor = '#667eea'}
+               onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+             >
+               <option value="beginner">🌱 Anfänger (A1-A2) - Grundlegende Lektionen</option>
+               <option value="experienced">🚀 Fortgeschritten (B1+) - Komplexere Inhalte</option>
+               <option value="all">🎯 Alle Niveaus - Alle Lektionen anzeigen</option>
+             </select>
+             <span style={{
+               position: 'absolute',
+               left: '15px',
+               top: '50%',
+               transform: 'translateY(-50%)',
+               fontSize: '18px',
+               color: '#999',
+               pointerEvents: 'none'
+             }}>📊</span>
+           </div>
+           <p style={{
+             fontSize: '12px',
+             color: '#666',
+             marginTop: '8px',
+             fontStyle: 'italic'
+           }}>
+             Die Lektionen werden automatisch nach deinem Niveau gefiltert. Du kannst dies später in den Einstellungen ändern.
+           </p>
          </div>
        )}
 

@@ -34,7 +34,9 @@ export default async function handler(req, res) {
       userId: user._id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      nativeLanguage: user.nativeLanguage,
+      level: user.level
     });
 
     res.status(200).json({
@@ -43,7 +45,9 @@ export default async function handler(req, res) {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        nativeLanguage: user.nativeLanguage,
+        level: user.level
       }
     });
   } catch (error) {

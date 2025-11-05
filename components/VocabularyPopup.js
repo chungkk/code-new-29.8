@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+ import React, { useState, useEffect, useRef } from 'react';
+ import { toast } from 'react-toastify';
+ import { useAuth } from '../context/AuthContext';
+ import { speakText } from '../lib/textToSpeech';
 
 const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTranslation = '' }) => {
   const { user } = useAuth();
@@ -162,23 +163,14 @@ const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTransl
         }}
       >
         <div className="vocabulary-popup-header">
-           <h3>Wort speichern</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
+            <h3>{word}</h3>
+           <div className="header-actions">
+             <button className="speak-btn" onClick={() => speakText(word, 'de-DE')} title="Wort aussprechen">🔊</button>
+             <button className="close-btn" onClick={onClose}>×</button>
+           </div>
+         </div>
         
-        <div className="vocabulary-popup-content">
-          <div className="vocab-field">
-             <label>Wort:</label>
-            <div className="vocab-word">{word}</div>
-          </div>
-
-          {context && (
-            <div className="vocab-field">
-               <label>Kontext:</label>
-              <div className="vocab-context">{context}</div>
-            </div>
-          )}
-
+         <div className="vocabulary-popup-content">
            <div className="vocab-field">
               <label>Bedeutung ({getLanguageName(user?.nativeLanguage || 'vi')}):</label>
              {loading ? (

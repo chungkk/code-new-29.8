@@ -321,7 +321,7 @@ body::before {
     max-width: 1200px;
     width: 100%;
     padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-3xl);
-    margin: 120px auto 0;
+    margin: clamp(72px, 12vh, 96px) auto 0;
     position: relative;
     z-index: 1;
     flex: 1;
@@ -1476,6 +1476,7 @@ body::before {
 
 .dark-theme .sentence-text {
     color: var(--text-color);
+    text-shadow: none;
 }
 
 .dark-theme .sentence-time {
@@ -1900,6 +1901,7 @@ body::before {
     margin-bottom: 3px;
     word-wrap: break-word;
     font-weight: 600;
+    color: #1a1a1a;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -3500,7 +3502,7 @@ body::before {
 }
 
 .main-container {
-    margin-top: 118px;
+    margin-top: clamp(72px, 12vh, 96px);
     flex: 1;
 }
 
@@ -4708,6 +4710,34 @@ body::before {
     margin-bottom: 8px;
     border-bottom: 2px solid #FFE66D;
     padding-bottom: 6px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.speak-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #636e72;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.speak-btn:hover {
+    background: #f8f9fa;
+    color: #6C5CE7;
+    transform: scale(1.1);
 }
 
 .vocabulary-popup-header h3 {

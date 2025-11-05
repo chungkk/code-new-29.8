@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
 import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
+import { useAuth } from '../context/AuthContext';
 
 const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -14,11 +15,22 @@ const HomePage = () => {
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const itemsPerPage = 12;
   const router = useRouter();
+  const { user } = useAuth();
 
   // Self-create lesson states
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  useEffect(() => {
+    // Set initial filter based on user level or default to beginner for non-logged-in users
+    if (user && user.level) {
+      setDifficultyFilter(user.level);
+    } else if (!user) {
+      // First-time visitors see beginner lessons by default
+      setDifficultyFilter('beginner');
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchLessons(currentPage, difficultyFilter);
