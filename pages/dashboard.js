@@ -14,7 +14,7 @@ import styles from '../styles/dashboard.module.css';
 function UserDashboard() {
   const router = useRouter();
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, themeOptions, setTheme, currentTheme } = useTheme();
   const [progress, setProgress] = useState([]);
   const [vocabulary, setVocabulary] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -595,11 +595,27 @@ function UserDashboard() {
                  <h3 className={styles.settingCardTitle}>Darstellung</h3>
                </div>
                <div className={styles.settingCardBody}>
-                 <button onClick={toggleTheme} className={styles.themeToggleBtn}>
-                   {theme === 'dark' ? '☀️ Zu Hell wechseln' : '🌙 Zu Dunkel wechseln'}
-                 </button>
+                 <div className={styles.themeOptions}>
+                   {themeOptions.map((option) => (
+                     <button
+                       key={option.id}
+                       type="button"
+                       className={`${styles.themeOption} ${theme === option.id ? styles.themeOptionActive : ''}`}
+                       onClick={() => setTheme(option.id)}
+                       aria-pressed={theme === option.id}
+                     >
+                       <span className={styles.themeOptionEmoji} aria-hidden="true">
+                         {option.emoji}
+                       </span>
+                       <span className={styles.themeOptionContent}>
+                         <span className={styles.themeOptionLabel}>{option.label}</span>
+                         <span className={styles.themeOptionDescription}>{option.description}</span>
+                       </span>
+                     </button>
+                   ))}
+                 </div>
                  <p className={styles.settingHint}>
-                   Aktuell: <strong>{theme === 'dark' ? 'Dunkler Modus' : 'Heller Modus'}</strong>
+                   Aktuell: <strong>{currentTheme?.label}</strong>
                  </p>
                </div>
              </div>

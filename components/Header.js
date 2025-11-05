@@ -3,23 +3,10 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const MoonIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path
-      d="M21 14.5A8.5 8.5 0 0110.5 4a7 7 0 1010.5 10.5z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const Header = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { currentTheme, nextTheme, toggleTheme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
@@ -89,8 +76,16 @@ const Header = () => {
         <div className="header-right">
           <div className="header-actions" aria-label="Quick actions" role="group">
             {/* Theme toggle */}
-            <button type="button" className="action-chip action-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>
-              <MoonIcon />
+            <button
+              type="button"
+              className="action-chip action-theme"
+              onClick={toggleTheme}
+              aria-label={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
+              title={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
+            >
+              <span className="action-theme-emoji" aria-hidden="true">
+                {currentTheme?.emoji || '🎨'}
+              </span>
             </button>
           </div>
 

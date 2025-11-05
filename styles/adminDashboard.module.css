@@ -78,6 +78,16 @@
   border-color: var(--primary-color);
 }
 
+.themeToggleEmoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.themeToggleText {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
 /* Statistics Grid */
 .statsGrid {
   display: grid;

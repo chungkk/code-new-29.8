@@ -11,7 +11,7 @@ import styles from '../../styles/adminDashboard.module.css';
 
 function AdminDashboardContent() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { currentTheme, nextTheme, toggleTheme } = useTheme();
   const [lessons, setLessons] = useState([]);
   const [selectedLessons, setSelectedLessons] = useState(new Set());
   const [showForm, setShowForm] = useState(false);
@@ -753,8 +753,18 @@ function AdminDashboardContent() {
             <p className={styles.subtitle}>Verwalten Sie Lektionen, Audio und Dateien</p>
           </div>
           <div className={styles.headerActions}>
-            <button onClick={toggleTheme} className={styles.themeToggle} title="Theme wechseln">
-              {theme === 'dark' ? '☀️ Hell' : '🌙 Dunkel'}
+            <button
+              onClick={toggleTheme}
+              className={styles.themeToggle}
+              title={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
+              aria-label={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
+            >
+              <span className={styles.themeToggleEmoji} aria-hidden="true">
+                {currentTheme?.emoji || '🎨'}
+              </span>
+              <span className={styles.themeToggleText}>
+                {nextTheme ? `Zu ${nextTheme.label}` : 'Theme wechseln'}
+              </span>
             </button>
           </div>
         </div>
