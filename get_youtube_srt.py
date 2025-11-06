@@ -56,6 +56,9 @@ def get_transcript(video_id):
 def convert_to_srt(transcript):
     # Pattern to detect sentence endings
     sentence_end_pattern = re.compile(r'[.!?…]+["\'\)\]]*\s*$')
+    noise_tag_pattern = re.compile(r'^\s*[\[\(][^\]\)]*[\]\)]\s*$')
+    MAX_CHAR_LENGTH = 120  # Drop very long cues that are hard to read
+    MIN_ALPHA_RATIO = 0.45  # Require most characters to be alphanumeric
     
     # Format time helper
     def format_time(seconds):
@@ -67,6 +70,31 @@ def convert_to_srt(transcript):
     
     def normalize_text(text):
         return ' '.join((text or '').replace('\n', ' ').split()).strip()
+
+    def is_useful_text(text):
+        if not text:
+            return False
+        stripped = text.strip()
+        if not stripped:
+            return False
+        if noise_tag_pattern.fullmatch(stripped):
+            return False
+        if any(ch in stripped for ch in ['♪', '♫', '♬', '♩']):
+            return False
+
+        visible_chars = [c for c in stripped if not c.isspace()]
+        if not visible_chars:
+            return False
+
+        alpha_numeric_count = sum(1 for c in visible_chars if c.isalpha() or c.isdigit())
+        if alpha_numeric_count == 0:
+            return False
+
+        ratio = alpha_numeric_count / len(visible_chars)
+        if ratio < MIN_ALPHA_RATIO:
+            return False
+
+        return True
     
     # Merge settings
     MIN_WORDS = 6  # Minimum words before considering sentence end
@@ -86,6 +114,8 @@ def convert_to_srt(transcript):
         
         if not text:
             continue
+        if not is_useful_text(text):
+            continue
         
         all_items.append({'start': start, 'end': end, 'text': text})
     
@@ -93,60 +123,56 @@ def convert_to_srt(transcript):
     merged_entries = []
     current_group = []
     current_texts = []
-    
-    for idx, item in enumerate(all_items):
-        # Add to current group
-        current_group.append(item)
-        current_texts.append(item['text'])
-        
-        # Check combined text
-        combined_text = ' '.join(current_texts)
-        word_count = len(combined_text.split())
-        has_sentence_end = bool(sentence_end_pattern.search(item['text']))
-        
-        # Decide if we should finalize this group
-        should_finalize = False
-        
-        if word_count >= MAX_WORDS:
-            # Force split if too long
-            should_finalize = True
-        elif has_sentence_end and word_count >= MIN_WORDS:
-            # Split at sentence end if long enough
-            should_finalize = True
-        
-        if should_finalize:
-            # Use start from first item, end adjusted to next item's start
-            entry_start = current_group[0]['start']
-            
-            # If there's a next item, use its start as our end
-            if idx + 1 < len(all_items):
-                next_start = all_items[idx + 1]['start']
-                entry_end = min(current_group[-1]['end'], next_start)
-            else:
-                entry_end = current_group[-1]['end']
-            
-            entry_text = combined_text
-            
+
+    def push_current_group(next_start=None):
+        if not current_group:
+            return
+        entry_text = ' '.join(current_texts)
+        if not entry_text:
+            current_group.clear()
+            current_texts.clear()
+            return
+        group_len = len(current_group)
+        entry_start = current_group[0]['start']
+        entry_end = current_group[-1]['end']
+        if next_start is not None:
+            entry_end = min(entry_end, next_start)
+        if is_useful_text(entry_text) and (len(entry_text) <= MAX_CHAR_LENGTH or group_len == 1):
             merged_entries.append({
                 'start': entry_start,
                 'end': entry_end,
                 'text': entry_text
             })
-            
-            # Reset for next group
-            current_group = []
-            current_texts = []
-    
-    # Don't forget remaining items
-    if current_group:
-        entry_start = current_group[0]['start']
-        entry_end = current_group[-1]['end']
-        entry_text = ' '.join(current_texts)
-        merged_entries.append({
-            'start': entry_start,
-            'end': entry_end,
-            'text': entry_text
-        })
+        current_group.clear()
+        current_texts.clear()
+
+    for idx, item in enumerate(all_items):
+        item_text = item['text']
+
+        if current_group:
+            potential_texts = current_texts + [item_text]
+            potential_text = ' '.join(potential_texts)
+            potential_word_count = len(potential_text.split())
+            potential_char_count = len(potential_text)
+
+            if potential_char_count > MAX_CHAR_LENGTH or potential_word_count > MAX_WORDS:
+                push_current_group(next_start=item['start'])
+
+        current_group.append(item)
+        current_texts.append(item_text)
+
+        combined_text = ' '.join(current_texts)
+        word_count = len(combined_text.split())
+        has_sentence_end = bool(sentence_end_pattern.search(item_text))
+
+        finalize_due_to_sentence = has_sentence_end and word_count >= MIN_WORDS
+        finalize_due_to_words = word_count >= MAX_WORDS
+
+        if finalize_due_to_sentence or finalize_due_to_words:
+            next_start = all_items[idx + 1]['start'] if idx + 1 < len(all_items) else None
+            push_current_group(next_start=next_start)
+
+    push_current_group()
 
     # Timing adjustments to improve readability and alignment
     adjusted_entries = []
