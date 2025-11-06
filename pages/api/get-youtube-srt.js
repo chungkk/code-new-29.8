@@ -19,10 +19,14 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Không có quyền truy cập' });
     }
 
-    const { youtubeUrl } = req.body;
+    const { youtubeUrl, punctuationType = 'with' } = req.body;
 
     if (!youtubeUrl) {
       return res.status(400).json({ message: 'Thiếu YouTube URL' });
+    }
+
+    if (!['with', 'without'].includes(punctuationType)) {
+      return res.status(400).json({ message: 'Loại SRT không hợp lệ. Sử dụng "with" hoặc "without"' });
     }
 
     // Extract video ID from YouTube URL
@@ -37,7 +41,7 @@ export default async function handler(req, res) {
     const scriptPath = path.join(process.cwd(), 'get_youtube_srt.py');
     const venvPath = path.join(process.cwd(), 'venv', 'bin', 'python');
 
-    const pythonProcess = spawn(venvPath, [scriptPath, videoId], {
+    const pythonProcess = spawn(venvPath, [scriptPath, videoId, punctuationType], {
       cwd: process.cwd(),
       stdio: ['pipe', 'pipe', 'pipe']
     });
