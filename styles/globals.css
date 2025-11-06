@@ -434,16 +434,17 @@ body::before {
 
 .difficulty-toggle {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     align-items: stretch;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, rgba(118, 75, 162, 0.14) 100%);
     border-radius: var(--radius-2xl);
     border: 1px solid rgba(148, 163, 184, 0.25);
-    margin-bottom: var(--spacing-2xl);
-    align-self: stretch;
+    margin: 0 auto var(--spacing-xl);
+    align-self: center;
     box-shadow: 0 18px 46px rgba(79, 70, 229, 0.24), 0 10px 24px rgba(15, 23, 42, 0.35);
     width: 100%;
+    max-width: 960px;
     flex-wrap: wrap;
     backdrop-filter: blur(18px);
 }
@@ -454,7 +455,7 @@ body::before {
     border: none;
     background: transparent;
     color: var(--text-color-light);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-radius: var(--radius-xl);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -511,16 +512,34 @@ body::before {
 
     .difficulty-toggle__option {
         min-width: 100%;
-        padding: var(--spacing-md) var(--spacing-lg);
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 }
 
 
 .lesson-cards-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--spacing-lg);
     margin-top: var(--spacing-xs);
+}
+
+@media (max-width: 1200px) {
+    .lesson-cards-container {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .lesson-cards-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .lesson-cards-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .pagination-controls {
@@ -571,7 +590,7 @@ body::before {
 
 .lesson-card {
     background: var(--surface-color);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     box-shadow: var(--box-shadow);
     border: 1px solid var(--border-color);
@@ -583,7 +602,7 @@ body::before {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 280px;
+    min-height: 210px;
 }
 
 .lesson-card:hover {
@@ -596,7 +615,7 @@ body::before {
     background: var(--surface-gradient);
     border: 2px solid var(--primary-color);
     box-shadow: var(--shadow-lg);
-    min-height: 320px;
+    min-height: 250px;
 }
 
 .lesson-card.featured:hover {

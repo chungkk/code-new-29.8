@@ -69,11 +69,6 @@ const LessonCard = ({
         {/* Title */}
         <h3 className={styles.title}>{lesson.displayTitle || lesson.title}</h3>
 
-        {/* Description */}
-        <p className={styles.description}>
-          {lesson.description || 'Keine Beschreibung verfügbar'}
-        </p>
-
         {/* Progress Bar (if showProgress) */}
         {showProgress && (
           <div className={styles.progressSection}>

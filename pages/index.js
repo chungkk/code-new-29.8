@@ -13,7 +13,7 @@ const HomePage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [difficultyFilter, setDifficultyFilter] = useState('all');
-  const itemsPerPage = 12;
+  const itemsPerPage = 15;
   const router = useRouter();
   const { user } = useAuth();
 
@@ -181,14 +181,16 @@ const HomePage = () => {
 
         {/* Self-create lesson form */}
         <div style={{
-          marginBottom: '30px',
-          padding: '20px',
+          marginBottom: '20px',
+          padding: '14px 16px',
           background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          borderRadius: '10px',
+          boxShadow: '0 3px 4px rgba(0,0,0,0.08)'
         }}>
-          <h3 style={{ marginBottom: '15px', color: '#333' }}>Erstelle eine Lektion aus YouTube</h3>
-          <form onSubmit={handleCreateLesson} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <form
+            onSubmit={handleCreateLesson}
+            style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}
+          >
             <input
               type="url"
               placeholder="Füge hier den YouTube-Link ein..."
@@ -196,10 +198,11 @@ const HomePage = () => {
               onChange={(e) => setYoutubeUrl(e.target.value)}
               style={{
                 flex: 1,
-                padding: '12px',
-                border: '2px solid #ddd',
+                minWidth: '220px',
+                padding: '10px 12px',
+                border: '1px solid #d3d9e0',
                 borderRadius: '8px',
-                fontSize: '16px',
+                fontSize: '15px',
                 outline: 'none'
               }}
               disabled={isCreating}
@@ -208,12 +211,12 @@ const HomePage = () => {
               type="submit"
               disabled={isCreating || !youtubeUrl.trim()}
               style={{
-                padding: '12px 24px',
+                padding: '10px 20px',
                 background: isCreating ? '#ccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '16px',
+                fontSize: '15px',
                 cursor: isCreating ? 'not-allowed' : 'pointer',
                 fontWeight: 'bold'
               }}
@@ -222,7 +225,7 @@ const HomePage = () => {
             </button>
           </form>
           {createError && (
-            <p style={{ color: 'red', marginTop: '10px', fontSize: '14px' }}>
+            <p style={{ color: 'red', marginTop: '8px', fontSize: '13px' }}>
               {createError}
             </p>
           )}
