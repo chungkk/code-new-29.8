@@ -71,6 +71,10 @@ def convert_to_srt(transcript):
     # Merge settings
     MIN_WORDS = 6  # Minimum words before considering sentence end
     MAX_WORDS = 16  # Maximum words before forcing split
+    START_LEAD_SECONDS = 0.22  # Show subtitle a bit earlier to catch the first phoneme
+    END_TRIM_SECONDS = 0.22  # Trim the tail so the next cue is not blocked
+    MIN_GAP_SECONDS = 0.0  # Allow back-to-back cues when we already trim the previous tail
+    MIN_DURATION_SECONDS = 0.35  # Keep each subtitle shown long enough to read
     
     # First pass: collect all items with their timing
     all_items = []
@@ -116,9 +120,9 @@ def convert_to_srt(transcript):
             
             # If there's a next item, use its start as our end
             if idx + 1 < len(all_items):
-                entry_end = all_items[idx + 1]['start']
+                next_start = all_items[idx + 1]['start']
+                entry_end = min(current_group[-1]['end'], next_start)
             else:
-                # Last entry, use the actual end time
                 entry_end = current_group[-1]['end']
             
             entry_text = combined_text
@@ -143,6 +147,52 @@ def convert_to_srt(transcript):
             'end': entry_end,
             'text': entry_text
         })
+
+    # Timing adjustments to improve readability and alignment
+    adjusted_entries = []
+    previous_end = 0.0
+    for idx, entry in enumerate(merged_entries):
+        raw_start = entry['start']
+        raw_end = entry['end']
+
+        # Ensure ordering
+        if raw_end < raw_start:
+            raw_end = raw_start
+
+        # Lead in slightly but never after the transcript start or overlapping the previous subtitle
+        lead_in_start = max(0.0, raw_start - START_LEAD_SECONDS)
+        adjusted_start = max(lead_in_start, previous_end + MIN_GAP_SECONDS)
+        adjusted_start = min(adjusted_start, raw_start)
+
+        # Make sure we have at least some display time
+        if raw_end - adjusted_start < 0.01:
+            adjusted_start = raw_start
+
+        # Trim a bit off the end if possible to avoid lingering text
+        adjusted_end = raw_end
+        available_duration = raw_end - adjusted_start
+        if idx != len(merged_entries) - 1 and available_duration > END_TRIM_SECONDS + 0.05:
+            adjusted_end = raw_end - END_TRIM_SECONDS
+
+        # Guarantee a readable duration without exceeding the raw end
+        if adjusted_end - adjusted_start < MIN_DURATION_SECONDS:
+            if available_duration >= MIN_DURATION_SECONDS:
+                adjusted_end = min(raw_end, adjusted_start + MIN_DURATION_SECONDS)
+            else:
+                adjusted_end = raw_end
+
+        # Fall back to raw end if we trimmed too aggressively
+        if adjusted_end <= adjusted_start:
+            adjusted_end = raw_end
+
+        adjusted_entries.append({
+            'start': adjusted_start,
+            'end': adjusted_end,
+            'text': entry['text']
+        })
+        previous_end = adjusted_end
+
+    merged_entries = adjusted_entries
     
     # Build SRT output
     srt = ''
