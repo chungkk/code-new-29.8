@@ -60,6 +60,8 @@ const ShadowingPageContent = () => {
     }
 
     setIsYouTube(true);
+
+    const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
@@ -82,6 +84,7 @@ const ShadowingPageContent = () => {
            fs: 0,
            modestbranding: 1,
            playsinline: 1,
+           origin: playerOrigin,
          },
          events: {
            onReady: (event) => {
@@ -112,6 +115,7 @@ const ShadowingPageContent = () => {
            fs: 0,
            modestbranding: 1,
            playsinline: 1,
+           origin: playerOrigin,
          },
          events: {
            onReady: (event) => {
@@ -654,7 +658,7 @@ const ShadowingPageContent = () => {
         
 
 
-          <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
+          <div className="shadowing-app-container shadowing-app-container--offset">
             <div className="shadowing-layout">
               {/* LEFT SIDE: Medien */}
               <div className="medien-section">

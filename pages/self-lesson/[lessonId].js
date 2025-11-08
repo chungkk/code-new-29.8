@@ -94,6 +94,8 @@ const SelfLessonPageContent = () => {
 
     console.log('Initializing YouTube player for video:', videoId);
 
+    const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
+
     const initPlayer = () => {
       console.log('initPlayer called, checking YT API...', window.YT);
 
@@ -127,6 +129,7 @@ const SelfLessonPageContent = () => {
             disablekb: 1,
             fs: 0,
             modestbranding: 1,
+            origin: playerOrigin,
           },
           events: {
             onReady: (event) => {

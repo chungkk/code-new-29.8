@@ -749,6 +749,27 @@ body::before {
     flex: 1;
 }
 
+.shadowing-app-container--offset {
+    margin-top: 100px;
+}
+
+@media (max-width: 900px) {
+    .shadowing-app-container--offset {
+        margin-top: 70px;
+    }
+
+    .shadowing-app-container {
+        padding-bottom: 120px;
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 600px) {
+    .shadowing-app-container--offset {
+        margin-top: 56px;
+    }
+}
+
 /* Phần Audio Cố Định (Fixed Bar - TOP) - 🎨 Retro - COMPACT */
 .fixed-audio-bar {
     position: fixed;
@@ -1032,19 +1053,14 @@ body::before {
     background: var(--secondary-color);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 999;
-
     opacity: 0.95;
-
-    display: flex;
-    justify-content: space-around;
-    padding: var(--spacing-xs) 0;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    display: none;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border-color);
-}
-
-/* Mặc định ẩn trên PC và khi chưa vào trang Shadowing */
-.fixed-footer-controls {
-    display: none; 
 }
 
 /* Ẩn hoàn toàn khi JS thêm lớp hidden-js (trên trang chủ) */
@@ -1052,27 +1068,10 @@ body::before {
     display: none !important;
 }
 
-/* HIỆN CHẮC CHẮN khi ở trang Shadowing và trên màn hình nhỏ */
-@media (max-width: 600px) {
-    .audio-content-wrapper {
-        max-width: 320px;
-        width: 85%;
-    }
+@media (max-width: 900px) {
     .fixed-footer-controls:not(.hidden-js) {
         display: flex;
     }
-}
-
-/* ẨN NÚT FOOTER TRÊN MÀN HÌNH LỚN */
-@media (min-width: 601px) {
-    .fixed-footer-controls {
-        display: none !important;
-    }
-}
-
-/* HIỆN FOOTER khi không có lớp hidden-js (bất kể kích thước màn hình) */
-.fixed-footer-controls:not(.hidden-js) {
-    display: flex !important;
 }
 
 .footer-btn {
@@ -1153,9 +1152,9 @@ body::before {
     }
     
     .shadowing-app-container {
-        padding: 10px;
-        margin-top: 15px; /* COMPACT - Mobile - Giảm 50% */
-        padding-bottom: 90px;
+        padding: var(--spacing-lg) var(--spacing-sm);
+        padding-bottom: 120px;
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
     }
 
     .fixed-audio-bar h1 {
@@ -1236,6 +1235,57 @@ body::before {
     }
 
 
+
+    .shadowing-layout {
+        gap: var(--spacing-md);
+    }
+
+    .medien-container {
+        padding: var(--spacing-md);
+        min-height: auto;
+    }
+
+    .media-player {
+        gap: var(--spacing-md);
+    }
+
+    .media-controls {
+        gap: var(--spacing-sm);
+    }
+
+    .media-btn-large {
+        width: 56px;
+        height: 56px;
+    }
+
+    .media-btn-small {
+        width: 40px;
+        height: 40px;
+    }
+
+    .media-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .media-artist {
+        font-size: var(--font-size-sm);
+        white-space: normal;
+    }
+
+    .current-sentence-section,
+    .sentence-list-section {
+        box-shadow: none;
+        background: transparent;
+        padding: 0;
+    }
+
+    .sentence-list {
+        max-height: none;
+    }
+
+    .sentence-item {
+        padding: var(--spacing-md);
+    }
 
     /* Footer: tăng kích thước icon/label cho mobile */
     .footer-btn .icon {
@@ -2050,23 +2100,47 @@ body::before {
 @media (max-width: 850px) {
     .shadowing-layout {
         grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
     }
 
-    .current-sentence-section {
-        position: sticky;
-        top: 110px;
-        border-radius: 16px;
-        padding: 4px;
-        background: linear-gradient(135deg, #FF6B9D, #4ECDC4, #FFE66D);
-        box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+    .medien-section {
+        position: static;
+        top: auto;
+        width: 100%;
     }
 
+    .medien-container {
+        min-height: auto;
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .media-artwork {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .media-player {
+        align-items: stretch;
+    }
+
+    .media-controls {
+        justify-content: space-between;
+    }
+
+    .current-sentence-section,
     .sentence-list-section {
         position: static;
         top: auto;
-        max-height: 500px;
-        margin-top: 25px;
-        border-radius: 16px;
+        max-height: none;
+    }
+
+    .sentence-list-section {
+        margin-top: var(--spacing-xl);
+    }
+
+    .sentence-list {
+        max-height: none;
     }
 }
 
@@ -4095,6 +4169,14 @@ body::before {
     margin-top: auto;
     position: relative;
     overflow: hidden;
+}
+
+@media (max-width: 900px) {
+    /* Reserve space so the fixed lesson controls never cover the footer */
+    .has-footer-controls .app-footer {
+        padding-bottom: 120px;
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    }
 }
 
 /* Colorful Cheerful Footer */

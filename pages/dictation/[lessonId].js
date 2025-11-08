@@ -82,6 +82,8 @@ const DictationPageContent = () => {
     }
 
     setIsYouTube(true);
+
+    const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
@@ -103,6 +105,7 @@ const DictationPageContent = () => {
            disablekb: 1,
            fs: 0,
            modestbranding: 1,
+           origin: playerOrigin,
          },
          events: {
            onReady: (event) => {
@@ -132,6 +135,7 @@ const DictationPageContent = () => {
            disablekb: 1,
            fs: 0,
            modestbranding: 1,
+           origin: playerOrigin,
          },
          events: {
            onReady: (event) => {

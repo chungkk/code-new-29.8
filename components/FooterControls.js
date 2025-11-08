@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const FooterControls = ({ onSeek, onPlayPause, isPlaying }) => {
+  useEffect(() => {
+    document.body.classList.add('has-footer-controls');
+
+    return () => {
+      document.body.classList.remove('has-footer-controls');
+    };
+  }, []);
+
   return (
     <div className="fixed-footer-controls">
       <button className="footer-btn" onClick={() => onSeek('backward')}>
