@@ -1024,25 +1024,24 @@ const DictationPageContent = () => {
           
           // Otherwise show input with hint button
           return `<span class="word-container">
-            <button 
-              class="hint-btn" 
+            <button
+              class="hint-btn"
               onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
               title="Hinweise anzeigen"
               type="button"
             >
-              👁️
             </button>
-            <input 
-              type="text" 
-              class="word-input" 
+            <input
+              type="text"
+              class="word-input"
               data-word-id="word-${wordIndex}"
-              oninput="window.checkWord(this, '${pureWord}', ${wordIndex})" 
-              onclick="window.handleInputClick(this, '${pureWord}')" 
-              onkeydown="window.disableArrowKeys(event)" 
+              oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
+              onclick="window.handleInputClick(this, '${pureWord}')"
+              onkeydown="window.disableArrowKeys(event)"
               onfocus="window.handleInputFocus(this, '${pureWord}')"
               onblur="window.handleInputBlur(this, '${pureWord}')"
-              maxlength="${pureWord.length}" 
-              size="${pureWord.length}" 
+              maxlength="${pureWord.length}"
+              size="${pureWord.length}"
               placeholder="${'*'.repeat(pureWord.length)}"
             />
             <span class="word-punctuation">${nonAlphaNumeric}</span>

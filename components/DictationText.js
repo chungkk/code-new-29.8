@@ -61,8 +61,8 @@ const DictationText = ({
           // Show input field for words not yet completed
           return (
             <span key={wordIndex} className="word-container">
-              <button 
-                className="hint-btn" 
+              <button
+                className="hint-btn"
                 onClick={(e) => {
                   e.preventDefault();
                   const btn = e.currentTarget;
@@ -70,8 +70,8 @@ const DictationText = ({
                 }}
                 title="Hiển thị gợi ý"
                 type="button"
+                aria-label="Hiển thị gợi ý"
               >
-                👁️
               </button>
               <input 
                 type="text" 
