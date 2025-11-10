@@ -30,12 +30,22 @@ function UserDashboard() {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // Check URL for tab parameter
+  // Sync tab state with URL query parameter
   useEffect(() => {
-    if (router.query.tab) {
-      setActiveTab(router.query.tab);
+    if (!router.isReady) return;
+
+    const queryTab = Array.isArray(router.query.tab)
+      ? router.query.tab[0]
+      : router.query.tab;
+
+    if (
+      queryTab &&
+      ['all-lessons', 'vocabulary', 'settings'].includes(queryTab) &&
+      queryTab !== activeTab
+    ) {
+      setActiveTab(queryTab);
     }
-  }, [router.query]);
+  }, [router.isReady, router.query.tab, activeTab]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -167,6 +177,27 @@ function UserDashboard() {
       const numB = parseInt(b.replace(/\D/g, ''));
       return numA - numB;
     });
+  };
+
+  const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+
+    setActiveTab(tabId);
+
+    if (!router.isReady) return;
+
+    const nextQuery = { ...router.query };
+    if (tabId === 'all-lessons') {
+      delete nextQuery.tab;
+    } else {
+      nextQuery.tab = tabId;
+    }
+
+    router.replace(
+      { pathname: router.pathname, query: nextQuery },
+      undefined,
+      { shallow: true }
+    );
   };
 
   // Export vocabulary to CSV
@@ -318,20 +349,20 @@ function UserDashboard() {
         {/* Main Tabs */}
         <div className={styles.tabs}>
           <button
-            onClick={() => setActiveTab('all-lessons')}
-            className={`${styles.tab} ${activeTab === 'all-lessons' ? styles.active : ''}`}
+            onClick={() => handleTabChange('all-lessons')}
+            className={`${styles.tab} ${activeTab === 'all-lessons' ? styles.tabActive : ''}`}
           >
             📚 Alle Lektionen
           </button>
            <button
-             onClick={() => setActiveTab('vocabulary')}
-             className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.active : ''}`}
+             onClick={() => handleTabChange('vocabulary')}
+             className={`${styles.tab} ${activeTab === 'vocabulary' ? styles.tabActive : ''}`}
            >
              📝 Wortschatz ({vocabulary.length})
            </button>
            <button
-             onClick={() => setActiveTab('settings')}
-             className={`${styles.tab} ${activeTab === 'settings' ? styles.active : ''}`}
+             onClick={() => handleTabChange('settings')}
+             className={`${styles.tab} ${activeTab === 'settings' ? styles.tabActive : ''}`}
            >
              ⚙️ Einstellungen
            </button>
@@ -488,34 +519,25 @@ function UserDashboard() {
                           <th>Bedeutung</th>
                           <th>Kontext</th>
                           <th>Lektion</th>
-                          <th style={{ textAlign: 'center' }}>Aktionen</th>
+                          <th className={styles.tableActionsHeader}>Aktionen</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getFilteredVocabulary().map((vocab) => (
-                        <tr key={vocab._id}>
+                          <tr key={vocab._id}>
                           <td>
                             <div
                               className={styles.wordCell}
                               onClick={() => speakWord(vocab.word)}
-                              style={{ cursor: 'pointer' }}
                               title="Klicken Sie, um die Aussprache zu hören"
                             >
                               🔊 {vocab.word}
                             </div>
                           </td>
-                          <td style={{ fontWeight: '500' }}>
+                          <td className={styles.tableTranslation}>
                             {vocab.translation}
                           </td>
-                          <td style={{
-                            fontSize: '14px',
-                            color: '#6c757d',
-                            maxWidth: '250px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            fontStyle: 'italic'
-                          }}>
+                          <td className={styles.tableContext}>
                             {vocab.context || '-'}
                           </td>
                           <td>
@@ -527,7 +549,7 @@ function UserDashboard() {
                               📖 {vocab.lessonId || 'Unbekannt'}
                             </button>
                           </td>
-                          <td style={{ textAlign: 'center' }}>
+                          <td className={styles.tableActions}>
                             <button
                               onClick={() => deleteVocabulary(vocab._id)}
                               className={styles.deleteBtn}
@@ -535,8 +557,8 @@ function UserDashboard() {
                               🗑️ Löschen
                             </button>
                           </td>
-                        </tr>
-                      ))}
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -548,7 +570,6 @@ function UserDashboard() {
                         <div
                           className={styles.vocabCardWord}
                           onClick={() => speakWord(vocab.word)}
-                          style={{ cursor: 'pointer' }}
                           title="Klicken Sie, um die Aussprache zu hören"
                         >
                           🔊 {vocab.word}
