@@ -1,72 +1,15 @@
-import { spawn } from 'child_process';
+/**
+ * Create Self Lesson API - Pure JavaScript implementation
+ * Sử dụng youtubei.js để lấy transcript từ YouTube
+ * Không cần Python dependency
+ */
+
 import path from 'path';
 import fs from 'fs';
+import { Innertube } from 'youtubei.js';
 import { requireAuth } from '../../lib/authMiddleware';
 import { Lesson } from '../../lib/models/Lesson';
 import connectDB from '../../lib/mongodb';
-
-function parseSRTTime(timeString) {
-  const [hours, minutes, secondsAndMs] = timeString.split(':');
-  const [seconds, milliseconds] = secondsAndMs.split(',');
-  
-  return (
-    parseInt(hours) * 3600 +
-    parseInt(minutes) * 60 +
-    parseInt(seconds) +
-    parseInt(milliseconds) / 1000
-  );
-}
-
-function convertSRTtoJSON(srtText) {
-  const lines = srtText.trim().split('\n');
-  const result = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    if (lines[i].trim() === '') {
-      i++;
-      continue;
-    }
-
-    const indexLine = lines[i].trim();
-    if (!/^\d+$/.test(indexLine)) {
-      i++;
-      continue;
-    }
-
-    i++;
-    if (i >= lines.length) break;
-
-    const timeLine = lines[i].trim();
-    const timeMatch = timeLine.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
-    
-    if (!timeMatch) {
-      i++;
-      continue;
-    }
-
-    const start = parseSRTTime(timeMatch[1]);
-    const end = parseSRTTime(timeMatch[2]);
-
-    i++;
-    let text = '';
-    while (i < lines.length && lines[i].trim() !== '' && !/^\d+$/.test(lines[i].trim())) {
-      if (text) text += ' ';
-      text += lines[i].trim();
-      i++;
-    }
-
-    if (text) {
-      result.push({
-        text: text,
-        start: start,
-        end: end
-      });
-    }
-  }
-
-  return result;
-}
 
 async function handler(req, res) {
   await connectDB();
@@ -90,56 +33,45 @@ async function handler(req, res) {
 
     const videoId = videoIdMatch[1];
 
-    // Call Python script to get transcript
-    const scriptPath = path.join(process.cwd(), 'get_youtube_srt.py');
-    const venvPath = path.join(process.cwd(), 'venv', 'bin', 'python');
+    // Get transcript using youtubei.js
+    const youtube = await Innertube.create();
+    const info = await youtube.getInfo(videoId);
+    const transcriptData = await info.getTranscript();
 
-    const pythonProcess = spawn(venvPath, [scriptPath, videoId], {
-      cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    await new Promise((resolve, reject) => {
-      pythonProcess.on('close', (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(stderr || 'Python script failed'));
-        }
-      });
-
-      pythonProcess.on('error', (error) => {
-        reject(error);
-      });
-    });
-
-    // Parse JSON output from Python script
-    let result;
-    try {
-      result = JSON.parse(stdout.trim());
-    } catch (parseError) {
-      throw new Error('Invalid JSON output from Python script: ' + stdout);
-    }
-
-    if (!result.success) {
+    if (!transcriptData || !transcriptData.transcript) {
       return res.status(404).json({
-        message: 'Video này không có phụ đề khả dụng. Vui lòng chọn video có phụ đề tự động (CC) hoặc thủ công. Bạn cũng có thể tải SRT từ YouTube thủ công.'
+        message: 'Video này không có phụ đề khả dụng. Vui lòng chọn video có phụ đề tự động (CC) hoặc thủ công.'
       });
     }
 
-    // Convert SRT to JSON
-    const jsonData = convertSRTtoJSON(result.srt);
+    const segments = transcriptData.transcript.content?.body?.initial_segments || [];
+
+    if (segments.length === 0) {
+      return res.status(404).json({
+        message: 'Không tìm thấy nội dung phụ đề trong video này.'
+      });
+    }
+
+    // Convert segments to JSON format (same as SRT but already in JSON)
+    const jsonData = segments
+      .filter(seg => {
+        // snippet is an object with .text property or .toString() method
+        const text = typeof seg.snippet === 'string'
+          ? seg.snippet
+          : (seg.snippet?.text || seg.snippet?.toString?.() || '');
+        return text && text.trim();
+      })
+      .map(seg => {
+        // Normalize snippet to string
+        const snippet = typeof seg.snippet === 'string'
+          ? seg.snippet
+          : (seg.snippet?.text || seg.snippet?.toString?.() || '');
+        return {
+          text: snippet.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(),
+          start: seg.start_ms / 1000, // Convert to seconds
+          end: seg.end_ms / 1000 // Convert to seconds
+        };
+      });
 
     if (jsonData.length === 0) {
       return res.status(400).json({ message: 'Không thể parse SRT text.' });

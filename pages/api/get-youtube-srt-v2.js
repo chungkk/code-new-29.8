@@ -1,17 +1,80 @@
-/**
- * YouTube SRT API - Pure JavaScript implementation
- * Sử dụng youtubei.js thay vì Python subprocess
- *
- * Ưu điểm:
- * - Không cần Python dependency
- * - Nhanh hơn (không spawn subprocess)
- * - Dễ maintain và deploy
- * - Tương thích hoàn toàn với Next.js
- */
-
-import { Innertube } from 'youtubei.js';
 import { verifyToken } from '../../lib/jwt';
 
+/**
+ * Extract ytInitialPlayerResponse từ YouTube HTML
+ * Sử dụng bracket counting để parse JSON object chính xác
+ */
+function extractYtInitialPlayerResponse(html) {
+  // Find the starting position
+  const searchTerm = 'var ytInitialPlayerResponse = ';
+  const startPos = html.indexOf(searchTerm);
+
+  if (startPos === -1) {
+    // Try alternative format
+    const altTerm = 'ytInitialPlayerResponse = ';
+    const altPos = html.indexOf(altTerm);
+    if (altPos === -1) {
+      throw new Error('Cannot find ytInitialPlayerResponse in HTML');
+    }
+    return extractJSONFromPosition(html, altPos + altTerm.length);
+  }
+
+  return extractJSONFromPosition(html, startPos + searchTerm.length);
+}
+
+function extractJSONFromPosition(html, startPos) {
+  if (html[startPos] !== '{') {
+    throw new Error('Expected JSON object to start with {');
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let i = startPos;
+
+  while (i < html.length) {
+    const char = html[i];
+
+    if (escaped) {
+      escaped = false;
+      i++;
+      continue;
+    }
+
+    if (char === '\\' && inString) {
+      escaped = true;
+      i++;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      i++;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === '{') {
+        depth++;
+      } else if (char === '}') {
+        depth--;
+        if (depth === 0) {
+          const jsonStr = html.substring(startPos, i + 1);
+          return JSON.parse(jsonStr);
+        }
+      }
+    }
+
+    i++;
+  }
+
+  throw new Error('Could not find end of JSON object');
+}
+
+/**
+ * Pure JavaScript implementation để lấy YouTube SRT
+ * Không cần Python dependency
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -36,11 +99,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Thiếu YouTube URL' });
     }
 
-    if (!['with', 'without'].includes(punctuationType)) {
-      return res.status(400).json({ message: 'Loại SRT không hợp lệ. Sử dụng "with" hoặc "without"' });
-    }
-
-    // Extract video ID from YouTube URL
+    // Extract video ID
     const videoIdMatch = youtubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     if (!videoIdMatch) {
       return res.status(400).json({ message: 'URL YouTube không hợp lệ' });
@@ -48,113 +107,114 @@ export default async function handler(req, res) {
 
     const videoId = videoIdMatch[1];
 
-    // Initialize YouTube client
-    const youtube = await Innertube.create();
+    // Fetch YouTube watch page HTML
+    const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const htmlResponse = await fetch(watchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
 
-    // Get video info
-    const info = await youtube.getInfo(videoId);
+    if (!htmlResponse.ok) {
+      throw new Error(`Failed to fetch YouTube page: ${htmlResponse.status}`);
+    }
 
-    // Get transcript
-    let transcriptData = await info.getTranscript();
+    const html = await htmlResponse.text();
 
-    if (!transcriptData || !transcriptData.transcript) {
+    // Parse ytInitialPlayerResponse from HTML using bracket counting
+    let playerResponse;
+    try {
+      playerResponse = extractYtInitialPlayerResponse(html);
+    } catch (parseError) {
+      return res.status(404).json({
+        message: 'Không tìm thấy phụ đề. Video có thể không có captions hoặc bị giới hạn.'
+      });
+    }
+
+    // Extract caption tracks
+    const captions = playerResponse?.captions?.playerCaptionsTracklistRenderer;
+    const captionTracks = captions?.captionTracks;
+
+    if (!captionTracks || captionTracks.length === 0) {
       return res.status(404).json({
         message: 'Video này không có phụ đề khả dụng. Vui lòng chọn video có phụ đề tự động (CC) hoặc thủ công.'
       });
     }
 
-    transcriptData = await prioritizeTranscriptLanguage(transcriptData);
+    // Prioritize caption selection:
+    // 1. German manually created (kind: "asr" = false)
+    // 2. German auto-generated (kind: "asr" = true)
+    // 3. English or other languages
+    let selectedTrack = null;
 
-    const segments = transcriptData.transcript.content?.body?.initial_segments || [];
+    // Try German first
+    selectedTrack = captionTracks.find(t =>
+      t.languageCode?.startsWith('de') && t.kind !== 'asr'
+    );
 
-    if (segments.length === 0) {
+    if (!selectedTrack) {
+      selectedTrack = captionTracks.find(t =>
+        t.languageCode?.startsWith('de')
+      );
+    }
+
+    // Fallback to English or first available
+    if (!selectedTrack) {
+      selectedTrack = captionTracks.find(t =>
+        t.languageCode?.startsWith('en')
+      );
+    }
+
+    if (!selectedTrack) {
+      selectedTrack = captionTracks[0];
+    }
+
+    // Fetch caption data in JSON3 format
+    const captionUrl = selectedTrack.baseUrl + '&fmt=json3';
+    const captionResponse = await fetch(captionUrl);
+
+    if (!captionResponse.ok) {
+      throw new Error(`Failed to fetch captions: ${captionResponse.status}`);
+    }
+
+    const captionData = await captionResponse.json();
+    const events = (captionData.events || []).filter(e => e.segs && e.segs.length > 0);
+
+    if (events.length === 0) {
       return res.status(404).json({
-        message: 'Không tìm thấy nội dung phụ đề trong video này.'
+        message: 'Không tìm thấy nội dung phụ đề'
       });
     }
 
     // Convert to SRT format
-    const srt = convertToSRT(segments, punctuationType);
-
-    if (!srt) {
-      return res.status(500).json({
-        message: 'Không thể chuyển đổi phụ đề sang format SRT'
-      });
-    }
-
+    const srt = convertToSRT(events, punctuationType);
     const itemCount = srt.split('\n\n').filter(block => block.trim()).length;
 
     return res.status(200).json({
       success: true,
       srt: srt,
       itemCount: itemCount,
-      message: 'SRT đã được tải thành công từ YouTube!'
+      message: 'SRT đã được tải thành công từ YouTube!',
+      language: selectedTrack.languageCode
     });
 
   } catch (error) {
     console.error('Get YouTube SRT error:', error);
-
-    // Handle specific errors
-    if (error.message?.includes('This video is unavailable')) {
-      return res.status(404).json({
-        message: 'Video không khả dụng hoặc đã bị xóa'
-      });
-    }
-
-    if (error.message?.includes('No transcripts')) {
-      return res.status(404).json({
-        message: 'Video này không có phụ đề khả dụng'
-      });
-    }
-
     return res.status(500).json({
       message: 'Lỗi lấy SRT từ YouTube: ' + error.message
     });
   }
 }
 
-async function prioritizeTranscriptLanguage(transcriptInfo) {
-  if (!transcriptInfo?.transcript) {
-    return transcriptInfo;
-  }
-
-  const GERMAN_KEYWORDS = ['german', 'deutsch', 'tiếng đức'];
-
-  try {
-    const selected = transcriptInfo.selectedLanguage?.toLowerCase?.() || '';
-    if (GERMAN_KEYWORDS.some(keyword => selected.includes(keyword))) {
-      return transcriptInfo;
-    }
-
-    const availableLanguages = transcriptInfo.languages || [];
-    const germanLanguage = availableLanguages.find(lang =>
-      GERMAN_KEYWORDS.some(keyword => lang.toLowerCase().includes(keyword))
-    );
-
-    if (germanLanguage) {
-      return await transcriptInfo.selectLanguage(germanLanguage);
-    }
-  } catch (error) {
-    console.warn('Không thể chọn transcript tiếng Đức ưu tiên:', error.message);
-    return transcriptInfo;
-  }
-
-  return transcriptInfo;
-}
-
 /**
- * Convert YouTube transcript segments to SRT format
- *
- * @param {Array} segments - Transcript segments from YouTube
- * @param {string} punctuationType - 'with' or 'without' punctuation
- * @returns {string} SRT formatted string
+ * Convert YouTube JSON3 events to SRT format
  */
-function convertToSRT(segments, punctuationType) {
+function convertToSRT(events, punctuationType) {
   const MAX_CHAR_LENGTH = 120;
   const MIN_ALPHA_RATIO = 0.45;
 
-  // Helper: Format milliseconds to SRT time
-  const formatTime = (ms) => {
+  // Helper: Format milliseconds to SRT time format
+  const toTime = (ms) => {
     const pad = (n, z = 2) => ("00" + n).slice(-z);
     const hours = Math.floor(ms / 3600000);
     const minutes = Math.floor((ms % 3600000) / 60000);
@@ -172,9 +232,9 @@ function convertToSRT(segments, punctuationType) {
   const isUsefulText = (text) => {
     if (!text || !text.trim()) return false;
 
-    // Filter music notes and noise
+    // Filter out music notes and noise
     if (/^[\[\(].*[\]\)]$/.test(text.trim())) return false;
-    if (/^[♪♫♬♩\s]+$/.test(text)) return false;
+    if (/[♪♫♬♩]/.test(text)) return false;
 
     const visibleChars = text.replace(/\s/g, '');
     if (!visibleChars) return false;
@@ -186,32 +246,23 @@ function convertToSRT(segments, punctuationType) {
     return ratio >= MIN_ALPHA_RATIO;
   };
 
-  // Filter and normalize segments
-  const items = segments
-    .filter(seg => {
-      // snippet is an object with .text property or .toString() method
-      const snippet = typeof seg.snippet === 'string'
-        ? seg.snippet
-        : (seg.snippet?.text || seg.snippet?.toString?.() || '');
-      return snippet && isUsefulText(snippet);
-    })
-    .map(seg => {
-      // Normalize snippet to string
-      const snippet = typeof seg.snippet === 'string'
-        ? seg.snippet
-        : (seg.snippet?.text || seg.snippet?.toString?.() || '');
-      return {
-        text: normalizeText(snippet),
-        start: seg.start_ms,
-        end: seg.end_ms
-      };
-    });
+  // Extract items with timing
+  const items = events.map(e => {
+    const text = normalizeText(e.segs.map(s => s.utf8 || '').join(''));
+    const startMs = e.tStartMs || 0;
+    const durationMs = e.dDurationMs || 0;
+    return {
+      text,
+      start: startMs,
+      end: startMs + durationMs
+    };
+  }).filter(item => isUsefulText(item.text));
 
   if (items.length === 0) {
     return '';
   }
 
-  // Merge segments based on punctuation type
+  // Merge items based on punctuation type
   let merged;
   if (punctuationType === 'without') {
     merged = mergeItemsWithoutPunctuation(items, MAX_CHAR_LENGTH);
@@ -222,14 +273,14 @@ function convertToSRT(segments, punctuationType) {
   // Build SRT string
   return merged.map((entry, index) => {
     const num = index + 1;
-    const start = formatTime(entry.start);
-    const end = formatTime(entry.end);
-    return `${num}\n${start} --> ${end}\n${entry.text}`;
+    const startTime = toTime(entry.start);
+    const endTime = toTime(entry.end);
+    return `${num}\n${startTime} --> ${endTime}\n${entry.text}`;
   }).join('\n\n');
 }
 
 /**
- * Merge items with punctuation awareness (sentence-based)
+ * Merge items with punctuation awareness
  */
 function mergeItemsWithPunctuation(items, maxCharLength) {
   const MIN_WORDS = 6;
