@@ -21,12 +21,12 @@
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 400px 1fr 320px;
-  gap: 24px;
-  align-items: flex-start;
-  max-width: 1400px;
-  margin: 0 auto;
+   display: grid;
+   grid-template-columns: 400px 1fr;
+   gap: 24px;
+   align-items: flex-start;
+   max-width: 1400px;
+   margin: 0 auto;
 }
 
 .mediaSection {

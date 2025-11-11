@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
-import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import { useProgress } from '../../lib/hooks/useProgress';
@@ -638,26 +637,7 @@ const ShadowingPageContent = () => {
     ? [videoData, breadcrumbData]
     : [breadcrumbData];
 
-  const transcriptClassNames = {
-    currentSentenceWrapper: styles.transcriptWrapper,
-    sentenceCounterContainer: styles.sentenceCounterContainer,
-    navButton: styles.navButton,
-    prevButton: styles.prevButton,
-    nextButton: styles.nextButton,
-    sentenceCounter: styles.sentenceCounter,
-    inputArea: styles.inputArea,
-    currentSentence: styles.currentSentence,
-    highlightedSentence: styles.highlightedSentence,
-    sentenceTimeContainer: styles.sentenceTimeContainer,
-    sentenceTimeContainerPlaying: styles.sentenceTimeContainerPlaying,
-    timeProgressBar: styles.timeProgressBar,
-    timeProgressFill: styles.timeProgressFill,
-    timeDisplay: styles.timeDisplay,
-    timeIcon: styles.timeIcon,
-    timeCurrent: styles.timeCurrent,
-    timeSeparator: styles.timeSeparator,
-    timeTotal: styles.timeTotal
-  };
+
 
   const sentenceListClassNames = {
     item: styles.sentenceItem,
@@ -762,26 +742,7 @@ const ShadowingPageContent = () => {
                 </div>
               </div>
 
-             {/* MIDDLE: Aktueller Satz */}
-             <div className={styles.currentSentenceSection}>
-              <div className={styles.currentSentenceContainer}>
-                <h3>Aktueller Satz</h3>
-                <Transcript
-                  transcriptData={transcriptData}
-                  currentTime={currentTime}
-                  isHidden={isTextHidden}
-                  onSentenceClick={handleSentenceClick}
-                  currentSentenceIndex={currentSentenceIndex}
-                  onPreviousSentence={goToPreviousSentence}
-                  onNextSentence={goToNextSentence}
-                  isPlaying={isPlaying}
-                  lessonId={lessonId}
-                  classNames={transcriptClassNames}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.sentenceListSection}>
+             <div className={styles.sentenceListSection}>
               <div className={styles.sentenceListContainer}>
                 <h3>Satzliste</h3>
                 <div className={styles.sentenceList}>
