@@ -1,6 +1,8 @@
 import React from 'react';
 import HoverableWord from './HoverableWord';
 
+const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
+
 const SentenceListItem = ({
   segment,
   index,
@@ -12,8 +14,21 @@ const SentenceListItem = ({
   formatTime,
   maskText,
   isTextHidden,
-  completedWords
+  completedWords,
+  classNames = {}
 }) => {
+  const {
+    item,
+    itemActive,
+    itemPlaying,
+    number,
+    content,
+    text,
+    time,
+    actions,
+    actionButton
+  } = classNames;
+
   const renderSentenceText = () => {
     if (isTextHidden && !isCompleted) {
       // If we have completed words for this sentence, show them
@@ -61,27 +76,27 @@ const SentenceListItem = ({
 
   return (
     <div
-      className={`sentence-item ${
-        currentSentenceIndex === index ? 'active' : ''
-      } ${
-        currentTime >= segment.start && currentTime < segment.end ? 'playing' : ''
-      }`}
+      className={joinClasses(
+        item,
+        currentSentenceIndex === index && itemActive,
+        currentTime >= segment.start && currentTime < segment.end && itemPlaying
+      )}
       onClick={() => onSentenceClick(segment.start, segment.end)}
     >
-      <div className="sentence-number">
+      <div className={joinClasses(number)}>
         {index + 1}
       </div>
-       <div className="sentence-content">
-         <div className="sentence-text" style={{ fontSize: '14px', lineHeight: '1.2', whiteSpace: 'normal' }}>
+       <div className={joinClasses(content)}>
+         <div className={joinClasses(text)}>
            {renderSentenceText()}
          </div>
-         <div className="sentence-time" style={{ fontSize: '12px' }}>
+         <div className={joinClasses(time)}>
            {formatTime(segment.start)} - {formatTime(segment.end)}
          </div>
        </div>
-      <div className="sentence-actions">
+      <div className={joinClasses(actions)}>
         <button 
-          className="action-btn"
+          className={joinClasses(actionButton)}
           onClick={(e) => {
             e.stopPropagation();
             onSentenceClick(segment.start, segment.end);

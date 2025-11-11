@@ -2,11 +2,33 @@ import React, { useState } from 'react';
 import HoverableWord from './HoverableWord';
 import VocabularyPopup from './VocabularyPopup';
 
-const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, currentSentenceIndex = 0, onPreviousSentence, onNextSentence, isPlaying = false, lessonId }) => {
+const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
+
+const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, currentSentenceIndex = 0, onPreviousSentence, onNextSentence, isPlaying = false, lessonId, classNames = {} }) => {
   const [showVocabPopup, setShowVocabPopup] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const [preTranslation, setPreTranslation] = useState('');
+  const {
+    currentSentenceWrapper,
+    sentenceCounterContainer,
+    navButton,
+    prevButton,
+    nextButton,
+    sentenceCounter,
+    inputArea,
+    currentSentence: currentSentenceClass,
+    highlightedSentence,
+    sentenceTimeContainer,
+    sentenceTimeContainerPlaying,
+    timeProgressBar,
+    timeProgressFill,
+    timeDisplay,
+    timeIcon,
+    timeCurrent,
+    timeSeparator,
+    timeTotal
+  } = classNames;
 
   const handleWordClick = (word, position, translation = '') => {
     const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
@@ -36,10 +58,10 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
     const isHighlighted = currentTime >= currentItem.start && currentTime < currentItem.end;
 
     return (
-      <div className="current-sentence-dictation">
-        <div className="sentence-counter-container">
+      <div className={joinClasses(currentSentenceWrapper)}>
+        <div className={joinClasses(sentenceCounterContainer)}>
           <button
-            className="nav-btn prev-btn"
+            className={joinClasses(navButton, prevButton)}
             onClick={onPreviousSentence}
             disabled={currentSentenceIndex === 0}
             title="Vorheriger Satz"
@@ -47,12 +69,12 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
             ‹
           </button>
 
-          <div className="sentence-counter">
+          <div className={joinClasses(sentenceCounter)}>
             Satz {currentSentenceIndex + 1} / {transcriptData.length}
           </div>
 
           <button
-            className="nav-btn next-btn"
+            className={joinClasses(navButton, nextButton)}
             onClick={onNextSentence}
             disabled={currentSentenceIndex === transcriptData.length - 1}
             title="Nächster Satz"
@@ -61,22 +83,22 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
           </button>
         </div>
 
-        <div className="dictation-input-area">
+        <div className={joinClasses(inputArea)}>
           <div
-            className={`current-sentence ${isHighlighted ? 'highlighted-sentence' : ''}`}
+            className={joinClasses(currentSentenceClass, isHighlighted && highlightedSentence)}
           >
             {splitTextIntoWords(currentItem.text.trim())}
           </div>
         </div>
 
         <div
-          className={`sentence-time-container ${isPlaying ? 'playing' : ''}`}
+          className={joinClasses(sentenceTimeContainer, isPlaying && sentenceTimeContainerPlaying)}
           onClick={() => onSentenceClick(currentItem.start, currentItem.end)}
            title="Click để phát hoặc tạm dừng câu này"
         >
-           <div className="time-progress-bar">
+           <div className={joinClasses(timeProgressBar)}>
              <div
-               className="time-progress-fill"
+               className={joinClasses(timeProgressFill)}
                style={{
                  transform: `scaleX(${isPlaying && currentItem
                    ? (currentTime - currentItem.start) / (currentItem.end - currentItem.start)
@@ -84,11 +106,11 @@ const Transcript = ({ transcriptData, currentTime, isHidden, onSentenceClick, cu
                }}
              />
            </div>
-          <div className="time-display">
-            <span className="time-icon">{isPlaying ? '▶' : '⏸'}</span>
-            <span className="time-current">{formatTime(currentTime)}</span>
-            <span className="time-separator">/</span>
-            <span className="time-total">
+          <div className={joinClasses(timeDisplay)}>
+            <span className={joinClasses(timeIcon)}>{isPlaying ? '▶' : '⏸'}</span>
+            <span className={joinClasses(timeCurrent)}>{formatTime(currentTime)}</span>
+            <span className={joinClasses(timeSeparator)}>/</span>
+            <span className={joinClasses(timeTotal)}>
               {formatTime(currentItem.start)} - {formatTime(currentItem.end)}
             </span>
           </div>

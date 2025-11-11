@@ -4,10 +4,10 @@ import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } fr
 
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
-import Transcript from '../../components/Transcript';
 import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
 import { speakText } from '../../lib/textToSpeech';
+import styles from '../../styles/dictationPage.module.css';
 
 const DictationPageContent = () => {
   const router = useRouter();
@@ -1094,7 +1094,7 @@ const DictationPageContent = () => {
 
   if (loading) {
     return (
-      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centeredState}>
         <div style={{ textAlign: 'center' }}>
           <h2>⏳ Lektion lädt...</h2>
         </div>
@@ -1104,7 +1104,7 @@ const DictationPageContent = () => {
 
   if (!lesson) {
     return (
-      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centeredState}>
         <div style={{ textAlign: 'center' }}>
           <h1>❌ Lektion nicht gefunden</h1>
            <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
@@ -1148,6 +1148,25 @@ const DictationPageContent = () => {
     ? [videoData, breadcrumbData]
     : [breadcrumbData];
 
+  const sentenceListClassNames = {
+    item: styles.sentenceItem,
+    itemActive: styles.sentenceItemActive,
+    itemPlaying: styles.sentenceItemPlaying,
+    number: styles.sentenceNumber,
+    content: styles.sentenceContent,
+    text: styles.sentenceText,
+    time: styles.sentenceTime,
+    actions: styles.sentenceActions,
+    actionButton: styles.sentenceActionButton
+  };
+
+  const footerClassNames = {
+    wrapper: styles.footerControls,
+    button: styles.footerButton,
+    icon: styles.footerIcon,
+    label: styles.footerLabel
+  };
+
   return (
     <>
       <SEO
@@ -1159,7 +1178,7 @@ const DictationPageContent = () => {
         structuredData={structuredDataArray}
       />
 
-      <div className="shadowing-page">
+      <div className={styles.page}>
         {!isYouTube && (
           <audio ref={audioRef} controls style={{ display: 'none' }}>
             <source src={lesson.audio} type="audio/mp3" />
@@ -1169,14 +1188,14 @@ const DictationPageContent = () => {
         
 
 
-         <div className="shadowing-app-container" style={{ marginTop: '100px' }}>
-           <div className="shadowing-layout">
+        <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
+           <div className={styles.layout}>
              {/* LEFT SIDE: Medien */}
-             <div className="medien-section">
-               <div className="medien-container">
-                 <div className="media-player">
-                      <div className="media-artwork">
-                        <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
+             <div className={styles.mediaSection}>
+               <div className={styles.mediaContainer}>
+                 <div className={styles.mediaPlayer}>
+                      <div className={styles.mediaArtwork}>
+                        <div className={styles.artworkInner} style={{ position: 'relative', overflow: 'hidden' }}>
                           {isYouTube ? (
                             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                               <div id="youtube-player" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
@@ -1190,28 +1209,28 @@ const DictationPageContent = () => {
                        </div>
                      </div>
                     
-                    <div className="media-info">
-                      <div className="media-title">{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
-                      <div className="media-artist">{lesson.description || 'Deutschunterricht'}</div>
+                    <div className={styles.mediaInfo}>
+                      <div className={styles.mediaTitle}>{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
+                      <div className={styles.mediaArtist}>{lesson.description || 'Deutschunterricht'}</div>
                     </div>
 
-                    <div className="media-progress-container">
-                      <div className="media-progress" onClick={handleProgressClick}>
-                        <div className="media-progress-fill" style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
+                    <div className={styles.mediaProgressContainer}>
+                      <div className={styles.mediaProgress} onClick={handleProgressClick}>
+                        <div className={styles.mediaProgressFill} style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
                       </div>
-                     <div className="media-time">
+                     <div className={styles.mediaTime}>
                        <span>{formatTime(currentTime)}</span>
                        <span>{formatTime(duration)}</span>
                      </div>
                    </div>
 
-                    <div className="media-controls">
-                      <button className="media-btn media-btn-small" onClick={goToPreviousSentence} title="Vorheriger Satz">
+                    <div className={styles.mediaControls}>
+                      <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToPreviousSentence} title="Vorheriger Satz">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                           <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                         </svg>
                       </button>
-                      <button className="media-btn media-btn-large" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
+                      <button className={`${styles.mediaButton} ${styles.mediaButtonLarge}`} onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
                         {isPlaying ? (
                           <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
@@ -1222,7 +1241,7 @@ const DictationPageContent = () => {
                           </svg>
                         )}
                       </button>
-                      <button className="media-btn media-btn-small" onClick={goToNextSentence} title="Nächster Satz">
+                      <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToNextSentence} title="Nächster Satz">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                           <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                         </svg>
@@ -1233,16 +1252,16 @@ const DictationPageContent = () => {
              </div>
 
              {/* MIDDLE: Aktueller Satz */}
-             <div className="current-sentence-section">
-              <div className="current-sentence-container">
+             <div className={styles.currentSentenceSection}>
+              <div className={styles.currentSentenceContainer}>
                 <h3>Aktueller Satz</h3>
                 
                 {/* Current Sentence Dictation Input */}
                 {transcriptData[currentSentenceIndex] && (
-                  <div className="current-sentence-dictation">
-                    <div className="sentence-counter-container">
+                  <div className={styles.transcriptWrapper}>
+                    <div className={styles.sentenceCounterContainer}>
                       <button 
-                        className="nav-btn prev-btn"
+                        className={`${styles.navButton} ${styles.prevButton}`}
                         onClick={goToPreviousSentence}
                         disabled={currentSentenceIndex === 0}
                         title="Vorheriger Satz"
@@ -1250,12 +1269,12 @@ const DictationPageContent = () => {
                         ‹
                       </button>
                       
-                      <div className="sentence-counter">
+                      <div className={styles.sentenceCounter}>
                         Satz {currentSentenceIndex + 1} / {transcriptData.length}
                       </div>
                       
                       <button 
-                        className="nav-btn next-btn"
+                        className={`${styles.navButton} ${styles.nextButton}`}
                         onClick={goToNextSentence}
                         disabled={currentSentenceIndex === transcriptData.length - 1}
                         title="Nächster Satz"
@@ -1264,24 +1283,24 @@ const DictationPageContent = () => {
                       </button>
                     </div>
                     
-                    <div className="dictation-input-area">
+                    <div className={styles.inputArea}>
                       <div 
-                        className="dictation-text"
+                        className={styles.dictationText}
                         dangerouslySetInnerHTML={{ __html: processedText }}
                       />
                     </div>
                     
                     <div 
-                      className={`sentence-time-container ${isPlaying ? 'playing' : ''}`}
+                      className={`${styles.sentenceTimeContainer} ${isPlaying ? styles.sentenceTimeContainerPlaying : ''}`}
                       onClick={() => handleSentenceClick(
                         transcriptData[currentSentenceIndex].start, 
                         transcriptData[currentSentenceIndex].end
                       )}
                        title="Klicken, um diesen Satz abzuspielen oder zu pausieren"
                     >
-                       <div className="time-progress-bar">
+                       <div className={styles.timeProgressBar}>
                          <div
-                           className="time-progress-fill"
+                           className={styles.timeProgressFill}
                            style={{
                              transform: `scaleX(${isPlaying && transcriptData[currentSentenceIndex]
                                ? (currentTime - transcriptData[currentSentenceIndex].start) /
@@ -1290,11 +1309,11 @@ const DictationPageContent = () => {
                            }}
                          />
                        </div>
-                      <div className="time-display">
-                        <span className="time-icon">{isPlaying ? '▶' : '⏸'}</span>
-                        <span className="time-current">{formatTime(currentTime)}</span>
-                        <span className="time-separator">/</span>
-                        <span className="time-total">
+                      <div className={styles.timeDisplay}>
+                        <span className={styles.timeIcon}>{isPlaying ? '▶' : '⏸'}</span>
+                        <span className={styles.timeCurrent}>{formatTime(currentTime)}</span>
+                        <span className={styles.timeSeparator}>/</span>
+                        <span className={styles.timeTotal}>
                           {formatTime(transcriptData[currentSentenceIndex].start)} - {formatTime(transcriptData[currentSentenceIndex].end)}
                         </span>
                       </div>
@@ -1305,27 +1324,28 @@ const DictationPageContent = () => {
             </div>
             
              {/* RIGHT SIDE: Satzliste */}
-              <div className="sentence-list-section">
-                <div className="sentence-list-container">
+              <div className={styles.sentenceListSection}>
+                <div className={styles.sentenceListContainer}>
                   <h3>Satzliste</h3>
                 
                 {/* Sentence List */}
-                <div className="sentence-list">
+                <div className={styles.sentenceList}>
                   {transcriptData.map((segment, index) => (
-                    <SentenceListItem
-                      key={index}
-                      segment={segment}
-                      index={index}
-                      currentSentenceIndex={currentSentenceIndex}
-                      currentTime={currentTime}
-                      isCompleted={completedSentences.includes(index)}
-                      lessonId={lessonId}
-                      onSentenceClick={handleSentenceClick}
-                      formatTime={formatTime}
-                      maskText={maskText}
-                      isTextHidden={true}
-                      completedWords={completedWords[index] || {}}
-                    />
+                  <SentenceListItem
+                    key={index}
+                    segment={segment}
+                    index={index}
+                    currentSentenceIndex={currentSentenceIndex}
+                    currentTime={currentTime}
+                    isCompleted={completedSentences.includes(index)}
+                    lessonId={lessonId}
+                    onSentenceClick={handleSentenceClick}
+                    formatTime={formatTime}
+                    maskText={maskText}
+                    isTextHidden={true}
+                    completedWords={completedWords[index] || {}}
+                    classNames={sentenceListClassNames}
+                  />
                   ))}
                 </div>
               </div>
@@ -1337,6 +1357,7 @@ const DictationPageContent = () => {
           onSeek={handleSeek}
           onPlayPause={handlePlayPause}
           isPlaying={isPlaying}
+          classNames={footerClassNames}
         />
       </div>
 

@@ -1,5 +1,7 @@
 import React from 'react';
 
+const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
+
 const AudioControls = ({ 
   lessonTitle, 
   currentTime, 
@@ -7,24 +9,39 @@ const AudioControls = ({
   isPlaying, 
   onSeek, 
   onPlayPause, 
-  formatTime
+  formatTime,
+  classNames = {}
 }) => {
+  const {
+    wrapper,
+    contentWrapper,
+    title,
+    mobileControls,
+    seekButton,
+    seekButtonLeft,
+    seekButtonRight,
+    seekIcon,
+    seekLabel,
+    audioSection,
+    timeDisplay
+  } = classNames;
+
   return (
-    <div className="fixed-audio-bar">
-      <div className="audio-content-wrapper">
-        <h1>{lessonTitle}</h1>
+    <div className={joinClasses(wrapper)}>
+      <div className={joinClasses(contentWrapper)}>
+        <h1 className={joinClasses(title)}>{lessonTitle}</h1>
         
-        <div className="mobile-seek-controls">
-          <button className="seek-btn seek-left" onClick={() => onSeek('backward')}>
-            <span className="icon">❮</span><span className="label">-3s</span>
+        <div className={joinClasses(mobileControls)}>
+          <button className={joinClasses(seekButton, seekButtonLeft)} onClick={() => onSeek('backward')}>
+            <span className={joinClasses(seekIcon)}>❮</span><span className={joinClasses(seekLabel)}>-3s</span>
           </button>
-          <button className="seek-btn seek-right" onClick={() => onSeek('forward')}>
-            <span className="label">+3s</span><span className="icon">❯</span>
+          <button className={joinClasses(seekButton, seekButtonRight)} onClick={() => onSeek('forward')}>
+            <span className={joinClasses(seekLabel)}>+3s</span><span className={joinClasses(seekIcon)}>❯</span>
           </button>
         </div>
 
-        <div className="audio-section">
-          <div className="time-display">
+        <div className={joinClasses(audioSection)}>
+          <div className={joinClasses(timeDisplay)}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
         </div>

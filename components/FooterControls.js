@@ -1,6 +1,15 @@
 import React, { useEffect } from 'react';
 
-const FooterControls = ({ onSeek, onPlayPause, isPlaying }) => {
+const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
+
+const FooterControls = ({ onSeek, onPlayPause, isPlaying, classNames = {} }) => {
+  const {
+    wrapper,
+    button,
+    icon,
+    label
+  } = classNames;
+
   useEffect(() => {
     document.body.classList.add('has-footer-controls');
 
@@ -10,20 +19,20 @@ const FooterControls = ({ onSeek, onPlayPause, isPlaying }) => {
   }, []);
 
   return (
-    <div className="fixed-footer-controls">
-      <button className="footer-btn" onClick={() => onSeek('backward')}>
-        <span className="icon">❮❮</span>
-        <span className="label">-3s</span>
+    <div className={joinClasses(wrapper)}>
+      <button className={joinClasses(button)} onClick={() => onSeek('backward')}>
+        <span className={joinClasses(icon)}>❮❮</span>
+        <span className={joinClasses(label)}>-3s</span>
       </button>
       
-      <button className="footer-btn" onClick={onPlayPause}>
-        <span className="icon">{isPlaying ? '❚❚' : '▶'}</span>
-        <span className="label">{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+      <button className={joinClasses(button)} onClick={onPlayPause}>
+        <span className={joinClasses(icon)}>{isPlaying ? '❚❚' : '▶'}</span>
+        <span className={joinClasses(label)}>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
       </button>
       
-      <button className="footer-btn" onClick={() => onSeek('forward')}>
-        <span className="label">+3s</span>
-        <span className="icon">❯❯</span>
+      <button className={joinClasses(button)} onClick={() => onSeek('forward')}>
+        <span className={joinClasses(label)}>+3s</span>
+        <span className={joinClasses(icon)}>❯❯</span>
       </button>
     </div>
   );

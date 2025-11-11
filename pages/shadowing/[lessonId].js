@@ -6,6 +6,7 @@ import Transcript from '../../components/Transcript';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import { useProgress } from '../../lib/hooks/useProgress';
+import styles from '../../styles/shadowingPage.module.css';
 
 const ShadowingPageContent = () => {
   const router = useRouter();
@@ -583,7 +584,7 @@ const ShadowingPageContent = () => {
 
   if (loading) {
     return (
-      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centeredState}>
         <div style={{ textAlign: 'center' }}>
           <h2>⏳ Lektion lädt...</h2>
         </div>
@@ -593,7 +594,7 @@ const ShadowingPageContent = () => {
 
   if (!lesson) {
     return (
-      <div className="main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centeredState}>
         <div style={{ textAlign: 'center' }}>
           <h1>❌ Lektion nicht gefunden</h1>
            <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
@@ -637,6 +638,46 @@ const ShadowingPageContent = () => {
     ? [videoData, breadcrumbData]
     : [breadcrumbData];
 
+  const transcriptClassNames = {
+    currentSentenceWrapper: styles.transcriptWrapper,
+    sentenceCounterContainer: styles.sentenceCounterContainer,
+    navButton: styles.navButton,
+    prevButton: styles.prevButton,
+    nextButton: styles.nextButton,
+    sentenceCounter: styles.sentenceCounter,
+    inputArea: styles.inputArea,
+    currentSentence: styles.currentSentence,
+    highlightedSentence: styles.highlightedSentence,
+    sentenceTimeContainer: styles.sentenceTimeContainer,
+    sentenceTimeContainerPlaying: styles.sentenceTimeContainerPlaying,
+    timeProgressBar: styles.timeProgressBar,
+    timeProgressFill: styles.timeProgressFill,
+    timeDisplay: styles.timeDisplay,
+    timeIcon: styles.timeIcon,
+    timeCurrent: styles.timeCurrent,
+    timeSeparator: styles.timeSeparator,
+    timeTotal: styles.timeTotal
+  };
+
+  const sentenceListClassNames = {
+    item: styles.sentenceItem,
+    itemActive: styles.sentenceItemActive,
+    itemPlaying: styles.sentenceItemPlaying,
+    number: styles.sentenceNumber,
+    content: styles.sentenceContent,
+    text: styles.sentenceText,
+    time: styles.sentenceTime,
+    actions: styles.sentenceActions,
+    actionButton: styles.sentenceActionButton
+  };
+
+  const footerClassNames = {
+    wrapper: styles.footerControls,
+    button: styles.footerButton,
+    icon: styles.footerIcon,
+    label: styles.footerLabel
+  };
+
   return (
     <>
       <SEO
@@ -648,7 +689,7 @@ const ShadowingPageContent = () => {
         structuredData={structuredDataArray}
       />
 
-      <div className="shadowing-page dark-theme">
+      <div className={`${styles.page} dark-theme`}>
         {!isYouTube && (
           <audio ref={audioRef} controls style={{ display: 'none' }}>
             <source src={lesson.audio} type="audio/mp3" />
@@ -658,14 +699,14 @@ const ShadowingPageContent = () => {
         
 
 
-          <div className="shadowing-app-container shadowing-app-container--offset">
-            <div className="shadowing-layout">
+          <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
+            <div className={styles.layout}>
               {/* LEFT SIDE: Medien */}
-              <div className="medien-section">
-                <div className="medien-container">
-                  <div className="media-player">
-                      <div className="media-artwork">
-                        <div className="artwork-inner" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div className={styles.mediaSection}>
+                <div className={styles.mediaContainer}>
+                  <div className={styles.mediaPlayer}>
+                      <div className={styles.mediaArtwork}>
+                        <div className={styles.artworkInner} style={{ position: 'relative', overflow: 'hidden' }}>
                           {isYouTube ? (
                             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                               <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
@@ -679,28 +720,28 @@ const ShadowingPageContent = () => {
                         </div>
                          </div>
 
-                      <div className="media-info">
-                       <div className="media-title">{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
-                       <div className="media-artist">{lesson.description || 'Deutschunterricht'}</div>
+                      <div className={styles.mediaInfo}>
+                       <div className={styles.mediaTitle}>{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
+                       <div className={styles.mediaArtist}>{lesson.description || 'Deutschunterricht'}</div>
                      </div>
 
-                     <div className="media-progress-container">
-                       <div className="media-progress" onClick={handleProgressClick}>
-                         <div className="media-progress-fill" style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
+                     <div className={styles.mediaProgressContainer}>
+                       <div className={styles.mediaProgress} onClick={handleProgressClick}>
+                         <div className={styles.mediaProgressFill} style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
                        </div>
-                      <div className="media-time">
+                      <div className={styles.mediaTime}>
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
                       </div>
                     </div>
 
-                     <div className="media-controls">
-                       <button className="media-btn media-btn-small" onClick={goToPreviousSentence} title="Vorheriger Satz">
+                     <div className={styles.mediaControls}>
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToPreviousSentence} title="Vorheriger Satz">
                          <svg viewBox="0 0 24 24" fill="currentColor">
                            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                          </svg>
                        </button>
-                       <button className="media-btn media-btn-large" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonLarge}`} onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
                          {isPlaying ? (
                            <svg viewBox="0 0 24 24" fill="currentColor">
                              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
@@ -711,7 +752,7 @@ const ShadowingPageContent = () => {
                            </svg>
                          )}
                        </button>
-                       <button className="media-btn media-btn-small" onClick={goToNextSentence} title="Nächster Satz">
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToNextSentence} title="Nächster Satz">
                          <svg viewBox="0 0 24 24" fill="currentColor">
                            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                          </svg>
@@ -722,8 +763,8 @@ const ShadowingPageContent = () => {
               </div>
 
              {/* MIDDLE: Aktueller Satz */}
-             <div className="current-sentence-section">
-              <div className="current-sentence-container">
+             <div className={styles.currentSentenceSection}>
+              <div className={styles.currentSentenceContainer}>
                 <h3>Aktueller Satz</h3>
                 <Transcript
                   transcriptData={transcriptData}
@@ -735,14 +776,15 @@ const ShadowingPageContent = () => {
                   onNextSentence={goToNextSentence}
                   isPlaying={isPlaying}
                   lessonId={lessonId}
+                  classNames={transcriptClassNames}
                 />
               </div>
             </div>
             
-            <div className="sentence-list-section">
-              <div className="sentence-list-container">
+            <div className={styles.sentenceListSection}>
+              <div className={styles.sentenceListContainer}>
                 <h3>Satzliste</h3>
-                <div className="sentence-list">
+                <div className={styles.sentenceList}>
                   {transcriptData.map((segment, index) => (
                     <SentenceListItem
                       key={index}
@@ -755,6 +797,7 @@ const ShadowingPageContent = () => {
                       onSentenceClick={handleSentenceClick}
                       formatTime={formatTime}
                       maskText={(text) => text}
+                      classNames={sentenceListClassNames}
                     />
                   ))}
                 </div>
@@ -767,6 +810,7 @@ const ShadowingPageContent = () => {
           onSeek={handleSeek}
           onPlayPause={handlePlayPause}
           isPlaying={isPlaying}
+          classNames={footerClassNames}
         />
       </div>
     </>
