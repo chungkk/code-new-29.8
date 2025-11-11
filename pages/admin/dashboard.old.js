@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Image from 'next/image';
 import ProtectedPage from '../../components/ProtectedPage';
 import { useTheme } from '../../context/ThemeContext';
 import { fetchWithAuth } from '../../lib/api';
@@ -1159,9 +1160,11 @@ function AdminDashboardContent() {
                        {thumbnailPreview && (
                          <div style={{ marginTop: '10px' }}>
                            <p style={{ fontSize: '12px', color: '#6c757d', marginBottom: '5px' }}>Vorschau:</p>
-                           <img
+                           <Image
                              src={thumbnailPreview}
                              alt="Thumbnail preview"
+                             width={300}
+                             height={200}
                              style={{
                                maxWidth: '300px',
                                maxHeight: '200px',

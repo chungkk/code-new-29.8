@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
 import ProtectedPage from '../components/ProtectedPage';
@@ -48,14 +48,10 @@ function UserDashboard() {
   }, [router.isReady, router.query.tab, activeTab]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Load progress first
       const progressRes = await fetchWithAuth('/api/progress');
       const progressData = await progressRes.json();
@@ -64,10 +60,10 @@ function UserDashboard() {
       // Load ALL lessons (sorted by order)
       const lessonsRes = await fetch('/api/lessons');
       const lessonsData = await lessonsRes.json();
-      
+
       // Handle both old array format and new object format
       const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
-      
+
       if (lessons && lessons.length > 0) {
         // Sort by newest first (createdAt descending)
         const sortedLessons = [...lessons].sort((a, b) => {
@@ -89,7 +85,11 @@ function UserDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const calculateProgress = (lessonId) => {
     const lessonProgress = progress.filter(p => p.lessonId === lessonId);

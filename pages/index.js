@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
 import LessonCard from '../components/LessonCard';
@@ -32,15 +32,7 @@ const HomePage = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchLessons(currentPage, difficultyFilter);
-  }, [currentPage, difficultyFilter]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [difficultyFilter]);
-
-  const fetchLessons = async (page = 1, difficulty = difficultyFilter) => {
+  const fetchLessons = useCallback(async (page = 1, difficulty = difficultyFilter) => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -64,7 +56,15 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [difficultyFilter, itemsPerPage]);
+
+  useEffect(() => {
+    fetchLessons(currentPage, difficultyFilter);
+  }, [currentPage, difficultyFilter, fetchLessons]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [difficultyFilter]);
 
   const nextPage = () => {
     if (currentPage < totalPages) {

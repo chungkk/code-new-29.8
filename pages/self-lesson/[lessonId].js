@@ -187,48 +187,48 @@ const SelfLessonPageContent = () => {
   }, [lesson]);
 
   // Fetch lesson data from localStorage for self-created lessons
-  useEffect(() => {
-    const loadLesson = async () => {
-      if (!lessonId) return;
+  const loadLesson = useCallback(async () => {
+    if (!lessonId) return;
 
-      try {
-        setLoading(true);
-        // First try localStorage for self-created lessons
-        const storedLesson = localStorage.getItem(`self-lesson-${lessonId}`);
-        if (storedLesson) {
-          const data = JSON.parse(storedLesson);
-          setLesson(data);
-          console.log('Self-lesson loaded from localStorage:', data);
+    try {
+      setLoading(true);
+      // First try localStorage for self-created lessons
+      const storedLesson = localStorage.getItem(`self-lesson-${lessonId}`);
+      if (storedLesson) {
+        const data = JSON.parse(storedLesson);
+        setLesson(data);
+        console.log('Self-lesson loaded from localStorage:', data);
 
-          if (data.json) {
-            loadTranscript(data.json);
-          }
-        } else {
-          // Fallback to API for regular lessons
-          const res = await fetch(`/api/lessons/${lessonId}`);
-
-          if (!res.ok) {
-            throw new Error('Lesson not found');
-          }
-
-          const data = await res.json();
-          setLesson(data);
-          console.log('Lesson loaded from API:', data);
-
-          if (data.json) {
-            loadTranscript(data.json);
-          }
+        if (data.json) {
+          loadTranscript(data.json);
         }
-      } catch (error) {
-        console.error('Error loading lesson:', error);
-        setLesson(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+      } else {
+        // Fallback to API for regular lessons
+        const res = await fetch(`/api/lessons/${lessonId}`);
 
-    loadLesson();
+        if (!res.ok) {
+          throw new Error('Lesson not found');
+        }
+
+        const data = await res.json();
+        setLesson(data);
+        console.log('Lesson loaded from API:', data);
+
+        if (data.json) {
+          loadTranscript(data.json);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading lesson:', error);
+      setLesson(null);
+    } finally {
+      setLoading(false);
+    }
   }, [lessonId]);
+
+  useEffect(() => {
+    loadLesson();
+  }, [loadLesson]);
 
   // Load progress from database (only for regular lessons)
   useEffect(() => {

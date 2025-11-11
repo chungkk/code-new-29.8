@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Image from 'next/image';
 import ProtectedPage from '../../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../../components/AdminDashboardLayout';
 import { toast } from 'react-toastify';
@@ -42,13 +43,7 @@ function LessonFormPage() {
       .replace(/^-|-$/g, '');
   };
 
-  useEffect(() => {
-    if (!isNewLesson && id) {
-      loadLesson(id);
-    }
-  }, [id, isNewLesson]);
-
-  const loadLesson = async (lessonId) => {
+  const loadLesson = useCallback(async (lessonId) => {
     try {
       setLoading(true);
       const res = await fetch('/api/lessons');
@@ -74,7 +69,13 @@ function LessonFormPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (!isNewLesson && id) {
+      loadLesson(id);
+    }
+  }, [id, isNewLesson, loadLesson]);
 
   const validateSRT = (text) => {
     if (!text.trim()) return true;
@@ -533,7 +534,13 @@ function LessonFormPage() {
                     className={styles.fileInput}
                   />
                   {thumbnailPreview && (
-                    <img src={thumbnailPreview} alt="Preview" className={styles.thumbnailPreview} />
+                    <Image
+                      src={thumbnailPreview}
+                      alt="Preview"
+                      width={300}
+                      height={200}
+                      className={styles.thumbnailPreview}
+                    />
                   )}
                 </div>
               )}

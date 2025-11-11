@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import ProtectedPage from '../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../components/AdminDashboardLayout';
@@ -11,15 +11,15 @@ function AdminFilesPage() {
   const [deletingFiles, setDeletingFiles] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     await Promise.all([loadUnusedFiles(), loadOldFiles()]);
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const loadUnusedFiles = async () => {
     try {

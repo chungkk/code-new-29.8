@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import ProtectedPage from '../../components/ProtectedPage';
@@ -15,11 +15,7 @@ function DashboardIndex() {
   const [allLessons, setAllLessons] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -51,7 +47,11 @@ function DashboardIndex() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const calculateProgress = (lessonId) => {
     const lessonProgress = progress.filter(p => p.lessonId === lessonId);

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import Image from 'next/image';
 
 const Header = () => {
   const router = useRouter();
@@ -73,12 +74,11 @@ const Header = () => {
           aria-label="Go to Papageil home"
         >
           <span className="brand-emblem" aria-hidden="true">
-            <img
+            <Image
               src="/logo-simple.svg"
               alt="Papageil logo"
-              width="32"
-              height="32"
-              className="brand-image"
+              width={32}
+              height={32}
             />
           </span>
           <span className="brand-label">
