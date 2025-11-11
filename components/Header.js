@@ -143,7 +143,7 @@ const Header = () => {
 
                      <button
                        className="dropdown-item"
-                       onClick={() => handleMenuItemClick(() => router.push('/dashboard?tab=vocabulary'))}
+                       onClick={() => handleMenuItemClick(() => router.push('/dashboard/vocabulary'))}
                        role="menuitem"
                      >
                        <span className="dropdown-item-icon">📚</span>
