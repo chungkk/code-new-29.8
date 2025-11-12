@@ -7,6 +7,7 @@ import SentenceListItem from '../../components/SentenceListItem';
 import { useProgress } from '../../lib/hooks/useProgress';
 import styles from '../../styles/shadowingPage.module.css';
 
+
 const ShadowingPageContent = () => {
   const router = useRouter();
   const { lessonId } = useRouter().query;
@@ -24,6 +25,12 @@ const ShadowingPageContent = () => {
   const [loading, setLoading] = useState(true);
   const [isUserSeeking, setIsUserSeeking] = useState(false);
   const [userSeekTimeout, setUserSeekTimeout] = useState(null);
+
+  // Parroto-style controls
+  const [autoStop, setAutoStop] = useState(true);
+  const [showIPA, setShowIPA] = useState(true);
+  const [showTranslation, setShowTranslation] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
@@ -65,18 +72,18 @@ const ShadowingPageContent = () => {
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
-    // Load YouTube iframe API
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
+     // Load YouTube iframe API
+     if (!window.YT) {
+       const tag = document.createElement('script');
+       tag.src = 'https://www.youtube.com/iframe_api';
+       const firstScriptTag = document.getElementsByTagName('script')[0];
+       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+     }
 
       window.onYouTubeIframeAPIReady = () => {
         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-          height: '280',
-          width: '280',
+          height: '140',
+          width: '140',
           videoId: videoId,
           playerVars: {
             controls: 0,
@@ -91,26 +98,26 @@ const ShadowingPageContent = () => {
               setDuration(event.target.getDuration());
               const container = document.getElementById('youtube-player-shadowing');
               const rect = container.getBoundingClientRect();
-              // Responsive sizing for mobile
+              // Adjust size based on screen width for mobile
               const isMobile = window.innerWidth <= 768;
               const scaleFactor = isMobile ? 1.0 : 1.2;
               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
             },
-          onStateChange: (event) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false);
-            }
-          }
-        }
-      });
-    };
+           onStateChange: (event) => {
+             if (event.data === window.YT.PlayerState.PLAYING) {
+               setIsPlaying(true);
+             } else if (event.data === window.YT.PlayerState.PAUSED) {
+               setIsPlaying(false);
+             }
+           }
+         }
+       });
+     };
 
-    if (window.YT && window.YT.Player) {
+      if (window.YT && window.YT.Player) {
         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-          height: '280',
-          width: '280',
+          height: '140',
+          width: '140',
           videoId: videoId,
           playerVars: {
             controls: 0,
@@ -125,21 +132,21 @@ const ShadowingPageContent = () => {
               setDuration(event.target.getDuration());
               const container = document.getElementById('youtube-player-shadowing');
               const rect = container.getBoundingClientRect();
-              // Responsive sizing for mobile
+              // Adjust size based on screen width for mobile
               const isMobile = window.innerWidth <= 768;
               const scaleFactor = isMobile ? 1.0 : 1.2;
               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
             },
-          onStateChange: (event) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false);
-            }
-          }
-        }
-      });
-    }
+           onStateChange: (event) => {
+             if (event.data === window.YT.PlayerState.PLAYING) {
+               setIsPlaying(true);
+             } else if (event.data === window.YT.PlayerState.PAUSED) {
+               setIsPlaying(false);
+             }
+           }
+         }
+       });
+     }
 
     return () => {
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
@@ -190,7 +197,8 @@ const ShadowingPageContent = () => {
           const currentTime = player.getCurrentTime();
           setCurrentTime(currentTime);
 
-          if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
+          // Auto-stop when segment ends (only if autoStop is enabled)
+          if (autoStop && segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
             player.pauseVideo();
             setIsPlaying(false);
             setSegmentPlayEndTime(null);
@@ -201,8 +209,8 @@ const ShadowingPageContent = () => {
         if (audio && !audio.paused) {
           setCurrentTime(audio.currentTime);
 
-          // Auto-stop when segment ends
-          if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
+          // Auto-stop when segment ends (only if autoStop is enabled)
+          if (autoStop && segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
             audio.pause();
             setIsPlaying(false);
             setSegmentPlayEndTime(null);
@@ -224,7 +232,7 @@ const ShadowingPageContent = () => {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isPlaying, segmentPlayEndTime, isYouTube]);
+  }, [isPlaying, segmentPlayEndTime, isYouTube, autoStop]);
 
   // Audio event listeners
   useEffect(() => {
@@ -260,6 +268,21 @@ const ShadowingPageContent = () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [isYouTube]);
+
+  // Update playback speed
+  useEffect(() => {
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (player && player.setPlaybackRate) {
+        player.setPlaybackRate(playbackSpeed);
+      }
+    } else {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.playbackRate = playbackSpeed;
+      }
+    }
+  }, [playbackSpeed, isYouTube]);
 
   // Tìm câu hiện tại dựa trên thời gian
   useEffect(() => {
@@ -685,102 +708,165 @@ const ShadowingPageContent = () => {
         
 
 
-          <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
-            <div className={styles.layout}>
-              {/* LEFT SIDE: Medien */}
-              <div className={styles.mediaSection}>
-                <div className={styles.mediaContainer}>
-                  <div className={styles.mediaPlayer}>
-                      <div className={styles.mediaArtwork}>
-                        <div className={styles.artworkInner} style={{ position: 'relative', overflow: 'hidden' }}>
-                          {isYouTube ? (
-                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                              <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
-                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
-                            </div>
-                          ) : (
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                            </svg>
-                          )}
-                        </div>
-                         </div>
-
-                      <div className={styles.mediaInfo}>
-                       <div className={styles.mediaTitle}>{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
-                       <div className={styles.mediaArtist}>{lesson.description || 'Deutschunterricht'}</div>
+           <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
+             {/* Single Container - New Design */}
+             <div className={styles.mainContainer}>
+               {/* Left Section: Video + Current Sentence + Controls */}
+               <div className={styles.leftSection}>
+                 {/* Video Player */}
+                 <div className={styles.videoContainer}>
+                   {isYouTube ? (
+                     <div className={styles.videoWrapper}>
+                       <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
+                       <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
                      </div>
+                   ) : (
+                     <div className={styles.videoPlaceholder}>
+                       <svg viewBox="0 0 24 24" fill="currentColor">
+                         <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                       </svg>
+                     </div>
+                   )}
+                    <div className={styles.videoTimer}>
+                      {formatTime(currentTime)} / {formatTime(duration)}
+                    </div>
+                 </div>
 
-                     <div className={styles.mediaProgressContainer}>
-                       <div className={styles.mediaProgress} onClick={handleProgressClick}>
-                         <div className={styles.mediaProgressFill} style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
+                 {/* Current Sentence Display */}
+                 {transcriptData[currentSentenceIndex] && (
+                   <div className={styles.currentSentenceDisplay}>
+                     <div className={styles.currentSentenceText}>
+                       {transcriptData[currentSentenceIndex].text.split(' ').map((word, idx) => (
+                         <span key={idx} className={styles.word}>
+                           {word}
+                         </span>
+                       ))}
+                     </div>
+                     {showIPA && transcriptData[currentSentenceIndex].ipa && (
+                       <div className={styles.currentSentenceIPA}>
+                         {transcriptData[currentSentenceIndex].ipa}
                        </div>
-                      <div className={styles.mediaTime}>
-                        <span>{formatTime(currentTime)}</span>
-                        <span>{formatTime(duration)}</span>
+                     )}
+                   </div>
+                 )}
+
+
+
+                  {/* Controls */}
+                  <div className={styles.controlsWrapper}>
+                    <div className={styles.controlRow}>
+                      <label className={styles.checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          className={styles.checkbox}
+                        />
+                        <span className={styles.checkboxText}>Large-sized video</span>
+                      </label>
+                      <button className={styles.startButton} onClick={handlePlayPause}>
+                        ▶ Start
+                      </button>
+                      <label className={styles.toggleLabel}>
+                        <input
+                          type="checkbox"
+                          checked={autoStop}
+                          onChange={(e) => setAutoStop(e.target.checked)}
+                          className={styles.toggleInput}
+                        />
+                        <span className={styles.toggleSlider}></span>
+                        <span className={styles.toggleText}>Auto Stop</span>
+                      </label>
+                      <div className={styles.controlGroup}>
+                        <button className={styles.iconButton} title="Settings">
+                          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                          </svg>
+                        </button>
+                        <button className={styles.speedButton} onClick={() => {
+                          const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+                          const currentIndex = speeds.indexOf(playbackSpeed);
+                          const nextIndex = (currentIndex + 1) % speeds.length;
+                          setPlaybackSpeed(speeds[nextIndex]);
+                        }}>
+                          ⚡ {playbackSpeed}x
+                        </button>
                       </div>
                     </div>
-
-                     <div className={styles.mediaControls}>
-                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToPreviousSentence} title="Vorheriger Satz">
-                         <svg viewBox="0 0 24 24" fill="currentColor">
-                           <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-                         </svg>
-                       </button>
-                       <button className={`${styles.mediaButton} ${styles.mediaButtonLarge}`} onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
-                         {isPlaying ? (
-                           <svg viewBox="0 0 24 24" fill="currentColor">
-                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                           </svg>
-                         ) : (
-                           <svg viewBox="0 0 24 24" fill="currentColor">
-                             <path d="M8 5v14l11-7z"/>
-                           </svg>
-                         )}
-                       </button>
-                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToNextSentence} title="Nächster Satz">
-                         <svg viewBox="0 0 24 24" fill="currentColor">
-                           <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-                         </svg>
-                       </button>
-                     </div>
                   </div>
-                </div>
-              </div>
+               </div>
 
-             <div className={styles.sentenceListSection} suppressHydrationWarning>
-               <div className={styles.sentenceListContainer}>
-                 <h3>Satzliste</h3>
-                 <div className={styles.sentenceList}>
+               {/* Right Section: Transcript */}
+               <div className={styles.transcriptSection}>
+                 <div className={styles.transcriptHeader}>
+                   <h3 className={styles.transcriptTitle}>Transcript</h3>
+                   <div className={styles.transcriptHeaderControls}>
+                     <button
+                       className={`${styles.headerControlButton} ${showIPA ? styles.headerControlButtonActive : ''}`}
+                       onClick={() => setShowIPA(!showIPA)}
+                     >
+                       <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                       </svg>
+                       IPA
+                     </button>
+                     <button
+                       className={`${styles.headerControlButton} ${showTranslation ? styles.headerControlButtonActive : ''}`}
+                       onClick={() => setShowTranslation(!showTranslation)}
+                     >
+                       <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                         {showTranslation ? (
+                           <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                         ) : (
+                           <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                         )}
+                       </svg>
+                       Trans
+                     </button>
+                   </div>
+                 </div>
+
+                 <div className={styles.transcriptList}>
                    {transcriptData.map((segment, index) => (
-                     <SentenceListItem
+                     <div
                        key={index}
-                       segment={segment}
-                       index={index}
-                       currentSentenceIndex={currentSentenceIndex}
-                       currentTime={currentTime}
-                       isCompleted={true}
-                       lessonId={lessonId}
-                       onSentenceClick={handleSentenceClick}
-                       formatTime={formatTime}
-                       maskText={(text) => text}
-                       classNames={sentenceListClassNames}
-                     />
+                       className={`${styles.transcriptItem} ${currentSentenceIndex === index ? styles.transcriptItemActive : ''}`}
+                       onClick={() => handleSentenceClick(segment.start, segment.end)}
+                     >
+                       <div className={styles.transcriptItemHeader}>
+                         <span className={styles.transcriptNumber}>#{index + 1}</span>
+                          <div className={styles.transcriptActions}>
+                            <button className={styles.transcriptActionBtn} title="Report">
+                              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                              </svg>
+                            </button>
+                          </div>
+                       </div>
+
+                       <div className={styles.transcriptText}>{segment.text}</div>
+
+                       {showIPA && segment.ipa && (
+                         <div className={styles.transcriptIPA}>{segment.ipa}</div>
+                       )}
+
+                       {showTranslation && segment.translation && (
+                         <div className={styles.transcriptTranslation}>{segment.translation}</div>
+                       )}
+                     </div>
                    ))}
                  </div>
                </div>
              </div>
-          </div>
-        </div>
+         </div>
 
-        <div suppressHydrationWarning>
+        {/* Footer Controls - Hidden in Parroto design */}
+        {/* <div suppressHydrationWarning>
           <FooterControls
             onSeek={handleSeek}
             onPlayPause={handlePlayPause}
             isPlaying={isPlaying}
             classNames={footerClassNames}
           />
-        </div>
+        </div> */}
       </div>
     </>
   );

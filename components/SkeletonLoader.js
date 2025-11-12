@@ -1,80 +1,120 @@
 import React from 'react';
-import styles from '../styles/SkeletonLoader.module.css';
 
-export function SkeletonCard() {
-  return (
-    <div className={styles.skeletonCard}>
-      <div className={styles.skeletonHeader}>
-        <div className={styles.skeletonTitle}></div>
-        <div className={styles.skeletonBadge}></div>
-      </div>
-      <div className={styles.skeletonText}></div>
-      <div className={styles.skeletonText} style={{ width: '80%' }}></div>
-      <div className={styles.skeletonProgress}>
-        <div className={styles.skeletonProgressBar}></div>
-      </div>
-      <div className={styles.skeletonButtons}>
-        <div className={styles.skeletonButton}></div>
-        <div className={styles.skeletonButton}></div>
+const SkeletonBox = ({ width = '100%', height = '20px', borderRadius = '4px', marginBottom = '0' }) => (
+  <div
+    style={{
+      width,
+      height,
+      borderRadius,
+      marginBottom,
+      background: 'linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-hover) 50%, var(--bg-secondary) 100%)',
+      backgroundSize: '200% 100%',
+      animation: 'loading 1.5s ease-in-out infinite',
+    }}
+  />
+);
+
+export const SkeletonCard = () => (
+  <div
+    style={{
+      background: 'var(--bg-card)',
+      borderRadius: 'var(--border-radius)',
+      overflow: 'hidden',
+      border: '1px solid var(--border-color)',
+    }}
+  >
+    <SkeletonBox width="100%" height="180px" borderRadius="0" />
+    <div style={{ padding: 'var(--spacing-md)' }}>
+      <SkeletonBox width="80%" height="20px" marginBottom="var(--spacing-sm)" />
+      <SkeletonBox width="60%" height="16px" marginBottom="var(--spacing-md)" />
+      <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+        <SkeletonBox width="48%" height="32px" />
+        <SkeletonBox width="48%" height="32px" />
       </div>
     </div>
-  );
-}
+  </div>
+);
 
-export function SkeletonTable({ rows = 5 }) {
-  return (
-    <div className={styles.skeletonTable}>
-      <div className={styles.skeletonTableHeader}>
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={styles.skeletonTableHeaderCell}></div>
-        ))}
+export const SkeletonGrid = ({ count = 6 }) => (
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+      gap: 'var(--spacing-lg)',
+    }}
+  >
+    {Array.from({ length: count }).map((_, i) => (
+      <SkeletonCard key={i} />
+    ))}
+  </div>
+);
+
+export const SkeletonStats = () => (
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: 'var(--spacing-lg)',
+      marginBottom: 'var(--spacing-xl)',
+    }}
+  >
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div
+        key={i}
+        style={{
+          background: 'var(--bg-secondary)',
+          padding: 'var(--spacing-lg)',
+          borderRadius: 'var(--border-radius)',
+          border: '1px solid var(--border-color)',
+        }}
+      >
+        <SkeletonBox width="60%" height="18px" marginBottom="var(--spacing-sm)" />
+        <SkeletonBox width="40%" height="32px" />
       </div>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className={styles.skeletonTableRow}>
-          {[1, 2, 3, 4].map((j) => (
-            <div key={j} className={styles.skeletonTableCell}></div>
-          ))}
-        </div>
-      ))}
+    ))}
+  </div>
+);
+
+export const SkeletonTable = ({ rows = 5 }) => (
+  <div
+    style={{
+      background: 'var(--bg-secondary)',
+      borderRadius: 'var(--border-radius)',
+      border: '1px solid var(--border-color)',
+      overflow: 'hidden',
+    }}
+  >
+    <div style={{ padding: 'var(--spacing-md)', borderBottom: '1px solid var(--border-color)' }}>
+      <SkeletonBox width="30%" height="20px" />
     </div>
-  );
+    {Array.from({ length: rows }).map((_, i) => (
+      <div
+        key={i}
+        style={{
+          padding: 'var(--spacing-md)',
+          borderBottom: i < rows - 1 ? '1px solid var(--border-color)' : 'none',
+          display: 'flex',
+          gap: 'var(--spacing-lg)',
+        }}
+      >
+        <SkeletonBox width="40%" height="18px" />
+        <SkeletonBox width="20%" height="18px" />
+        <SkeletonBox width="30%" height="18px" />
+      </div>
+    ))}
+  </div>
+);
+
+// Add CSS animation to global styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
-export function SkeletonStats({ count = 4 }) {
-  return (
-    <div className={styles.skeletonStatsGrid}>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className={styles.skeletonStatCard}>
-          <div className={styles.skeletonStatIcon}></div>
-          <div className={styles.skeletonStatContent}>
-            <div className={styles.skeletonStatValue}></div>
-            <div className={styles.skeletonStatLabel}></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function SkeletonText({ width = '100%', height = '16px' }) {
-  return <div className={styles.skeletonText} style={{ width, height }}></div>;
-}
-
-export function SkeletonCircle({ size = '40px' }) {
-  return <div className={styles.skeletonCircle} style={{ width: size, height: size }}></div>;
-}
-
-export function SkeletonGrid({ count = 6, columns = 3 }) {
-  return (
-    <div
-      className={styles.skeletonGrid}
-      style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
-    >
-      {Array.from({ length: count }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  );
-}
-
-export default SkeletonCard;
+export default SkeletonBox;

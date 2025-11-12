@@ -3,7 +3,7 @@ import Head from 'next/head';
 import ProtectedPage from '../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../components/AdminDashboardLayout';
 import { toast } from 'react-toastify';
-import styles from '../../../styles/adminPage.module.css';
+
 
 function AdminFilesPage() {
   const [unusedFiles, setUnusedFiles] = useState({ audio: [], json: [] });

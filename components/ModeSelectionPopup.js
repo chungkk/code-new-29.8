@@ -1,54 +1,63 @@
 import React from 'react';
+import styles from '../styles/ModeSelectionPopup.module.css';
 
 const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
-  const handleModeSelect = (mode) => {
-    onSelectMode(lesson, mode);
-    onClose();
+  const modes = [
+    {
+      id: 'dictation',
+      name: 'Dictation',
+      icon: '✍️',
+      description: 'Listen and type what you hear to improve your listening comprehension and spelling.',
+    },
+    {
+      id: 'shadowing',
+      name: 'Shadowing',
+      icon: '🗣️',
+      description: 'Listen and repeat after the speaker to improve your pronunciation and speaking fluency.',
+    },
+  ];
+
+  const handleModeClick = (mode) => {
+    onSelectMode(lesson, mode.id);
   };
 
-  const handleBackdropClick = (e) => {
+  const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div className="mode-popup-overlay" onClick={handleBackdropClick}>
-      <div className="mode-popup-container">
-        <div className="mode-popup-header">
-          <h2>🎓 Übungsmodus wählen</h2>
-          <button className="mode-popup-close" onClick={onClose}>
-            <span>×</span>
-          </button>
-        </div>
-        
-        <div className="mode-popup-lesson-info">
-          <h3>{lesson.displayTitle}</h3>
-          <p>{lesson.description}</p>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
+      <div className={styles.popup}>
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+          ✕
+        </button>
+
+        <h2 className={styles.popupTitle}>Choose Learning Mode</h2>
+
+        <div className={styles.lessonInfo}>
+          <div className={styles.lessonTitle}>{lesson.title}</div>
+          <div className={styles.lessonMeta}>
+            <span>⏱ {Math.floor((lesson.duration || 0) / 60)} min</span>
+            <span>📊 {lesson.difficulty || 'Beginner'}</span>
+          </div>
         </div>
 
-        <div className="mode-popup-options">
-          <div 
-            className="mode-popup-option mode-option-dictation" 
-            onClick={() => handleModeSelect('dictation')}
-          >
-            <div className="mode-popup-icon">✍️</div>
-            <div className="mode-popup-text">
-              <h4>Diktat</h4>
-              <p>Hören und den Lektionsinhalt aufschreiben</p>
+        <div className={styles.modesContainer}>
+          {modes.map((mode) => (
+            <div
+              key={mode.id}
+              className={styles.modeOption}
+              onClick={() => handleModeClick(mode)}
+            >
+              <div className={styles.modeHeader}>
+                <div className={styles.modeIcon}>{mode.icon}</div>
+                <div className={styles.modeName}>{mode.name}</div>
+              </div>
+              <div className={styles.modeDescription}>{mode.description}</div>
             </div>
-          </div>
-          
-          <div 
-            className="mode-popup-option mode-option-shadowing" 
-            onClick={() => handleModeSelect('shadowing')}
-          >
-            <div className="mode-popup-icon">🎤</div>
-            <div className="mode-popup-text">
-              <h4>Shadowing</h4>
-              <p>Dem Audio folgen, um die Aussprache zu verbessern</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

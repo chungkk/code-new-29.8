@@ -1,111 +1,135 @@
 import React from 'react';
-import VideoThumbnail from './VideoThumbnail';
 import styles from '../styles/LessonCard.module.css';
 
-const LessonCard = ({
-  lesson,
-  onClick,
-  featured = false,
-  progress = 0,
-  showProgress = false
-}) => {
-  const getLevelColor = (level) => {
-    const colors = {
-      'A1': '#22c55e',
-      'A2': '#4ade80',
-      'B1': '#f59e0b',
-      'B2': '#fb923c',
-      'C1': '#ef4444',
-      'C2': '#dc2626'
-    };
-    return colors[level] || colors['A1'];
+const LessonCard = ({ lesson, onClick }) => {
+  const extractYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const patterns = [
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&\n?#]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^&\n?#]+)/,
+      /(?:https?:\/\/)?youtu\.be\/([^&\n?#]+)/
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   };
 
-  const formatDuration = (duration) => {
-    if (!duration) return '02:30 Min';
-    // If duration is in seconds, convert to MM:SS
-    if (typeof duration === 'number') {
-      const minutes = Math.floor(duration / 60);
-      const seconds = duration % 60;
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} Min`;
+  const getYouTubeThumbnail = (url) => {
+    const videoId = extractYouTubeVideoId(url);
+    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+  };
+
+  const formatDuration = (seconds) => {
+    if (!seconds) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const formatViewCount = (count) => {
+    if (!count) return '0';
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}k`;
     }
-    return duration;
+    return count.toString();
+  };
+
+  const getDifficultyClass = (difficulty) => {
+    if (!difficulty) return 'beginner';
+    return difficulty.toLowerCase();
+  };
+
+  const getDifficultyLabel = (difficulty) => {
+    if (!difficulty) return 'A1';
+    const diffMap = {
+      beginner: 'A1',
+      a1: 'A1',
+      a2: 'A2',
+      b1: 'B1',
+      b2: 'B2',
+      experienced: 'B2',
+      c1: 'C1',
+      c2: 'C2',
+    };
+    return diffMap[difficulty.toLowerCase()] || difficulty.toUpperCase();
   };
 
   return (
-    <div
-      className={`${styles.lessonCard} ${featured ? styles.featured : ''}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyPress={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onClick();
-        }
-      }}
-    >
-      {/* Thumbnail Section */}
-      <div className={styles.thumbnailWrapper}>
-        <VideoThumbnail lesson={lesson} className={styles.thumbnail} />
+    <div className={styles.lessonCard} onClick={onClick}>
+      <div className={styles.thumbnailContainer}>
+        <img
+          src={lesson.thumbnail || getYouTubeThumbnail(lesson.youtubeUrl) || '/default-thumbnail.jpg'}
+          alt={lesson.title}
+          className={styles.thumbnail}
+        />
 
-        {/* Level Badge on Thumbnail */}
-        <div
-          className={styles.levelBadge}
-          style={{ backgroundColor: getLevelColor(lesson.level || 'A1') }}
-        >
-          {lesson.level || 'A1'}
+        <div className={styles.badges}>
+          <div className={styles.viewCount}>
+            <svg
+              className={styles.viewIcon}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+            </svg>
+            <span>{formatViewCount(lesson.viewCount || 0)}</span>
+          </div>
+
+          <div
+            className={`${styles.difficultyBadge} ${styles[getDifficultyClass(lesson.difficulty)]}`}
+          >
+            {getDifficultyLabel(lesson.difficulty)}
+          </div>
         </div>
 
-        {/* Source Badge */}
-        {lesson.youtubeUrl && (
-          <div className={styles.sourceBadge}>
-            <span className={styles.sourceIcon}>▶</span> YouTube
+        {lesson.duration && (
+          <div className={styles.duration}>
+            <span>⏱</span>
+            <span>{formatDuration(lesson.duration)}</span>
+          </div>
+        )}
+
+        {lesson.source && (
+          <div className={styles.sourceIndicator}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.861-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z" />
+            </svg>
+            <span>Youtube</span>
           </div>
         )}
       </div>
 
-      {/* Content Section */}
-      <div className={styles.content}>
-        {/* Title */}
-        <h3 className={styles.title}>{lesson.displayTitle || lesson.title}</h3>
+      <div className={styles.cardContent}>
+        <h3 className={styles.title}>{lesson.title}</h3>
 
-        {/* Progress Bar (if showProgress) */}
-        {showProgress && (
-          <div className={styles.progressSection}>
-            <div className={styles.progressInfo}>
-              <span className={styles.progressLabel}>Fortschritt</span>
-              <span className={styles.progressPercent}>{Math.round(progress)}%</span>
-            </div>
-            <div className={styles.progressBar}>
-              <div
-                className={styles.progressFill}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        )}
+        <div className={styles.actions}>
+          <button
+            className={styles.actionBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (lesson.onDictationClick) lesson.onDictationClick();
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span>Dictation</span>
+          </button>
 
-        {/* Footer */}
-        <div className={styles.footer}>
-          {/* Mode Badges */}
-          <div className={styles.modeBadges}>
-            <span className={styles.modeBadge} title="Diktat Modus">
-              <span className={styles.modeIcon}>✍️</span>
-              <span className={styles.modeText}>Diktat</span>
-            </span>
-            <span className={styles.modeBadge} title="Shadowing Modus">
-              <span className={styles.modeIcon}>🗣️</span>
-              <span className={styles.modeText}>Shadowing</span>
-            </span>
-          </div>
-
-          {/* Duration */}
-          <div className={styles.duration}>
-            <span className={styles.durationIcon}>⏱️</span>
-            <span className={styles.durationText}>
-              {formatDuration(lesson.duration)}
-            </span>
-          </div>
+          <button
+            className={styles.actionBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (lesson.onShadowingClick) lesson.onShadowingClick();
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            <span>Shadowing</span>
+          </button>
         </div>
       </div>
     </div>

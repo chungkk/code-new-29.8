@@ -1,47 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import Link from 'next/link';
+import styles from '../styles/Footer.module.css';
 
 const Footer = () => {
-  const [currentYear, setCurrentYear] = useState(2024); // Default year
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="app-footer">
-      <div className="footer-content">
-        <div className="footer-section">
-          <h3 className="footer-title">Papageil</h3>
-          <p className="footer-description">
-            Effektiv Deutsch lernen mit Shadowing- und Diktatmethoden
+    <footer className={styles.footer}>
+      <div className={styles.footerContent}>
+        <div className={styles.footerSection}>
+          <div className={styles.footerBrand}>
+            <div className={styles.footerLogo}>🦜</div>
+            <span className={styles.footerBrandText}>Parroto</span>
+          </div>
+          <p className={styles.footerDescription}>
+            Improve your English pronunciation and speaking skills with modern shadowing
+            and dictation methods.
           </p>
+          <a href="#" className={styles.appStoreBtn}>
+            <span style={{ fontSize: '24px' }}>🍎</span>
+            <div>
+              <div style={{ fontSize: '10px', opacity: 0.7 }}>Download on the</div>
+              <div style={{ fontWeight: 600 }}>App Store</div>
+            </div>
+          </a>
         </div>
 
-        <div className="footer-section">
-          <h4 className="footer-heading">Kontakt</h4>
-          <ul className="footer-contact">
-            <li>
-              <span className="contact-icon">Email:</span>
-              <span>contact@papageil.net</span>
-            </li>
-            <li>
-              <span className="contact-icon">Website:</span>
-              <span>www.papageil.net</span>
-            </li>
-          </ul>
+        <div className={styles.footerSection}>
+          <h4 className={styles.footerSectionTitle}>Information</h4>
+          <div className={styles.footerLinks}>
+            <Link href="/privacy" className={styles.footerLink}>
+              Privacy Policy
+            </Link>
+            <Link href="/about" className={styles.footerLink}>
+              About Us
+            </Link>
+            <Link href="/terms" className={styles.footerLink}>
+              Terms of Service
+            </Link>
+            <Link href="/contact" className={styles.footerLink}>
+              Contact Us
+            </Link>
+            <Link href="/feedback" className={styles.footerLink}>
+              Feedbacks
+            </Link>
+          </div>
+        </div>
+
+        <div className={styles.footerSection}>
+          <h4 className={styles.footerSectionTitle}>Features</h4>
+          <div className={styles.footerLinks}>
+            <Link href="/" className={styles.footerLink}>
+              Shadowing
+            </Link>
+            <Link href="/" className={styles.footerLink}>
+              Dictation
+            </Link>
+            <Link href="/dashboard/vocabulary" className={styles.footerLink}>
+              Vocabulary
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="footer-bottom">
-        <div className="footer-bottom-content">
-          <p className="copyright">
-            © {currentYear} Papageil. Alle Rechte vorbehalten.
-          </p>
-          <div className="footer-bottom-links">
-            <a href="#">Datenschutz</a>
-            <span className="separator">•</span>
-            <a href="#">Impressum</a>
-          </div>
+      <div className={styles.footerBottom}>
+        <div className={styles.copyright}>
+          © {currentYear} PARROTO CO., LTD. All rights reserved.
+        </div>
+
+        <div className={styles.socialLinks}>
+          <a href="#" className={styles.socialLink} aria-label="Facebook">
+            <span>f</span>
+          </a>
+          <a href="#" className={styles.socialLink} aria-label="TikTok">
+            <span>🎵</span>
+          </a>
+          <a href="#" className={styles.socialLink} aria-label="LinkedIn">
+            <span>in</span>
+          </a>
+          <a href="#" className={styles.socialLink} aria-label="GitHub">
+            <span>G</span>
+          </a>
+          <a href="#" className={styles.socialLink} aria-label="YouTube">
+            <span>▶</span>
+          </a>
+        </div>
+
+        <div className={styles.madeWith}>
+          <span>Made with</span>
+          <span className={styles.heart}>❤</span>
+          <span>by Parroto</span>
         </div>
       </div>
     </footer>

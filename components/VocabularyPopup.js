@@ -1,231 +1,184 @@
- import React, { useState, useEffect, useRef } from 'react';
- import { toast } from 'react-toastify';
- import { useAuth } from '../context/AuthContext';
- import { speakText } from '../lib/textToSpeech';
+import React, { useState } from 'react';
 
-const VocabularyPopup = ({ word, context, lessonId, onClose, position, preTranslation = '' }) => {
-  const { user } = useAuth();
-  const [translation, setTranslation] = useState(preTranslation);
+const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false }) => {
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(!preTranslation);
-  const [autoTranslation, setAutoTranslation] = useState(preTranslation);
-  const popupRef = useRef(null);
-
-  // Get language name in German
-  const getLanguageName = (langCode) => {
-    const languageNames = {
-      'vi': 'Vietnamesisch',
-      'en': 'Englisch',
-      'fr': 'Französisch',
-      'es': 'Spanisch',
-      'zh': 'Chinesisch',
-      'ja': 'Japanisch',
-      'ko': 'Koreanisch',
-      'ru': 'Russisch',
-      'ar': 'Arabisch',
-      'pt': 'Portugiesisch',
-      'it': 'Italienisch',
-      'nl': 'Niederländisch',
-      'pl': 'Polnisch',
-      'tr': 'Türkisch',
-      'th': 'Thailändisch',
-      'hi': 'Hindi'
-    };
-    return languageNames[langCode] || 'Ihre Sprache';
-  };
-
-  // Fetch auto translation when popup opens (if not already provided)
-  useEffect(() => {
-    const fetchTranslation = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/api/translate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: word,
-            context: context || '', // Pass context for better AI translation
-            sourceLang: 'de',
-            targetLang: user?.nativeLanguage || 'vi'
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.translation) {
-            setAutoTranslation(data.translation);
-            setTranslation(data.translation); // Pre-fill input
-            
-            // Log which method was used
-            if (data.method) {
-              console.log(`Translation method: ${data.method}`);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Auto translation error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Only fetch if we don't have a preTranslation
-    if (word && !preTranslation) {
-      fetchTranslation();
-    }
-  }, [word, context, preTranslation, user?.nativeLanguage]);
-
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
-  // Position popup fixed below header
-  useEffect(() => {
-    const positionPopup = () => {
-      const popup = popupRef.current;
-      if (!popup) return;
-
-      const rect = popup.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-
-      // Get actual header height
-      const header = document.querySelector('.app-header');
-      const headerHeight = header ? header.offsetHeight : 80;
-
-      // Position popup right below header, centered horizontally
-      const newTop = headerHeight + 10;
-      const newLeft = Math.max(10, (viewportWidth - rect.width) / 2);
-
-      popup.style.top = `${newTop}px`;
-      popup.style.left = `${newLeft}px`;
-    };
-
-    // Position immediately when popup opens
-    positionPopup();
-
-    // Reposition on resize
-    window.addEventListener('resize', positionPopup);
-
-    return () => {
-      window.removeEventListener('resize', positionPopup);
-    };
-  }, []); // Empty dependency array since position doesn't matter anymore
 
   const handleSave = async () => {
-    if (!translation.trim()) {
-      toast.error('Bitte geben Sie die Bedeutung des Wortes ein');
-      return;
-    }
-
     setSaving(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/vocabulary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          word: word.toLowerCase(),
-          translation: translation.trim(),
-          context: context || '',
-          lessonId: lessonId || ''
-        })
-      });
+    await onSave({ word, translation, notes });
+    setSaving(false);
+    onClose();
+  };
 
-      if (!res.ok) throw new Error('Failed to save vocabulary');
-
-       toast.success(`✓ Wort gespeichert: ${word}`);
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
       onClose();
-    } catch (error) {
-       toast.error('Fehler beim Speichern des Wortes');
-    } finally {
-      setSaving(false);
     }
   };
 
   return (
-    <>
-      <div className="vocabulary-popup-overlay" onClick={onClose} />
+    <div
+      onClick={handleOverlayClick}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.75)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: 'var(--spacing-lg)',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
       <div
-        ref={popupRef}
-        className="vocabulary-popup"
         style={{
-          top: position.top,
-          left: position.left
+          background: 'var(--bg-card)',
+          borderRadius: 'var(--border-radius)',
+          padding: 'var(--spacing-xl)',
+          maxWidth: '500px',
+          width: '100%',
+          position: 'relative',
+          border: '1px solid var(--border-color)',
+          animation: 'slideUp 0.3s ease',
         }}
       >
-        <div className="vocabulary-popup-header">
-            <h3>{word}</h3>
-           <div className="header-actions">
-             <button className="speak-btn" onClick={() => speakText(word, 'de-DE')} title="Wort aussprechen">🔊</button>
-             <button className="close-btn" onClick={onClose}>×</button>
-           </div>
-         </div>
-        
-         <div className="vocabulary-popup-content">
-           <div className="vocab-field">
-              <label>Bedeutung ({getLanguageName(user?.nativeLanguage || 'vi')}):</label>
-             {loading ? (
-               <div className="translation-loading">
-                 <span className="loading-spinner">⏳</span>
-                  <span>Übersetze...</span>
-               </div>
-             ) : (
-               <>
-                 <input
-                   type="text"
-                   value={translation}
-                   onChange={(e) => setTranslation(e.target.value)}
-                    placeholder={`${getLanguageName(user?.nativeLanguage || 'vi')} Bedeutung eingeben...`}
-                   autoFocus
-                   onKeyPress={(e) => {
-                     if (e.key === 'Enter') handleSave();
-                   }}
-                 />
-                 {autoTranslation && (
-                   <div className="translation-suggestions">
-                     <div className="suggestions-label">💡 Vorschläge:</div>
-                     <div className="suggestions-list">
-                       {autoTranslation.split(',').map((meaning, index) => (
-                         <button
-                           key={index}
-                           className="suggestion-item"
-                           onClick={() => setTranslation(meaning.trim())}
-                           title="Click để chọn nghĩa này"
-                         >
-                           {meaning.trim()}
-                         </button>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </>
-             )}
-           </div>
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 'var(--spacing-md)',
+            right: 'var(--spacing-md)',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '24px',
+          }}
+        >
+          ✕
+        </button>
+
+        <h3
+          style={{
+            fontSize: '22px',
+            fontWeight: '700',
+            color: 'var(--text-primary)',
+            marginBottom: 'var(--spacing-lg)',
+            paddingRight: 'var(--spacing-xl)',
+          }}
+        >
+          {isSaved ? 'Vocabulary Details' : 'Save to Vocabulary'}
+        </h3>
+
+        <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+          <div
+            style={{
+              fontSize: '28px',
+              fontWeight: '600',
+              color: 'var(--accent-blue)',
+              marginBottom: 'var(--spacing-sm)',
+            }}
+          >
+            {word}
+          </div>
+
+          {translation && (
+            <div
+              style={{
+                fontSize: '16px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.6',
+              }}
+            >
+              {translation}
+            </div>
+          )}
         </div>
 
-        <div className="vocabulary-popup-footer">
-          <button className="btn-cancel" onClick={onClose}>
-             Abbrechen
-          </button>
-          <button 
-            className="btn-save" 
-            onClick={handleSave}
-            disabled={saving}
-          >
-             {saving ? 'Speichere...' : 'Speichern'}
-          </button>
-        </div>
+        {!isSaved && (
+          <>
+            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: 'var(--text-primary)',
+                  marginBottom: 'var(--spacing-sm)',
+                }}
+              >
+                Notes (optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add your notes here..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--border-radius-small)',
+                  color: 'var(--text-primary)',
+                  fontSize: '15px',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+              <button
+                onClick={onClose}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  borderRadius: 'var(--border-radius-small)',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: saving ? 'var(--bg-hover)' : 'var(--accent-gradient)',
+                  border: 'none',
+                  color: 'white',
+                  borderRadius: 'var(--border-radius-small)',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                }}
+              >
+                {saving ? 'Saving...' : 'Save to Vocabulary'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

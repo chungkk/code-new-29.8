@@ -8,7 +8,7 @@ import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
 import ModeSelectionPopup from '../../components/ModeSelectionPopup';
 import { speakText } from '../../lib/textToSpeech';
-import styles from '../../styles/selfLessonPage.module.css';
+
 
 const SelfLessonPageContent = () => {
   const router = useRouter();

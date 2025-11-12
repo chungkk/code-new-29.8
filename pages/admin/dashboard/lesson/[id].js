@@ -5,7 +5,7 @@ import Image from 'next/image';
 import ProtectedPage from '../../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../../components/AdminDashboardLayout';
 import { toast } from 'react-toastify';
-import styles from '../../../../styles/adminLessonForm.module.css';
+
 
 function LessonFormPage() {
   const router = useRouter();

@@ -1,63 +1,46 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React from 'react';
 
-export default function GoogleSignInButton() {
-  const { loginWithGoogle } = useAuth();
-  const [loading, setLoading] = useState(false);
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      await loginWithGoogle();
-    } catch (error) {
-      console.error('Google sign in error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const GoogleSignInButton = ({ onClick, loading = false }) => {
   return (
     <button
-      onClick={handleGoogleSignIn}
+      onClick={onClick}
       disabled={loading}
       style={{
         width: '100%',
-        padding: '12px',
+        padding: '14px',
         background: 'white',
-        color: '#444',
-        border: '1px solid #ddd',
-        borderRadius: '6px',
-        fontSize: '16px',
+        border: '1px solid #dadce0',
+        borderRadius: 'var(--border-radius-small)',
+        color: '#3c4043',
+        fontSize: '15px',
         fontWeight: '500',
         cursor: loading ? 'not-allowed' : 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '10px',
-        transition: 'all 0.3s',
-        opacity: loading ? 0.6 : 1
+        gap: '12px',
+        transition: 'all 0.2s ease',
       }}
       onMouseOver={(e) => {
         if (!loading) {
           e.currentTarget.style.background = '#f8f9fa';
-          e.currentTarget.style.borderColor = '#667eea';
+          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
         }
       }}
       onMouseOut={(e) => {
-        if (!loading) {
-          e.currentTarget.style.background = 'white';
-          e.currentTarget.style.borderColor = '#ddd';
-        }
+        e.currentTarget.style.background = 'white';
+        e.currentTarget.style.boxShadow = 'none';
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 48 48">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        <path fill="none" d="M0 0h48v48H0z"/>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9231 12.0477 13.5613V15.8195H14.9564C16.6582 14.2527 17.64 11.9454 17.64 9.20454Z" fill="#4285F4"/>
+        <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5613C11.2418 14.1013 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9831 5.48182 18 9 18Z" fill="#34A853"/>
+        <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59318 3.68182 9C3.68182 8.40681 3.78409 7.82999 3.96409 7.28999V4.95818H0.957275C0.347727 6.17318 0 7.54772 0 9C0 10.4522 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
+        <path d="M9 3.57954C10.3214 3.57954 11.5077 4.03363 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01681 0.957275 4.95818L3.96409 7.28999C4.67182 5.16272 6.65591 3.57954 9 3.57954Z" fill="#EA4335"/>
       </svg>
-      <span>{loading ? 'Wird angemeldet...' : 'Mit Google anmelden'}</span>
+      <span>{loading ? 'Signing in...' : 'Sign in with Google'}</span>
     </button>
   );
-}
+};
+
+export default GoogleSignInButton;

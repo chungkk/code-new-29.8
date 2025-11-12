@@ -1,88 +1,87 @@
-import { useRouter } from 'next/router';
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import styles from '../styles/adminDashboardLayout.module.css';
+import { useRouter } from 'next/router';
 
-export default function AdminDashboardLayout({ children }) {
+const AdminDashboardLayout = ({ children }) => {
   const router = useRouter();
-  const { user } = useAuth();
-  const { currentTheme, nextTheme, toggleTheme } = useTheme();
 
   const navItems = [
-    {
-      path: '/admin/dashboard',
-      icon: '📚',
-      label: 'Lektionen verwalten',
-      description: 'Lektionen erstellen & bearbeiten'
-    },
-    {
-      path: '/admin/dashboard/files',
-      icon: '🗂️',
-      label: 'Dateien verwalten',
-      description: 'Ungenutzte Dateien löschen'
-    }
+    { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { href: '/admin/dashboard/files', label: 'Files', icon: '📁' },
   ];
 
   const isActive = (path) => {
     if (path === '/admin/dashboard') {
-      return router.pathname === '/admin/dashboard';
+      return router.pathname === '/admin/dashboard' || router.pathname === '/admin/dashboard/index';
     }
     return router.pathname.startsWith(path);
   };
 
   return (
-    <div className={styles.adminContainer}>
-      {/* Sidebar Navigation */}
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarHeader}>
-          <div className={styles.adminBadge}>
-            <span className={styles.adminIcon}>👑</span>
-            <div className={styles.adminInfo}>
-              <h3 className={styles.adminTitle}>Admin Panel</h3>
-              <p className={styles.adminName}>{user?.name}</p>
-            </div>
-          </div>
+    <div style={{
+      display: 'flex',
+      minHeight: 'calc(100vh - 64px)',
+      maxWidth: '1600px',
+      margin: '0 auto',
+    }}>
+      {/* Sidebar */}
+      <aside style={{
+        width: '250px',
+        background: 'var(--bg-secondary)',
+        borderRight: '1px solid var(--border-color)',
+        padding: 'var(--spacing-lg)',
+      }}>
+        <div style={{
+          marginBottom: 'var(--spacing-lg)',
+          padding: 'var(--spacing-md)',
+          background: 'var(--accent-gradient)',
+          borderRadius: 'var(--border-radius-small)',
+          color: 'white',
+          fontWeight: '600',
+          textAlign: 'center',
+        }}>
+          Admin Panel
         </div>
 
-        <nav className={styles.nav}>
+        <nav style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-sm)',
+        }}>
           {navItems.map((item) => (
             <Link
-              key={item.path}
-              href={item.path}
-              className={`${styles.navItem} ${isActive(item.path) ? styles.navItemActive : ''}`}
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                padding: '12px 16px',
+                borderRadius: 'var(--border-radius-small)',
+                textDecoration: 'none',
+                color: isActive(item.href) ? 'var(--accent-blue)' : 'var(--text-primary)',
+                background: isActive(item.href) ? 'rgba(102, 126, 234, 0.15)' : 'transparent',
+                fontWeight: isActive(item.href) ? '600' : '500',
+                transition: 'all 0.2s ease',
+              }}
             >
-              <span className={styles.navIcon}>{item.icon}</span>
-              <div className={styles.navContent}>
-                <span className={styles.navLabel}>{item.label}</span>
-                <span className={styles.navDescription}>{item.description}</span>
-              </div>
+              <span style={{ fontSize: '18px' }}>{item.icon}</span>
+              <span>{item.label}</span>
             </Link>
           ))}
         </nav>
-
-        <div className={styles.sidebarFooter}>
-          <button
-            onClick={toggleTheme}
-            className={styles.themeToggle}
-            title={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
-          >
-            <span className={styles.themeIcon}>{currentTheme?.emoji || '🎨'}</span>
-            <span className={styles.themeLabel}>
-              {nextTheme ? `${nextTheme.label}` : 'Theme'}
-            </span>
-          </button>
-
-          <Link href="/dashboard" className={styles.backButton}>
-            ← Zurück zum Dashboard
-          </Link>
-        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className={styles.mainContent}>
+      {/* Main content */}
+      <main style={{
+        flex: 1,
+        padding: 'var(--spacing-xl) var(--spacing-lg)',
+        overflowY: 'auto',
+      }}>
         {children}
       </main>
     </div>
   );
-}
+};
+
+export default AdminDashboardLayout;

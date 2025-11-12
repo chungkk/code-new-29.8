@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { toast } from 'react-toastify';
-import styles from '../../styles/dashboardPage.module.css';
+
 
 function SettingsPage() {
   const { user } = useAuth();

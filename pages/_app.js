@@ -6,8 +6,7 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.css';
-import '../styles/popup.css';
-import '../styles/lessonCard.css';
+
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 

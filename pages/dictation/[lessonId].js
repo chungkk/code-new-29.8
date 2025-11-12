@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
-
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
 import { speakText } from '../../lib/textToSpeech';
 import styles from '../../styles/dictationPage.module.css';
+
 
 const DictationPageContent = () => {
   const router = useRouter();
@@ -87,73 +87,79 @@ const DictationPageContent = () => {
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
-    // Load YouTube iframe API
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
+     // Load YouTube iframe API
+     if (!window.YT) {
+       const tag = document.createElement('script');
+       tag.src = 'https://www.youtube.com/iframe_api';
+       const firstScriptTag = document.getElementsByTagName('script')[0];
+       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+     }
 
-     window.onYouTubeIframeAPIReady = () => {
-       youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-         height: '0',
-         width: '0',
-         videoId: videoId,
-         playerVars: {
-           controls: 0,
-           disablekb: 1,
-           fs: 0,
-           modestbranding: 1,
-           origin: playerOrigin,
-         },
-         events: {
-           onReady: (event) => {
-             setDuration(event.target.getDuration());
-             const container = document.getElementById('youtube-player');
-             const rect = container.getBoundingClientRect();
-             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
-           },
-          onStateChange: (event) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false);
-            }
-          }
-        }
-      });
-    };
+      window.onYouTubeIframeAPIReady = () => {
+        youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+          height: '0',
+          width: '0',
+          videoId: videoId,
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            origin: playerOrigin,
+          },
+          events: {
+            onReady: (event) => {
+              setDuration(event.target.getDuration());
+              const container = document.getElementById('youtube-player');
+              const rect = container.getBoundingClientRect();
+              // Adjust size based on screen width for mobile
+              const isMobile = window.innerWidth <= 768;
+              const scaleFactor = isMobile ? 1.0 : 1.2;
+              event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+            },
+           onStateChange: (event) => {
+             if (event.data === window.YT.PlayerState.PLAYING) {
+               setIsPlaying(true);
+             } else if (event.data === window.YT.PlayerState.PAUSED) {
+               setIsPlaying(false);
+             }
+           }
+         }
+       });
+     };
 
-    if (window.YT && window.YT.Player) {
-       youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-         height: '0',
-         width: '0',
-         videoId: videoId,
-         playerVars: {
-           controls: 0,
-           disablekb: 1,
-           fs: 0,
-           modestbranding: 1,
-           origin: playerOrigin,
-         },
-         events: {
-           onReady: (event) => {
-             setDuration(event.target.getDuration());
-             const container = document.getElementById('youtube-player');
-             const rect = container.getBoundingClientRect();
-             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
-           },
-          onStateChange: (event) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false);
-            }
-          }
-        }
-      });
-    }
+     if (window.YT && window.YT.Player) {
+        youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+          height: '0',
+          width: '0',
+          videoId: videoId,
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            origin: playerOrigin,
+          },
+          events: {
+            onReady: (event) => {
+              setDuration(event.target.getDuration());
+              const container = document.getElementById('youtube-player');
+              const rect = container.getBoundingClientRect();
+              // Adjust size based on screen width for mobile
+              const isMobile = window.innerWidth <= 768;
+              const scaleFactor = isMobile ? 1.0 : 1.2;
+              event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+            },
+           onStateChange: (event) => {
+             if (event.data === window.YT.PlayerState.PLAYING) {
+               setIsPlaying(true);
+             } else if (event.data === window.YT.PlayerState.PAUSED) {
+               setIsPlaying(false);
+             }
+           }
+         }
+       });
+     }
 
     return () => {
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
@@ -1031,19 +1037,19 @@ const DictationPageContent = () => {
               type="button"
             >
             </button>
-            <input
-              type="text"
-              class="word-input"
-              data-word-id="word-${wordIndex}"
-              oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
-              onclick="window.handleInputClick(this, '${pureWord}')"
-              onkeydown="window.disableArrowKeys(event)"
-              onfocus="window.handleInputFocus(this, '${pureWord}')"
-              onblur="window.handleInputBlur(this, '${pureWord}')"
-              maxlength="${pureWord.length}"
-              size="${pureWord.length}"
-              placeholder="${'*'.repeat(pureWord.length)}"
-            />
+             <input
+               type="text"
+               class="word-input"
+               data-word-id="word-${wordIndex}"
+               oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
+               onclick="window.handleInputClick(this, '${pureWord}')"
+               onkeydown="window.disableArrowKeys(event)"
+               onfocus="window.handleInputFocus(this, '${pureWord}')"
+               onblur="window.handleInputBlur(this, '${pureWord}')"
+               maxlength="${pureWord.length}"
+               size="${Math.max(pureWord.length, 3)}"
+               placeholder="${'*'.repeat(pureWord.length)}"
+             />
             <span class="word-punctuation">${nonAlphaNumeric}</span>
           </span>`;
         }
@@ -1328,9 +1334,9 @@ const DictationPageContent = () => {
                 <div className={styles.sentenceListContainer}>
                   <h3>Satzliste</h3>
                 
-                {/* Sentence List */}
-                <div className={styles.sentenceList}>
-                  {transcriptData.map((segment, index) => (
+                 {/* Sentence List */}
+                 <div className={styles.sentenceList}>
+                   {transcriptData.map((segment, index) => (
                   <SentenceListItem
                     key={index}
                     segment={segment}

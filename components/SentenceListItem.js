@@ -1,113 +1,87 @@
 import React from 'react';
-import HoverableWord from './HoverableWord';
-
-const joinClasses = (...classes) => classes.filter(Boolean).join(' ');
 
 const SentenceListItem = ({
-  segment,
+  sentence,
   index,
-  currentSentenceIndex,
-  currentTime,
+  isActive,
   isCompleted,
-  lessonId,
-  onSentenceClick,
-  formatTime,
-  maskText,
-  isTextHidden,
-  completedWords,
-  classNames = {}
+  onClick,
+  showTranslation = false,
 }) => {
-  const {
-    item,
-    itemActive,
-    itemPlaying,
-    number,
-    content,
-    text,
-    time,
-    actions,
-    actionButton
-  } = classNames;
-
-  const renderSentenceText = () => {
-    if (isTextHidden && !isCompleted) {
-      // If we have completed words for this sentence, show them
-      if (completedWords && Object.keys(completedWords).length > 0) {
-        const words = segment.text.trim().split(/\s+/);
-        return words.map((word, wordIndex) => {
-          const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
-          const punctuation = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
-
-          // If this word is completed, show it normally
-          if (completedWords[wordIndex]) {
-            return (
-              <span key={wordIndex}>
-                <HoverableWord word={pureWord} />
-                {punctuation}
-                {wordIndex < words.length - 1 ? ' ' : ''}
-              </span>
-            );
-          }
-
-          // Otherwise show masked
-          return (
-            <span key={wordIndex}>
-              {maskText(pureWord)}
-              {punctuation}
-              {wordIndex < words.length - 1 ? ' ' : ''}
-            </span>
-          );
-        });
-      }
-
-      // No completed words, mask everything
-      return maskText(segment.text.trim());
-    }
-
-    const words = segment.text.trim().split(/(\s+)/);
-    return words.map((word, wordIndex) => {
-      if (/^\s+$/.test(word)) {
-        return <span key={wordIndex}>{word}</span>;
-      }
-      // Không truyền onWordClick để disable popup trong danh sách câu
-      return <HoverableWord key={wordIndex} word={word} />;
-    });
-  };
-
   return (
     <div
-      className={joinClasses(
-        item,
-        currentSentenceIndex === index && itemActive,
-        currentTime >= segment.start && currentTime < segment.end && itemPlaying
-      )}
-      onClick={() => onSentenceClick(segment.start, segment.end)}
+      onClick={onClick}
+      style={{
+        background: isActive ? 'var(--bg-hover)' : 'var(--bg-secondary)',
+        border: `2px solid ${isActive ? 'var(--accent-blue)' : 'var(--border-color)'}`,
+        borderRadius: 'var(--border-radius)',
+        padding: 'var(--spacing-md)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+      }}
     >
-      <div className={joinClasses(number)}>
-        {index + 1}
-      </div>
-       <div className={joinClasses(content)}>
-         <div className={joinClasses(text)}>
-           {renderSentenceText()}
-         </div>
-         <div className={joinClasses(time)}>
-           {formatTime(segment.start)} - {formatTime(segment.end)}
-         </div>
-       </div>
-      <div className={joinClasses(actions)}>
-        <button 
-          className={joinClasses(actionButton)}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSentenceClick(segment.start, segment.end);
-          }}
-           title="Diesen Satz abspielen oder pausieren"
-        >
-          ▶
-        </button>
+      <div style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 'var(--spacing-md)',
+      }}>
+        <div style={{
+          minWidth: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          background: isCompleted ? 'var(--accent-gradient)' : 'var(--bg-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: '600',
+        }}>
+          {isCompleted ? '✓' : index + 1}
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div style={{
+            color: 'var(--text-primary)',
+            fontSize: '15px',
+            lineHeight: '1.6',
+            marginBottom: showTranslation && sentence.translation ? 'var(--spacing-sm)' : 0,
+          }}>
+            {sentence.text}
+          </div>
+
+          {showTranslation && sentence.translation && (
+            <div style={{
+              color: 'var(--text-secondary)',
+              fontSize: '13px',
+              lineHeight: '1.5',
+              fontStyle: 'italic',
+            }}>
+              {sentence.translation}
+            </div>
+          )}
+
+          {sentence.startTime !== undefined && (
+            <div style={{
+              color: 'var(--text-muted)',
+              fontSize: '12px',
+              marginTop: 'var(--spacing-xs)',
+            }}>
+              {formatTime(sentence.startTime)} - {formatTime(sentence.endTime)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
+};
+
+const formatTime = (seconds) => {
+  if (!seconds || isNaN(seconds)) return '00:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 };
 
 export default SentenceListItem;

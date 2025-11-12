@@ -1,31 +1,14 @@
-import { useRouter } from 'next/router';
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '../context/AuthContext';
-import styles from '../styles/dashboardLayout.module.css';
+import { useRouter } from 'next/router';
 
-export default function DashboardLayout({ children }) {
+const DashboardLayout = ({ children }) => {
   const router = useRouter();
-  const { user } = useAuth();
 
   const navItems = [
-    {
-      path: '/dashboard',
-      icon: '📚',
-      label: 'Alle Lektionen',
-      description: 'Ihre Lernfortschritt'
-    },
-    {
-      path: '/dashboard/vocabulary',
-      icon: '📝',
-      label: 'Wortschatz',
-      description: 'Gespeicherte Wörter'
-    },
-    {
-      path: '/dashboard/settings',
-      icon: '⚙️',
-      label: 'Einstellungen',
-      description: 'Profil & Präferenzen'
-    }
+    { href: '/dashboard', label: 'Overview', icon: '📊' },
+    { href: '/dashboard/vocabulary', label: 'Vocabulary', icon: '📚' },
+    { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
   ];
 
   const isActive = (path) => {
@@ -36,48 +19,58 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <div className={styles.dashboardContainer}>
-      {/* Sidebar Navigation */}
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarHeader}>
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className={styles.userDetails}>
-              <h3 className={styles.userName}>{user?.name}</h3>
-              <p className={styles.userEmail}>{user?.email}</p>
-            </div>
-          </div>
-        </div>
-
-        <nav className={styles.nav}>
+    <div style={{
+      display: 'flex',
+      minHeight: 'calc(100vh - 64px)',
+      maxWidth: '1400px',
+      margin: '0 auto',
+    }}>
+      {/* Sidebar */}
+      <aside style={{
+        width: '250px',
+        background: 'var(--bg-secondary)',
+        borderRight: '1px solid var(--border-color)',
+        padding: 'var(--spacing-lg)',
+      }}>
+        <nav style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-sm)',
+        }}>
           {navItems.map((item) => (
             <Link
-              key={item.path}
-              href={item.path}
-              className={`${styles.navItem} ${isActive(item.path) ? styles.navItemActive : ''}`}
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                padding: '12px 16px',
+                borderRadius: 'var(--border-radius-small)',
+                textDecoration: 'none',
+                color: isActive(item.href) ? 'var(--accent-blue)' : 'var(--text-primary)',
+                background: isActive(item.href) ? 'rgba(102, 126, 234, 0.15)' : 'transparent',
+                fontWeight: isActive(item.href) ? '600' : '500',
+                transition: 'all 0.2s ease',
+              }}
             >
-              <span className={styles.navIcon}>{item.icon}</span>
-              <div className={styles.navContent}>
-                <span className={styles.navLabel}>{item.label}</span>
-                <span className={styles.navDescription}>{item.description}</span>
-              </div>
+              <span style={{ fontSize: '18px' }}>{item.icon}</span>
+              <span>{item.label}</span>
             </Link>
           ))}
         </nav>
-
-        <div className={styles.sidebarFooter}>
-          <Link href="/" className={styles.backButton}>
-            ← Zurück zur Startseite
-          </Link>
-        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className={styles.mainContent}>
+      {/* Main content */}
+      <main style={{
+        flex: 1,
+        padding: 'var(--spacing-xl) var(--spacing-lg)',
+        overflowY: 'auto',
+      }}>
         {children}
       </main>
     </div>
   );
-}
+};
+
+export default DashboardLayout;
