@@ -11,10 +11,10 @@ const Footer = () => {
         <div className={styles.footerSection}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>🦜</div>
-            <span className={styles.footerBrandText}>Parroto</span>
+            <span className={styles.footerBrandText}>Papageil</span>
           </div>
           <p className={styles.footerDescription}>
-            Improve your English pronunciation and speaking skills with modern shadowing
+            Improve your German pronunciation and speaking skills with modern shadowing
             and dictation methods.
           </p>
           <a href="#" className={styles.appStoreBtn}>
@@ -65,7 +65,7 @@ const Footer = () => {
 
       <div className={styles.footerBottom}>
         <div className={styles.copyright}>
-          © {currentYear} PARROTO CO., LTD. All rights reserved.
+          © {currentYear} PAPAGEIL CO., LTD. All rights reserved.
         </div>
 
         <div className={styles.socialLinks}>
@@ -89,7 +89,7 @@ const Footer = () => {
         <div className={styles.madeWith}>
           <span>Made with</span>
           <span className={styles.heart}>❤</span>
-          <span>by Parroto</span>
+          <span>by Papageil</span>
         </div>
       </div>
     </footer>
