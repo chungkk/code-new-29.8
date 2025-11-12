@@ -1,21 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import Image from 'next/image';
 
 const Header = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { currentTheme, nextTheme, toggleTheme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,21 +81,6 @@ const Header = () => {
         </button>
 
         <div className="header-right" data-auth-state={authState}>
-          <div className="header-actions" aria-label="Quick actions" role="group">
-            {/* Theme toggle */}
-            <button
-              type="button"
-              className="action-chip action-theme"
-              onClick={toggleTheme}
-              aria-label={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
-              title={nextTheme ? `Theme wechseln: ${nextTheme.label}` : 'Theme wechseln'}
-            >
-              <span className="action-theme-emoji" aria-hidden="true">
-                {mounted ? (currentTheme?.emoji || '🎨') : '🎨'}
-              </span>
-            </button>
-          </div>
-
           {user ? (
             <div className="user-menu-container" ref={dropdownRef}>
               <button

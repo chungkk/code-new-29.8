@@ -1,12 +1,11 @@
-/* Modern LessonCard Styles */
+/* Simple LessonCard Styles */
 
 .lessonCard {
   background: var(--surface-color);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  transition: all var(--transition-slow);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -14,8 +13,7 @@
 }
 
 .lessonCard:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-md);
   border-color: var(--primary-color);
 }
 
@@ -24,22 +22,13 @@
   outline-offset: 2px;
 }
 
-.lessonCard.featured {
-  border: 2px solid var(--primary-color);
-  box-shadow: var(--shadow-primary);
-}
-
-.lessonCard.featured:hover {
-  box-shadow: var(--shadow-xl), var(--shadow-primary);
-}
-
 /* Thumbnail Section */
 .thumbnailWrapper {
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9 Aspect Ratio */
   overflow: hidden;
-  background: var(--gray-200);
+  background: #e5e7eb;
 }
 
 .thumbnail {
@@ -49,39 +38,31 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
-}
-
-.lessonCard:hover .thumbnail {
-  transform: scale(1.05);
 }
 
 /* Level Badge */
 .levelBadge {
   position: absolute;
-  top: var(--spacing-md);
-  left: var(--spacing-md);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(4px);
   z-index: 2;
 }
 
 /* Source Badge */
 .sourceBadge {
   position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  border-radius: var(--radius-md);
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: white;
@@ -105,9 +86,9 @@
 }
 
 .title {
-  font-size: 1.05rem;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--primary-700);
+  color: var(--primary-color);
   line-height: 1.3;
   margin: 0;
   display: -webkit-box;
@@ -115,23 +96,12 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: 0.01em;
-  text-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
-}
-
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .title {
-    background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 }
 
 /* Progress Section */
 .progressSection {
   margin-top: auto;
-  padding-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-color);
 }
 
@@ -139,7 +109,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .progressLabel {
@@ -147,11 +117,10 @@
   font-weight: var(--font-weight-semibold);
   color: var(--text-color-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .progressPercent {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   color: var(--primary-color);
 }
@@ -159,33 +128,15 @@
 .progressBar {
   width: 100%;
   height: 6px;
-  background: var(--gray-200);
+  background: var(--border-color);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-500), var(--accent-500));
+  background: var(--primary-color);
   border-radius: var(--radius-full);
-  transition: width var(--transition-slow);
-  position: relative;
-}
-
-.progressFill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  animation: shimmer 2s infinite;
 }
 
 /* Footer */
@@ -193,8 +144,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-md);
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-color);
   margin-top: auto;
   flex-wrap: wrap;
@@ -212,16 +163,10 @@
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--bg-color-secondary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--text-color-secondary);
-  transition: all var(--transition-fast);
-}
-
-.modeBadge:hover {
-  background: var(--primary-light);
-  color: var(--primary-color);
 }
 
 .modeIcon {
@@ -256,21 +201,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Animations */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* Dark Mode Adjustments */
-[data-theme="dark"] .thumbnailWrapper {
-  background: var(--gray-700);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .content {
@@ -281,15 +211,10 @@
     font-size: var(--font-size-base);
   }
 
-  .description {
-    font-size: var(--font-size-xs);
-    -webkit-line-clamp: 2;
-  }
-
   .footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
   }
 
   .modeBadges {
@@ -304,18 +229,5 @@
   .duration {
     width: 100%;
     justify-content: center;
-  }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .lessonCard,
-  .thumbnail,
-  .progressFill {
-    transition: none;
-  }
-
-  .progressFill::after {
-    animation: none;
   }
 }
