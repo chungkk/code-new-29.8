@@ -36,23 +36,8 @@ const getNextThemeId = (currentId) => {
 };
 
 const resolveInitialTheme = () => {
-  if (typeof window === 'undefined') {
-    return DEFAULT_THEME_ID;
-  }
-
-  const savedTheme = window.localStorage.getItem('theme');
-  const isValid = THEME_OPTIONS.some((option) => option.id === savedTheme);
-  const themeToUse = isValid ? savedTheme : DEFAULT_THEME_ID;
-
-  if (!isValid) {
-    window.localStorage.setItem('theme', themeToUse);
-  }
-
-  if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-theme', themeToUse);
-  }
-
-  return themeToUse;
+  // Always return default theme initially for consistent server/client rendering
+  return DEFAULT_THEME_ID;
 };
 
 export function ThemeProvider({ children }) {
@@ -62,6 +47,19 @@ export function ThemeProvider({ children }) {
     if (typeof document === 'undefined') return;
     document.documentElement.setAttribute('data-theme', themeId);
   }, []);
+
+  useEffect(() => {
+    // On client mount, check localStorage and update theme if different
+    if (typeof window !== 'undefined') {
+      const savedTheme = window.localStorage.getItem('theme');
+      const isValid = THEME_OPTIONS.some((option) => option.id === savedTheme);
+      if (isValid && savedTheme !== theme) {
+        setThemeState(savedTheme);
+      } else if (!isValid) {
+        window.localStorage.setItem('theme', theme);
+      }
+    }
+  }, []); // Run only once on mount
 
   useEffect(() => {
     applyTheme(theme);

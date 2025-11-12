@@ -708,6 +708,26 @@
     max-height: none;
   }
 
+  /* Đặt sentence list trước media section trên mobile để ưu tiên nội dung */
+  .layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sentenceListSection {
+    order: -1; /* Đưa lên trước */
+  }
+
+  .mediaSection {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mediaContainer {
+    width: 100%;
+    max-width: 100%;
+  }
+
   /* Chuẩn hóa styling cho tất cả containers - Cân xứng */
   .mediaContainer,
   .sentenceListContainer,
@@ -719,6 +739,16 @@
 
   .mediaPlayer {
     align-items: center;
+  }
+
+  .mediaArtwork {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .artworkInner {
+    width: 100%;
+    height: 100%;
   }
 
   .mediaControls {
@@ -744,6 +774,60 @@
   .sentenceListContainer,
   .currentSentenceContainer {
     padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mediaArtwork {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .mediaControls {
+    gap: 12px;
+  }
+
+  .mediaButtonLarge {
+    width: 60px;
+    height: 60px;
+  }
+
+  .mediaButtonLarge svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mediaButtonSmall {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mediaButtonSmall svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mediaTitle {
+    font-size: 18px;
+  }
+
+  .mediaArtist {
+    font-size: 14px;
+  }
+
+  .footerControls {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+
+  .footerIcon {
+    font-size: 2em;
+  }
+
+  .footerLabel {
+    font-size: 0.65em;
   }
 }
 
@@ -756,5 +840,25 @@
 
   .timeCurrent {
     min-width: 35px;
+  }
+
+  .sentenceList {
+    gap: 6px;
+  }
+
+  .sentenceItem {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .sentenceText {
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
+  .sentenceNumber {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8em;
   }
 }

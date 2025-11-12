@@ -73,26 +73,29 @@ const ShadowingPageContent = () => {
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
 
-     window.onYouTubeIframeAPIReady = () => {
-       youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-         height: '280',
-         width: '280',
-         videoId: videoId,
-         playerVars: {
-           controls: 0,
-           disablekb: 1,
-           fs: 0,
-           modestbranding: 1,
-           playsinline: 1,
-           origin: playerOrigin,
-         },
-         events: {
-           onReady: (event) => {
-             setDuration(event.target.getDuration());
-             const container = document.getElementById('youtube-player-shadowing');
-             const rect = container.getBoundingClientRect();
-             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
-           },
+      window.onYouTubeIframeAPIReady = () => {
+        youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+          height: '280',
+          width: '280',
+          videoId: videoId,
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            origin: playerOrigin,
+          },
+          events: {
+            onReady: (event) => {
+              setDuration(event.target.getDuration());
+              const container = document.getElementById('youtube-player-shadowing');
+              const rect = container.getBoundingClientRect();
+              // Responsive sizing for mobile
+              const isMobile = window.innerWidth <= 768;
+              const scaleFactor = isMobile ? 1.0 : 1.2;
+              event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+            },
           onStateChange: (event) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true);
@@ -105,25 +108,28 @@ const ShadowingPageContent = () => {
     };
 
     if (window.YT && window.YT.Player) {
-       youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-         height: '280',
-         width: '280',
-         videoId: videoId,
-         playerVars: {
-           controls: 0,
-           disablekb: 1,
-           fs: 0,
-           modestbranding: 1,
-           playsinline: 1,
-           origin: playerOrigin,
-         },
-         events: {
-           onReady: (event) => {
-             setDuration(event.target.getDuration());
-             const container = document.getElementById('youtube-player-shadowing');
-             const rect = container.getBoundingClientRect();
-             event.target.setSize(rect.width * 1.2, rect.height * 1.2);
-           },
+        youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+          height: '280',
+          width: '280',
+          videoId: videoId,
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            origin: playerOrigin,
+          },
+          events: {
+            onReady: (event) => {
+              setDuration(event.target.getDuration());
+              const container = document.getElementById('youtube-player-shadowing');
+              const rect = container.getBoundingClientRect();
+              // Responsive sizing for mobile
+              const isMobile = window.innerWidth <= 768;
+              const scaleFactor = isMobile ? 1.0 : 1.2;
+              event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+            },
           onStateChange: (event) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true);
@@ -742,37 +748,39 @@ const ShadowingPageContent = () => {
                 </div>
               </div>
 
-             <div className={styles.sentenceListSection}>
-              <div className={styles.sentenceListContainer}>
-                <h3>Satzliste</h3>
-                <div className={styles.sentenceList}>
-                  {transcriptData.map((segment, index) => (
-                    <SentenceListItem
-                      key={index}
-                      segment={segment}
-                      index={index}
-                      currentSentenceIndex={currentSentenceIndex}
-                      currentTime={currentTime}
-                      isCompleted={true}
-                      lessonId={lessonId}
-                      onSentenceClick={handleSentenceClick}
-                      formatTime={formatTime}
-                      maskText={(text) => text}
-                      classNames={sentenceListClassNames}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+             <div className={styles.sentenceListSection} suppressHydrationWarning>
+               <div className={styles.sentenceListContainer}>
+                 <h3>Satzliste</h3>
+                 <div className={styles.sentenceList}>
+                   {transcriptData.map((segment, index) => (
+                     <SentenceListItem
+                       key={index}
+                       segment={segment}
+                       index={index}
+                       currentSentenceIndex={currentSentenceIndex}
+                       currentTime={currentTime}
+                       isCompleted={true}
+                       lessonId={lessonId}
+                       onSentenceClick={handleSentenceClick}
+                       formatTime={formatTime}
+                       maskText={(text) => text}
+                       classNames={sentenceListClassNames}
+                     />
+                   ))}
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
 
-        <FooterControls
-          onSeek={handleSeek}
-          onPlayPause={handlePlayPause}
-          isPlaying={isPlaying}
-          classNames={footerClassNames}
-        />
+        <div suppressHydrationWarning>
+          <FooterControls
+            onSeek={handleSeek}
+            onPlayPause={handlePlayPause}
+            isPlaying={isPlaying}
+            classNames={footerClassNames}
+          />
+        </div>
       </div>
     </>
   );
