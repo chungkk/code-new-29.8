@@ -11,18 +11,6 @@ const ThemeContext = createContext();
 
 export const THEME_OPTIONS = [
   {
-    id: 'modern',
-    label: 'Papageil Modern',
-    description: 'Leuchtende Verläufe mit Glassmorphism-Highlights.',
-    emoji: '🎨'
-  },
-  {
-    id: 'minimal',
-    label: 'Minimal Hell',
-    description: 'Helle Flächen und ruhige neutrale Töne.',
-    emoji: '☀️'
-  },
-  {
     id: 'sunset',
     label: 'Sonnenuntergang',
     description: 'Warme Orange- und Pinknuancen für ein gemütliches Gefühl.',

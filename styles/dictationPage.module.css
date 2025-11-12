@@ -637,7 +637,7 @@
 
 .footerControls {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -646,7 +646,7 @@
   border-radius: var(--radius-full);
   padding: var(--spacing-sm) var(--spacing-lg);
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: 1040;
 }
 
 .footerButton {
@@ -732,8 +732,7 @@
   }
 
   .appContainer {
-    padding: var(--spacing-sm);
-    padding-bottom: 100px;
+    padding: 0 12px 100px 12px;
   }
 
   .audioTitle {

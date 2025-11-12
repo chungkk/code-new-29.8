@@ -612,9 +612,122 @@ body {
 }
 
 /* ========================================
-    DARK THEME
+    THEME VARIATIONS
     ======================================== */
 
+/* Modern Theme (Default - Bright Blue) */
+[data-theme="modern"] {
+    --primary-color: #0ea5e9;
+    --primary-hover: #0284c7;
+    --primary-light: #e0f2fe;
+
+    --accent-color: #0284c7;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+
+    --bg-color: #f9fafb;
+    --bg-color-secondary: #f3f4f6;
+    --surface-color: #ffffff;
+
+    --text-color: #111827;
+    --text-color-secondary: #4b5563;
+    --text-color-light: #6b7280;
+    --text-color-muted: #9ca3af;
+
+    --border-color: #e5e7eb;
+    --border-color-hover: #d1d5db;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Minimal Light Theme */
+[data-theme="minimal"] {
+    --primary-color: #64748b;
+    --primary-hover: #475569;
+    --primary-light: #f1f5f9;
+
+    --accent-color: #475569;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+
+    --bg-color: #ffffff;
+    --bg-color-secondary: #f8fafc;
+    --surface-color: #ffffff;
+
+    --text-color: #0f172a;
+    --text-color-secondary: #475569;
+    --text-color-light: #64748b;
+    --text-color-muted: #94a3b8;
+
+    --border-color: #e2e8f0;
+    --border-color-hover: #cbd5e1;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+/* Sunset Theme (Warm Orange/Pink) */
+[data-theme="sunset"] {
+    --primary-color: #f97316;
+    --primary-hover: #ea580c;
+    --primary-light: #fed7aa;
+
+    --accent-color: #ea580c;
+    --success-color: #22c55e;
+    --warning-color: #fbbf24;
+    --danger-color: #ef4444;
+
+    --bg-color: #fff7ed;
+    --bg-color-secondary: #ffedd5;
+    --surface-color: #ffffff;
+
+    --text-color: #1a1a1a;
+    --text-color-secondary: #78350f;
+    --text-color-light: #92400e;
+    --text-color-muted: #b45309;
+
+    --border-color: #fed7aa;
+    --border-color-hover: #fdba74;
+
+    --shadow-sm: 0 1px 2px 0 rgba(249, 115, 22, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(249, 115, 22, 0.1);
+}
+
+/* Dark Theme (Night Mode) */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #1e3a8a;
+
+    --accent-color: #2563eb;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+
+    --bg-color: #0f172a;
+    --bg-color-secondary: #1e293b;
+    --surface-color: #1e293b;
+
+    --text-color: #f1f5f9;
+    --text-color-secondary: #cbd5e1;
+    --text-color-light: #94a3b8;
+    --text-color-muted: #64748b;
+
+    --border-color: #334155;
+    --border-color-hover: #475569;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* Legacy support for .dark-theme class */
 .dark-theme {
     --primary-color: #3b82f6;
     --primary-hover: #2563eb;
@@ -643,6 +756,140 @@ body {
 }
 
 /* ========================================
+    THEME TOGGLE COMPONENT
+    ======================================== */
+
+.theme-toggle-container {
+    position: relative;
+}
+
+.theme-toggle-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-xl);
+}
+
+.theme-toggle-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+.theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 320px;
+    padding: var(--spacing-sm);
+    z-index: var(--z-index-dropdown);
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.theme-dropdown-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.theme-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.theme-option:hover {
+    background: var(--bg-color-secondary);
+}
+
+.theme-option.active {
+    background: var(--primary-light);
+}
+
+.theme-option-emoji {
+    font-size: var(--font-size-2xl);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.theme-option-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.theme-option-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+}
+
+.theme-option-description {
+    font-size: var(--font-size-xs);
+    color: var(--text-color-secondary);
+    line-height: var(--line-height-tight);
+}
+
+.theme-option-check {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+}
+
+.theme-option.active .theme-option-label {
+    color: var(--primary-color);
+}
+
+/* ========================================
     RESPONSIVE - MOBILE ADJUSTMENTS
     ======================================== */
 
@@ -662,5 +909,10 @@ body {
 
     .brand-secondary {
         font-size: 0.65rem;
+    }
+
+    .theme-dropdown {
+        min-width: 280px;
+        right: -8px;
     }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import Image from 'next/image';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const router = useRouter();
@@ -81,6 +82,7 @@ const Header = () => {
         </button>
 
         <div className="header-right" data-auth-state={authState}>
+          <ThemeToggle />
           {user ? (
             <div className="user-menu-container" ref={dropdownRef}>
               <button
