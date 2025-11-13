@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
@@ -43,6 +42,7 @@ const DictationPageContent = () => {
   // Touch swipe handling
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [swipeDirection, setSwipeDirection] = useState(null);
 
   // Progress tracking
   const [completedSentences, setCompletedSentences] = useState([]);
@@ -661,10 +661,14 @@ const DictationPageContent = () => {
 
     if (isLeftSwipe) {
       e.preventDefault();
+      setSwipeDirection('left');
       goToNextSentence();
+      setTimeout(() => setSwipeDirection(null), 300);
     } else if (isRightSwipe) {
       e.preventDefault();
+      setSwipeDirection('right');
       goToPreviousSentence();
+      setTimeout(() => setSwipeDirection(null), 300);
     }
 
     setTouchStart(null);
@@ -1350,15 +1354,6 @@ const DictationPageContent = () => {
       />
 
       <div className={styles.pageContainer}>
-        {/* Breadcrumb */}
-        <div className={styles.breadcrumb}>
-          <Link href="/">Home</Link>
-          <span>›</span>
-          <Link href="/topics">Topics</Link>
-          <span>›</span>
-          <span>{lesson.displayTitle || lesson.title}</span>
-        </div>
-
         {/* Main 3-Column Layout */}
         <div className={styles.mainContent}>
           {/* Left Column - Video */}
@@ -1434,13 +1429,13 @@ const DictationPageContent = () => {
                 <div className={styles.dictationHeaderTitle}>Dictation</div>
               </div>
               
-               <div
-                 className={styles.dictationInputArea}
-                 dangerouslySetInnerHTML={{ __html: processedText }}
-                 onTouchStart={handleTouchStart}
-                 onTouchMove={handleTouchMove}
-                 onTouchEnd={handleTouchEnd}
-               />
+                <div
+                  className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
+                  dangerouslySetInnerHTML={{ __html: processedText }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                />
 
               <div className={styles.dictationActions}>
                 {/* Mobile: Show video controls, Desktop: Show "Show all words" and "Next" buttons */}
