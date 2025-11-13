@@ -9,6 +9,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: var(--spacing-lg);
+  padding-top: calc(64px + var(--spacing-lg)); /* Header height + spacing */
 }
 
 .centeredState {
@@ -707,16 +708,16 @@
   background: var(--bg-secondary);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 /* Dictation Header - matching Transcript Header style */
 .dictationHeader {
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-card);
   display: flex;
@@ -735,23 +736,19 @@
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   font-size: 14px;
   color: var(--text-primary);
-  line-height: 2.2;
-  overflow-y: auto;
-  overflow-x: hidden;
+  line-height: 1.8;
+  overflow: visible;
   word-wrap: break-word;
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  align-content: flex-start;
-  gap: 6px;
-  flex: 1 1 auto;
-  min-height: 200px;
+  align-items: center;
+  align-content: center;
+  gap: 5px;
+  flex: 1;
   touch-action: pan-y pinch-zoom;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: none;
   user-select: none;
   cursor: grab;
   justify-content: center;
@@ -807,14 +804,25 @@
 .dictationActions {
   display: flex;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  margin-top: 0;
   flex-shrink: 0;
 }
 
+/* Mobile Video Controls - Fixed at bottom like shadowing page */
 .mobileVideoControls {
-  display: flex;
+  display: none; /* Hidden by default */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   gap: var(--spacing-sm);
-  width: 100%;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(20, 23, 48, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
   justify-content: space-between;
 }
 
@@ -823,21 +831,21 @@
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   border: 2px solid #334155;
   color: white;
-  padding: 16px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .mobileControlButton:hover {
   background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
   border-color: #667eea;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .mobileControlButton:active {
@@ -846,8 +854,8 @@
 }
 
 .mobileControlButton svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   stroke-width: 2.5;
 }
 
@@ -859,6 +867,13 @@
 .mobileControlButton:first-child:hover {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   border-color: #764ba2;
+}
+
+/* Hide mobile controls on desktop */
+@media (min-width: 769px) {
+  .mobileVideoControls {
+    display: none !important;
+  }
 }
 
 .showAllWordsButton {
@@ -935,10 +950,10 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   position: relative;
   margin: 0;
-  vertical-align: top;
+  vertical-align: middle;
   flex-shrink: 0;
 }
 
@@ -981,18 +996,18 @@
   background: linear-gradient(135deg, #1e2139 0%, #16192e 100%);
   border: 2px solid #2d3250;
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 3px 6px;
   font-size: 13px;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 500;
   letter-spacing: 0.2px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 50px;
-  max-width: 120px;
+  min-width: 45px;
+  max-width: 110px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
   text-align: center;
-  height: 30px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1019,15 +1034,15 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   background: rgba(16, 185, 129, 0.08);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  height: 30px;
-  min-height: 30px;
+  height: 28px;
+  min-height: 28px;
   font-size: 13px;
   letter-spacing: 0.2px;
 }
@@ -1059,13 +1074,13 @@
   color: #10b981;
   background: rgba(16, 185, 129, 0.12);
   animation: completedPulse 0.5s ease-out;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  min-height: 30px;
+  height: 28px;
+  min-height: 28px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.2px;
@@ -1089,11 +1104,11 @@
   background: rgba(245, 158, 11, 0.1);
   font-weight: 600;
   position: relative;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  height: 30px;
+  height: 28px;
   font-size: 13px;
   letter-spacing: 0.2px;
 }
@@ -1124,7 +1139,7 @@
 @media (max-width: 768px) {
   .pageContainer {
     padding: var(--spacing-sm);
-    padding-top: 80px; /* Offset fixed header height + spacing */
+    padding-top: calc(64px + var(--spacing-lg)); /* Header height (64px) + spacing */
   }
 
   .leftSection,
@@ -1168,9 +1183,7 @@
 }
 
 @media (max-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-sm);
-  }
+  /* pageContainer already defined in earlier media query */
 
   .mainContent {
     padding: 0;
@@ -1236,6 +1249,11 @@
     display: none;
   }
 
+  /* Show mobile video controls below video in mobile */
+  .mobileVideoControls {
+    display: flex;
+  }
+
   .dictationContainer {
     border: none;
     border-radius: var(--border-radius);
@@ -1270,22 +1288,21 @@
   }
 
   .dictationInputArea {
-    font-size: 16px;
-    line-height: 2.4;
-    padding: var(--spacing-lg);
-    padding-bottom: 0;
-    gap: 8px;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: var(--spacing-sm);
+    padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); /* Space for fixed buttons */
+    gap: 5px;
     border: 2px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     flex: 1;
-    min-height: calc(100vh - 400px);
-    max-height: calc(100vh - 400px);
-    overflow-y: auto;
-    margin-bottom: 80px;
+    overflow: visible;
     justify-content: center;
+    align-items: center;
+    align-content: center;
   }
 
   .dictationInputArea :global(.word-input),
@@ -1353,26 +1370,23 @@
 
   .dictationActions {
     position: fixed;
-    bottom: env(safe-area-inset-bottom, 0px);
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* Above mobile video controls */
     left: 0;
     right: 0;
     margin: 0;
-    margin-top: 0;
-    padding: var(--spacing-sm);
-    padding-top: var(--spacing-sm);
-    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 12px));
-    background: var(--bg-secondary);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    border-top: 1px solid var(--border-color);
+    padding: 8px 12px;
+    background: transparent;
+    z-index: 999;
+    border: none;
     border-radius: 0;
   }
 
-  .showAllWordsButton,
-  .nextButton {
-    padding: 14px 24px;
+  .showAllWordsButton {
+    width: 100%;
+    padding: 12px 24px;
     font-size: 14px;
-    border-radius: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
   }
 
   .nextButton {
@@ -1383,7 +1397,7 @@
 @media (max-width: 480px) {
   .pageContainer {
     padding: var(--spacing-xs);
-    padding-top: 80px; /* Offset fixed header height + spacing */
+    padding-top: calc(64px + var(--spacing-md)); /* Header height (64px) + spacing */
   }
 
   .mainContent {
@@ -1459,12 +1473,13 @@
     border-radius: var(--border-radius);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    min-height: calc(100vh - 400px);
-    max-height: calc(100vh - 400px);
-    overflow-y: auto;
-    padding-bottom: 0;
-    margin-bottom: 80px;
+    overflow: visible;
+    padding: var(--spacing-xs);
+    padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); /* Space for fixed buttons */
     justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: 4px;
   }
 
   .dictationInputArea :global(.word-input),
@@ -1528,26 +1543,23 @@
 
   .dictationActions {
     position: fixed;
-    bottom: env(safe-area-inset-bottom, 0px);
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)); /* Above mobile video controls */
     left: 0;
     right: 0;
     margin: 0;
-    margin-top: 0;
-    padding: var(--spacing-sm) var(--spacing-xs);
-    padding-top: var(--spacing-sm);
-    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 16px));
-    background: var(--bg-secondary);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    border-top: 1px solid var(--border-color);
+    padding: 8px 12px;
+    background: transparent;
+    z-index: 999;
+    border: none;
     border-radius: 0;
   }
 
-  .showAllWordsButton,
-  .nextButton {
-    padding: 12px 20px;
+  .showAllWordsButton {
+    width: 100%;
+    padding: 11px 20px;
     font-size: 13px;
-    border-radius: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
   }
 }
 

@@ -1443,6 +1443,57 @@ const DictationPageContent = () => {
                 <h3>{lesson.displayTitle || lesson.title}</h3>
               </div>
             </div>
+
+            {/* Mobile Video Controls - Only show on mobile */}
+            {isMobile && (
+              <div className={styles.mobileVideoControls}>
+                <button 
+                  className={styles.mobileControlButton}
+                  onClick={handlePlayPause}
+                  title={isPlaying ? 'Tạm dừng' : 'Phát tiếp'}
+                >
+                  {isPlaying ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+                
+                <button 
+                  className={styles.mobileControlButton}
+                  onClick={handleReplayFromStart}
+                  title="Phát lại từ đầu câu"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
+                
+                <button 
+                  className={styles.mobileControlButton}
+                  onClick={() => handleSeek('backward')}
+                  title="Tua lại 2 giây"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  className={styles.mobileControlButton}
+                  onClick={() => handleSeek('forward')}
+                  title="Tua tiếp 2 giây"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Middle Column - Dictation Area */}
@@ -1462,82 +1513,32 @@ const DictationPageContent = () => {
                 />
 
               <div className={styles.dictationActions}>
-                {/* Mobile: Show video controls, Desktop: Show "Show all words" and "Next" buttons */}
-                {isMobile ? (
-                  <div className={styles.mobileVideoControls}>
-                    <button 
-                      className={styles.mobileControlButton}
-                      onClick={handlePlayPause}
-                      title={isPlaying ? 'Tạm dừng' : 'Phát tiếp'}
-                    >
-                      {isPlaying ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                          <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      )}
-                    </button>
-                    
-                    <button 
-                      className={styles.mobileControlButton}
-                      onClick={handleReplayFromStart}
-                      title="Phát lại từ đầu câu"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
-                    
-                    <button 
-                      className={styles.mobileControlButton}
-                      onClick={() => handleSeek('backward')}
-                      title="Tua lại 2 giây"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    
-                    <button 
-                      className={styles.mobileControlButton}
-                      onClick={() => handleSeek('forward')}
-                      title="Tua tiếp 2 giây"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <button 
-                      className={styles.showAllWordsButton}
-                      onClick={() => {
-                        // Reveal all words
-                        const allInputs = document.querySelectorAll('.word-input');
-                        allInputs.forEach((input, idx) => {
-                          const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-                          showHint(input.previousElementSibling, correctWord, idx);
-                        });
-                      }}
-                    >
-                      Show all words
-                    </button>
-                    
-                    <button 
-                      className={styles.nextButton}
-                      onClick={goToNextSentence}
-                      disabled={currentSentenceIndex >= transcriptData.length - 1}
-                    >
-                      Next
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                      </svg>
-                    </button>
-                  </>
+                {/* Mobile: Show "Show all words" button, Desktop: Show "Show all words" and "Next" buttons */}
+                <button 
+                  className={styles.showAllWordsButton}
+                  onClick={() => {
+                    // Reveal all words
+                    const allInputs = document.querySelectorAll('.word-input');
+                    allInputs.forEach((input, idx) => {
+                      const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                      showHint(input.previousElementSibling, correctWord, idx);
+                    });
+                  }}
+                >
+                  Show all words
+                </button>
+                
+                {!isMobile && (
+                  <button 
+                    className={styles.nextButton}
+                    onClick={goToNextSentence}
+                    disabled={currentSentenceIndex >= transcriptData.length - 1}
+                  >
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                  </button>
                 )}
               </div>
             </div>
