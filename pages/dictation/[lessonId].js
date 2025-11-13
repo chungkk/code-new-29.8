@@ -180,7 +180,15 @@ const DictationPageContent = () => {
       
       try {
         setLoading(true);
-        const res = await fetch(`/api/lessons/${lessonId}`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        
+        const res = await fetch(`/api/lessons/${lessonId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!res.ok) {
           throw new Error('Lesson not found');
@@ -194,7 +202,11 @@ const DictationPageContent = () => {
           loadTranscript(data.json);
         }
       } catch (error) {
-        console.error('Error loading lesson:', error);
+        if (error.name === 'AbortError') {
+          console.error('Request timeout loading lesson');
+        } else {
+          console.error('Error loading lesson:', error);
+        }
         setLesson(null);
       } finally {
         setLoading(false);
@@ -219,11 +231,17 @@ const DictationPageContent = () => {
           return;
         }
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+        
         const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`, {
           headers: {
             'Authorization': `Bearer ${token}`
-          }
+          },
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (res.ok) {
           const data = await res.json();
@@ -253,7 +271,11 @@ const DictationPageContent = () => {
           }
         }
       } catch (error) {
-        console.error('Error loading progress:', error);
+        if (error.name === 'AbortError') {
+          console.warn('Timeout loading progress, continuing without saved progress');
+        } else {
+          console.error('Error loading progress:', error);
+        }
       } finally {
         setProgressLoaded(true);
       }
@@ -661,12 +683,24 @@ const DictationPageContent = () => {
   // Load transcript from JSON
   const loadTranscript = async (jsonPath) => {
     try {
-      const response = await fetch(jsonPath);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const response = await fetch(jsonPath, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) throw new Error(`Không thể tải file JSON tại: ${jsonPath}`);
       const data = await response.json();
       setTranscriptData(data);
     } catch (error) {
-      console.error('Lỗi tải transcript:', error);
+      if (error.name === 'AbortError') {
+        console.error('Timeout loading transcript:', jsonPath);
+      } else {
+        console.error('Lỗi tải transcript:', error);
+      }
     }
   };
 
@@ -762,6 +796,9 @@ const DictationPageContent = () => {
         correctWordsCount += Object.keys(sentenceWords).length;
       });
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+      
       const response = await fetch('/api/progress', {
         method: 'POST',
         headers: { 
@@ -779,8 +816,11 @@ const DictationPageContent = () => {
             correctWords: correctWordsCount,
             totalWords
           }
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error('Failed to save progress');
@@ -1079,6 +1119,8 @@ const DictationPageContent = () => {
              <input
                type="text"
                class="word-input"
+               id="word-${wordIndex}"
+               name="word-${wordIndex}"
                data-word-id="word-${wordIndex}"
                oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
                onclick="window.handleInputClick(this, '${pureWord}')"
@@ -1088,6 +1130,7 @@ const DictationPageContent = () => {
                maxlength="${pureWord.length}"
                size="${Math.max(pureWord.length, 3)}"
                placeholder="${'*'.repeat(pureWord.length)}"
+               autocomplete="off"
              />
            <span class="word-punctuation">${nonAlphaNumeric}</span>
          </span>`;

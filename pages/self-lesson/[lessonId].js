@@ -8,6 +8,7 @@ import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
 import ModeSelectionPopup from '../../components/ModeSelectionPopup';
 import { speakText } from '../../lib/textToSpeech';
+import styles from '../../styles/shadowingPage.module.css';
 
 
 const SelfLessonPageContent = () => {

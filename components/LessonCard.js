@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import styles from '../styles/LessonCard.module.css';
 
 const LessonCard = ({ lesson, onClick }) => {
@@ -59,9 +60,11 @@ const LessonCard = ({ lesson, onClick }) => {
   return (
     <div className={styles.lessonCard} onClick={onClick}>
       <div className={styles.thumbnailContainer}>
-        <img
+        <Image
           src={lesson.thumbnail || getYouTubeThumbnail(lesson.youtubeUrl) || '/default-thumbnail.jpg'}
           alt={lesson.title}
+          width={320}
+          height={180}
           className={styles.thumbnail}
         />
 
