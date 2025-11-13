@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -8,6 +8,8 @@ import styles from '../styles/Header.module.css';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const router = useRouter();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -23,6 +25,32 @@ const Header = () => {
       return router.pathname === '/';
     }
     return router.pathname.startsWith(path);
+  };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userMenuOpen]);
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    await logout();
   };
 
   return (
@@ -76,14 +104,97 @@ const Header = () => {
                 <span className={styles.notificationBadge}></span>
               </button>
 
-              <Image
-                src={user.avatar || '/default-avatar.png'}
-                alt={user.name || 'User'}
-                width={40}
-                height={40}
-                className={styles.userAvatar}
-                onClick={() => router.push('/dashboard/settings')}
-              />
+              <div className={styles.userMenuContainer} ref={userMenuRef}>
+                <button 
+                  className={styles.userAvatarBtn}
+                  onClick={toggleUserMenu}
+                  aria-label="User menu"
+                  aria-expanded={userMenuOpen}
+                >
+                  <Image
+                    src={user.avatar || '/default-avatar.png'}
+                    alt={user.name || 'User'}
+                    width={40}
+                    height={40}
+                    className={styles.userAvatar}
+                  />
+                </button>
+
+                {userMenuOpen && (
+                  <div className={styles.userDropdown}>
+                    <div className={styles.userDropdownHeader}>
+                      <div className={styles.userDropdownAvatar}>
+                        <Image
+                          src={user.avatar || '/default-avatar.png'}
+                          alt={user.name || 'User'}
+                          width={48}
+                          height={48}
+                          className={styles.dropdownAvatar}
+                        />
+                      </div>
+                      <div className={styles.userDropdownInfo}>
+                        <div className={styles.userName}>{user.name}</div>
+                        <div className={styles.userEmail}>{user.email}</div>
+                      </div>
+                    </div>
+
+                    <div className={styles.userDropdownDivider}></div>
+
+                    <div className={styles.userDropdownMenu}>
+                      <Link 
+                        href="/dashboard" 
+                        className={styles.userDropdownItem}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <span className={styles.dropdownIcon}>📊</span>
+                        <span>Dashboard</span>
+                      </Link>
+
+                      <Link 
+                        href="/dashboard/vocabulary" 
+                        className={styles.userDropdownItem}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <span className={styles.dropdownIcon}>📚</span>
+                        <span>Mein Wortschatz</span>
+                      </Link>
+
+                      <Link 
+                        href="/dashboard/settings" 
+                        className={styles.userDropdownItem}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <span className={styles.dropdownIcon}>⚙️</span>
+                        <span>Einstellungen</span>
+                      </Link>
+
+                      {user.role === 'admin' && (
+                        <>
+                          <div className={styles.userDropdownDivider}></div>
+                          <Link 
+                            href="/admin/dashboard" 
+                            className={`${styles.userDropdownItem} ${styles.adminItem}`}
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <span className={styles.dropdownIcon}>👑</span>
+                            <span>Admin Panel</span>
+                          </Link>
+                        </>
+                      )}
+
+                      <div className={styles.userDropdownDivider}></div>
+
+                      <button 
+                        className={`${styles.userDropdownItem} ${styles.logoutItem}`}
+                        onClick={handleLogout}
+                      >
+                        <span className={styles.dropdownIcon}>🚪</span>
+                        <span>Abmelden</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           )}
 

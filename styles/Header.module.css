@@ -217,19 +217,178 @@
   border: 2px solid var(--bg-secondary);
 }
 
+/* User Menu Container */
+.userMenuContainer {
+  position: relative;
+}
+
+.userAvatarBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.userAvatarBtn:hover .userAvatar {
+  border-color: var(--accent-blue);
+  transform: scale(1.05);
+}
+
 .userAvatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  cursor: pointer;
   border: 2px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
-.userAvatar:hover {
-  border-color: var(--accent-blue);
-  transform: scale(1.05);
+/* User Dropdown Menu */
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 280px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  animation: dropdownFadeIn 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userDropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-secondary);
+}
+
+.userDropdownAvatar {
+  flex-shrink: 0;
+}
+
+.dropdownAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+}
+
+.userDropdownInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userDropdownDivider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 4px 0;
+}
+
+.userDropdownMenu {
+  padding: 8px;
+}
+
+.userDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--border-radius-small);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.userDropdownItem:hover {
+  background: var(--bg-hover);
+  color: var(--accent-blue);
+}
+
+.dropdownIcon {
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.adminItem {
+  color: var(--accent-blue);
+}
+
+.adminItem:hover {
+  background: rgba(102, 126, 234, 0.15);
+  color: var(--accent-blue);
+}
+
+.adminItem .dropdownIcon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.logoutItem {
+  color: #ef4444;
+}
+
+.logoutItem:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .mobileMenuBtn {
@@ -284,6 +443,11 @@
     padding: 6px 12px;
     font-size: 13px;
   }
+
+  .userDropdown {
+    min-width: 260px;
+    right: -10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -298,5 +462,16 @@
   .languageSelector {
     padding: 6px 8px;
     font-size: 12px;
+  }
+
+  .userDropdown {
+    min-width: calc(100vw - 32px);
+    right: -8px;
+    left: auto;
+  }
+
+  .themeToggle,
+  .languageSelector {
+    display: none;
   }
 }

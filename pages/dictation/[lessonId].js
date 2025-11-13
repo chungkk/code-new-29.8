@@ -7,6 +7,7 @@ import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import VocabularyPopup from '../../components/VocabularyPopup';
 import { speakText } from '../../lib/textToSpeech';
+import { toast } from 'react-toastify';
 import styles from '../../styles/dictationPage.module.css';
 
 
@@ -895,6 +896,43 @@ const DictationPageContent = () => {
     });
   }, []);
 
+  // Save vocabulary to database
+  const saveVocabulary = useCallback(async ({ word, translation, notes }) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        toast.error('Bitte melden Sie sich an, um Vokabeln zu speichern');
+        return;
+      }
+
+      const context = transcriptData[currentSentenceIndex]?.text || '';
+
+      const response = await fetch('/api/vocabulary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          word,
+          translation: translation || notes || '',
+          context,
+          lessonId
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Vokabel erfolgreich gespeichert!');
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Fehler beim Speichern');
+      }
+    } catch (error) {
+      console.error('Save vocabulary error:', error);
+      toast.error('Ein Fehler ist aufgetreten');
+    }
+  }, [lessonId, transcriptData, currentSentenceIndex]);
+
   // Handle word click for popup (for completed words)
   const handleWordClickForPopup = useCallback((word, event) => {
     // Pause main audio nếu đang phát
@@ -1530,6 +1568,7 @@ const DictationPageContent = () => {
           word={selectedWord}
           position={popupPosition}
           onClose={() => setShowVocabPopup(false)}
+          onSave={saveVocabulary}
         />
       )}
     </div>
