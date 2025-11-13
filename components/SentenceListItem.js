@@ -1,13 +1,15 @@
 import React from 'react';
 
 const SentenceListItem = ({
-  sentence,
+  segment,
   index,
   isActive,
   isCompleted,
   onClick,
   showTranslation = false,
 }) => {
+  if (!segment) return null;
+
   return (
     <div
       onClick={onClick}
@@ -46,29 +48,29 @@ const SentenceListItem = ({
             color: 'var(--text-primary)',
             fontSize: '15px',
             lineHeight: '1.6',
-            marginBottom: showTranslation && sentence.translation ? 'var(--spacing-sm)' : 0,
+            marginBottom: showTranslation && segment.translation ? 'var(--spacing-sm)' : 0,
           }}>
-            {sentence.text}
+            {segment.text}
           </div>
 
-          {showTranslation && sentence.translation && (
+          {showTranslation && segment.translation && (
             <div style={{
               color: 'var(--text-secondary)',
               fontSize: '13px',
               lineHeight: '1.5',
               fontStyle: 'italic',
             }}>
-              {sentence.translation}
+              {segment.translation}
             </div>
           )}
 
-          {sentence.startTime !== undefined && (
+          {segment.start !== undefined && (
             <div style={{
               color: 'var(--text-muted)',
               fontSize: '12px',
               marginTop: 'var(--spacing-xs)',
             }}>
-              {formatTime(sentence.startTime)} - {formatTime(sentence.endTime)}
+              {formatTime(segment.start)} - {formatTime(segment.end)}
             </div>
           )}
         </div>
