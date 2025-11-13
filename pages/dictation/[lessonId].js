@@ -1247,6 +1247,30 @@ const DictationPageContent = () => {
       const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
       setProcessedText(processed);
       
+      // Detect sentence length and add appropriate class
+      setTimeout(() => {
+        const dictationArea = document.querySelector('.dictationInputArea');
+        if (dictationArea) {
+          const wordCount = text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1).length;
+          
+          // Remove old classes
+          dictationArea.classList.remove('short-sentence', 'medium-sentence', 'long-sentence', 'very-long-sentence');
+          
+          // Add new class based on word count
+          if (wordCount <= 8) {
+            dictationArea.classList.add('short-sentence');
+          } else if (wordCount <= 15) {
+            dictationArea.classList.add('medium-sentence');
+          } else if (wordCount <= 25) {
+            dictationArea.classList.add('long-sentence');
+          } else {
+            dictationArea.classList.add('very-long-sentence');
+          }
+          
+          console.log(`Sentence has ${wordCount} words, applied class`);
+        }
+      }, 100);
+      
       if (typeof window !== 'undefined') {
         window.checkWord = checkWord;
         window.handleInputClick = handleInputClick;

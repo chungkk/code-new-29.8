@@ -1291,16 +1291,64 @@
   .dictationInputArea :global(.word-input),
   .dictationInputArea :global(.correct-word),
   .dictationInputArea :global(.hint-revealed) {
-    height: 32px;
-    min-height: 32px;
-    font-size: 13px;
-    padding: 6px 10px;
-    min-width: 45px;
+    height: clamp(60px, 8vh, 80px);
+    min-height: 60px;
+    font-size: clamp(20px, 2.5vw, 24px);
+    padding: clamp(12px, 1.5vh, 16px) clamp(14px, 2vw, 20px);
+    min-width: clamp(80px, 25vw, 150px);
+    max-width: clamp(120px, 40vw, 200px);
   }
 
   .dictationInputArea :global(.hint-btn) {
-    width: 20px;
-    height: 20px;
+    width: clamp(24px, 3vw, 30px);
+    height: clamp(24px, 3vw, 30px);
+    font-size: clamp(11px, 1.5vw, 14px);
+  }
+
+  /* Adaptive sizing based on sentence length */
+  .dictationInputArea:global(.short-sentence) :global(.word-input),
+  .dictationInputArea:global(.short-sentence) :global(.correct-word),
+  .dictationInputArea:global(.short-sentence) :global(.hint-revealed) {
+    height: clamp(70px, 10vh, 90px);
+    font-size: clamp(24px, 3.5vw, 28px);
+  }
+
+  .dictationInputArea:global(.short-sentence) :global(.hint-btn) {
+    width: clamp(28px, 3.5vw, 34px);
+    height: clamp(28px, 3.5vw, 34px);
+  }
+
+  .dictationInputArea:global(.medium-sentence) :global(.word-input),
+  .dictationInputArea:global(.medium-sentence) :global(.correct-word),
+  .dictationInputArea:global(.medium-sentence) :global(.hint-revealed) {
+    height: clamp(60px, 8vh, 80px);
+    font-size: clamp(20px, 2.5vw, 24px);
+  }
+
+  .dictationInputArea:global(.long-sentence) :global(.word-input),
+  .dictationInputArea:global(.long-sentence) :global(.correct-word),
+  .dictationInputArea:global(.long-sentence) :global(.hint-revealed) {
+    height: clamp(50px, 6vh, 65px);
+    font-size: clamp(17px, 2vw, 20px);
+  }
+
+  .dictationInputArea:global(.long-sentence) :global(.hint-btn) {
+    width: clamp(20px, 2.5vw, 24px);
+    height: clamp(20px, 2.5vw, 24px);
+  }
+
+  .dictationInputArea:global(.very-long-sentence) :global(.word-input),
+  .dictationInputArea:global(.very-long-sentence) :global(.correct-word),
+  .dictationInputArea:global(.very-long-sentence) :global(.hint-revealed) {
+    height: clamp(42px, 5vh, 55px);
+    font-size: clamp(15px, 1.8vw, 18px);
+    padding: clamp(8px, 1vh, 12px) clamp(10px, 1.5vw, 14px);
+  }
+
+  .dictationInputArea:global(.very-long-sentence) :global(.hint-btn) {
+    width: clamp(18px, 2vw, 22px);
+    height: clamp(18px, 2vw, 22px);
+    font-size: clamp(9px, 1.2vw, 11px);
   }
 
   .dictationActions {
@@ -1417,6 +1465,65 @@
     padding-bottom: 0;
     margin-bottom: 80px;
     justify-content: center;
+  }
+
+  .dictationInputArea :global(.word-input),
+  .dictationInputArea :global(.correct-word),
+  .dictationInputArea :global(.hint-revealed) {
+    height: clamp(65px, 9vh, 85px);
+    min-height: 65px;
+    font-size: clamp(21px, 3vw, 26px);
+  }
+
+  .dictationInputArea :global(.hint-btn) {
+    width: clamp(26px, 3.5vw, 32px);
+    height: clamp(26px, 3.5vw, 32px);
+  }
+
+  /* Adaptive sizing for small screens */
+  .dictationInputArea:global(.short-sentence) :global(.word-input),
+  .dictationInputArea:global(.short-sentence) :global(.correct-word),
+  .dictationInputArea:global(.short-sentence) :global(.hint-revealed) {
+    height: clamp(75px, 11vh, 95px);
+    font-size: clamp(26px, 4vw, 30px);
+  }
+
+  .dictationInputArea:global(.short-sentence) :global(.hint-btn) {
+    width: clamp(30px, 4vw, 36px);
+    height: clamp(30px, 4vw, 36px);
+  }
+
+  .dictationInputArea:global(.medium-sentence) :global(.word-input),
+  .dictationInputArea:global(.medium-sentence) :global(.correct-word),
+  .dictationInputArea:global(.medium-sentence) :global(.hint-revealed) {
+    height: clamp(65px, 9vh, 85px);
+    font-size: clamp(21px, 3vw, 26px);
+  }
+
+  .dictationInputArea:global(.long-sentence) :global(.word-input),
+  .dictationInputArea:global(.long-sentence) :global(.correct-word),
+  .dictationInputArea:global(.long-sentence) :global(.hint-revealed) {
+    height: clamp(52px, 7vh, 68px);
+    font-size: clamp(18px, 2.3vw, 21px);
+  }
+
+  .dictationInputArea:global(.long-sentence) :global(.hint-btn) {
+    width: clamp(22px, 2.8vw, 26px);
+    height: clamp(22px, 2.8vw, 26px);
+  }
+
+  .dictationInputArea:global(.very-long-sentence) :global(.word-input),
+  .dictationInputArea:global(.very-long-sentence) :global(.correct-word),
+  .dictationInputArea:global(.very-long-sentence) :global(.hint-revealed) {
+    height: clamp(44px, 5.5vh, 58px);
+    font-size: clamp(16px, 2vw, 19px);
+    padding: clamp(8px, 1vh, 12px) clamp(10px, 1.5vw, 14px);
+  }
+
+  .dictationInputArea:global(.very-long-sentence) :global(.hint-btn) {
+    width: clamp(19px, 2.3vw, 24px);
+    height: clamp(19px, 2.3vw, 24px);
+    font-size: clamp(9px, 1.3vw, 11px);
   }
 
   .dictationActions {
