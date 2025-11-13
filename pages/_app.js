@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
@@ -11,11 +12,15 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 function Layout({ children }) {
+  const router = useRouter();
+  const isHomePage = router.pathname === '/';
+  const isAdminPage = router.pathname.startsWith('/admin');
+
   return (
     <>
-      <Header />
+      {!isAdminPage && <Header />}
       {children}
-      <Footer />
+      {isHomePage && <Footer />}
     </>
   );
 }

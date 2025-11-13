@@ -6,6 +6,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { fetchWithAuth } from '../../lib/api';
 import { toast } from 'react-toastify';
 import { speakText } from '../../lib/textToSpeech';
+import styles from '../../styles/dashboard.module.css';
 
 
 function VocabularyPage() {

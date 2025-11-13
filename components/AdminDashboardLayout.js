@@ -1,13 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import styles from '../styles/adminLayout.module.css';
 
 const AdminDashboardLayout = ({ children }) => {
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false); // for mobile
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // for desktop
+  const [userName, setUserName] = useState('Admin');
 
-  const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { href: '/admin/dashboard/files', label: 'Files', icon: '📁' },
+  useEffect(() => {
+    // Get user info from localStorage
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        setUserName(userData.name || userData.email || 'Admin');
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+  }, []);
+
+  const navSections = [
+    {
+      label: 'Main',
+      items: [
+        { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+        { href: '/admin/dashboard/files', label: 'Dateien', icon: '📁' },
+      ]
+    },
+    {
+      label: 'Content',
+      items: [
+        { href: '/admin/dashboard/lesson/new', label: 'Neue Lektion', icon: '➕' },
+      ]
+    },
+    {
+      label: 'Settings',
+      items: [
+        { href: '/admin/settings', label: 'Einstellungen', icon: '⚙️' },
+      ]
+    }
   ];
 
   const isActive = (path) => {
@@ -17,69 +51,154 @@ const AdminDashboardLayout = ({ children }) => {
     return router.pathname.startsWith(path);
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/auth/login');
+  };
+
+  const getUserInitials = (name) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: 'calc(100vh - 64px)',
-      maxWidth: '1600px',
-      margin: '0 auto',
-    }}>
+    <div className={styles.layout}>
+      {/* Overlay for mobile */}
+      <div 
+        className={`${styles.overlay} ${sidebarOpen ? styles.overlayVisible : ''}`}
+        onClick={closeSidebar}
+      />
+
       {/* Sidebar */}
-      <aside style={{
-        width: '250px',
-        background: 'var(--bg-secondary)',
-        borderRight: '1px solid var(--border-color)',
-        padding: 'var(--spacing-lg)',
-      }}>
-        <div style={{
-          marginBottom: 'var(--spacing-lg)',
-          padding: 'var(--spacing-md)',
-          background: 'var(--accent-gradient)',
-          borderRadius: 'var(--border-radius-small)',
-          color: 'white',
-          fontWeight: '600',
-          textAlign: 'center',
-        }}>
-          Admin Panel
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarVisible : ''} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
+        {/* Logo */}
+        <div className={styles.logoArea}>
+          <div className={styles.logoContent}>
+            <div className={styles.logoIcon}>🎓</div>
+            <div className={styles.logoText}>
+              <h1 className={styles.logoTitle}>GG Driver</h1>
+              <p className={styles.logoSubtitle}>Admin Panel</p>
+            </div>
+          </div>
         </div>
 
-        <nav style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-sm)',
-        }}>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-sm)',
-                padding: '12px 16px',
-                borderRadius: 'var(--border-radius-small)',
-                textDecoration: 'none',
-                color: isActive(item.href) ? 'var(--accent-blue)' : 'var(--text-primary)',
-                background: isActive(item.href) ? 'rgba(102, 126, 234, 0.15)' : 'transparent',
-                fontWeight: isActive(item.href) ? '600' : '500',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <span style={{ fontSize: '18px' }}>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
+        {/* Navigation */}
+        <nav className={styles.nav}>
+          {navSections.map((section, index) => (
+            <div key={index} className={styles.navSection}>
+              {!sidebarCollapsed && <div className={styles.navLabel}>{section.label}</div>}
+              <ul className={styles.navList}>
+                {section.items.map((item) => (
+                  <li key={item.href} className={styles.navItem}>
+                    <Link
+                      href={item.href}
+                      className={`${styles.navLink} ${isActive(item.href) ? styles.navLinkActive : ''}`}
+                      onClick={closeSidebar}
+                      title={sidebarCollapsed ? item.label : ''}
+                    >
+                      <span className={styles.navIcon}>{item.icon}</span>
+                      {!sidebarCollapsed && <span>{item.label}</span>}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </nav>
+
+        {/* Collapse Button */}
+        <button 
+          className={styles.collapseButton}
+          onClick={toggleSidebarCollapse}
+          title={sidebarCollapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
+        >
+          {sidebarCollapsed ? '→' : '←'}
+        </button>
+
+        {/* User Section */}
+        {!sidebarCollapsed && (
+          <div className={styles.sidebarUser}>
+            <div className={styles.userInfo}>
+              <div className={styles.userAvatar}>
+                {getUserInitials(userName)}
+              </div>
+              <div className={styles.userDetails}>
+                <p className={styles.userName}>{userName}</p>
+                <p className={styles.userRole}>Administrator</p>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
 
-      {/* Main content */}
-      <main style={{
-        flex: 1,
-        padding: 'var(--spacing-xl) var(--spacing-lg)',
-        overflowY: 'auto',
-      }}>
-        {children}
-      </main>
+      {/* Main Content Wrapper */}
+      <div className={`${styles.mainWrapper} ${sidebarCollapsed ? styles.mainWrapperCollapsed : ''}`}>
+        {/* Top Header */}
+        <header className={styles.topHeader}>
+          <div className={styles.headerLeft}>
+            <button 
+              className={styles.menuToggle}
+              onClick={toggleSidebar}
+              aria-label="Toggle menu"
+            >
+              ☰
+            </button>
+
+            <div className={styles.searchBar}>
+              <span className={styles.searchIcon}>🔍</span>
+              <input 
+                type="text" 
+                placeholder="Suchen..." 
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
+
+          <div className={styles.headerRight}>
+            <button className={styles.headerButton} title="Benachrichtigungen">
+              🔔
+              <span className={styles.notificationDot}></span>
+            </button>
+            
+            <button className={styles.headerButton} title="Hilfe">
+              ❓
+            </button>
+
+            <button 
+              className={styles.userButton}
+              onClick={handleLogout}
+              title="Abmelden"
+            >
+              <div className={styles.userButtonAvatar}>
+                {getUserInitials(userName)}
+              </div>
+              <span className={styles.userButtonName}>{userName}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className={styles.mainContent}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 };

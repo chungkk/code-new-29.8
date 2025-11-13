@@ -90,34 +90,16 @@ const Header = () => {
           {!user && (
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
-                onClick={() => router.push('/login')}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                  padding: '8px 16px',
-                  borderRadius: 'var(--border-radius-small)',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                }}
+                onClick={() => router.push('/auth/login')}
+                className={styles.loginBtn}
               >
-                Login
+                Anmelden
               </button>
               <button
-                onClick={() => router.push('/signup')}
-                style={{
-                  background: 'var(--accent-gradient)',
-                  border: 'none',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: 'var(--border-radius-small)',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                }}
+                onClick={() => router.push('/auth/register')}
+                className={styles.signupBtn}
               >
-                Sign Up
+                Registrieren
               </button>
             </div>
           )}

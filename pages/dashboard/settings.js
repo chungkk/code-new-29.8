@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { toast } from 'react-toastify';
+import styles from '../../styles/dashboard.module.css';
 
 
 function SettingsPage() {

@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/router';
 
-const AuthForm = ({ mode = 'login', onSubmit, error, loading }) => {
+const AuthForm = ({ mode = 'login' }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
     confirmPassword: '',
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login, register } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e) => {
     setFormData({
@@ -15,9 +21,32 @@ const AuthForm = ({ mode = 'login', onSubmit, error, loading }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setError('');
+    setLoading(true);
+
+    try {
+      let result;
+      if (mode === 'login') {
+        result = await login(formData.email, formData.password);
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+        result = await register(formData.name, formData.email, formData.password);
+      }
+
+      if (result.success) {
+        router.push('/dashboard');
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isLogin = mode === 'login';
