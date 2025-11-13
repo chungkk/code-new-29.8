@@ -37,7 +37,8 @@
 .middleSection {
   display: flex;
   flex-direction: column;
-  height: 550px;
+  height: 500px;
+  min-height: 350px;
 }
 
 /* Left Section - Video and Controls */
@@ -706,10 +707,11 @@
   background: var(--bg-secondary);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   height: 100%;
+  gap: var(--spacing-md);
 }
 
 /* Dictation Header - matching Transcript Header style */
@@ -733,10 +735,10 @@
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   font-size: 14px;
   color: var(--text-primary);
-  line-height: 2;
+  line-height: 2.2;
   overflow-y: auto;
   overflow-x: hidden;
   word-wrap: break-word;
@@ -744,14 +746,15 @@
   flex-wrap: wrap;
   align-items: flex-start;
   align-content: flex-start;
-  gap: 4px;
+  gap: 6px;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 200px;
   touch-action: pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: none;
   user-select: none;
   cursor: grab;
+  justify-content: center;
 }
 
 .dictationInputArea:focus {
@@ -806,6 +809,56 @@
   gap: var(--spacing-sm);
   margin-top: var(--spacing-sm);
   flex-shrink: 0;
+}
+
+.mobileVideoControls {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.mobileControlButton {
+  flex: 1;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #334155;
+  color: white;
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.mobileControlButton:hover {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.mobileControlButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.mobileControlButton svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+}
+
+.mobileControlButton:first-child {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.mobileControlButton:first-child:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  border-color: #764ba2;
 }
 
 .showAllWordsButton {
@@ -1186,13 +1239,18 @@
   .dictationContainer {
     border: none;
     border-radius: var(--border-radius);
-    padding: var(--spacing-md);
-    padding-bottom: 0;
+    padding: 0;
+    padding-top: var(--spacing-xs);
     height: auto;
     min-height: auto;
-    max-height: calc(100vh - 350px);
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
     margin-bottom: 0;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: transparent;
   }
 
   .dictationHeader {
@@ -1214,13 +1272,20 @@
   .dictationInputArea {
     font-size: 16px;
     line-height: 2.4;
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     padding-bottom: 0;
-    gap: 6px;
+    gap: 8px;
+    border: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    max-height: calc(100vh - 40px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    flex: 1;
+    min-height: calc(100vh - 400px);
+    max-height: calc(100vh - 400px);
     overflow-y: auto;
-    margin-bottom: 0;
+    margin-bottom: 80px;
+    justify-content: center;
   }
 
   .dictationInputArea :global(.word-input),
@@ -1241,16 +1306,18 @@
   .dictationActions {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 0px);
-    left: var(--spacing-sm);
-    right: var(--spacing-sm);
+    left: 0;
+    right: 0;
     margin: 0;
-    padding: var(--spacing-md) var(--spacing-sm);
-    padding-bottom: calc(var(--spacing-md) + 12px);
+    margin-top: 0;
+    padding: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 12px));
     background: var(--bg-secondary);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     border-top: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: 0;
   }
 
   .showAllWordsButton,
@@ -1323,36 +1390,49 @@
   .dictationContainer {
     border: none;
     border-radius: var(--border-radius);
-    padding: var(--spacing-sm);
-    padding-bottom: 0;
+    padding: 0;
+    padding-top: var(--spacing-xs);
     height: auto;
     min-height: auto;
-    max-height: calc(100vh - 300px);
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
     margin-bottom: 0;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: transparent;
   }
 
   .dictationInputArea {
+    border: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    max-height: calc(100vh - 40px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    min-height: calc(100vh - 400px);
+    max-height: calc(100vh - 400px);
     overflow-y: auto;
     padding-bottom: 0;
-    margin-bottom: 0;
+    margin-bottom: 80px;
+    justify-content: center;
   }
 
   .dictationActions {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 0px);
-    left: var(--spacing-xs);
-    right: var(--spacing-xs);
+    left: 0;
+    right: 0;
     margin: 0;
-    padding: var(--spacing-md) var(--spacing-xs);
-    padding-bottom: calc(var(--spacing-md) + 16px);
+    margin-top: 0;
+    padding: var(--spacing-sm) var(--spacing-xs);
+    padding-top: var(--spacing-sm);
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 16px));
     background: var(--bg-secondary);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     border-top: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: 0;
   }
 
   .showAllWordsButton,

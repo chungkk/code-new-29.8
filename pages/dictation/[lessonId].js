@@ -53,6 +53,9 @@ const DictationPageContent = () => {
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   
+  // Mobile detection state
+  const [isMobile, setIsMobile] = useState(false);
+  
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
@@ -69,6 +72,21 @@ const DictationPageContent = () => {
         window.mainYoutubePlayerRef = null;
       }
     };
+  }, []);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Extract YouTube video ID from URL
@@ -405,12 +423,12 @@ const DictationPageContent = () => {
   }, [userSeekTimeout]);
 
   // Audio control functions
-  const handleSeek = useCallback((direction) => {
+  const handleSeek = useCallback((direction, customSeekTime = null) => {
     if (isYouTube) {
       const player = youtubePlayerRef.current;
       if (!player || !player.getCurrentTime) return;
 
-      const seekTime = 3;
+      const seekTime = customSeekTime || 2;
       const currentSegment = transcriptData[currentSentenceIndex];
 
       if (!currentSegment) return;
@@ -434,7 +452,7 @@ const DictationPageContent = () => {
       const audio = audioRef.current;
       if (!audio || !isFinite(audio.duration)) return;
 
-      const seekTime = 3;
+      const seekTime = customSeekTime || 2;
       const currentSegment = transcriptData[currentSentenceIndex];
 
       if (!currentSegment) return;
@@ -512,6 +530,33 @@ const DictationPageContent = () => {
        }
      }
    }, [transcriptData, currentSentenceIndex, isYouTube]);
+
+  // Replay current sentence from the beginning
+  const handleReplayFromStart = useCallback(() => {
+    if (transcriptData.length === 0 || currentSentenceIndex >= transcriptData.length) return;
+    
+    const currentSentence = transcriptData[currentSentenceIndex];
+    
+    if (isYouTube) {
+      const player = youtubePlayerRef.current;
+      if (!player || !player.seekTo) return;
+      
+      player.seekTo(currentSentence.start);
+      player.playVideo();
+      setIsPlaying(true);
+      setSegmentPlayEndTime(currentSentence.end);
+      setSegmentEndTimeLocked(true);
+    } else {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      audio.currentTime = currentSentence.start;
+      audio.play();
+      setIsPlaying(true);
+      setSegmentPlayEndTime(currentSentence.end);
+      setSegmentEndTimeLocked(true);
+    }
+  }, [transcriptData, currentSentenceIndex, isYouTube]);
 
   // Audio control functions
   const handleSentenceClick = useCallback((startTime, endTime) => {
@@ -1360,30 +1405,83 @@ const DictationPageContent = () => {
                />
 
               <div className={styles.dictationActions}>
-                <button 
-                  className={styles.showAllWordsButton}
-                  onClick={() => {
-                    // Reveal all words
-                    const allInputs = document.querySelectorAll('.word-input');
-                    allInputs.forEach((input, idx) => {
-                      const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-                      showHint(input.previousElementSibling, correctWord, idx);
-                    });
-                  }}
-                >
-                  Show all words
-                </button>
-                
-                <button 
-                  className={styles.nextButton}
-                  onClick={goToNextSentence}
-                  disabled={currentSentenceIndex >= transcriptData.length - 1}
-                >
-                  Next
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </button>
+                {/* Mobile: Show video controls, Desktop: Show "Show all words" and "Next" buttons */}
+                {isMobile ? (
+                  <div className={styles.mobileVideoControls}>
+                    <button 
+                      className={styles.mobileControlButton}
+                      onClick={handlePlayPause}
+                      title={isPlaying ? 'Tạm dừng' : 'Phát tiếp'}
+                    >
+                      {isPlaying ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                          <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
+                    </button>
+                    
+                    <button 
+                      className={styles.mobileControlButton}
+                      onClick={handleReplayFromStart}
+                      title="Phát lại từ đầu câu"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                    
+                    <button 
+                      className={styles.mobileControlButton}
+                      onClick={() => handleSeek('backward')}
+                      title="Tua lại 2 giây"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    <button 
+                      className={styles.mobileControlButton}
+                      onClick={() => handleSeek('forward')}
+                      title="Tua tiếp 2 giây"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button 
+                      className={styles.showAllWordsButton}
+                      onClick={() => {
+                        // Reveal all words
+                        const allInputs = document.querySelectorAll('.word-input');
+                        allInputs.forEach((input, idx) => {
+                          const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                          showHint(input.previousElementSibling, correctWord, idx);
+                        });
+                      }}
+                    >
+                      Show all words
+                    </button>
+                    
+                    <button 
+                      className={styles.nextButton}
+                      onClick={goToNextSentence}
+                      disabled={currentSentenceIndex >= transcriptData.length - 1}
+                    >
+                      Next
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                      </svg>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
