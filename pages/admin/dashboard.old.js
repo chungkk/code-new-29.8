@@ -8,7 +8,7 @@ import { fetchWithAuth } from '../../lib/api';
 import { toast } from 'react-toastify';
 import { SkeletonStats, SkeletonTable } from '../../components/SkeletonLoader';
 import { NoLessonsFound } from '../../components/EmptyState';
-import styles from '../../../styles/adminDashboard.module.css';
+import styles from '../../styles/adminDashboard.module.css';
 
 
 function AdminDashboardContent() {
