@@ -229,20 +229,20 @@ All sizes scaled proportionally:
 #### Mobile (≤768px) - FINAL:
 - Input height: 45-60px → **35-48px** (-25%)
 - Font size: 16-20px → **14-17px** 
-- Video max-height: Added **35vh** constraint
-- Dictation max-height: **45vh**
+- Video max-height: **38vh**
+- Dictation max-height: **48vh**
 - Padding reduced: 8px throughout
 - Dictation header: **Hidden** to save space
+- Video title: **Hidden** to save space
 - Bottom controls padding: 12px → **10px**
 
 #### Small Mobile (≤480px) - FINAL:
 - Input height: 40-55px → **32-45px** (-20%)
 - Font size: 15-19px → **13-16px**
-- Video max-height: **32vh**
-- Dictation max-height: **38vh** (scrollable if needed)
+- Video max-height: **35vh**
+- Dictation max-height: **44vh** (scrollable if needed)
 - Min-height reduced: 240px → **180px**
-- All spacing: **6px or less**
-- Video title font: 14px → **13px**
+- All spacing: **6px**
 - Gap between inputs: 3px → **2px**
 
 #### Very Long Sentences - Extreme Compression:
@@ -253,14 +253,15 @@ All sizes scaled proportionally:
 #### Container Constraints Applied:
 ```css
 /* Mobile 768px */
-.videoContainer { max-height: 35vh; }
-.dictationContainer { max-height: 45vh; }
-.dictationInputArea { max-height: 45vh; overflow: auto; }
+.videoContainer { max-height: 38vh; }
+.dictationContainer { max-height: 48vh; }
+.dictationInputArea { max-height: 48vh; overflow: auto; }
+.videoTitleBox { display: none; } /* Hidden to save space */
 
 /* Mobile 480px */
-.videoContainer { max-height: 32vh; }
-.dictationContainer { max-height: 42vh; }
-.dictationInputArea { max-height: 38vh; min-height: 180px; }
+.videoContainer { max-height: 35vh; }
+.dictationContainer { max-height: 48vh; }
+.dictationInputArea { max-height: 44vh; min-height: 180px; }
 ```
 
 **Result**: ✅ **ZERO SCROLLING** - All content fits on one screen even on smallest mobile devices (320px width)
