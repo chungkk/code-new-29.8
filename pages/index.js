@@ -50,6 +50,19 @@ const HomePage = () => {
         setLessons(data.lessons || []);
         setTotalPages(data.totalPages || 1);
         // No need to sort - backend already sorted by createdAt descending
+        
+        // Prefetch next page for faster navigation
+        if (page < data.totalPages) {
+          const nextPageParams = new URLSearchParams({
+            page: (page + 1).toString(),
+            limit: itemsPerPage.toString()
+          });
+          if (difficulty && difficulty !== 'all') {
+            nextPageParams.set('difficulty', difficulty);
+          }
+          // Prefetch in background (fire and forget)
+          fetch(`/api/lessons?${nextPageParams.toString()}`).catch(() => {});
+        }
       }
     } catch (error) {
       console.error('Error loading lessons:', error);
@@ -237,11 +250,12 @@ const HomePage = () => {
           </div>
         ) : (
           <div className="lesson-cards-container">
-            {lessons.map(lesson => (
+            {lessons.map((lesson, index) => (
               <LessonCard
                 key={lesson.id}
                 lesson={lesson}
                 onClick={() => handleLessonClick(lesson)}
+                priority={index < 6}
               />
             ))}
           </div>

@@ -1672,151 +1672,41 @@
   }
 }
 
-/* Swipe animations for mobile - Enhanced Professional & Fun Effects */
+/* Swipe animations for mobile - Simple & Smooth */
 .swipe-left {
-  animation: swipeLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: swipeLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .swipe-right {
-  animation: swipeRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: swipeRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes swipeLeft {
   0% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    filter: brightness(1);
-    box-shadow: 0 0 0 rgba(239, 68, 68, 0);
+    transform: translateX(0) scale(1);
+    opacity: 1;
   }
-  30% {
-    transform: translateX(-30px) scale(0.95) rotateY(-5deg);
-    filter: brightness(0.9);
-    box-shadow: -10px 0 30px rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    transform: translateX(-40px) scale(0.92) rotateY(-8deg);
-    filter: brightness(0.85) hue-rotate(-10deg);
-    box-shadow: -15px 0 40px rgba(239, 68, 68, 0.6);
-  }
-  75% {
-    transform: translateX(10px) scale(1.02) rotateY(3deg);
-    filter: brightness(1.1) hue-rotate(5deg);
-    box-shadow: 5px 0 25px rgba(16, 185, 129, 0.4);
+  40% {
+    transform: translateX(-25px) scale(0.98);
+    opacity: 0.85;
   }
   100% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    filter: brightness(1);
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+    transform: translateX(0) scale(1);
+    opacity: 1;
   }
 }
 
 @keyframes swipeRight {
   0% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    filter: brightness(1);
-    box-shadow: 0 0 0 rgba(59, 130, 246, 0);
+    transform: translateX(0) scale(1);
+    opacity: 1;
   }
-  30% {
-    transform: translateX(30px) scale(0.95) rotateY(5deg);
-    filter: brightness(0.9);
-    box-shadow: 10px 0 30px rgba(59, 130, 246, 0.4);
-  }
-  50% {
-    transform: translateX(40px) scale(0.92) rotateY(8deg);
-    filter: brightness(0.85) hue-rotate(10deg);
-    box-shadow: 15px 0 40px rgba(59, 130, 246, 0.6);
-  }
-  75% {
-    transform: translateX(-10px) scale(1.02) rotateY(-3deg);
-    filter: brightness(1.1) hue-rotate(-5deg);
-    box-shadow: -5px 0 25px rgba(16, 185, 129, 0.4);
+  40% {
+    transform: translateX(25px) scale(0.98);
+    opacity: 0.85;
   }
   100% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    filter: brightness(1);
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
-  }
-}
-
-/* Glow effect when active swipe */
-.dictationInputArea.swipe-left::before,
-.dictationInputArea.swipe-right::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  background: linear-gradient(90deg, 
-    rgba(102, 126, 234, 0.2),
-    rgba(118, 75, 162, 0.2),
-    rgba(239, 68, 68, 0.2)
-  );
-  border-radius: calc(var(--border-radius) + 4px);
-  z-index: -1;
-  opacity: 0;
-  animation: glowPulse 0.5s ease-out;
-  pointer-events: none;
-}
-
-@keyframes glowPulse {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  50% {
+    transform: translateX(0) scale(1);
     opacity: 1;
-    transform: scale(1.02);
-  }
-}
-
-/* Fun particle effect when swiping (using pseudo-elements) */
-.dictationInputArea.swipe-left::after,
-.dictationInputArea.swipe-right::after {
-  content: '✨';
-  position: absolute;
-  font-size: 24px;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.dictationInputArea.swipe-left::after {
-  top: 50%;
-  right: -20px;
-  animation: sparkleLeft 0.5s ease-out;
-}
-
-.dictationInputArea.swipe-right::after {
-  top: 50%;
-  left: -20px;
-  animation: sparkleRight 0.5s ease-out;
-}
-
-@keyframes sparkleLeft {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(40px) scale(0) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0px) scale(1.5) rotate(180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(-40px) scale(0) rotate(360deg);
-  }
-}
-
-@keyframes sparkleRight {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(-40px) scale(0) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0px) scale(1.5) rotate(-180deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(40px) scale(0) rotate(-360deg);
   }
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import styles from '../styles/LessonCard.module.css';
 
-const LessonCard = ({ lesson, onClick }) => {
+const LessonCard = ({ lesson, onClick, priority = false }) => {
   const extractYouTubeVideoId = (url) => {
     if (!url) return null;
     const patterns = [
@@ -66,6 +66,10 @@ const LessonCard = ({ lesson, onClick }) => {
           width={320}
           height={180}
           className={styles.thumbnail}
+          priority={priority}
+          loading={priority ? undefined : 'lazy'}
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PC9zdmc+"
         />
 
         <div className={styles.badges}>

@@ -21,8 +21,10 @@ export default async function handler(req, res) {
           : {};
 
       // Parallel queries for better performance
+      // Select only essential fields for listing (reduce payload size)
       const [lessons, total] = await Promise.all([
         Lesson.find(levelFilter)
+          .select('id title displayTitle thumbnail youtubeUrl duration difficulty level viewCount source createdAt')
           .sort({ createdAt: -1 }) // Sort by newest first
           .skip(skip)
           .limit(limit)
