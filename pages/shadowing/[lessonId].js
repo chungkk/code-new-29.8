@@ -72,89 +72,63 @@ const ShadowingPageContent = () => {
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
-     // Load YouTube iframe API
-     if (!window.YT) {
-       const tag = document.createElement('script');
-       tag.src = 'https://www.youtube.com/iframe_api';
-       const firstScriptTag = document.getElementsByTagName('script')[0];
-       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-     }
+      // Load YouTube iframe API
+      if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
 
-        window.onYouTubeIframeAPIReady = () => {
-          youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-            height: '140',
-            width: '140',
-            videoId: videoId,
-            playerVars: {
-              controls: 0,
-              disablekb: 1,
-              fs: 0,
-              modestbranding: 1,
-              playsinline: 1,
-              origin: playerOrigin,
-              cc_load_policy: 0,
-              rel: 0,
-              showinfo: 0,
-              iv_load_policy: 3,
+      const createPlayer = () => {
+        youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+          height: '140',
+          width: '140',
+          videoId: videoId,
+          playerVars: {
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            origin: playerOrigin,
+            cc_load_policy: 0,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+          },
+          events: {
+            onReady: (event) => {
+              setDuration(event.target.getDuration());
+              const container = document.getElementById('youtube-player-shadowing');
+              if (container) {
+                const rect = container.getBoundingClientRect();
+                // Adjust size based on screen width for mobile
+                const isMobile = window.innerWidth <= 768;
+                const scaleFactor = isMobile ? 1.0 : 1.0;
+                event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+              }
             },
-           events: {
-             onReady: (event) => {
-               setDuration(event.target.getDuration());
-               const container = document.getElementById('youtube-player-shadowing');
-               const rect = container.getBoundingClientRect();
-               // Adjust size based on screen width for mobile
-               const isMobile = window.innerWidth <= 768;
-               const scaleFactor = isMobile ? 1.0 : 1.0;
-               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
-             },
-           onStateChange: (event) => {
-             if (event.data === window.YT.PlayerState.PLAYING) {
-               setIsPlaying(true);
-             } else if (event.data === window.YT.PlayerState.PAUSED) {
-               setIsPlaying(false);
-             }
-           }
-         }
-       });
-     };
+            onStateChange: (event) => {
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                setIsPlaying(true);
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                setIsPlaying(false);
+              }
+            },
+            onError: (event) => {
+              console.error('YouTube player error:', event);
+              // Optionally, show user a message or retry
+            }
+          }
+        });
+      };
 
-        if (window.YT && window.YT.Player) {
-          youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-            height: '140',
-            width: '140',
-            videoId: videoId,
-            playerVars: {
-              controls: 0,
-              disablekb: 1,
-              fs: 0,
-              modestbranding: 1,
-              playsinline: 1,
-              origin: playerOrigin,
-              cc_load_policy: 0,
-              rel: 0,
-              showinfo: 0,
-              iv_load_policy: 3,
-            },
-           events: {
-             onReady: (event) => {
-               setDuration(event.target.getDuration());
-               const container = document.getElementById('youtube-player-shadowing');
-               const rect = container.getBoundingClientRect();
-               // Adjust size based on screen width for mobile
-               const isMobile = window.innerWidth <= 768;
-               const scaleFactor = isMobile ? 1.0 : 1.0;
-               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
-             },
-           onStateChange: (event) => {
-             if (event.data === window.YT.PlayerState.PLAYING) {
-               setIsPlaying(true);
-             } else if (event.data === window.YT.PlayerState.PAUSED) {
-               setIsPlaying(false);
-             }
-           }
-         }
-       });
-     }
+      if (window.YT && window.YT.Player) {
+        createPlayer();
+      } else {
+        window.onYouTubeIframeAPIReady = createPlayer;
+      }
 
     return () => {
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
@@ -366,11 +340,8 @@ const ShadowingPageContent = () => {
         // Save paused position
         setPausedPositions(prev => ({ ...prev, [clickedIndex]: currentTime }));
        } else {
-         // Play or resume the sentence (either a different sentence or the same paused sentence)
-         let seekTime = startTime;
-         if (pausedPositions[clickedIndex] && pausedPositions[clickedIndex] >= startTime && pausedPositions[clickedIndex] < endTime) {
-           seekTime = pausedPositions[clickedIndex];
-         }
+          // Play the sentence from start
+          let seekTime = startTime;
 
          // Set seeking flag to prevent auto-update conflicts
          if (userSeekTimeout) clearTimeout(userSeekTimeout);
@@ -867,12 +838,12 @@ const ShadowingPageContent = () => {
                </div>
               </div>
 
-              {/* Start Button Below Script */}
-              <div className={styles.startButtonContainer}>
-                <button className={styles.startButton} onClick={handlePlayPause}>
-                  ▶ Start
-                </button>
-              </div>
+               {/* Play/Pause Button Below Script */}
+               <div className={styles.startButtonContainer}>
+                 <button className={styles.startButton} onClick={handlePlayPause}>
+                   {isPlaying ? '⏸ Pause' : '▶ Play'}
+                 </button>
+               </div>
         </div>
 
          {/* Footer Controls - Hidden in Parroto design */}
