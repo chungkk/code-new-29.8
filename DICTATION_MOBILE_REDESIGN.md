@@ -86,16 +86,14 @@ Redesign the dictation page mobile layout to always show the video frame at the 
 ### Mobile Layout (≤768px):
 ```
 ┌─────────────────────┐
-│    Video Frame      │ ← Always visible
-│    (16:9)          │
-│    Video Title     │
+│    Video Frame      │ ← STICKY - Always visible at top
+│    (35vh)          │ ← Does not scroll
 ├─────────────────────┤
-│                     │
-│   Dictation Area    │
+│   Dictation Area    │ ← Scrollable independently
 │   (Word inputs)     │
-│                     │
+│   [Scrollable]      │
 ├─────────────────────┤
-│ [Fixed Bottom Bar]  │ ← New!
+│ [Fixed Bottom Bar]  │ ← Fixed at bottom
 │  ▶️  🔁  ◀  ▶      │
 └─────────────────────┘
 ```
@@ -264,7 +262,41 @@ All sizes scaled proportionally:
 .dictationInputArea { max-height: 44vh; min-height: 180px; }
 ```
 
-**Result**: ✅ **ZERO SCROLLING** - All content fits on one screen even on smallest mobile devices (320px width)
+**Result**: ✅ **STICKY VIDEO + SCROLLABLE DICTATION** - Video stays fixed at top, dictation area scrolls independently
+
+### 📌 Sticky Video Implementation (Mobile)
+
+**How it works:**
+```css
+.leftSection {
+  position: sticky;
+  top: 64px; /* Below header */
+  z-index: 10;
+  background: var(--bg-primary);
+  flex-shrink: 0;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px - 76px);
+}
+
+.dictationContainer {
+  flex: 1;
+  overflow: hidden;
+}
+
+.dictationInputArea {
+  overflow-y: auto; /* Scrolls independently */
+}
+```
+
+**Benefits:**
+- ✅ Video always visible while typing
+- ✅ Can watch and type simultaneously
+- ✅ Dictation area scrolls when needed
+- ✅ No page-level scrolling
 
 ---
 
