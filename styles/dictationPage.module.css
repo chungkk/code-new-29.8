@@ -1160,18 +1160,29 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .pageContainer {
-    padding: 8px;
-    padding-top: calc(64px + 8px);
+    padding: 0;
+    padding-top: 0;
     padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); /* Space for fixed mobile controls */
   }
 
   .mainContent {
-    gap: 8px;
+    gap: 0;
+    padding: 0;
   }
 
-  .leftSection,
+  .leftSection {
+    position: fixed;
+    top: 64px; /* Below header */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg-primary);
+    padding: 0;
+  }
+  
   .middleSection {
-    height: auto;
+    margin-top: calc(35vh + 64px); /* Video height + header height */
+    padding: 8px;
   }
 
   .rightSection {
@@ -1190,12 +1201,12 @@
   
   .videoContainer {
     min-height: auto;
-    max-height: 38vh;
+    height: 35vh;
+    max-height: 35vh;
   }
   
   .dictationContainer {
     min-height: 200px;
-    max-height: 48vh;
   }
 
   /* Hide video wrapper borders and padding on mobile */
@@ -1203,11 +1214,11 @@
     padding: 0;
     border: none;
     background: transparent;
-    margin-bottom: 8px;
+    margin-bottom: 0;
   }
 
   .videoContainer {
-    border-radius: var(--border-radius);
+    border-radius: 0;
   }
 }
 
@@ -1443,16 +1454,25 @@
 
 @media (max-width: 480px) {
   .pageContainer {
-    padding: 6px;
-    padding-top: calc(64px + 6px);
+    padding: 0;
+    padding-top: 0;
     padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)); /* Space for fixed mobile controls */
   }
 
   .mainContent {
     padding: 0;
-    gap: 6px;
+    gap: 0;
     border: none;
     border-radius: 0;
+  }
+  
+  .leftSection {
+    top: 64px;
+  }
+  
+  .middleSection {
+    margin-top: calc(32vh + 64px); /* Smaller video on small screens */
+    padding: 6px;
   }
 
   .sentenceTextLarge {
@@ -1485,18 +1505,19 @@
     border-radius: 0;
     overflow: visible;
     background: transparent;
-    margin-bottom: 6px;
+    margin-bottom: 0;
   }
 
   .videoContainer {
-    border-radius: var(--border-radius);
+    border-radius: 0;
     background: #000;
     min-height: auto;
-    max-height: 35vh;
+    height: 32vh;
+    max-height: 32vh;
   }
 
   .videoPlayerWrapper {
-    border-radius: var(--border-radius);
+    border-radius: 0;
     overflow: hidden;
   }
 
@@ -1506,7 +1527,6 @@
     padding: 6px;
     margin-bottom: 6px;
     background: var(--bg-secondary);
-    max-height: 48vh;
   }
 
   .dictationInputArea {
