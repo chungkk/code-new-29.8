@@ -80,19 +80,23 @@ const ShadowingPageContent = () => {
        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
      }
 
-       window.onYouTubeIframeAPIReady = () => {
-         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-           height: '140',
-           width: '140',
-           videoId: videoId,
-           playerVars: {
-             controls: 0,
-             disablekb: 1,
-             fs: 0,
-             modestbranding: 1,
-             playsinline: 1,
-             origin: playerOrigin,
-           },
+        window.onYouTubeIframeAPIReady = () => {
+          youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+            height: '140',
+            width: '140',
+            videoId: videoId,
+            playerVars: {
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              modestbranding: 1,
+              playsinline: 1,
+              origin: playerOrigin,
+              cc_load_policy: 0,
+              rel: 0,
+              showinfo: 0,
+              iv_load_policy: 3,
+            },
            events: {
              onReady: (event) => {
                setDuration(event.target.getDuration());
@@ -114,19 +118,23 @@ const ShadowingPageContent = () => {
        });
      };
 
-       if (window.YT && window.YT.Player) {
-         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-           height: '140',
-           width: '140',
-           videoId: videoId,
-           playerVars: {
-             controls: 0,
-             disablekb: 1,
-             fs: 0,
-             modestbranding: 1,
-             playsinline: 1,
-             origin: playerOrigin,
-           },
+        if (window.YT && window.YT.Player) {
+          youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+            height: '140',
+            width: '140',
+            videoId: videoId,
+            playerVars: {
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              modestbranding: 1,
+              playsinline: 1,
+              origin: playerOrigin,
+              cc_load_policy: 0,
+              rel: 0,
+              showinfo: 0,
+              iv_load_policy: 3,
+            },
            events: {
              onReady: (event) => {
                setDuration(event.target.getDuration());
@@ -725,12 +733,11 @@ const ShadowingPageContent = () => {
                <div className={styles.leftSection}>
                  {/* Video Player */}
                  <div className={styles.videoContainer}>
-                   {isYouTube ? (
-                     <div className={styles.videoWrapper}>
-                       <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
-                       <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
-                     </div>
-                   ) : (
+                    {isYouTube ? (
+                      <div className={styles.videoWrapper}>
+                        <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
+                      </div>
+                    ) : (
                      <div className={styles.videoPlaceholder}>
                        <svg viewBox="0 0 24 24" fill="currentColor">
                          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
