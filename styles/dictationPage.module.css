@@ -1216,16 +1216,22 @@
     flex-direction: column;
   }
 
-  /* Hide video wrapper borders and padding on mobile */
+  /* Style video wrapper on mobile */
   .videoWrapper {
-    padding: 0;
+    padding: 8px;
     border: none;
     background: transparent;
     margin-bottom: 0;
   }
 
   .videoContainer {
-    border-radius: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .videoPlayerWrapper {
+    border-radius: 12px;
+    overflow: hidden;
   }
 }
 
@@ -1505,24 +1511,23 @@
   }
 
   .videoWrapper {
-    padding: 0;
+    padding: 6px;
     border: none;
-    border-radius: 0;
-    overflow: visible;
     background: transparent;
     margin-bottom: 0;
   }
 
   .videoContainer {
-    border-radius: 0;
+    border-radius: 10px;
     background: #000;
     min-height: auto;
     height: 32vh;
     max-height: 32vh;
+    overflow: hidden;
   }
 
   .videoPlayerWrapper {
-    border-radius: 0;
+    border-radius: 10px;
     overflow: hidden;
   }
 
