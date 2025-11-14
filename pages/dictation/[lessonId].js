@@ -119,18 +119,22 @@ const DictationPageContent = () => {
        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
      }
 
-      window.onYouTubeIframeAPIReady = () => {
-        youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-          height: '0',
-          width: '0',
-          videoId: videoId,
-          playerVars: {
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            modestbranding: 1,
-            origin: playerOrigin,
-          },
+        window.onYouTubeIframeAPIReady = () => {
+          youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+            height: '0',
+            width: '0',
+            videoId: videoId,
+            playerVars: {
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              modestbranding: 1,
+              origin: playerOrigin,
+              cc_load_policy: 0,
+              rel: 0,
+              showinfo: 0,
+              iv_load_policy: 3,
+            },
           events: {
             onReady: (event) => {
               setDuration(event.target.getDuration());
@@ -152,7 +156,7 @@ const DictationPageContent = () => {
        });
      };
 
-     if (window.YT && window.YT.Player) {
+      if (window.YT && window.YT.Player) {
         youtubePlayerRef.current = new window.YT.Player('youtube-player', {
           height: '0',
           width: '0',
@@ -163,6 +167,8 @@ const DictationPageContent = () => {
             fs: 0,
             modestbranding: 1,
             origin: playerOrigin,
+            cc_load_policy: 0,
+            rel: 0,
           },
           events: {
             onReady: (event) => {
@@ -1383,117 +1389,81 @@ const DictationPageContent = () => {
           {/* Left Column - Video */}
           <div className={styles.leftSection}>
             <div className={styles.videoWrapper}>
-              {/* Video Header */}
-              <div className={styles.videoHeader}>
-                <div className={styles.videoHeaderTitle}>Video</div>
-              </div>
-
+              {/* Video Container - Always visible */}
               <div className={styles.videoContainer}>
                 {isYouTube ? (
                   <div className={styles.videoPlayerWrapper}>
                     <div id="youtube-player"></div>
+                    <div className={styles.videoOverlay}>
+                      <div className={styles.videoTimer}>
+                        ⏱️ {formatTime(currentTime)} / {formatTime(duration)}
+                      </div>
+                      {lesson.youtubeUrl && (
+                        <a 
+                          href={lesson.youtubeUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className={styles.videoViewOnYoutube}
+                        >
+                          <span>Xem trên</span>
+                          <svg width="18" height="13" viewBox="0 0 18 13" fill="currentColor">
+                            <path d="M17.6 2.1s-.2-1.1-.7-1.6c-.7-.7-1.5-.7-1.8-.8C12.6 0 9 0 9 0h0S5.4 0 2.9.3c-.3 0-1.1.1-1.8.8-.5.5-.7 1.6-.7 1.6S0 3.4 0 4.7v1.2c0 1.3.4 2.6.4 2.6s.2 1.1.7 1.6c.7.7 1.6.7 2 .8 1.5.1 6.9.2 6.9.2s3.6 0 6.1-.3c.3 0 1.1-.1 1.8-.8.5-.5.7-1.6.7-1.6s.4-1.3.4-2.6V4.7c0-1.3-.4-2.6-.4-2.6zM7.2 8.9V3.4l4.7 2.8-4.7 2.7z"/>
+                          </svg>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ) : lesson.audioUrl ? (
                   <div className={styles.videoPlaceholder}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
+                    <div className={styles.videoTimer}>
+                      ⏱️ {formatTime(currentTime)} / {formatTime(duration)}
+                    </div>
                   </div>
                 ) : null}
                 <audio ref={audioRef} src={lesson.audioUrl} preload="metadata"></audio>
-
-                <div className={styles.videoTimer}>
-                  ⏱️ {formatTime(currentTime)} / {formatTime(duration)}
-                </div>
               </div>
 
-              {/* Controls */}
-              <div className={styles.controlsWrapper}>
-                <div className={styles.controlBar}>
-                  <div className={styles.playControls}>
-                    <button className={styles.playButton} onClick={() => handleSeek('backward')} title="Zurück (←)">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-                      </svg>
-                    </button>
-                    
-                    <button className={styles.playButton} onClick={handlePlayPause} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}>
-                      {isPlaying ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      )}
-                    </button>
-                    
-                    <button className={styles.playButton} onClick={() => handleSeek('forward')} title="Vorwärts (→)">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Video Title */}
-              <div className={styles.videoTitle}>
+              {/* Video Title - Always visible */}
+              <div className={styles.videoTitleBox}>
                 <h3>{lesson.displayTitle || lesson.title}</h3>
               </div>
-            </div>
 
-            {/* Mobile Video Controls - Only show on mobile */}
-            {isMobile && (
-              <div className={styles.mobileVideoControls}>
-                <button 
-                  className={styles.mobileControlButton}
-                  onClick={handlePlayPause}
-                  title={isPlaying ? 'Tạm dừng' : 'Phát tiếp'}
-                >
-                  {isPlaying ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
-                
-                <button 
-                  className={styles.mobileControlButton}
-                  onClick={handleReplayFromStart}
-                  title="Phát lại từ đầu câu"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </button>
-                
-                <button 
-                  className={styles.mobileControlButton}
-                  onClick={() => handleSeek('backward')}
-                  title="Tua lại 2 giây"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button 
-                  className={styles.mobileControlButton}
-                  onClick={() => handleSeek('forward')}
-                  title="Tua tiếp 2 giây"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            )}
+              {/* Desktop Controls - Hidden on mobile */}
+              {!isMobile && (
+                <div className={styles.controlsWrapper}>
+                  <div className={styles.controlBar}>
+                    <div className={styles.playControls}>
+                      <button className={styles.playButton} onClick={() => handleSeek('backward')} title="Zurück (←)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                        </svg>
+                      </button>
+                      
+                      <button className={styles.playButton} onClick={handlePlayPause} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}>
+                        {isPlaying ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                      
+                      <button className={styles.playButton} onClick={() => handleSeek('forward')} title="Vorwärts (→)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Middle Column - Dictation Area */}
@@ -1513,7 +1483,7 @@ const DictationPageContent = () => {
                 />
 
               <div className={styles.dictationActions}>
-                {/* Mobile: Show "Show all words" button, Desktop: Show "Show all words" and "Next" buttons */}
+                {/* Desktop: Show both buttons side by side */}
                 <button 
                   className={styles.showAllWordsButton}
                   onClick={() => {
@@ -1528,18 +1498,16 @@ const DictationPageContent = () => {
                   Show all words
                 </button>
                 
-                {!isMobile && (
-                  <button 
-                    className={styles.nextButton}
-                    onClick={goToNextSentence}
-                    disabled={currentSentenceIndex >= transcriptData.length - 1}
-                  >
-                    Next
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  </button>
-                )}
+                <button 
+                  className={styles.nextButton}
+                  onClick={goToNextSentence}
+                  disabled={currentSentenceIndex >= transcriptData.length - 1}
+                >
+                  Next
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -1581,6 +1549,59 @@ const DictationPageContent = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Bottom Controls - Fixed position */}
+      {isMobile && (
+        <div className={styles.mobileBottomControls}>
+          <button 
+            className={styles.mobileControlBtn}
+            onClick={handlePlayPause}
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </button>
+          
+          <button 
+            className={styles.mobileControlBtn}
+            onClick={handleReplayFromStart}
+            title="Replay"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+          
+          <button 
+            className={styles.mobileControlBtn}
+            onClick={goToPreviousSentence}
+            disabled={currentSentenceIndex === 0}
+            title="Previous"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button 
+            className={styles.mobileControlBtn}
+            onClick={goToNextSentence}
+            disabled={currentSentenceIndex >= transcriptData.length - 1}
+            title="Next"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Vocabulary Popup */}
       {showVocabPopup && (
