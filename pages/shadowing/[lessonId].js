@@ -35,6 +35,7 @@ const ShadowingPageContent = () => {
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
+  const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
   const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
 
   // Expose audioRef globally để components có thể pause khi phát từ
@@ -59,7 +60,43 @@ const ShadowingPageContent = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Initialize YouTube player
+  // Load YouTube iframe API script
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Check if API is already loaded
+    if (window.YT && window.YT.Player) {
+      setIsYouTubeAPIReady(true);
+      return;
+    }
+
+    // Check if script is already being loaded
+    if (window.YT) {
+      // API is loading, wait for it
+      const checkInterval = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          setIsYouTubeAPIReady(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+      return () => clearInterval(checkInterval);
+    }
+
+    // Load the YouTube iframe API script
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.async = true;
+
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // Set up the callback for when API is ready
+    window.onYouTubeIframeAPIReady = () => {
+      setIsYouTubeAPIReady(true);
+    };
+  }, []);
+
+  // Initialize YouTube player when API is ready and lesson is loaded
   useEffect(() => {
     if (!lesson || !lesson.youtubeUrl) {
       setIsYouTube(false);
@@ -68,92 +105,69 @@ const ShadowingPageContent = () => {
 
     setIsYouTube(true);
 
+    if (!isYouTubeAPIReady) {
+      return; // Wait for API to be ready
+    }
+
     const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
-     // Load YouTube iframe API
-     if (!window.YT) {
-       const tag = document.createElement('script');
-       tag.src = 'https://www.youtube.com/iframe_api';
-       const firstScriptTag = document.getElementsByTagName('script')[0];
-       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-     }
+    // Destroy existing player if any
+    if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
+      youtubePlayerRef.current.destroy();
+      youtubePlayerRef.current = null;
+    }
 
-       window.onYouTubeIframeAPIReady = () => {
-         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-           height: '140',
-           width: '140',
-           videoId: videoId,
-           playerVars: {
-             controls: 0,
-             disablekb: 1,
-             fs: 0,
-             modestbranding: 1,
-             playsinline: 1,
-             origin: playerOrigin,
-           },
-           events: {
-             onReady: (event) => {
-               setDuration(event.target.getDuration());
-               const container = document.getElementById('youtube-player-shadowing');
-               const rect = container.getBoundingClientRect();
-               // Adjust size based on screen width for mobile
-               const isMobile = window.innerWidth <= 768;
-               const scaleFactor = isMobile ? 1.0 : 1.0;
-               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
-             },
-           onStateChange: (event) => {
-             if (event.data === window.YT.PlayerState.PLAYING) {
-               setIsPlaying(true);
-             } else if (event.data === window.YT.PlayerState.PAUSED) {
-               setIsPlaying(false);
-             }
-           }
-         }
-       });
-     };
-
-       if (window.YT && window.YT.Player) {
-         youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-           height: '140',
-           width: '140',
-           videoId: videoId,
-           playerVars: {
-             controls: 0,
-             disablekb: 1,
-             fs: 0,
-             modestbranding: 1,
-             playsinline: 1,
-             origin: playerOrigin,
-           },
-           events: {
-             onReady: (event) => {
-               setDuration(event.target.getDuration());
-               const container = document.getElementById('youtube-player-shadowing');
-               const rect = container.getBoundingClientRect();
-               // Adjust size based on screen width for mobile
-               const isMobile = window.innerWidth <= 768;
-               const scaleFactor = isMobile ? 1.0 : 1.0;
-               event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
-             },
-           onStateChange: (event) => {
-             if (event.data === window.YT.PlayerState.PLAYING) {
-               setIsPlaying(true);
-             } else if (event.data === window.YT.PlayerState.PAUSED) {
-               setIsPlaying(false);
-             }
-           }
-         }
-       });
-     }
+    // Create the player
+    youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+      height: '140',
+      width: '140',
+      videoId: videoId,
+      playerVars: {
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        origin: playerOrigin,
+        cc_load_policy: 0,
+        rel: 0,
+        showinfo: 0,
+        iv_load_policy: 3,
+        enablejsapi: 1,
+        widget_referrer: playerOrigin,
+        autohide: 1,
+      },
+      events: {
+        onReady: (event) => {
+          setDuration(event.target.getDuration());
+          const container = document.getElementById('youtube-player-shadowing');
+          if (container) {
+            const rect = container.getBoundingClientRect();
+            // Adjust size based on screen width for mobile
+            const isMobile = window.innerWidth <= 768;
+            const scaleFactor = isMobile ? 1.0 : 1.0;
+            event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+          }
+        },
+        onStateChange: (event) => {
+          if (event.data === window.YT.PlayerState.PLAYING) {
+            setIsPlaying(true);
+          } else if (event.data === window.YT.PlayerState.PAUSED) {
+            setIsPlaying(false);
+          }
+        }
+      }
+    });
 
     return () => {
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
         youtubePlayerRef.current.destroy();
+        youtubePlayerRef.current = null;
       }
     };
-  }, [lesson]);
+  }, [lesson, isYouTubeAPIReady]);
 
   // Fetch lesson data from API
   useEffect(() => {

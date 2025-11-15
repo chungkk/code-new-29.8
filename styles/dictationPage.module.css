@@ -170,28 +170,6 @@
   background: rgba(0, 0, 0, 0.85);
 }
 
-.videoViewOnYoutube {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(255, 0, 0, 0.9);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 3;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.videoViewOnYoutube:hover {
-  background: rgba(255, 0, 0, 1);
-}
-
 .videoTimer {
   position: absolute;
   top: 12px;
@@ -248,7 +226,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 999;
 }
 
 .videoOverlay > * {

@@ -64,9 +64,10 @@
 .videoOverlay {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 999;
   cursor: pointer;
-  background: linear-gradient(180deg, rgba(20, 25, 60, 0.1), rgba(20, 25, 60, 0.3));
+  background: transparent;
+  pointer-events: all;
 }
 
 .videoPlaceholder {
@@ -96,27 +97,6 @@
   font-size: 12px;
   font-weight: 600;
   backdrop-filter: blur(4px);
-}
-
-.videoViewOnYoutube {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(244, 67, 54, 0.95);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.videoViewOnYoutube:hover {
-  background: rgba(244, 67, 54, 1);
 }
 
 /* Current Sentence Display */
