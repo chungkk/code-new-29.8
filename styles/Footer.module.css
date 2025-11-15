@@ -1,7 +1,7 @@
 /* Footer Styles */
 
 .footer {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid var(--border-color);
   padding: var(--spacing-xl) var(--spacing-lg);
   margin-top: auto;
@@ -59,7 +59,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
-  background: var(--bg-primary);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-small);
   padding: 10px 16px;
@@ -70,8 +70,8 @@
 }
 
 .appStoreBtn:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
   transform: translateY(-2px);
 }
 
@@ -124,7 +124,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--bg-primary);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -135,8 +135,8 @@
 }
 
 .socialLink:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
   transform: translateY(-2px);
 }
 

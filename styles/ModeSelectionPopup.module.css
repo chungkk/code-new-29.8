@@ -16,7 +16,7 @@
 }
 
 .popup {
-  background: var(--bg-card);
+  background: #1e2139;
   border-radius: var(--border-radius);
   padding: var(--spacing-xl);
   max-width: 500px;
@@ -24,6 +24,7 @@
   position: relative;
   border: 1px solid var(--border-color);
   animation: slideUp 0.3s ease;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes slideUp {
@@ -93,7 +94,7 @@
 }
 
 .modeOption {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.03);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
@@ -103,9 +104,10 @@
 }
 
 .modeOption:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(74, 144, 226, 0.6);
   transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .modeHeader {

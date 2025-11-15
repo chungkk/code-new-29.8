@@ -1,21 +1,21 @@
 /* Global Styles - Parroto Dark Theme */
 
 :root {
-  /* Colors */
-  --bg-primary: #2C2E43;
-  --bg-secondary: #363853;
-  --bg-card: #3A3D58;
-  --bg-hover: #424563;
+  /* Colors - Shadowing Theme */
+  --bg-primary: #141730;
+  --bg-secondary: #1a1d35;
+  --bg-card: #1e2139;
+  --bg-hover: rgba(255, 255, 255, 0.1);
 
   --text-primary: #FFFFFF;
-  --text-secondary: #B8BDD9;
-  --text-muted: #8B91B0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
   --accent-blue: #4A90E2;
   --accent-purple: #7B68EE;
   --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
-  --border-color: #4A4D6B;
+  --border-color: rgba(255, 255, 255, 0.1);
   --border-radius: 12px;
   --border-radius-small: 8px;
 
@@ -77,8 +77,8 @@ body {
 }
 
 .difficulty-toggle__option {
-  background: var(--bg-secondary);
-  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
   cursor: pointer;
@@ -89,13 +89,13 @@ body {
 }
 
 .difficulty-toggle__option:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(74, 144, 226, 0.5);
 }
 
 .difficulty-toggle__option.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
-  border-color: var(--accent-purple);
+  background: rgba(74, 144, 226, 0.15);
+  border-color: rgba(74, 144, 226, 0.6);
 }
 
 .difficulty-toggle__title {
@@ -131,7 +131,7 @@ body {
 }
 
 .topic-tag {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: 20px;
@@ -143,14 +143,15 @@ body {
 }
 
 .topic-tag:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
   transform: translateY(-1px);
 }
 
 .topic-tag.active {
   background: var(--accent-gradient);
   border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* Lesson Cards Container */
@@ -172,7 +173,7 @@ body {
 }
 
 .pagination-btn {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-small);
@@ -184,8 +185,9 @@ body {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
+  transform: translateY(-1px);
 }
 
 .pagination-btn:disabled {
@@ -266,14 +268,14 @@ button:focus-visible {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(255, 255, 255, 0.3);
 }

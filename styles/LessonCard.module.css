@@ -1,7 +1,7 @@
 /* Lesson Card Styles */
 
 .lessonCard {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: var(--border-radius);
   overflow: hidden;
   cursor: pointer;
@@ -11,8 +11,9 @@
 
 .lessonCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  border-color: var(--accent-blue);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  border-color: rgba(74, 144, 226, 0.6);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .thumbnailContainer {
@@ -152,7 +153,7 @@
 
 .actionBtn {
   flex: 1;
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 8px 12px;
@@ -168,8 +169,8 @@
 }
 
 .actionBtn:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
   transform: translateY(-1px);
 }
 
@@ -196,9 +197,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--bg-secondary) 0%,
-    var(--bg-hover) 50%,
-    var(--bg-secondary) 100%
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
   );
   background-size: 200% 100%;
   animation: loading 1.5s ease-in-out infinite;
