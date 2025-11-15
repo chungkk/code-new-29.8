@@ -107,7 +107,11 @@ export function AuthProvider({ children }) {
       if (decoded.userId) {
         setUser({
           id: decoded.userId,
-          // Các thông tin khác sẽ được cập nhật khi API hoạt động trở lại
+          email: decoded.email,
+          name: decoded.name,
+          role: decoded.role,
+          nativeLanguage: decoded.nativeLanguage,
+          level: decoded.level
         });
         console.log('✅ Sử dụng thông tin từ token cache');
       }
