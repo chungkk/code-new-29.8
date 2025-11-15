@@ -99,7 +99,7 @@ function SettingsPage() {
   return (
     <>
       <SEO
-        title="Einstellungen - Papageil"
+        title="Einstellungen - PapaGeil"
         description="Verwalten Sie Ihre Kontoeinstellungen, Präferenzen und Profil."
         keywords="Einstellungen, Profil, Konto verwalten, Deutsch lernen Einstellungen"
         structuredData={breadcrumbData}

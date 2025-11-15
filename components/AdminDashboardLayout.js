@@ -93,7 +93,7 @@ const AdminDashboardLayout = ({ children }) => {
           <div className={styles.logoContent}>
             <div className={styles.logoIcon}>🎓</div>
             <div className={styles.logoText}>
-              <h1 className={styles.logoTitle}>GG Driver</h1>
+              <h1 className={styles.logoTitle}>PapaGeil</h1>
               <p className={styles.logoSubtitle}>Admin Panel</p>
             </div>
           </div>

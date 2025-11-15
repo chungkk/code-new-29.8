@@ -11,7 +11,7 @@ const Footer = () => {
         <div className={styles.footerSection}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>🦜</div>
-            <span className={styles.footerBrandText}>Papageil</span>
+            <span className={styles.footerBrandText}>PapaGeil</span>
           </div>
            <p className={styles.footerDescription}>
              Improve your German pronunciation and speaking skills with modern shadowing
@@ -82,7 +82,7 @@ const Footer = () => {
         <div className={styles.madeWith}>
           <span>Made with</span>
           <span className={styles.heart}>❤</span>
-          <span>by Papageil</span>
+          <span>by PapaGeil</span>
         </div>
       </div>
     </footer>

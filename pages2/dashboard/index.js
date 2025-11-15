@@ -87,7 +87,7 @@ function DashboardIndex() {
   return (
     <>
       <SEO
-        title="Mein Dashboard - Papageil"
+        title="Mein Dashboard - PapaGeil"
         description="Verfolgen Sie Ihren Deutsch-Lernfortschritt, verwalten Sie Ihren persönlichen Wortschatz und überprüfen Sie Ihre abgeschlossenen Lektionen."
         keywords="Deutsch Dashboard, Lernfortschritt, Wortschatz, Vokabeln speichern, Deutsch Übungsverlauf"
         structuredData={breadcrumbData}

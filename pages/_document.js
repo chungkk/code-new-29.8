@@ -25,7 +25,7 @@ export default function Document() {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'EducationalOrganization',
-              name: 'Papageil - Deutsch Lernen',
+              name: 'PapaGeil - Deutsch Lernen',
               description: 'Lerne Deutsch mit Shadowing und Diktat Methoden. Interaktive Übungen mit YouTube-Videos für alle Niveaus.',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net',
               logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net'}/logo.png`,
@@ -50,7 +50,7 @@ export default function Document() {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Papageil - Deutsch Lernen',
+              name: 'PapaGeil - Deutsch Lernen',
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net',
               potentialAction: {
                 '@type': 'SearchAction',

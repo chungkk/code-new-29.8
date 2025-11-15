@@ -58,7 +58,7 @@ const Header = () => {
       <div className={styles.headerContent}>
         <Link href="/" className={styles.logo}>
           <div className={styles.logoIcon}>🦜</div>
-          <span className={styles.logoText}>Papageil</span>
+          <span className={styles.logoText}>PapaGeil</span>
         </Link>
 
         <nav className={`${styles.nav} ${mobileMenuOpen ? styles.open : ''}`}>

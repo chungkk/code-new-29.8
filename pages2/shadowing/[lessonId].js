@@ -698,9 +698,9 @@ const ShadowingPageContent = () => {
   return (
     <>
       <SEO
-        title={`${lesson.displayTitle || lesson.title} - Papageil Shadowing Übung`}
+        title={`${lesson.displayTitle || lesson.title} - PapaGeil Shadowing Übung`}
         description={`Übe deine deutsche Aussprache mit dieser Shadowing-Lektion: ${lesson.title}. Höre zu und sprich nach, um dein Deutsch zu verbessern.`}
-        keywords={`Shadowing ${lesson.title}, Deutsch Aussprache üben, Papageil Shadowing, ${lesson.displayTitle}, Deutsch Hörverstehen`}
+        keywords={`Shadowing ${lesson.title}, Deutsch Aussprache üben, PapaGeil Shadowing, ${lesson.displayTitle}, Deutsch Hörverstehen`}
         image={lesson.thumbnail || undefined}
         type="video.other"
         structuredData={structuredDataArray}

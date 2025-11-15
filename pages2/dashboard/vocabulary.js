@@ -140,7 +140,7 @@ function VocabularyPage() {
   return (
     <>
       <SEO
-        title="Mein Wortschatz - Papageil"
+        title="Mein Wortschatz - PapaGeil"
         description="Verwalten Sie Ihren persönlichen deutschen Wortschatz. Speichern, überprüfen und üben Sie Ihre gelernten Vokabeln."
         keywords="Deutsch Wortschatz, Vokabeln speichern, Vokabeltrainer, Deutsch lernen Wortschatz"
         structuredData={breadcrumbData}

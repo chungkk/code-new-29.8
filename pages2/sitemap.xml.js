@@ -49,7 +49,7 @@ function generateSiteMap(lessons) {
     ${lesson.thumbnail ? `
     <image:image>
       <image:loc>${lesson.thumbnail}</image:loc>
-      <image:title>${lesson.title || 'Papageil - Deutsch Lernen Lektion'}</image:title>
+      <image:title>${lesson.title || 'PapaGeil - Deutsch Lernen Lektion'}</image:title>
     </image:image>` : ''}
   </url>
   <url>

@@ -34,9 +34,9 @@ export default function Login() {
   return (
     <>
       <SEO
-        title="Anmelden - Papageil"
+        title="Anmelden - PapaGeil"
         description="Melden Sie sich an, um Ihre Deutsch-Lernreise fortzusetzen. Greifen Sie auf personalisierte Lektionen, Fortschrittsverfolgung und Wortschatz zu."
-        keywords="Papageil Login, Anmelden, Deutsch lernen Login"
+        keywords="PapaGeil Login, Anmelden, Deutsch lernen Login"
         noindex={true}
       />
 
@@ -46,7 +46,7 @@ export default function Login() {
             <div className={styles.brandHeader}>
               <span className={styles.brandIcon}>🦜</span>
             </div>
-            <h1 className={styles.authTitle}>Papageil</h1>
+            <h1 className={styles.authTitle}>PapaGeil</h1>
             <p className={styles.authSubtitle}>
               Melden Sie sich an, um weiterzulernen
             </p>

@@ -744,7 +744,7 @@ function AdminDashboardContent() {
   return (
     <>
       <Head>
-        <title>Admin-Dashboard - Papageil</title>
+        <title>Admin-Dashboard - PapaGeil</title>
       </Head>
       
       <div className={styles.container}>

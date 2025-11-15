@@ -8,7 +8,7 @@ export default function Custom404() {
   return (
     <>
       <SEO
-        title="404 - Seite nicht gefunden | Papageil"
+        title="404 - Seite nicht gefunden | PapaGeil"
         description="Die gesuchte Seite konnte nicht gefunden werden. Kehren Sie zur Startseite zurück, um weiter Deutsch zu lernen."
         noindex={true}
       />
