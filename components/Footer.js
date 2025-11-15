@@ -13,17 +13,10 @@ const Footer = () => {
             <div className={styles.footerLogo}>🦜</div>
             <span className={styles.footerBrandText}>Papageil</span>
           </div>
-          <p className={styles.footerDescription}>
-            Improve your German pronunciation and speaking skills with modern shadowing
-            and dictation methods.
-          </p>
-          <a href="#" className={styles.appStoreBtn}>
-            <span style={{ fontSize: '24px' }}>🍎</span>
-            <div>
-              <div style={{ fontSize: '10px', opacity: 0.7 }}>Download on the</div>
-              <div style={{ fontWeight: 600 }}>App Store</div>
-            </div>
-          </a>
+           <p className={styles.footerDescription}>
+             Improve your German pronunciation and speaking skills with modern shadowing
+             and dictation methods.
+           </p>
         </div>
 
         <div className={styles.footerSection}>

@@ -141,13 +141,23 @@
   padding-left: 56px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .popup {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+    max-width: 90vw;
   }
 
   .popupTitle {
-    font-size: 20px;
+    font-size: 18px;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .lessonInfo {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .modeOption {
+    padding: var(--spacing-md);
   }
 
   .modeHeader {
@@ -155,17 +165,42 @@
   }
 
   .modeIcon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-  }
-
-  .modeName {
+    width: 32px;
+    height: 32px;
     font-size: 16px;
   }
 
+  .modeName {
+    font-size: 15px;
+  }
+
   .modeDescription {
-    padding-left: 48px;
-    font-size: 13px;
+    padding-left: 44px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup {
+    padding: var(--spacing-sm);
+  }
+
+  .popupTitle {
+    font-size: 16px;
+  }
+
+  .modeIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .modeName {
+    font-size: 14px;
+  }
+
+  .modeDescription {
+    padding-left: 40px;
+    font-size: 11px;
   }
 }

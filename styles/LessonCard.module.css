@@ -229,14 +229,35 @@
   width: 80%;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .cardContent {
+    padding: var(--spacing-sm);
+  }
+
   .title {
     font-size: 14px;
-    min-height: 40px;
+    margin-bottom: var(--spacing-sm);
+    min-height: 36px;
+  }
+
+  .actions {
+    margin-top: var(--spacing-sm);
   }
 
   .actionBtn {
-    font-size: 12px;
     padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 13px;
+    min-height: 32px;
+  }
+
+  .actionBtn {
+    font-size: 11px;
+    padding: 5px 8px;
   }
 }
