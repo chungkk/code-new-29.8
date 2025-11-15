@@ -18,6 +18,41 @@
   }
 }
 
+/* Breadcrumb Header */
+.breadcrumbHeader {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.breadcrumbLink {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.breadcrumbLink:hover {
+  color: #5a67d8;
+}
+
+.breadcrumbSeparator {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.breadcrumbCurrent {
+  color: #374151;
+  font-weight: 600;
+}
+
 /* Page Header */
 .pageHeader {
   display: flex;

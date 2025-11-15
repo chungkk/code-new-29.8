@@ -11,28 +11,32 @@ export function AuthProvider({ children }) {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === 'loading') {
-      setLoading(true);
-      return;
-    }
-
-    if (session) {
-      // Nếu có session từ NextAuth (Google login)
-      setUser({
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        role: session.user.role
-      });
-      // Lưu custom token để tương thích với hệ thống JWT hiện tại
-      if (session.customToken && typeof window !== 'undefined') {
-        localStorage.setItem('token', session.customToken);
+    const checkAuth = async () => {
+      // Nếu NextAuth đang loading, đợi nó load xong
+      if (status === 'loading') {
+        return; // Chỉ cần đợi, không làm gì cả
       }
-      setLoading(false);
-    } else {
-      // Kiểm tra JWT token truyền thống
-      checkUser();
-    }
+
+      if (session) {
+        // Nếu có session từ NextAuth (Google login)
+        setUser({
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email,
+          role: session.user.role
+        });
+        // Lưu custom token để tương thích với hệ thống JWT hiện tại
+        if (session.customToken && typeof window !== 'undefined') {
+          localStorage.setItem('token', session.customToken);
+        }
+        setLoading(false);
+      } else {
+        // Kiểm tra JWT token truyền thống
+        await checkUser();
+      }
+    };
+
+    checkAuth();
   }, [session, status]);
 
   const checkUser = async () => {
@@ -54,17 +58,66 @@ export function AuthProvider({ children }) {
         const data = await res.json();
         setUser(data.user);
       } else {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
+        // Chỉ xóa token khi chắc chắn token không hợp lệ (401, 403)
+        // KHÔNG xóa khi lỗi server (500) hoặc lỗi khác
+        if (res.status === 401 || res.status === 403) {
+          console.log('⚠️ Token không hợp lệ, đăng xuất...');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
+          setUser(null);
+        } else {
+          // Lỗi server hoặc lỗi khác - GIỮ token và thử decode token
+          console.warn(`⚠️ Lỗi khi check user (${res.status}), sử dụng token cache`);
+          tryDecodeToken(token);
         }
       }
     } catch (error) {
-      console.error('❌ Check user error:', error);
+      // Network error hoặc lỗi khác - GIỮ token và thử decode token
+      console.error('❌ Check user error (network/server):', error.message);
+      tryDecodeToken(token);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function để decode JWT token và lấy thông tin user cơ bản
+  const tryDecodeToken = (token) => {
+    try {
+      // Decode JWT token (phần payload là phần giữa của token)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const decoded = JSON.parse(jsonPayload);
+
+      // Kiểm tra token có hết hạn chưa
+      if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+        console.log('⚠️ Token đã hết hạn');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
+        setUser(null);
+        return;
+      }
+
+      // Set user từ token decode (fallback khi API lỗi)
+      if (decoded.userId) {
+        setUser({
+          id: decoded.userId,
+          // Các thông tin khác sẽ được cập nhật khi API hoạt động trở lại
+        });
+        console.log('✅ Sử dụng thông tin từ token cache');
+      }
+    } catch (error) {
+      console.error('❌ Không thể decode token:', error);
+      // Nếu không decode được, xóa token
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
       }
-    } finally {
-      setLoading(false);
+      setUser(null);
     }
   };
 

@@ -2,21 +2,24 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 
-const ProtectedPage = ({ children, adminOnly = false, requireAuth = true }) => {
+const ProtectedPage = ({ children, adminOnly = false, requireAdmin = false, requireAuth = true }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
+
+  // Support both adminOnly and requireAdmin props
+  const needsAdmin = adminOnly || requireAdmin;
 
   useEffect(() => {
     if (!loading) {
       if (requireAuth && !user) {
         // Redirect to login if not authenticated
         router.push('/auth/login?redirect=' + router.asPath);
-      } else if (adminOnly && user && !user.isAdmin) {
-        // Redirect to home if not admin
+      } else if (needsAdmin && user && user.role !== 'admin') {
+        // Redirect to home if not admin (check user.role instead of user.isAdmin)
         router.push('/');
       }
     }
-  }, [user, loading, router, adminOnly, requireAuth]);
+  }, [user, loading, router, needsAdmin, requireAuth]);
 
   // Show loading state
   if (loading) {
@@ -40,7 +43,7 @@ const ProtectedPage = ({ children, adminOnly = false, requireAuth = true }) => {
     return null;
   }
 
-  if (adminOnly && user && !user.isAdmin) {
+  if (needsAdmin && user && user.role !== 'admin') {
     return null;
   }
 

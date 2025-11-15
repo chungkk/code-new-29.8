@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Head from 'next/head';
 import ProtectedPage from '../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../components/AdminDashboardLayout';
@@ -134,21 +135,30 @@ function AdminLessonsPage() {
         <title>Lektionen verwalten - Admin Dashboard</title>
       </Head>
 
-      <AdminDashboardLayout>
-        <div className={styles.pageHeader}>
-          <div>
-            <h1 className={styles.pageTitle}>📚 Lektionen verwalten</h1>
-            <p className={styles.pageSubtitle}>
-              Erstellen, bearbeiten und löschen Sie Lektionen
-            </p>
-          </div>
-          <button
-            onClick={() => router.push('/admin/dashboard/lesson/new')}
-            className={styles.primaryButton}
-          >
-            + Neue Lektion
-          </button>
-        </div>
+       <AdminDashboardLayout>
+         {/* Breadcrumb Header */}
+         <div className={styles.breadcrumbHeader}>
+           <nav className={styles.breadcrumb}>
+             <Link href="/admin/dashboard" className={styles.breadcrumbLink}>Admin</Link>
+             <span className={styles.breadcrumbSeparator}>›</span>
+             <span className={styles.breadcrumbCurrent}>Dashboard</span>
+           </nav>
+         </div>
+
+         <div className={styles.pageHeader}>
+           <div>
+             <h1 className={styles.pageTitle}>📚 Lektionen verwalten</h1>
+             <p className={styles.pageSubtitle}>
+               Erstellen, bearbeiten und löschen Sie Lektionen
+             </p>
+           </div>
+           <button
+             onClick={() => router.push('/admin/dashboard/lesson/new')}
+             className={styles.primaryButton}
+           >
+             + Neue Lektion
+           </button>
+         </div>
 
         {/* Stats */}
         <div className={styles.statsOverview}>
