@@ -469,7 +469,8 @@
 
   .userDropdown {
     min-width: 260px;
-    right: -10px;
+    max-width: calc(100vw - 40px);
+    right: 0;
   }
 
   .authButtonsDesktop {
@@ -492,9 +493,13 @@
   }
 
   .userDropdown {
-    min-width: calc(100vw - 32px);
-    right: -8px;
-    left: auto;
+    position: fixed;
+    top: 64px;
+    right: 16px;
+    left: 16px;
+    min-width: auto;
+    max-width: none;
+    width: auto;
   }
 
   .themeToggle,

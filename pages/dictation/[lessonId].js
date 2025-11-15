@@ -1201,6 +1201,9 @@ const DictationPageContent = () => {
           }
           
           // Otherwise show input with hint button
+          // Calculate dynamic size based on word length for better mobile UX
+          const dynamicSize = Math.max(Math.min(pureWord.length, 20), 3);
+          
           return `<span class="word-container">
             <button
               class="hint-btn"
@@ -1215,15 +1218,17 @@ const DictationPageContent = () => {
                id="word-${wordIndex}"
                name="word-${wordIndex}"
                data-word-id="word-${wordIndex}"
+               data-word-length="${pureWord.length}"
                oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
                onclick="window.handleInputClick(this, '${pureWord}')"
                onkeydown="window.disableArrowKeys(event)"
                onfocus="window.handleInputFocus(this, '${pureWord}')"
                onblur="window.handleInputBlur(this, '${pureWord}')"
                maxlength="${pureWord.length}"
-               size="${Math.max(pureWord.length, 3)}"
+               size="${dynamicSize}"
                placeholder="${'*'.repeat(pureWord.length)}"
                autocomplete="off"
+               style="width: ${dynamicSize}ch;"
              />
            <span class="word-punctuation">${nonAlphaNumeric}</span>
          </span>`;
@@ -1253,7 +1258,7 @@ const DictationPageContent = () => {
       const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
       setProcessedText(processed);
       
-      // Detect sentence length and add appropriate class
+      // Detect sentence length and add appropriate class + set word-length CSS variables
       setTimeout(() => {
         const dictationArea = document.querySelector('.dictationInputArea');
         if (dictationArea) {
@@ -1274,6 +1279,15 @@ const DictationPageContent = () => {
           }
           
           console.log(`Sentence has ${wordCount} words, applied class`);
+          
+          // Set word-length CSS variable for each input based on actual word length
+          const inputs = dictationArea.querySelectorAll('.word-input');
+          inputs.forEach(input => {
+            const wordLength = input.getAttribute('data-word-length');
+            if (wordLength) {
+              input.style.setProperty('--word-length', wordLength);
+            }
+          });
         }
       }, 100);
       
@@ -1481,7 +1495,14 @@ const DictationPageContent = () => {
             <div className={styles.dictationContainer}>
               {/* Dictation Header */}
               <div className={styles.dictationHeader}>
-                <div className={styles.dictationHeaderTitle}>Dictation</div>
+                <div className={styles.dictationHeaderTitle}>
+                  {isMobile ? `#${currentSentenceIndex + 1}` : 'Dictation'}
+                </div>
+                {!isMobile && (
+                  <div className={styles.sentenceCounter}>
+                    #{currentSentenceIndex + 1} / {transcriptData.length}
+                  </div>
+                )}
               </div>
               
                 <div

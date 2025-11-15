@@ -750,6 +750,12 @@
   color: var(--text-primary);
 }
 
+.sentenceCounter {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .dictationInputArea {
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
@@ -842,31 +848,40 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    gap: 6px;
-    padding: 10px 8px;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    background: rgba(20, 23, 48, 0.98);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(102, 126, 234, 0.2);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+    gap: 8px;
+    padding: 12px 10px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 -8px 32px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
     justify-content: space-between;
   }
 }
 
 .mobileControlBtn {
   flex: 1;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border: 2px solid #334155;
-  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
   padding: 14px 8px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
   min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .mobileControlBtn:disabled {
@@ -875,10 +890,12 @@
 }
 
 .mobileControlBtn:not(:disabled):hover {
-  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
-  border-color: #667eea;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 24px rgba(102, 126, 234, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .mobileControlBtn:not(:disabled):active {
@@ -893,13 +910,21 @@
 }
 
 .mobileControlBtn:first-child {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.25);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-color: rgba(102, 126, 234, 0.4);
+  box-shadow:
+    0 4px 20px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .mobileControlBtn:first-child:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-  border-color: #764ba2;
+  background: rgba(118, 75, 162, 0.35);
+  border-color: rgba(118, 75, 162, 0.5);
+  box-shadow:
+    0 8px 28px rgba(118, 75, 162, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .showAllWordsButton {
@@ -1039,7 +1064,8 @@
   letter-spacing: 0.3px;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   min-width: 55px;
-  max-width: 135px;
+  width: auto !important;
+  max-width: min(25ch, calc(100% - 40px));
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.25),
     0 2px 8px rgba(102, 126, 234, 0.15),
@@ -1113,6 +1139,9 @@
   position: relative;
   height: 38px;
   min-height: 38px;
+  min-width: 55px;
+  width: auto;
+  max-width: none;
   font-size: 16px;
   letter-spacing: 0.3px;
   border: 2px solid rgba(16, 185, 129, 0.3);
@@ -1189,6 +1218,9 @@
   display: inline-flex;
   align-items: center;
   height: 38px;
+  min-width: 55px;
+  width: auto;
+  max-width: none;
   font-size: 16px;
   letter-spacing: 0.3px;
   border: 2px solid rgba(245, 158, 11, 0.4);
@@ -1282,9 +1314,53 @@
     display: none; /* Hide transcript on mobile */
   }
   
-  /* Hide dictation header on mobile to save space */
+  /* Show dictation header on mobile with Apple liquid glass style */
   .dictationHeader {
-    display: none;
+    display: flex;
+    padding: 12px var(--spacing-md);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.18);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+    justify-content: center;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dictationHeader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent
+    );
+  }
+
+  .dictationHeaderTitle {
+    font-size: 22px;
+    font-weight: 600;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.8) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   }
   
   /* Hide video title on mobile to save space */
@@ -1424,25 +1500,29 @@
   }
 
   .dictationContainer {
-    border: none;
-    border-radius: var(--border-radius);
+    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
     padding: 0;
-    padding-top: var(--spacing-xs);
+    padding-top: 0;
     height: auto;
     min-height: auto;
     max-height: none;
-    overflow: visible;
+    overflow: hidden;
     margin-bottom: 0;
     padding-bottom: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 1px 2px rgba(255, 255, 255, 0.1);
   }
 
-  .dictationHeader {
-    display: none;
-  }
+  /* Dictation header styling handled in earlier mobile section */
 
   .transcriptItem {
     padding: var(--spacing-sm);
@@ -1459,11 +1539,11 @@
   .dictationInputArea {
     font-size: 13px;
     line-height: 1.4;
-    padding: var(--spacing-xs);
-    padding-bottom: var(--spacing-xs);
-    gap: 3px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    gap: 6px;
+    border: none;
+    border-radius: 0;
     flex: 1;
     overflow: auto;
     justify-content: center;
@@ -1471,18 +1551,32 @@
     align-content: flex-start;
     max-width: 100%;
     box-sizing: border-box;
+    background: transparent;
   }
 
-  /* Base mobile sizing - adapts to viewport */
-  .dictationInputArea :global(.word-input),
+  /* Base mobile sizing - adapts to viewport and word length */
+  .dictationInputArea :global(.word-input) {
+    height: clamp(42px, 6vh, 60px);
+    min-height: 42px;
+    font-size: clamp(16px, 2.5vw, 22px);
+    padding: clamp(8px, 1.2vh, 13px) clamp(9px, 2vw, 15px);
+    min-width: 50px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1ch + 30px), calc(100vw - 120px));
+  }
+
   .dictationInputArea :global(.correct-word),
   .dictationInputArea :global(.hint-revealed) {
     height: clamp(42px, 6vh, 60px);
     min-height: 42px;
     font-size: clamp(16px, 2.5vw, 22px);
     padding: clamp(8px, 1.2vh, 13px) clamp(9px, 2vw, 15px);
-    min-width: clamp(50px, 18vw, 105px);
-    max-width: clamp(80px, 30vw, 155px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 100px);
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 
   .dictationInputArea :global(.hint-btn) {
@@ -1492,14 +1586,23 @@
   }
 
   /* Short sentences (1-8 words): Larger, more comfortable */
-  .dictationInputArea:global(.short-sentence) :global(.word-input),
+  .dictationInputArea:global(.short-sentence) :global(.word-input) {
+    height: clamp(52px, 8vh, 70px);
+    font-size: clamp(19px, 3.2vw, 26px);
+    padding: clamp(10px, 1.5vh, 16px) clamp(12px, 2.4vw, 20px);
+    min-width: 55px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1.1ch + 35px), calc(100vw - 100px));
+  }
+
   .dictationInputArea:global(.short-sentence) :global(.correct-word),
   .dictationInputArea:global(.short-sentence) :global(.hint-revealed) {
     height: clamp(52px, 8vh, 70px);
     font-size: clamp(19px, 3.2vw, 26px);
     padding: clamp(10px, 1.5vh, 16px) clamp(12px, 2.4vw, 20px);
-    min-width: clamp(58px, 20vw, 115px);
-    max-width: clamp(92px, 34vw, 175px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 80px);
   }
 
   .dictationInputArea:global(.short-sentence) :global(.hint-btn) {
@@ -1509,14 +1612,23 @@
   }
 
   /* Medium sentences (9-15 words): Balanced sizing */
-  .dictationInputArea:global(.medium-sentence) :global(.word-input),
+  .dictationInputArea:global(.medium-sentence) :global(.word-input) {
+    height: clamp(46px, 6.5vh, 62px);
+    font-size: clamp(17px, 2.7vw, 23px);
+    padding: clamp(9px, 1.3vh, 13px) clamp(10px, 2vw, 17px);
+    min-width: 52px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1.05ch + 32px), calc(100vw - 110px));
+  }
+
   .dictationInputArea:global(.medium-sentence) :global(.correct-word),
   .dictationInputArea:global(.medium-sentence) :global(.hint-revealed) {
     height: clamp(46px, 6.5vh, 62px);
     font-size: clamp(17px, 2.7vw, 23px);
     padding: clamp(9px, 1.3vh, 13px) clamp(10px, 2vw, 17px);
-    min-width: clamp(52px, 18vw, 110px);
-    max-width: clamp(82px, 31vw, 160px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 90px);
   }
 
   .dictationInputArea:global(.medium-sentence) :global(.hint-btn) {
@@ -1526,14 +1638,23 @@
   }
 
   /* Long sentences (16-25 words): Compact but readable */
-  .dictationInputArea:global(.long-sentence) :global(.word-input),
+  .dictationInputArea:global(.long-sentence) :global(.word-input) {
+    height: clamp(40px, 5.5vh, 56px);
+    font-size: clamp(15px, 2.3vw, 20px);
+    padding: clamp(8px, 1.1vh, 12px) clamp(9px, 1.8vw, 15px);
+    min-width: 46px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1ch + 30px), calc(100vw - 115px));
+  }
+
   .dictationInputArea:global(.long-sentence) :global(.correct-word),
   .dictationInputArea:global(.long-sentence) :global(.hint-revealed) {
     height: clamp(40px, 5.5vh, 56px);
-    font-size: clamp(15px, 2.3vw, 18px);
+    font-size: clamp(15px, 2.3vw, 20px);
     padding: clamp(8px, 1.1vh, 12px) clamp(9px, 1.8vw, 15px);
-    min-width: clamp(46px, 16vw, 100px);
-    max-width: clamp(72px, 28vw, 145px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 95px);
   }
 
   .dictationInputArea:global(.long-sentence) :global(.hint-btn) {
@@ -1543,14 +1664,23 @@
   }
 
   /* Very long sentences (26+ words): Maximum density */
-  .dictationInputArea:global(.very-long-sentence) :global(.word-input),
+  .dictationInputArea:global(.very-long-sentence) :global(.word-input) {
+    height: clamp(36px, 5vh, 50px);
+    font-size: clamp(14px, 2vw, 18px);
+    padding: clamp(7px, 0.9vh, 11px) clamp(8px, 1.6vw, 13px);
+    min-width: 42px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 0.95ch + 28px), calc(100vw - 120px));
+  }
+
   .dictationInputArea:global(.very-long-sentence) :global(.correct-word),
   .dictationInputArea:global(.very-long-sentence) :global(.hint-revealed) {
     height: clamp(36px, 5vh, 50px);
     font-size: clamp(14px, 2vw, 18px);
     padding: clamp(7px, 0.9vh, 11px) clamp(8px, 1.6vw, 13px);
-    min-width: clamp(42px, 14vw, 90px);
-    max-width: clamp(66px, 26vw, 135px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 100px);
   }
 
   .dictationInputArea:global(.very-long-sentence) :global(.hint-btn) {
@@ -1671,16 +1801,29 @@
     flex: 1;
   }
 
-  /* Base mobile sizing for small screens - adapts to viewport */
-  .dictationInputArea :global(.word-input),
+  /* Base mobile sizing for small screens - optimized for word length */
+  .dictationInputArea :global(.word-input) {
+    height: clamp(40px, 6vh, 58px);
+    min-height: 40px;
+    font-size: clamp(15px, 2.5vw, 21px);
+    padding: clamp(8px, 1.2vh, 12px) clamp(9px, 2vw, 14px);
+    min-width: 48px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1ch + 28px), calc(100vw - 105px));
+  }
+
   .dictationInputArea :global(.correct-word),
   .dictationInputArea :global(.hint-revealed) {
     height: clamp(40px, 6vh, 58px);
     min-height: 40px;
     font-size: clamp(15px, 2.5vw, 21px);
     padding: clamp(8px, 1.2vh, 12px) clamp(9px, 2vw, 14px);
-    min-width: clamp(48px, 17vw, 102px);
-    max-width: clamp(76px, 29vw, 150px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 85px);
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: normal;
   }
 
   .dictationInputArea :global(.hint-btn) {
@@ -1690,14 +1833,23 @@
   }
 
   /* Short sentences (1-8 words): Larger for better UX */
-  .dictationInputArea:global(.short-sentence) :global(.word-input),
+  .dictationInputArea:global(.short-sentence) :global(.word-input) {
+    height: clamp(50px, 8vh, 68px);
+    font-size: clamp(18px, 3.2vw, 25px);
+    padding: clamp(10px, 1.5vh, 15px) clamp(11px, 2.4vw, 19px);
+    min-width: 54px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1.1ch + 33px), calc(100vw - 90px));
+  }
+
   .dictationInputArea:global(.short-sentence) :global(.correct-word),
   .dictationInputArea:global(.short-sentence) :global(.hint-revealed) {
     height: clamp(50px, 8vh, 68px);
     font-size: clamp(18px, 3.2vw, 25px);
     padding: clamp(10px, 1.5vh, 15px) clamp(11px, 2.4vw, 19px);
-    min-width: clamp(56px, 19vw, 112px);
-    max-width: clamp(88px, 33vw, 170px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 70px);
   }
 
   .dictationInputArea:global(.short-sentence) :global(.hint-btn) {
@@ -1707,14 +1859,23 @@
   }
 
   /* Medium sentences (9-15 words): Balanced sizing */
-  .dictationInputArea:global(.medium-sentence) :global(.word-input),
+  .dictationInputArea:global(.medium-sentence) :global(.word-input) {
+    height: clamp(44px, 6.5vh, 60px);
+    font-size: clamp(16px, 2.7vw, 22px);
+    padding: clamp(9px, 1.3vh, 13px) clamp(9px, 2vw, 16px);
+    min-width: 50px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1.05ch + 30px), calc(100vw - 95px));
+  }
+
   .dictationInputArea:global(.medium-sentence) :global(.correct-word),
   .dictationInputArea:global(.medium-sentence) :global(.hint-revealed) {
     height: clamp(44px, 6.5vh, 60px);
     font-size: clamp(16px, 2.7vw, 22px);
     padding: clamp(9px, 1.3vh, 13px) clamp(9px, 2vw, 16px);
-    min-width: clamp(50px, 17vw, 106px);
-    max-width: clamp(80px, 30vw, 155px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 75px);
   }
 
   .dictationInputArea:global(.medium-sentence) :global(.hint-btn) {
@@ -1724,14 +1885,23 @@
   }
 
   /* Long sentences (16-25 words): Compact but readable */
-  .dictationInputArea:global(.long-sentence) :global(.word-input),
+  .dictationInputArea:global(.long-sentence) :global(.word-input) {
+    height: clamp(38px, 5.5vh, 54px);
+    font-size: clamp(14px, 2.3vw, 19px);
+    padding: clamp(8px, 1.1vh, 11px) clamp(8px, 1.8vw, 14px);
+    min-width: 44px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 1ch + 28px), calc(100vw - 100px));
+  }
+
   .dictationInputArea:global(.long-sentence) :global(.correct-word),
   .dictationInputArea:global(.long-sentence) :global(.hint-revealed) {
     height: clamp(38px, 5.5vh, 54px);
     font-size: clamp(14px, 2.3vw, 19px);
     padding: clamp(8px, 1.1vh, 11px) clamp(8px, 1.8vw, 14px);
-    min-width: clamp(44px, 15vw, 96px);
-    max-width: clamp(70px, 27vw, 140px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 80px);
   }
 
   .dictationInputArea:global(.long-sentence) :global(.hint-btn) {
@@ -1741,14 +1911,23 @@
   }
 
   /* Very long sentences (26+ words): Maximum density */
-  .dictationInputArea:global(.very-long-sentence) :global(.word-input),
+  .dictationInputArea:global(.very-long-sentence) :global(.word-input) {
+    height: clamp(34px, 5vh, 48px);
+    font-size: clamp(13px, 2vw, 17px);
+    padding: clamp(7px, 0.9vh, 10px) clamp(7px, 1.6vw, 12px);
+    min-width: 40px;
+    width: auto !important;
+    max-width: min(calc(var(--word-length, 10) * 0.95ch + 26px), calc(100vw - 105px));
+  }
+
   .dictationInputArea:global(.very-long-sentence) :global(.correct-word),
   .dictationInputArea:global(.very-long-sentence) :global(.hint-revealed) {
     height: clamp(34px, 5vh, 48px);
     font-size: clamp(13px, 2vw, 17px);
     padding: clamp(7px, 0.9vh, 10px) clamp(7px, 1.6vw, 12px);
-    min-width: clamp(40px, 13vw, 88px);
-    max-width: clamp(64px, 25vw, 130px);
+    min-width: auto;
+    width: auto;
+    max-width: calc(100vw - 85px);
   }
 
   .dictationInputArea:global(.very-long-sentence) :global(.hint-btn) {

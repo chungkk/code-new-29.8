@@ -219,7 +219,7 @@
 .lessonsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 28px;
+  gap: 32px;
 }
 
 .lessonCard {
@@ -232,6 +232,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 420px;
   animation: fadeInScale 0.5s ease-out;
 }
 
@@ -313,6 +314,7 @@
 /* Progress Section */
 .progressSection {
   padding: 0 32px 24px 32px;
+  margin-top: auto;
 }
 
 .progressInfo {
