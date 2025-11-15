@@ -199,20 +199,28 @@ const Header = () => {
           )}
 
           {!user && (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <>
+              <div className={styles.authButtonsDesktop}>
+                <button
+                  onClick={() => router.push('/auth/login')}
+                  className={styles.loginBtn}
+                >
+                  Anmelden
+                </button>
+                <button
+                  onClick={() => router.push('/auth/register')}
+                  className={styles.signupBtn}
+                >
+                  Registrieren
+                </button>
+              </div>
               <button
                 onClick={() => router.push('/auth/login')}
-                className={styles.loginBtn}
+                className={styles.authBtnMobile}
               >
                 Anmelden
               </button>
-              <button
-                onClick={() => router.push('/auth/register')}
-                className={styles.signupBtn}
-              >
-                Registrieren
-              </button>
-            </div>
+            </>
           )}
 
           <button

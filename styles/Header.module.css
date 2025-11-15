@@ -404,6 +404,30 @@
   padding: 0;
 }
 
+.authButtonsDesktop {
+  display: flex;
+  gap: 8px;
+}
+
+.authBtnMobile {
+  display: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.authBtnMobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 /* Mobile Navigation */
 @media (max-width: 768px) {
   .nav {
@@ -447,15 +471,19 @@
     min-width: 260px;
     right: -10px;
   }
+
+  .authButtonsDesktop {
+    display: none;
+  }
+
+  .authBtnMobile {
+    display: block;
+  }
 }
 
 @media (max-width: 480px) {
   .headerContent {
     padding: 0 var(--spacing-sm);
-  }
-
-  .logoText {
-    display: none;
   }
 
   .languageSelector {

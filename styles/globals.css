@@ -234,7 +234,20 @@ button:focus-visible {
   }
 
   .difficulty-toggle {
-    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .difficulty-toggle__option {
+    padding: 12px var(--spacing-md);
+  }
+
+  .difficulty-toggle__title {
+    font-size: 15px;
+    margin-bottom: 0;
+  }
+
+  .difficulty-toggle__description {
+    display: none;
   }
 
   .lesson-cards-container {
@@ -248,6 +261,18 @@ button:focus-visible {
 }
 
 @media (max-width: 480px) {
+  .difficulty-toggle {
+    gap: 8px;
+  }
+
+  .difficulty-toggle__option {
+    padding: 10px 12px;
+  }
+
+  .difficulty-toggle__title {
+    font-size: 14px;
+  }
+
   .lesson-cards-container {
     grid-template-columns: 1fr;
   }

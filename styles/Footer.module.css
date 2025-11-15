@@ -154,8 +154,13 @@
 
 @media (max-width: 768px) {
   .footerContent {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-lg);
+  }
+
+  .footerSection:first-child {
+    grid-column: 1 / -1;
   }
 
   .footerBottom {
@@ -174,11 +179,20 @@
     padding: var(--spacing-lg) var(--spacing-md);
   }
 
+  .footerContent {
+    gap: var(--spacing-md);
+  }
+
   .footerSectionTitle {
     font-size: 15px;
   }
 
   .footerLink {
+    font-size: 13px;
+  }
+
+  .appStoreBtn {
+    padding: 8px 12px;
     font-size: 13px;
   }
 }
