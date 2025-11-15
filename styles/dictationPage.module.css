@@ -3,6 +3,7 @@
 .page {
   background: var(--bg-primary);
   min-height: 100vh;
+  padding-bottom: 60px;
 }
 
 .pageContainer {
@@ -1162,6 +1163,10 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .page {
+    padding-bottom: 0;
+  }
+
   .pageContainer {
     padding: 0;
     padding-top: 0;

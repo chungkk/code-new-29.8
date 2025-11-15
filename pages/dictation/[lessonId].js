@@ -1383,6 +1383,16 @@ const DictationPageContent = () => {
         structuredData={structuredDataArray}
       />
 
+      {/* Hide footer and header on mobile */}
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .header,
+          footer {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       <div className={styles.pageContainer}>
         {/* Main 3-Column Layout */}
         <div className={styles.mainContent}>

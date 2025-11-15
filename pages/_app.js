@@ -20,7 +20,7 @@ function Layout({ children }) {
     <>
       {!isAdminPage && <Header />}
       {children}
-      {isHomePage && <Footer />}
+      {!isAdminPage && <Footer />}
     </>
   );
 }
