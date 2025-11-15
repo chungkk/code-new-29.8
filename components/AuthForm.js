@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import styles from '../styles/authForm.module.css';
 
 const AuthForm = ({ mode = 'login' }) => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ const AuthForm = ({ mode = 'login' }) => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { login, register } = useAuth();
   const router = useRouter();
 
@@ -52,141 +55,113 @@ const AuthForm = ({ mode = 'login' }) => {
   const isLogin = mode === 'login';
 
   return (
-    <form onSubmit={handleSubmit} style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 'var(--spacing-md)',
-      width: '100%',
-    }}>
+    <form onSubmit={handleSubmit} className={styles.authForm}>
       {!isLogin && (
-        <div>
-          <label style={{
-            display: 'block',
-            color: 'var(--text-primary)',
-            fontSize: '14px',
-            fontWeight: '500',
-            marginBottom: 'var(--spacing-xs)',
-          }}>
+        <div className={styles.formField}>
+          <label className={styles.formLabel} htmlFor="name">
             Name
           </label>
           <input
+            id="name"
             type="text"
             name="name"
+            placeholder="Geben Sie Ihren Namen ein"
             value={formData.name}
             onChange={handleChange}
             required={!isLogin}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--border-radius-small)',
-              color: 'var(--text-primary)',
-              fontSize: '15px',
-              outline: 'none',
-            }}
+            className={styles.formInput}
+            disabled={loading}
           />
         </div>
       )}
 
-      <div>
-        <label style={{
-          display: 'block',
-          color: 'var(--text-primary)',
-          fontSize: '14px',
-          fontWeight: '500',
-          marginBottom: 'var(--spacing-xs)',
-        }}>
-          Email
+      <div className={styles.formField}>
+        <label className={styles.formLabel} htmlFor="email">
+          E-Mail
         </label>
         <input
+          id="email"
           type="email"
           name="email"
+          placeholder="ihre.email@beispiel.de"
           value={formData.email}
           onChange={handleChange}
           required
-          style={{
-            width: '100%',
-            padding: '12px',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--border-radius-small)',
-            color: 'var(--text-primary)',
-            fontSize: '15px',
-            outline: 'none',
-          }}
+          className={styles.formInput}
+          disabled={loading}
+          autoComplete="email"
         />
       </div>
 
-      <div>
-        <label style={{
-          display: 'block',
-          color: 'var(--text-primary)',
-          fontSize: '14px',
-          fontWeight: '500',
-          marginBottom: 'var(--spacing-xs)',
-        }}>
-          Password
+      <div className={styles.formField}>
+        <label className={styles.formLabel} htmlFor="password">
+          Passwort
         </label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          style={{
-            width: '100%',
-            padding: '12px',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--border-radius-small)',
-            color: 'var(--text-primary)',
-            fontSize: '15px',
-            outline: 'none',
-          }}
-        />
+        <div className={styles.passwordContainer}>
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            placeholder="Geben Sie Ihr Passwort ein"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className={styles.formInput}
+            disabled={loading}
+            autoComplete={isLogin ? 'current-password' : 'new-password'}
+          />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+            aria-label="Toggle password visibility"
+          >
+            {showPassword ? '👁️' : '👁️‍🗨️'}
+          </button>
+        </div>
+        {isLogin && (
+          <div className={styles.forgotPassword}>
+            <a href="#" className={styles.forgotPasswordLink} onClick={(e) => e.preventDefault()}>
+              Passwort vergessen?
+            </a>
+          </div>
+        )}
       </div>
 
       {!isLogin && (
-        <div>
-          <label style={{
-            display: 'block',
-            color: 'var(--text-primary)',
-            fontSize: '14px',
-            fontWeight: '500',
-            marginBottom: 'var(--spacing-xs)',
-          }}>
-            Confirm Password
+        <div className={styles.formField}>
+          <label className={styles.formLabel} htmlFor="confirmPassword">
+            Passwort bestätigen
           </label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required={!isLogin}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--border-radius-small)',
-              color: 'var(--text-primary)',
-              fontSize: '15px',
-              outline: 'none',
-            }}
-          />
+          <div className={styles.passwordContainer}>
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              name="confirmPassword"
+              placeholder="Passwort erneut eingeben"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required={!isLogin}
+              className={styles.formInput}
+              disabled={loading}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              className={styles.passwordToggle}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              tabIndex={-1}
+              aria-label="Toggle password visibility"
+            >
+              {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
         </div>
       )}
 
       {error && (
-        <div style={{
-          padding: '12px',
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          borderRadius: 'var(--border-radius-small)',
-          color: '#ef4444',
-          fontSize: '14px',
-        }}>
+        <div className={styles.errorMessage}>
           {error}
         </div>
       )}
@@ -194,20 +169,10 @@ const AuthForm = ({ mode = 'login' }) => {
       <button
         type="submit"
         disabled={loading}
-        style={{
-          width: '100%',
-          padding: '14px',
-          background: loading ? 'var(--bg-hover)' : 'var(--accent-gradient)',
-          border: 'none',
-          borderRadius: 'var(--border-radius-small)',
-          color: 'white',
-          fontSize: '16px',
-          fontWeight: '600',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s ease',
-        }}
+        className={styles.submitButton}
       >
-        {loading ? 'Loading...' : isLogin ? 'Log In' : 'Sign Up'}
+        {loading && <span className={styles.loadingSpinner} />}
+        {loading ? 'Lädt...' : isLogin ? 'Anmelden' : 'Registrieren'}
       </button>
     </form>
   );
