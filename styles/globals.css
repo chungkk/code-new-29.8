@@ -230,7 +230,7 @@ button:focus-visible {
 /* Responsive */
 @media (max-width: 768px) {
   .main-container {
-    padding: 64px var(--spacing-md) var(--spacing-lg);
+    padding: 84px var(--spacing-md) var(--spacing-lg);
   }
 
   .difficulty-toggle {

@@ -187,10 +187,10 @@ const HomePage = () => {
           borderRadius: '10px',
           boxShadow: '0 3px 4px rgba(0,0,0,0.08)'
         }}>
-          <form
-            onSubmit={handleCreateLesson}
-            style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}
-          >
+            <form
+              onSubmit={handleCreateLesson}
+              style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}
+            >
             <input
               type="url"
               placeholder="Füge hier den YouTube-Link ein..."
