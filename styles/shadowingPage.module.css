@@ -494,6 +494,18 @@
   margin-bottom: 6px;
 }
 
+.clickableWord {
+  transition: all 0.2s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.clickableWord:hover {
+  background: rgba(74, 144, 226, 0.2);
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
 .transcriptIPA {
   font-size: 13px;
   color: #7dd3fc;
@@ -554,6 +566,25 @@
     padding: 64px 0 0 0;
   }
 
+  /* Fix YouTube video to fill container on mobile */
+  .videoWrapper {
+    padding-top: 0 !important;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    position: relative;
+  }
+
+  /* Ensure YouTube iframe fills container on mobile */
+  .videoWrapper > div,
+  .videoWrapper iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
 
   .appContainer {
     height: 100%;
@@ -664,6 +695,12 @@
 
     .transcriptItemHeader {
       margin-bottom: 6px;
+    }
+
+    /* Hide triangle report button on mobile */
+    .transcriptActions,
+    .transcriptActionBtn {
+      display: none !important;
     }
   }
 

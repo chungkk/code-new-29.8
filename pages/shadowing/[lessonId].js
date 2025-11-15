@@ -4,7 +4,10 @@ import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } fr
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
+import VocabularyPopup from '../../components/VocabularyPopup';
 import { useProgress } from '../../lib/hooks/useProgress';
+import { speakText } from '../../lib/textToSpeech';
+import { toast } from 'react-toastify';
 import styles from '../../styles/shadowingPage.module.css';
 
 
@@ -31,6 +34,11 @@ const ShadowingPageContent = () => {
   const [showIPA, setShowIPA] = useState(true);
   const [showTranslation, setShowTranslation] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  
+  // Vocabulary popup states
+  const [showVocabPopup, setShowVocabPopup] = useState(false);
+  const [selectedWord, setSelectedWord] = useState('');
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
@@ -121,8 +129,8 @@ const ShadowingPageContent = () => {
 
     // Create the player
     youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-      height: '140',
-      width: '140',
+      height: '100%',
+      width: '100%',
       videoId: videoId,
       playerVars: {
         controls: 0,
@@ -142,13 +150,16 @@ const ShadowingPageContent = () => {
       events: {
         onReady: (event) => {
           setDuration(event.target.getDuration());
-          const container = document.getElementById('youtube-player-shadowing');
-          if (container) {
-            const rect = container.getBoundingClientRect();
-            // Adjust size based on screen width for mobile
-            const isMobile = window.innerWidth <= 768;
-            const scaleFactor = isMobile ? 1.0 : 1.0;
-            event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
+          const playerElement = document.getElementById('youtube-player-shadowing');
+          if (playerElement && playerElement.parentElement) {
+            // Get parent container (videoPlayerWrapper) dimensions
+            const wrapper = playerElement.parentElement;
+            const rect = wrapper.getBoundingClientRect();
+
+            // Set player size to fill the container
+            if (rect.width > 0 && rect.height > 0) {
+              event.target.setSize(rect.width, rect.height);
+            }
           }
         },
         onStateChange: (event) => {
@@ -161,7 +172,29 @@ const ShadowingPageContent = () => {
       }
     });
 
+    // Add resize listener to adjust player size when window resizes
+    const handleResize = () => {
+      if (youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
+        const playerElement = document.getElementById('youtube-player-shadowing');
+        if (playerElement && playerElement.parentElement) {
+          const wrapper = playerElement.parentElement;
+          const rect = wrapper.getBoundingClientRect();
+
+          if (rect.width > 0 && rect.height > 0) {
+            youtubePlayerRef.current.setSize(rect.width, rect.height);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Also handle orientation change on mobile
+    window.addEventListener('orientationchange', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
         youtubePlayerRef.current.destroy();
         youtubePlayerRef.current = null;
@@ -431,6 +464,73 @@ const ShadowingPageContent = () => {
       handleSentenceClick(item.start, item.end);
     }
   }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
+
+  // Handle word click for vocabulary popup
+  const handleWordClickForPopup = useCallback((word, event) => {
+    // Pause main audio if playing
+    if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
+      const audio = window.mainAudioRef.current;
+      if (!audio.paused) {
+        audio.pause();
+      }
+    }
+
+    // Pause YouTube if playing
+    if (isYouTube && youtubePlayerRef.current) {
+      const player = youtubePlayerRef.current;
+      if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      }
+    }
+
+    const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+    if (!cleanedWord) return;
+
+    // Speak the word
+    speakText(cleanedWord);
+
+    // Calculate popup position (centered modal)
+    setSelectedWord(cleanedWord);
+    setPopupPosition({ top: 0, left: 0 }); // Using centered modal, position not needed
+    setShowVocabPopup(true);
+  }, [isYouTube]);
+
+  // Save vocabulary to database
+  const saveVocabulary = useCallback(async ({ word, translation, notes }) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        toast.error('Bitte melden Sie sich an, um Vokabeln zu speichern');
+        return;
+      }
+
+      const context = transcriptData[currentSentenceIndex]?.text || '';
+
+      const response = await fetch('/api/vocabulary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          word,
+          translation: translation || notes || '',
+          context,
+          lessonId
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Vokabel erfolgreich gespeichert!');
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Fehler beim Speichern');
+      }
+    } catch (error) {
+      console.error('Save vocabulary error:', error);
+      toast.error('Ein Fehler ist aufgetreten');
+    }
+  }, [lessonId, transcriptData, currentSentenceIndex]);
 
   const handleSeek = useCallback((direction) => {
     if (isYouTube) {
@@ -859,7 +959,27 @@ const ShadowingPageContent = () => {
                           </div>
                        </div>
 
-                       <div className={styles.transcriptText}>{segment.text}</div>
+                       <div className={styles.transcriptText}>
+                         {segment.text.split(/\s+/).map((word, wordIndex) => {
+                           const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+                           if (cleanWord.length > 0) {
+                             return (
+                               <span
+                                 key={wordIndex}
+                                 className={styles.clickableWord}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleWordClickForPopup(word, e);
+                                 }}
+                                 style={{ cursor: 'pointer' }}
+                               >
+                                 {word}{' '}
+                               </span>
+                             );
+                           }
+                           return <span key={wordIndex}>{word} </span>;
+                         })}
+                       </div>
 
                        {showIPA && segment.ipa && (
                          <div className={styles.transcriptIPA}>{segment.ipa}</div>
@@ -891,6 +1011,16 @@ const ShadowingPageContent = () => {
              classNames={footerClassNames}
            />
          </div> */}
+
+         {/* Vocabulary Popup */}
+         {showVocabPopup && (
+           <VocabularyPopup
+             word={selectedWord}
+             position={popupPosition}
+             onClose={() => setShowVocabPopup(false)}
+             onSave={saveVocabulary}
+           />
+         )}
        </div>
      </>
    );

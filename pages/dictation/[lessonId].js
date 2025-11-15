@@ -135,78 +135,122 @@ const DictationPageContent = () => {
     };
   }, []);
 
-  // Initialize YouTube player when API is ready and lesson is loaded
+  // Set isYouTube flag
   useEffect(() => {
     if (!lesson || !lesson.youtubeUrl) {
       setIsYouTube(false);
-      return;
+    } else {
+      setIsYouTube(true);
     }
+  }, [lesson]);
 
-    setIsYouTube(true);
-
-    if (!isYouTubeAPIReady) {
-      return; // Wait for API to be ready
+  // Initialize YouTube player when API is ready and element is rendered
+  useEffect(() => {
+    if (!isYouTube || !isYouTubeAPIReady || !lesson) {
+      return;
     }
 
     const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
     if (!videoId) return;
 
-    // Destroy existing player if any
-    if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
-      youtubePlayerRef.current.destroy();
-      youtubePlayerRef.current = null;
-    }
+    // Function to initialize player - with retry logic
+    const initializePlayer = () => {
+      const playerElement = document.getElementById('youtube-player');
 
-    // Create the player
-    youtubePlayerRef.current = new window.YT.Player('youtube-player', {
-      height: '0',
-      width: '0',
-      videoId: videoId,
-      playerVars: {
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        origin: playerOrigin,
-        cc_load_policy: 0,
-        rel: 0,
-        showinfo: 0,
-        iv_load_policy: 3,
-        playsinline: 1,
-        enablejsapi: 1,
-        widget_referrer: playerOrigin,
-        autohide: 1,
-      },
-      events: {
-        onReady: (event) => {
-          setDuration(event.target.getDuration());
-          const container = document.getElementById('youtube-player');
-          if (container) {
-            const rect = container.getBoundingClientRect();
-            // Adjust size based on screen width for mobile
-            const isMobile = window.innerWidth <= 768;
-            const scaleFactor = isMobile ? 1.0 : 1.2;
-            event.target.setSize(rect.width * scaleFactor, rect.height * scaleFactor);
-          }
+      // If element doesn't exist yet, wait for next frame
+      if (!playerElement) {
+        console.log('YouTube player element not ready, retrying...');
+        requestAnimationFrame(initializePlayer);
+        return;
+      }
+
+      // Destroy existing player if any
+      if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
+        youtubePlayerRef.current.destroy();
+        youtubePlayerRef.current = null;
+      }
+
+      console.log('Initializing YouTube player...');
+
+      // Create the player
+      youtubePlayerRef.current = new window.YT.Player('youtube-player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          origin: playerOrigin,
+          cc_load_policy: 0,
+          rel: 0,
+          showinfo: 0,
+          iv_load_policy: 3,
+          playsinline: 1,
+          enablejsapi: 1,
+          widget_referrer: playerOrigin,
+          autohide: 1,
         },
-        onStateChange: (event) => {
-          if (event.data === window.YT.PlayerState.PLAYING) {
-            setIsPlaying(true);
-          } else if (event.data === window.YT.PlayerState.PAUSED) {
-            setIsPlaying(false);
+        events: {
+          onReady: (event) => {
+            setDuration(event.target.getDuration());
+            const playerElement = document.getElementById('youtube-player');
+            if (playerElement && playerElement.parentElement) {
+              // Get parent container (videoPlayerWrapper) dimensions
+              const wrapper = playerElement.parentElement;
+              const rect = wrapper.getBoundingClientRect();
+
+              // Set player size to fill the container
+              if (rect.width > 0 && rect.height > 0) {
+                event.target.setSize(rect.width, rect.height);
+              }
+            }
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
+          }
+        }
+      });
+    };
+
+    // Start initialization
+    initializePlayer();
+
+    // Add resize listener to adjust player size when window resizes
+    const handleResize = () => {
+      if (youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
+        const playerElement = document.getElementById('youtube-player');
+        if (playerElement && playerElement.parentElement) {
+          const wrapper = playerElement.parentElement;
+          const rect = wrapper.getBoundingClientRect();
+
+          if (rect.width > 0 && rect.height > 0) {
+            youtubePlayerRef.current.setSize(rect.width, rect.height);
           }
         }
       }
-    });
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Also handle orientation change on mobile
+    window.addEventListener('orientationchange', handleResize);
 
     return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
         youtubePlayerRef.current.destroy();
         youtubePlayerRef.current = null;
       }
     };
-  }, [lesson, isYouTubeAPIReady]);
+  }, [isYouTube, isYouTubeAPIReady, lesson]);
 
   // Fetch lesson data from API
   useEffect(() => {
@@ -963,6 +1007,14 @@ const DictationPageContent = () => {
       }
     }
 
+    // Pause YouTube if playing
+    if (isYouTube && youtubePlayerRef.current) {
+      const player = youtubePlayerRef.current;
+      if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      }
+    }
+
     const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
     if (!cleanedWord) return;
 
@@ -996,7 +1048,7 @@ const DictationPageContent = () => {
     setSelectedWord(cleanedWord);
     setPopupPosition({ top, left });
     setShowVocabPopup(true);
-  }, []);
+  }, [isYouTube]);
 
   // Double-click hint functionality
   const handleInputClick = useCallback((input, correctWord) => {
@@ -1175,7 +1227,46 @@ const DictationPageContent = () => {
     }
   }, [saveWord, checkSentenceCompletion, saveWordCompletion]);
 
-  // Process text for dictation
+  /**
+   * ============================================================================
+   * DYNAMIC HTML GENERATION FOR DICTATION
+   * ============================================================================
+   *
+   * This function generates HTML dynamically with GLOBAL CSS classes.
+   *
+   * WHY GLOBAL CLASSES:
+   * -------------------
+   * - We use innerHTML to create interactive word elements at runtime
+   * - CSS Modules would require dynamic class name generation (complex)
+   * - Global classes are simpler and work well when properly scoped
+   *
+   * GLOBAL CLASSES GENERATED:
+   * -------------------------
+   * - .word-container    → Wrapper for each word + input/button
+   * - .hint-btn          → Button to reveal the word
+   * - .word-input        → Input field for typing
+   * - .correct-word      → Display for correctly typed word
+   * - .completed-word    → Word from a completed sentence
+   * - .word-punctuation  → Punctuation marks
+   *
+   * SCOPING MECHANISM:
+   * ------------------
+   * These classes are styled in dictationPage.module.css using:
+   *   .dictationInputArea :global(.word-input) { }
+   *
+   * This means they ONLY work inside .dictationInputArea and won't
+   * affect other components/pages.
+   *
+   * CSS MODULES PATTERN:
+   * --------------------
+   * ✅ Container uses CSS Modules: className={styles.dictationInputArea}
+   * ⚠️ Children use global classes: class="word-input"
+   * ✅ Global classes are scoped by parent CSS Module class
+   *
+   * This is a VALID and DOCUMENTED approach when working with dynamic HTML.
+   * See: dictationPage.module.css (line 977) for detailed documentation.
+   * ============================================================================
+   */
   const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted) => {
     const sentences = sentence.split(/\n+/);
     
@@ -1270,6 +1361,9 @@ const DictationPageContent = () => {
       
       // Detect sentence length and add appropriate class + set word-length CSS variables
       setTimeout(() => {
+        // NOTE: Using class selector here instead of ref because this element
+        // is rendered via dangerouslySetInnerHTML. The class is from CSS Modules
+        // (styles.dictationInputArea) but we query it as a plain class.
         const dictationArea = document.querySelector('.dictationInputArea');
         if (dictationArea) {
           const wordCount = text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1).length;
@@ -1300,7 +1394,11 @@ const DictationPageContent = () => {
           });
         }
       }, 100);
-      
+
+      // Expose functions to window object for dynamic HTML event handlers
+      // NOTE: These functions are called from dynamically generated HTML (innerHTML)
+      // via onclick, oninput, etc. Since the HTML is created as strings, we can't
+      // use React event handlers directly. This is a valid pattern for this use case.
       if (typeof window !== 'undefined') {
         window.checkWord = checkWord;
         window.handleInputClick = handleInputClick;

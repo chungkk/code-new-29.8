@@ -1,12 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false }) => {
+const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, position }) => {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [fetchedTranslation, setFetchedTranslation] = useState(translation || '');
+  const [isLoadingTranslation, setIsLoadingTranslation] = useState(false);
+
+  // Fetch translation when word changes and no translation provided
+  useEffect(() => {
+    const fetchTranslation = async () => {
+      if (!word || translation) return; // Skip if word is empty or translation already provided
+      
+      setIsLoadingTranslation(true);
+      try {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: word,
+            context: '', // Could pass sentence context here if available
+            sourceLang: 'de',
+            targetLang: 'vi'
+          })
+        });
+
+        const data = await response.json();
+        if (data.success && data.translation) {
+          setFetchedTranslation(data.translation);
+        }
+      } catch (error) {
+        console.error('Translation fetch error:', error);
+      } finally {
+        setIsLoadingTranslation(false);
+      }
+    };
+
+    fetchTranslation();
+  }, [word, translation]);
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave({ word, translation, notes });
+    await onSave({ word, translation: fetchedTranslation, notes });
     setSaving(false);
     onClose();
   };
@@ -45,6 +81,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false }
           position: 'relative',
           border: '1px solid var(--border-color)',
           animation: 'slideUp 0.3s ease',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
         }}
       >
         <button
@@ -93,7 +130,18 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false }
             {word}
           </div>
 
-          {translation && (
+          {isLoadingTranslation ? (
+            <div
+              style={{
+                fontSize: '16px',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.6',
+                fontStyle: 'italic',
+              }}
+            >
+              Translating...
+            </div>
+          ) : fetchedTranslation ? (
             <div
               style={{
                 fontSize: '16px',
@@ -101,9 +149,9 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false }
                 lineHeight: '1.6',
               }}
             >
-              {translation}
+              {fetchedTranslation}
             </div>
-          )}
+          ) : null}
         </div>
 
         {!isSaved && (
