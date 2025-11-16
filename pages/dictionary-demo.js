@@ -27,8 +27,8 @@ export default function DictionaryDemo() {
         </p>
         <ul style={{ marginBottom: '20px', lineHeight: '1.8' }}>
           <li>Nằm ở top của màn hình (gần thanh trình duyệt)</li>
-          <li>Gộp "Giải thích" và "Ví dụ" trong 1 trang</li>
-          <li>Bỏ tab "Ngữ pháp"</li>
+          <li>Gộp &quot;Giải thích&quot; và &quot;Ví dụ&quot; trong 1 trang</li>
+          <li>Bỏ tab &quot;Ngữ pháp&quot;</li>
           <li>Overlay nhẹ hơn (30% opacity) để nhìn thấy nội dung phía sau</li>
         </ul>
         <p style={{ marginBottom: '15px', lineHeight: '1.8', fontSize: '16px' }}>
