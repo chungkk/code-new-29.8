@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
@@ -28,6 +28,7 @@ const DictationPageContent = () => {
   const [isTextHidden, setIsTextHidden] = useState(true);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hidePercentage, setHidePercentage] = useState(30); // 30%, 60%, or 100% - default to Easy mode
   
   // Dictation specific states (from ckk)
   const [savedWords, setSavedWords] = useState([]);
@@ -1169,10 +1170,89 @@ const DictationPageContent = () => {
     }
   }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion]);
 
-  // Mask text function - replace letters with asterisks
+  /**
+   * Seeded random number generator for deterministic word selection
+   * Uses the sentence index as seed to ensure consistency across re-renders
+   */
+  const seededRandom = useCallback((seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }, []);
+
+  // Mask text function - replace letters with asterisks (deprecated - use maskTextByPercentage)
   const maskText = useCallback((text) => {
     return text.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, '*');
   }, []);
+
+  // Mask text by percentage - used for transcript display
+  const maskTextByPercentage = useCallback((text, sentenceIdx, hidePercent, sentenceWordsCompleted = {}) => {
+    if (hidePercent === 100) {
+      // Mask all letters except completed words
+      const words = text.split(/\s+/);
+      const processedWords = words.map((word, wordIndex) => {
+        const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+        if (pureWord.length >= 1) {
+          // If word is completed, show it
+          if (sentenceWordsCompleted[wordIndex]) {
+            return word;
+          }
+          // Otherwise mask it
+          return word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, '*');
+        }
+        return word;
+      });
+      return processedWords.join(" ");
+    }
+
+    const words = text.split(/\s+/);
+
+    // Determine which words to hide
+    const validWordIndices = [];
+    words.forEach((word, idx) => {
+      const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+      if (pureWord.length >= 1) {
+        validWordIndices.push(idx);
+      }
+    });
+
+    // Calculate how many words to hide
+    const totalValidWords = validWordIndices.length;
+    const wordsToHideCount = Math.ceil((totalValidWords * hidePercent) / 100);
+
+    // Deterministically select words to hide (same logic as processLevelUp)
+    const hiddenWordIndices = new Set();
+    const shuffled = [...validWordIndices].sort((a, b) => {
+      const seedA = seededRandom(sentenceIdx * 1000 + a);
+      const seedB = seededRandom(sentenceIdx * 1000 + b);
+      return seedA - seedB;
+    });
+    for (let i = 0; i < wordsToHideCount; i++) {
+      hiddenWordIndices.add(shuffled[i]);
+    }
+
+    // Process each word
+    const processedWords = words.map((word, wordIndex) => {
+      const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+      if (pureWord.length >= 1) {
+        // If word is completed, always show it
+        if (sentenceWordsCompleted[wordIndex]) {
+          return word;
+        }
+
+        const shouldHide = hiddenWordIndices.has(wordIndex);
+        if (shouldHide) {
+          // Mask this word
+          return word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, '*');
+        } else {
+          // Show this word
+          return word;
+        }
+      }
+      return word;
+    });
+
+    return processedWords.join(" ");
+  }, [seededRandom]);
 
   // Handle input focus - keep placeholder visible
   const handleInputFocus = useCallback((input, correctWord) => {
@@ -1267,24 +1347,51 @@ const DictationPageContent = () => {
    * See: dictationPage.module.css (line 977) for detailed documentation.
    * ============================================================================
    */
-  const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted) => {
+  const processLevelUp = useCallback((sentence, isCompleted, sentenceWordsCompleted, hidePercent) => {
     const sentences = sentence.split(/\n+/);
-    
+
     const processedSentences = sentences.map((sentence) => {
       const words = sentence.split(/\s+/);
-      
+
+      // Determine which words to hide based on hidePercentage
+      const validWordIndices = [];
+      words.forEach((word, idx) => {
+        const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+        if (pureWord.length >= 1) {
+          validWordIndices.push(idx);
+        }
+      });
+
+      // Calculate how many words to hide
+      const totalValidWords = validWordIndices.length;
+      const wordsToHideCount = Math.ceil((totalValidWords * hidePercent) / 100);
+
+      // Deterministically select words to hide based on sentence index and word position
+      const hiddenWordIndices = new Set();
+      if (hidePercent < 100) {
+        // Use seeded random to make it consistent for the same sentence
+        // Seed is based on currentSentenceIndex to ensure same words are hidden on each render
+        const shuffled = [...validWordIndices].sort((a, b) => {
+          const seedA = seededRandom(currentSentenceIndex * 1000 + a);
+          const seedB = seededRandom(currentSentenceIndex * 1000 + b);
+          return seedA - seedB;
+        });
+        for (let i = 0; i < wordsToHideCount; i++) {
+          hiddenWordIndices.add(shuffled[i]);
+        }
+      } else {
+        // Hide all words (100%)
+        validWordIndices.forEach(idx => hiddenWordIndices.add(idx));
+      }
+
       const processedWords = words.map((word, wordIndex) => {
         const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
         if (pureWord.length >= 1) {
           const nonAlphaNumeric = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
-          
+
           // Check if this specific word is completed
           const isWordCompleted = sentenceWordsCompleted && sentenceWordsCompleted[wordIndex];
-          
-          if (isWordCompleted) {
-            console.log(`Word ${wordIndex} (${pureWord}) is completed:`, sentenceWordsCompleted[wordIndex]);
-          }
-          
+
           // If entire sentence is completed, show all words
           if (isCompleted) {
             return `<span class="word-container completed">
@@ -1292,7 +1399,7 @@ const DictationPageContent = () => {
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
-          
+
           // If this specific word is completed, show it
           if (isWordCompleted) {
             return `<span class="word-container">
@@ -1300,48 +1407,58 @@ const DictationPageContent = () => {
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
-          
-          // Otherwise show input with hint button
-          // Calculate dynamic size based on word length for better mobile UX
-          const dynamicSize = Math.max(Math.min(pureWord.length, 20), 3);
-          
-          return `<span class="word-container">
-            <button
-              class="hint-btn"
-              onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
-              title="Hinweise anzeigen"
-              type="button"
-            >
-            </button>
-             <input
-               type="text"
-               class="word-input"
-               id="word-${wordIndex}"
-               name="word-${wordIndex}"
-               data-word-id="word-${wordIndex}"
-               data-word-length="${pureWord.length}"
-               oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
-               onclick="window.handleInputClick(this, '${pureWord}')"
-               onkeydown="window.disableArrowKeys(event)"
-               onfocus="window.handleInputFocus(this, '${pureWord}')"
-               onblur="window.handleInputBlur(this, '${pureWord}')"
-               maxlength="${pureWord.length}"
-               size="${dynamicSize}"
-               placeholder="${'*'.repeat(pureWord.length)}"
-               autocomplete="off"
-               style="width: ${dynamicSize}ch;"
-             />
-           <span class="word-punctuation">${nonAlphaNumeric}</span>
-         </span>`;
+
+          // Check if this word should be hidden based on hidePercentage
+          const shouldHide = hiddenWordIndices.has(wordIndex);
+
+          if (shouldHide) {
+            // Show input with hint button (hidden)
+            const dynamicSize = Math.max(Math.min(pureWord.length, 20), 3);
+
+            return `<span class="word-container">
+              <button
+                class="hint-btn"
+                onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
+                title="Hinweise anzeigen"
+                type="button"
+              >
+              </button>
+               <input
+                 type="text"
+                 class="word-input"
+                 id="word-${wordIndex}"
+                 name="word-${wordIndex}"
+                 data-word-id="word-${wordIndex}"
+                 data-word-length="${pureWord.length}"
+                 oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
+                 onclick="window.handleInputClick(this, '${pureWord}')"
+                 onkeydown="window.disableArrowKeys(event)"
+                 onfocus="window.handleInputFocus(this, '${pureWord}')"
+                 onblur="window.handleInputBlur(this, '${pureWord}')"
+                 maxlength="${pureWord.length}"
+                 size="${dynamicSize}"
+                 placeholder="${'*'.repeat(pureWord.length)}"
+                 autocomplete="off"
+                 style="width: ${dynamicSize}ch;"
+               />
+             <span class="word-punctuation">${nonAlphaNumeric}</span>
+           </span>`;
+          } else {
+            // Show the word (not hidden)
+            return `<span class="word-container">
+              <span class="correct-word revealed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
+              <span class="word-punctuation">${nonAlphaNumeric}</span>
+            </span>`;
+          }
         }
         return `<span>${word}</span>`;
       });
-      
+
       return processedWords.join(" ");
     });
-    
+
     return processedSentences.join(" ");
-  }, []);
+  }, [currentSentenceIndex, seededRandom]);
 
   // Initialize dictation for current sentence
   useEffect(() => {
@@ -1349,14 +1466,15 @@ const DictationPageContent = () => {
       const text = transcriptData[currentSentenceIndex].text;
       const isCompleted = completedSentences.includes(currentSentenceIndex);
       const sentenceWordsCompleted = completedWords[currentSentenceIndex] || {};
-      
+
       console.log('Rendering sentence', currentSentenceIndex, ':', {
         isCompleted,
         sentenceWordsCompleted,
-        allCompletedWords: completedWords
+        allCompletedWords: completedWords,
+        hidePercentage
       });
-      
-      const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted);
+
+      const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted, hidePercentage);
       setProcessedText(processed);
       
       // Detect sentence length and add appropriate class + set word-length CSS variables
@@ -1415,9 +1533,37 @@ const DictationPageContent = () => {
         };
       }
     }
-  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded]);
+  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, hidePercentage]);
 
   const handleBackToHome = () => router.push('/');
+
+  // Calculate accurate progress based on words completed (not just sentences)
+  const progressPercentage = useMemo(() => {
+    if (!transcriptData || transcriptData.length === 0) return 0;
+
+    let totalWords = 0;
+    let completedWordsCount = 0;
+
+    transcriptData.forEach((segment, sentenceIndex) => {
+      const words = segment.text.split(/\s+/);
+      const validWords = words.filter(word => {
+        const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+        return pureWord.length >= 1;
+      });
+
+      totalWords += validWords.length;
+
+      // Count completed words for this sentence
+      const sentenceWordsCompleted = completedWords[sentenceIndex] || {};
+      const completedCount = Object.keys(sentenceWordsCompleted).filter(
+        wordIdx => sentenceWordsCompleted[wordIdx]
+      ).length;
+
+      completedWordsCount += completedCount;
+    });
+
+    return totalWords > 0 ? Math.round((completedWordsCount / totalWords) * 100) : 0;
+  }, [transcriptData, completedWords]);
 
   if (loading) {
     return (
@@ -1593,6 +1739,19 @@ const DictationPageContent = () => {
                 <div className={styles.dictationHeaderTitle}>
                   {isMobile ? `#${currentSentenceIndex + 1}` : 'Dictation'}
                 </div>
+                {/* Hide Level Selector */}
+                <div className={styles.hideLevelSelector}>
+                  <select
+                    value={hidePercentage}
+                    onChange={(e) => setHidePercentage(Number(e.target.value))}
+                    className={styles.hideLevelDropdown}
+                    title="Wählen Sie den Schwierigkeitsgrad"
+                  >
+                    <option value={30}>Easy (30%)</option>
+                    <option value={60}>Medium (60%)</option>
+                    <option value={100}>Hard (100%)</option>
+                  </select>
+                </div>
                 {!isMobile && (
                   <div className={styles.sentenceCounter}>
                     #{currentSentenceIndex + 1} / {transcriptData.length}
@@ -1610,14 +1769,42 @@ const DictationPageContent = () => {
 
               <div className={styles.dictationActions}>
                 {/* Desktop: Show both buttons side by side */}
-                <button 
+                <button
                   className={styles.showAllWordsButton}
                   onClick={() => {
-                    // Reveal all words
+                    // Reveal all words by batch updating state
                     const allInputs = document.querySelectorAll('.word-input');
-                    allInputs.forEach((input, idx) => {
-                      const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-                      showHint(input.previousElementSibling, correctWord, idx);
+                    const wordsToComplete = {};
+
+                    allInputs.forEach((input) => {
+                      const wordIndexMatch = input.id.match(/word-(\d+)/);
+                      if (wordIndexMatch) {
+                        const wordIndex = parseInt(wordIndexMatch[1]);
+                        const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                        wordsToComplete[wordIndex] = correctWord;
+                        // Save each word to vocabulary
+                        saveWord(correctWord);
+                      }
+                    });
+
+                    // Batch update all words at once
+                    setCompletedWords(prevWords => {
+                      const updatedWords = { ...prevWords };
+
+                      if (!updatedWords[currentSentenceIndex]) {
+                        updatedWords[currentSentenceIndex] = {};
+                      }
+
+                      // Merge all completed words
+                      updatedWords[currentSentenceIndex] = {
+                        ...updatedWords[currentSentenceIndex],
+                        ...wordsToComplete
+                      };
+
+                      // Save to database with updated data
+                      saveProgress(completedSentences, updatedWords);
+
+                      return updatedWords;
                     });
                   }}
                 >
@@ -1647,7 +1834,14 @@ const DictationPageContent = () => {
                 </div>
               </div>
               <div className={styles.transcriptProgress}>
-                {Math.round((completedSentences.length / transcriptData.length) * 100) || 0}%
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${progressPercentage}%` }}
+                    data-progress={progressPercentage}
+                  />
+                </div>
+                <span className={styles.progressText}>{progressPercentage}%</span>
               </div>
             </div>
             
@@ -1656,16 +1850,16 @@ const DictationPageContent = () => {
                 {transcriptData.map((segment, index) => {
                   const isCompleted = completedSentences.includes(index);
                   const sentenceWordsCompleted = completedWords[index] || {};
-                  
+
                   return (
-                    <div 
+                    <div
                       key={index}
                       className={`${styles.transcriptItem} ${index === currentSentenceIndex ? styles.active : ''}`}
                       onClick={() => handleSentenceClick(segment.start, segment.end)}
                     >
                       <div className={styles.transcriptItemNumber}>#{index + 1}</div>
                       <div className={styles.transcriptItemText}>
-                        {isCompleted ? segment.text : maskText(segment.text)}
+                        {isCompleted ? segment.text : maskTextByPercentage(segment.text, index, hidePercentage, sentenceWordsCompleted)}
                       </div>
                     </div>
                   );

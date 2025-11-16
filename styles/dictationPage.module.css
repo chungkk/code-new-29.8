@@ -569,9 +569,174 @@
 }
 
 .transcriptProgress {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 120px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 12px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Dynamic color based on progress percentage */
+.progressFill[data-progress="0"],
+.progressFill[data-progress="1"],
+.progressFill[data-progress="2"],
+.progressFill[data-progress="3"],
+.progressFill[data-progress="4"],
+.progressFill[data-progress="5"],
+.progressFill[data-progress="6"],
+.progressFill[data-progress="7"],
+.progressFill[data-progress="8"],
+.progressFill[data-progress="9"],
+.progressFill[data-progress="10"],
+.progressFill[data-progress="11"],
+.progressFill[data-progress="12"],
+.progressFill[data-progress="13"],
+.progressFill[data-progress="14"],
+.progressFill[data-progress="15"],
+.progressFill[data-progress="16"],
+.progressFill[data-progress="17"],
+.progressFill[data-progress="18"],
+.progressFill[data-progress="19"],
+.progressFill[data-progress="20"],
+.progressFill[data-progress="21"],
+.progressFill[data-progress="22"],
+.progressFill[data-progress="23"],
+.progressFill[data-progress="24"],
+.progressFill[data-progress="25"],
+.progressFill[data-progress="26"],
+.progressFill[data-progress="27"],
+.progressFill[data-progress="28"],
+.progressFill[data-progress="29"],
+.progressFill[data-progress="30"],
+.progressFill[data-progress="31"],
+.progressFill[data-progress="32"],
+.progressFill[data-progress="33"] {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.progressFill[data-progress="34"],
+.progressFill[data-progress="35"],
+.progressFill[data-progress="36"],
+.progressFill[data-progress="37"],
+.progressFill[data-progress="38"],
+.progressFill[data-progress="39"],
+.progressFill[data-progress="40"],
+.progressFill[data-progress="41"],
+.progressFill[data-progress="42"],
+.progressFill[data-progress="43"],
+.progressFill[data-progress="44"],
+.progressFill[data-progress="45"],
+.progressFill[data-progress="46"],
+.progressFill[data-progress="47"],
+.progressFill[data-progress="48"],
+.progressFill[data-progress="49"],
+.progressFill[data-progress="50"],
+.progressFill[data-progress="51"],
+.progressFill[data-progress="52"],
+.progressFill[data-progress="53"],
+.progressFill[data-progress="54"],
+.progressFill[data-progress="55"],
+.progressFill[data-progress="56"],
+.progressFill[data-progress="57"],
+.progressFill[data-progress="58"],
+.progressFill[data-progress="59"],
+.progressFill[data-progress="60"],
+.progressFill[data-progress="61"],
+.progressFill[data-progress="62"],
+.progressFill[data-progress="63"],
+.progressFill[data-progress="64"],
+.progressFill[data-progress="65"],
+.progressFill[data-progress="66"] {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.progressFill[data-progress="67"],
+.progressFill[data-progress="68"],
+.progressFill[data-progress="69"],
+.progressFill[data-progress="70"],
+.progressFill[data-progress="71"],
+.progressFill[data-progress="72"],
+.progressFill[data-progress="73"],
+.progressFill[data-progress="74"],
+.progressFill[data-progress="75"],
+.progressFill[data-progress="76"],
+.progressFill[data-progress="77"],
+.progressFill[data-progress="78"],
+.progressFill[data-progress="79"],
+.progressFill[data-progress="80"],
+.progressFill[data-progress="81"],
+.progressFill[data-progress="82"],
+.progressFill[data-progress="83"],
+.progressFill[data-progress="84"],
+.progressFill[data-progress="85"],
+.progressFill[data-progress="86"],
+.progressFill[data-progress="87"],
+.progressFill[data-progress="88"],
+.progressFill[data-progress="89"],
+.progressFill[data-progress="90"],
+.progressFill[data-progress="91"],
+.progressFill[data-progress="92"],
+.progressFill[data-progress="93"],
+.progressFill[data-progress="94"],
+.progressFill[data-progress="95"],
+.progressFill[data-progress="96"],
+.progressFill[data-progress="97"],
+.progressFill[data-progress="98"],
+.progressFill[data-progress="99"],
+.progressFill[data-progress="100"] {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 42px;
+  text-align: right;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .transcriptSection {
@@ -734,6 +899,51 @@
   color: var(--text-secondary);
 }
 
+/* Hide Level Selector */
+.hideLevelSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.hideLevelDropdown {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow:
+    0 2px 8px rgba(102, 126, 234, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+.hideLevelDropdown:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(102, 126, 234, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15);
+}
+
+.hideLevelDropdown:focus {
+  border-color: var(--accent-blue);
+  box-shadow:
+    0 0 0 3px rgba(102, 126, 234, 0.2),
+    0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.hideLevelDropdown option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
 .dictationInputArea {
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
@@ -746,9 +956,10 @@
   word-wrap: break-word;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  align-content: center;
-  gap: 8px;
+  align-items: flex-end;
+  align-content: flex-start;
+  gap: 0;
+  row-gap: 8px;
   flex: 1;
   touch-action: pan-y pinch-zoom;
   user-select: none;
@@ -1023,11 +1234,14 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: 2px;
   position: relative;
-  margin: 0;
-  vertical-align: middle;
+  margin: 0 4px 0 0;
+  vertical-align: bottom;
   flex-shrink: 0;
+  line-height: 1;
+  min-height: 64px;
 }
 
 .dictationInputArea :global(.hint-btn) {
@@ -1052,7 +1266,7 @@
 }
 
 .dictationInputArea :global(.hint-btn):hover {
-  transform: scale(1.2) translateY(-2px) rotate(5deg);
+  transform: scale(1.1);
   box-shadow:
     0 6px 16px rgba(102, 126, 234, 0.6),
     0 0 20px rgba(102, 126, 234, 0.4),
@@ -1062,7 +1276,7 @@
 }
 
 .dictationInputArea :global(.hint-btn):active {
-  transform: scale(1.1) translateY(-1px);
+  transform: scale(1.0);
   box-shadow:
     0 3px 10px rgba(102, 126, 234, 0.5),
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
@@ -1094,11 +1308,15 @@
     0 0 0 1px rgba(102, 126, 234, 0.1);
   text-align: center;
   height: 38px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
   backdrop-filter: blur(8px);
+  box-sizing: border-box;
+  vertical-align: middle;
+  line-height: 1.2;
 }
 
 .dictationInputArea :global(.word-input)::before {
@@ -1122,7 +1340,6 @@
     inset 0 2px 4px rgba(0, 0, 0, 0.2),
     0 4px 12px rgba(102, 126, 234, 0.3),
     0 0 0 1px rgba(102, 126, 234, 0.2);
-  transform: translateY(-1px) scale(1.02);
 }
 
 .dictationInputArea :global(.word-input):hover::before {
@@ -1138,7 +1355,6 @@
     0 0 0 3px rgba(102, 126, 234, 0.25),
     0 6px 20px rgba(102, 126, 234, 0.4),
     0 0 30px rgba(102, 126, 234, 0.2);
-  transform: translateY(-2px) scale(1.05);
   color: #ffffff;
 }
 
@@ -1149,7 +1365,7 @@
 
 .dictationInputArea :global(.correct-word) {
   color: #10b981;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 6px 12px;
@@ -1170,6 +1386,10 @@
   box-shadow:
     0 2px 6px rgba(16, 185, 129, 0.2),
     inset 0 1px 2px rgba(16, 185, 129, 0.1);
+  box-sizing: border-box;
+  vertical-align: middle;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .dictationInputArea :global(.correct-word)::before {
@@ -1189,7 +1409,6 @@
 .dictationInputArea :global(.correct-word):hover {
   color: #34d399;
   background: linear-gradient(145deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);
-  transform: translateY(-2px) scale(1.05);
   border-color: rgba(16, 185, 129, 0.5);
   box-shadow:
     0 4px 12px rgba(16, 185, 129, 0.35),
@@ -1230,16 +1449,58 @@
   }
 }
 
+/* Revealed Word - Words shown in Easy/Medium modes */
+.dictationInputArea :global(.revealed-word) {
+  color: #60a5fa;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0.08) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 38px;
+  min-height: 38px;
+  min-width: 55px;
+  width: auto;
+  max-width: none;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  border: 2px solid rgba(96, 165, 250, 0.25);
+  box-shadow:
+    0 2px 6px rgba(96, 165, 250, 0.2),
+    inset 0 1px 2px rgba(96, 165, 250, 0.1);
+  box-sizing: border-box;
+  vertical-align: middle;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dictationInputArea :global(.revealed-word):hover {
+  color: #93c5fd;
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.25) 0%, rgba(96, 165, 250, 0.15) 100%);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow:
+    0 4px 12px rgba(96, 165, 250, 0.35),
+    0 0 20px rgba(96, 165, 250, 0.2),
+    inset 0 1px 3px rgba(96, 165, 250, 0.15);
+}
+
 .dictationInputArea :global(.hint-revealed) {
   color: #fbbf24;
   background: linear-gradient(145deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
-  font-weight: 700;
+  font-weight: 600;
   position: relative;
   padding: 6px 12px;
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   height: 38px;
+  min-height: 38px;
   min-width: 55px;
   width: auto;
   max-width: none;
@@ -1250,6 +1511,10 @@
     0 2px 8px rgba(245, 158, 11, 0.3),
     inset 0 1px 2px rgba(245, 158, 11, 0.15);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-sizing: border-box;
+  vertical-align: middle;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .dictationInputArea :global(.hint-revealed)::after {
@@ -1384,7 +1649,21 @@
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   }
-  
+
+  /* Mobile hide level dropdown - compact styling */
+  .hideLevelDropdown {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    position: absolute;
+    right: 12px;
+    background: rgba(102, 126, 234, 0.2);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
   /* Hide video title on mobile to save space */
   .videoTitleBox {
     display: none;
