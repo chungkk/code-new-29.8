@@ -1,10 +1,11 @@
 /* Footer Styles */
 
 .footer {
-  background: #000000;
-  border-top: 1px solid var(--border-color);
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: var(--spacing-xl) var(--spacing-lg);
   margin-top: auto;
+  color: #ffffff;
 }
 
 .footerContent {
@@ -49,7 +50,7 @@
 }
 
 .footerDescription {
-  color: var(--text-secondary);
+  color: #cbd5e1;
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: var(--spacing-md);
@@ -60,11 +61,11 @@
   align-items: center;
   gap: var(--spacing-sm);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius-small);
   padding: 10px 16px;
   text-decoration: none;
-  color: var(--text-primary);
+  color: #ffffff;
   transition: all 0.2s ease;
   width: fit-content;
 }
@@ -78,7 +79,7 @@
 .footerSectionTitle {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #ffffff;
   margin-bottom: var(--spacing-sm);
 }
 
@@ -89,14 +90,14 @@
 }
 
 .footerLink {
-  color: var(--text-secondary);
+  color: #cbd5e1;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s ease;
 }
 
 .footerLink:hover {
-  color: var(--accent-blue);
+  color: #4A90E2;
 }
 
 .footerBottom {
@@ -104,14 +105,14 @@
   margin: 0 auto;
   padding-top: var(--spacing-lg);
   margin-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .copyright {
-  color: var(--text-muted);
+  color: #94a3b8;
   font-size: 13px;
 }
 
@@ -125,11 +126,11 @@
   height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  color: #ffffff;
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -144,7 +145,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-secondary);
+  color: #cbd5e1;
   font-size: 13px;
 }
 

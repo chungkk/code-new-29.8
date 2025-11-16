@@ -16,7 +16,7 @@
 }
 
 .popup {
-  background: #1e2139;
+  background: var(--bg-card);
   border-radius: var(--border-radius);
   padding: var(--spacing-xl);
   max-width: 500px;
@@ -24,7 +24,7 @@
   position: relative;
   border: 1px solid var(--border-color);
   animation: slideUp 0.3s ease;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes slideUp {

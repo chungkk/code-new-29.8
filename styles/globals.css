@@ -1,7 +1,7 @@
-/* Global Styles - Parroto Dark Theme */
+/* Global Styles - Parroto Theme System */
 
 :root {
-  /* Colors - Shadowing Theme */
+  /* Colors - Shadowing Theme (Dark) */
   --bg-primary: #141730;
   --bg-secondary: #1a1d35;
   --bg-card: #1e2139;
@@ -33,6 +33,42 @@
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  /* Light Colors */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: rgba(0, 0, 0, 0.05);
+
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  --border-color: rgba(0, 0, 0, 0.12);
+
+  /* Difficulty colors (same for all themes) */
+  --difficulty-a1: #4CAF50;
+  --difficulty-a2: #8BC34A;
+  --difficulty-b1: #FFC107;
+  --difficulty-b2: #FF9800;
+  --difficulty-c1: #FF5722;
+  --difficulty-c2: #F44336;
+}
+
+/* Light theme scrollbar */
+[data-theme="light"]::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 * {

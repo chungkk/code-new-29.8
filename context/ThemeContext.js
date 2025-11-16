@@ -21,6 +21,12 @@ export const THEME_OPTIONS = [
     label: 'Nachtmodus',
     description: 'Kontrastreicher Dark Mode für späte Lernsessions.',
     emoji: '🌙'
+  },
+  {
+    id: 'light',
+    label: 'Hellmodus',
+    description: 'Heller, klarer Modus für Tageslernen.',
+    emoji: '☀️'
   }
 ];
 

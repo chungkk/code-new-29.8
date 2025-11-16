@@ -12,7 +12,7 @@ const Header = () => {
   const userMenuRef = useRef(null);
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, currentTheme } = useTheme();
 
   // Tạo avatar mặc định từ initials
   const getDefaultAvatar = (name) => {
@@ -104,8 +104,9 @@ const Header = () => {
             className={styles.themeToggle}
             onClick={toggleTheme}
             aria-label="Toggle theme"
+            title={currentTheme?.label || 'Toggle theme'}
           >
-            {theme === 'dark' ? '🌙' : '☀️'}
+            {currentTheme?.emoji || '🌅'}
           </button>
 
           <div className={styles.languageSelector}>
