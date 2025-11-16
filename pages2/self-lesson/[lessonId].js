@@ -5,7 +5,7 @@ import Head from 'next/head';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
-import VocabularyPopup from '../../components/VocabularyPopup';
+import DictionaryPopup from '../../components/DictionaryPopup';
 import ModeSelectionPopup from '../../components/ModeSelectionPopup';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -1443,14 +1443,9 @@ const SelfLessonPageContent = () => {
       </div>
 
         {showVocabPopup && (
-          <VocabularyPopup
+          <DictionaryPopup
             word={selectedWord}
-            context={transcriptData[currentSentenceIndex]?.text || ''}
-            lessonId={lessonId}
             onClose={() => setShowVocabPopup(false)}
-            onSave={saveVocabulary}
-            position={popupPosition}
-            preTranslation=""
           />
         )}
 

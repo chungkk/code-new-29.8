@@ -4,7 +4,7 @@ import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } fr
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
-import VocabularyPopup from '../../components/VocabularyPopup';
+import DictionaryPopup from '../../components/DictionaryPopup';
 import { useProgress } from '../../lib/hooks/useProgress';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -1012,13 +1012,11 @@ const ShadowingPageContent = () => {
            />
          </div> */}
 
-         {/* Vocabulary Popup */}
+         {/* Dictionary Popup */}
          {showVocabPopup && (
-           <VocabularyPopup
+           <DictionaryPopup
              word={selectedWord}
-             position={popupPosition}
              onClose={() => setShowVocabPopup(false)}
-             onSave={saveVocabulary}
            />
          )}
        </div>
