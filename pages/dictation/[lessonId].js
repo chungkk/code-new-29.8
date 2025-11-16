@@ -1672,11 +1672,11 @@ const DictationPageContent = () => {
                 {isYouTube ? (
                   <div className={styles.videoPlayerWrapper}>
                     <div id="youtube-player"></div>
-                    <div className={styles.videoOverlay}>
-                      <div className={styles.videoTimer}>
-                        ⏱️ {formatTime(currentTime)} / {formatTime(duration)}
-                      </div>
-                    </div>
+                     <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}>
+                       <div className={styles.videoTimer}>
+                         ⏱️ {formatTime(currentTime)} / {formatTime(duration)}
+                       </div>
+                     </div>
                   </div>
                 ) : lesson.audioUrl ? (
                   <div className={styles.videoPlaceholder}>
