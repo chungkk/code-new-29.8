@@ -9,6 +9,7 @@ import WordTooltip from '../../components/WordTooltip';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
+import { translationCache } from '../../lib/translationCache';
 import styles from '../../styles/dictationPage.module.css';
 
 
@@ -1064,9 +1065,16 @@ const DictationPageContent = () => {
       setTooltipPosition({ top, left });
       setShowTooltip(true);
 
+      // Check cache first
+      const targetLang = user?.nativeLanguage || 'vi';
+      const cached = translationCache.get(cleanedWord, 'de', targetLang);
+      if (cached) {
+        setTooltipTranslation(cached);
+        return;
+      }
+
       // Fetch translation for tooltip
       try {
-        const targetLang = user?.nativeLanguage || 'vi';
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: {
@@ -1083,6 +1091,7 @@ const DictationPageContent = () => {
         const data = await response.json();
         if (data.success && data.translation) {
           setTooltipTranslation(data.translation);
+          translationCache.set(cleanedWord, data.translation, 'de', targetLang);
         }
       } catch (error) {
         console.error('Translation error:', error);

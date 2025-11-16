@@ -2,6 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import styles from '../styles/DictionaryPopup.module.css';
 
+const DICTIONARY_CACHE_KEY = 'dictionary_cache';
+const CACHE_EXPIRY_DAYS = 7;
+
+const dictionaryCache = {
+  get(word, targetLang) {
+    if (typeof window === 'undefined') return null;
+    try {
+      const cache = JSON.parse(localStorage.getItem(DICTIONARY_CACHE_KEY) || '{}');
+      const key = `${word}_${targetLang}`.toLowerCase();
+      const cached = cache[key];
+      if (cached && cached.expiry > Date.now()) {
+        return cached.data;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+  set(word, data, targetLang) {
+    if (typeof window === 'undefined') return;
+    try {
+      const cache = JSON.parse(localStorage.getItem(DICTIONARY_CACHE_KEY) || '{}');
+      const key = `${word}_${targetLang}`.toLowerCase();
+      cache[key] = {
+        data,
+        expiry: Date.now() + (CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+      };
+      localStorage.setItem(DICTIONARY_CACHE_KEY, JSON.stringify(cache));
+    } catch {}
+  }
+};
+
 const DictionaryPopup = ({ word, onClose, position }) => {
   const { user } = useAuth();
   const [wordData, setWordData] = useState(null);
@@ -23,9 +55,18 @@ const DictionaryPopup = ({ word, onClose, position }) => {
     const fetchWordData = async () => {
       if (!word) return;
       
+      const targetLang = user?.nativeLanguage || 'vi';
+      
+      // Check cache first
+      const cached = dictionaryCache.get(word, targetLang);
+      if (cached) {
+        setWordData(cached);
+        setIsLoading(false);
+        return;
+      }
+      
       setIsLoading(true);
       try {
-        const targetLang = user?.nativeLanguage || 'vi';
         const response = await fetch('/api/dictionary', {
           method: 'POST',
           headers: {
@@ -41,6 +82,7 @@ const DictionaryPopup = ({ word, onClose, position }) => {
         const data = await response.json();
         if (data.success) {
           setWordData(data.data);
+          dictionaryCache.set(word, data.data, targetLang);
         }
       } catch (error) {
         console.error('Dictionary fetch error:', error);

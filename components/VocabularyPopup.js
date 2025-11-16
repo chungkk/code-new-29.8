@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { translationCache } from '../lib/translationCache';
 
 const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, position }) => {
   const [notes, setNotes] = useState('');
@@ -9,7 +10,14 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
   // Fetch translation when word changes and no translation provided
   useEffect(() => {
     const fetchTranslation = async () => {
-      if (!word || translation) return; // Skip if word is empty or translation already provided
+      if (!word || translation) return;
+      
+      // Check cache first
+      const cached = translationCache.get(word, 'de', 'vi');
+      if (cached) {
+        setFetchedTranslation(cached);
+        return;
+      }
       
       setIsLoadingTranslation(true);
       try {
@@ -20,7 +28,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
           },
           body: JSON.stringify({
             text: word,
-            context: '', // Could pass sentence context here if available
+            context: '',
             sourceLang: 'de',
             targetLang: 'vi'
           })
@@ -29,6 +37,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
         const data = await response.json();
         if (data.success && data.translation) {
           setFetchedTranslation(data.translation);
+          translationCache.set(word, data.translation, 'de', 'vi');
         }
       } catch (error) {
         console.error('Translation fetch error:', error);

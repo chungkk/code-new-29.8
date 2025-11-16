@@ -220,6 +220,78 @@ async function translateWithMyMemory(text, sourceLang, targetLang) {
   return null;
 }
 
+/**
+ * Helper to add timeout to promises
+ */
+function withTimeout(promise, timeoutMs, serviceName) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error(`${serviceName} timeout after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ]);
+}
+
+/**
+ * Try all services in parallel and return the fastest successful result
+ */
+async function translateParallel(text, context, sourceLang, targetLang) {
+  const promises = [];
+  
+  // OpenAI with 4s timeout
+  if (OPENAI_API_KEY) {
+    promises.push(
+      withTimeout(translateWithOpenAI(text, context, targetLang), 4000, 'OpenAI')
+        .then(result => ({ method: 'openai-gpt4', translation: result, priority: 1 }))
+        .catch(error => ({ error: error.message, method: 'openai-gpt4', priority: 1 }))
+    );
+  }
+  
+  // Google Translate with 3s timeout
+  if (GOOGLE_TRANSLATE_API_KEY) {
+    promises.push(
+      withTimeout(translateWithGoogle(text, sourceLang, targetLang), 3000, 'Google')
+        .then(result => ({ method: 'google-translate', translation: result, priority: 2 }))
+        .catch(error => ({ error: error.message, method: 'google-translate', priority: 2 }))
+    );
+  }
+  
+  // Groq with 4s timeout
+  if (GROQ_API_KEY) {
+    promises.push(
+      withTimeout(translateWithGroq(text, context, targetLang), 4000, 'Groq')
+        .then(result => ({ method: 'groq-llama', translation: result, priority: 3 }))
+        .catch(error => ({ error: error.message, method: 'groq-llama', priority: 3 }))
+    );
+  }
+  
+  // MyMemory with 3s timeout (always available)
+  promises.push(
+    withTimeout(translateWithMyMemory(text, sourceLang, targetLang), 3000, 'MyMemory')
+      .then(result => ({ method: 'mymemory', translation: result, priority: 4 }))
+      .catch(error => ({ error: error.message, method: 'mymemory', priority: 4 }))
+  );
+  
+  if (promises.length === 0) {
+    return null;
+  }
+  
+  // Wait for all promises to complete
+  const results = await Promise.all(promises);
+  
+  // Filter successful results
+  const successResults = results.filter(r => r.translation && !r.error && r.translation !== text);
+  
+  if (successResults.length === 0) {
+    console.log('All services failed:', results.map(r => `${r.method}: ${r.error || 'no result'}`).join(', '));
+    return null;
+  }
+  
+  // Sort by priority and return the best one
+  successResults.sort((a, b) => a.priority - b.priority);
+  return successResults[0];
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -233,132 +305,32 @@ export default async function handler(req, res) {
     }
 
     const cleanText = text.trim().toLowerCase();
-    let translation = '';
-    let method = '';
-
-    // PRIORITY 1: OpenAI GPT-4 mini (High quality, context-aware)
-    if (OPENAI_API_KEY) {
-      try {
-        translation = await translateWithOpenAI(cleanText, context, targetLang);
-        method = 'openai-gpt4';
-
-        if (translation && translation !== cleanText) {
-          console.log(`✅ OpenAI: ${cleanText} → ${translation}`);
-          return res.status(200).json({
-            success: true,
-            originalText: cleanText,
-            translation: translation,
-            method,
-            sourceLang,
-            targetLang
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ OpenAI failed, trying next...', error.message);
-      }
+    
+    // Try all services in parallel
+    const result = await translateParallel(cleanText, context, sourceLang, targetLang);
+    
+    if (result) {
+      console.log(`✅ ${result.method}: ${cleanText} → ${result.translation}`);
+      return res.status(200).json({
+        success: true,
+        originalText: cleanText,
+        translation: result.translation,
+        method: result.method,
+        sourceLang,
+        targetLang
+      });
     }
-
-    // PRIORITY 2: Google Translate (Best for Vietnamese)
-    if (GOOGLE_TRANSLATE_API_KEY) {
-      try {
-        translation = await translateWithGoogle(cleanText, sourceLang, targetLang);
-        method = 'google-translate';
-
-        if (translation && translation !== cleanText) {
-          console.log(`✅ Google Translate: ${cleanText} → ${translation}`);
-          return res.status(200).json({
-            success: true,
-            originalText: cleanText,
-            translation: translation,
-            method,
-            sourceLang,
-            targetLang
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ Google Translate failed, trying next...', error.message);
-      }
-    }
-
-    // PRIORITY 3: DeepL (Best for German, but no Vietnamese support yet)
-    // Skip for now since DeepL doesn't support Vietnamese
-    // Uncomment when DeepL adds Vietnamese
-    /*
-    if (DEEPL_API_KEY && targetLang !== 'vi') {
-      try {
-        translation = await translateWithDeepL(cleanText, sourceLang, targetLang);
-        method = 'deepl';
-
-        if (translation && translation !== cleanText) {
-          console.log(`✅ DeepL: ${cleanText} → ${translation}`);
-          return res.status(200).json({
-            success: true,
-            originalText: cleanText,
-            translation: translation,
-            method,
-            sourceLang,
-            targetLang
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ DeepL failed, trying next...', error.message);
-      }
-    }
-    */
-
-    // PRIORITY 4: Groq AI with improved prompt (Free but less accurate)
-    if (GROQ_API_KEY) {
-      try {
-        translation = await translateWithGroq(cleanText, context, targetLang);
-        method = 'groq-llama';
-        
-        if (translation && translation !== cleanText) {
-          console.log(`✅ Groq AI: ${cleanText} → ${translation}`);
-          return res.status(200).json({
-            success: true,
-            originalText: cleanText,
-            translation: translation,
-            method,
-            sourceLang,
-            targetLang
-          });
-        }
-      } catch (error) {
-        console.log('⚠️ Groq failed, trying MyMemory...', error.message);
-      }
-    }
-
-    // PRIORITY 5: MyMemory (Last resort, free but low quality)
-    try {
-      translation = await translateWithMyMemory(cleanText, sourceLang, targetLang);
-      method = 'mymemory';
-      
-      if (translation && translation !== cleanText) {
-        console.log(`⚠️ MyMemory (low quality): ${cleanText} → ${translation}`);
-        return res.status(200).json({
-          success: true,
-          originalText: cleanText,
-          translation: translation,
-          method,
-          sourceLang,
-          targetLang,
-          warning: 'Using fallback translation service - quality may be lower'
-        });
-      }
-    } catch (error) {
-      console.error('❌ MyMemory failed:', error.message);
-    }
-
+    
     // No translation found
     console.error(`❌ All translation services failed for: ${cleanText}`);
     return res.status(200).json({
       success: true,
       originalText: cleanText,
-      translation: cleanText, // Return original if all fail
+      translation: cleanText,
       method: 'none',
       sourceLang,
       targetLang,
-      warning: 'No translation service available. Please add API keys to .env.local'
+      warning: 'No translation service available'
     });
 
   } catch (error) {
