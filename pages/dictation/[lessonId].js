@@ -6,6 +6,7 @@ import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
+import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -66,6 +67,13 @@ const DictationPageContent = () => {
   
   // Mobile detection state
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Word suggestion popup states
+  const [showSuggestionPopup, setShowSuggestionPopup] = useState(false);
+  const [suggestionWord, setSuggestionWord] = useState('');
+  const [suggestionWordIndex, setSuggestionWordIndex] = useState(null);
+  const [suggestionContext, setSuggestionContext] = useState('');
+  const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0 });
   
   const { user } = useAuth();
   
@@ -1345,40 +1353,99 @@ const DictationPageContent = () => {
     }
   }, []);
 
-  // Show hint for a word
+  // Show hint for a word - now opens suggestion popup instead of revealing directly
   const showHint = useCallback((button, correctWord, wordIndex) => {
-    const container = button.parentElement;
-    const input = container.querySelector('.word-input');
+    // Get current sentence context
+    const context = transcriptData[currentSentenceIndex]?.text || '';
     
-    if (input) {
-      // Save this word completion to database
-      saveWordCompletion(wordIndex, correctWord);
-      
-      // Replace input with correct word
-      const wordSpan = document.createElement("span");
-      wordSpan.className = "correct-word hint-revealed";
-      wordSpan.innerText = correctWord;
-      wordSpan.onclick = function () {
-        if (window.saveWord) window.saveWord(correctWord);
-      };
-      
-      // Find the punctuation span
-      const punctuation = container.querySelector('.word-punctuation');
-      
-      // Clear container and rebuild
-      container.innerHTML = '';
-      container.appendChild(wordSpan);
-      if (punctuation) {
-        container.appendChild(punctuation);
-      }
-      
-      // Save the word
-      saveWord(correctWord);
-      
-      // Check if sentence is completed
-      checkSentenceCompletion();
+    // Calculate popup position relative to the hint button
+    const rect = button.getBoundingClientRect();
+    const popupWidth = 280;
+    const popupHeight = 250; // Estimated max height
+    
+    // Position popup to the right of the button by default
+    let top = rect.top;
+    let left = rect.right + 10;
+    
+    // Check if popup would go off right edge of screen
+    if (left + popupWidth > window.innerWidth - 10) {
+      // Position to the left instead
+      left = rect.left - popupWidth - 10;
     }
+    
+    // Check if popup would go off left edge
+    if (left < 10) {
+      // Center horizontally instead
+      left = Math.max(10, (window.innerWidth - popupWidth) / 2);
+    }
+    
+    // Check if popup would go off bottom of screen
+    if (top + popupHeight > window.innerHeight - 10) {
+      top = Math.max(10, window.innerHeight - popupHeight - 10);
+    }
+    
+    // Check if popup would go off top
+    if (top < 10) {
+      top = 10;
+    }
+    
+    // Set state for popup
+    setSuggestionWord(correctWord);
+    setSuggestionWordIndex(wordIndex);
+    setSuggestionContext(context);
+    setSuggestionPosition({ top, left });
+    setShowSuggestionPopup(true);
+  }, [transcriptData, currentSentenceIndex]);
+
+  // Handle correct answer from suggestion popup
+  const handleCorrectSuggestion = useCallback((correctWord, wordIndex) => {
+    // Find the button with this word index
+    const button = document.querySelector(`button[onclick*="showHint"][onclick*="${correctWord}"][onclick*="${wordIndex}"]`);
+    if (button) {
+      const container = button.parentElement;
+      const input = container.querySelector('.word-input');
+      
+      if (input) {
+        // Save this word completion to database
+        saveWordCompletion(wordIndex, correctWord);
+        
+        // Replace input with correct word
+        const wordSpan = document.createElement("span");
+        wordSpan.className = "correct-word hint-revealed";
+        wordSpan.innerText = correctWord;
+        wordSpan.onclick = function () {
+          if (window.saveWord) window.saveWord(correctWord);
+        };
+        
+        // Find the punctuation span
+        const punctuation = container.querySelector('.word-punctuation');
+        
+        // Clear container and rebuild
+        container.innerHTML = '';
+        container.appendChild(wordSpan);
+        if (punctuation) {
+          container.appendChild(punctuation);
+        }
+        
+        // Save the word
+        saveWord(correctWord);
+        
+        // Check if sentence is completed
+        checkSentenceCompletion();
+      }
+    }
+    
+    // Close popup
+    setShowSuggestionPopup(false);
+    toast.success('Richtig! Gut gemacht!');
   }, [saveWord, checkSentenceCompletion, saveWordCompletion]);
+
+  // Handle wrong answer from suggestion popup
+  const handleWrongSuggestion = useCallback((correctWord, wordIndex, selectedWord) => {
+    // Close popup after showing feedback
+    setShowSuggestionPopup(false);
+    toast.error(`Falsch! Das richtige Wort ist: ${correctWord}`);
+  }, []);
 
   /**
    * ============================================================================
@@ -2013,6 +2080,19 @@ const DictationPageContent = () => {
         <DictionaryPopup
           word={selectedWord}
           onClose={() => setShowVocabPopup(false)}
+        />
+      )}
+
+      {/* Word Suggestion Popup */}
+      {showSuggestionPopup && (
+        <WordSuggestionPopup
+          correctWord={suggestionWord}
+          context={suggestionContext}
+          wordIndex={suggestionWordIndex}
+          position={suggestionPosition}
+          onCorrectAnswer={handleCorrectSuggestion}
+          onWrongAnswer={handleWrongSuggestion}
+          onClose={() => setShowSuggestionPopup(false)}
         />
       )}
     </div>
