@@ -6,6 +6,18 @@ const DictionaryPopup = ({ word, onClose, position }) => {
   const { user } = useAuth();
   const [wordData, setWordData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const fetchWordData = async () => {
@@ -47,8 +59,16 @@ const DictionaryPopup = ({ word, onClose, position }) => {
   };
 
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
-      <div className={styles.popupContainer}>
+    <div className={`${styles.overlay} ${isMobile ? styles.mobileOverlay : ''}`} onClick={handleOverlayClick}>
+      <div 
+        className={`${styles.popupContainer} ${isMobile ? styles.mobilePopup : ''}`}
+        style={isMobile && position ? {
+          position: 'fixed',
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+          transform: 'translate(-50%, 10px)',
+        } : {}}
+      >
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.wordTitle}>{word}</div>

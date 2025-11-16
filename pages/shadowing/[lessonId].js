@@ -5,7 +5,9 @@ import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
+import WordTooltip from '../../components/WordTooltip';
 import { useProgress } from '../../lib/hooks/useProgress';
+import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
 import styles from '../../styles/shadowingPage.module.css';
@@ -39,6 +41,14 @@ const ShadowingPageContent = () => {
   const [showVocabPopup, setShowVocabPopup] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  
+  // Mobile tooltip states
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipWord, setTooltipWord] = useState('');
+  const [tooltipTranslation, setTooltipTranslation] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  
+  const { user } = useAuth();
   
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
@@ -466,7 +476,7 @@ const ShadowingPageContent = () => {
   }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
 
   // Handle word click for vocabulary popup
-  const handleWordClickForPopup = useCallback((word, event) => {
+  const handleWordClickForPopup = useCallback(async (word, event) => {
     // Pause main audio if playing
     if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
       const audio = window.mainAudioRef.current;
@@ -489,11 +499,88 @@ const ShadowingPageContent = () => {
     // Speak the word
     speakText(cleanedWord);
 
-    // Calculate popup position (centered modal)
-    setSelectedWord(cleanedWord);
-    setPopupPosition({ top: 0, left: 0 }); // Using centered modal, position not needed
-    setShowVocabPopup(true);
-  }, [isYouTube]);
+    const rect = event.target.getBoundingClientRect();
+    const isMobileView = window.innerWidth <= 768;
+
+    if (isMobileView) {
+      // Mobile: Show tooltip above word with boundary checks
+      const tooltipHeight = 50; // Estimated tooltip height
+      const tooltipWidth = 200; // Estimated tooltip width
+      
+      let top = rect.top - 10;
+      let left = rect.left + rect.width / 2;
+
+      // Keep tooltip within viewport
+      // Check top boundary
+      if (top - tooltipHeight < 10) {
+        top = rect.bottom + 10 + tooltipHeight; // Show below if not enough space above
+      }
+
+      // Check left boundary
+      const halfWidth = tooltipWidth / 2;
+      if (left - halfWidth < 10) {
+        left = halfWidth + 10;
+      }
+      
+      // Check right boundary
+      if (left + halfWidth > window.innerWidth - 10) {
+        left = window.innerWidth - halfWidth - 10;
+      }
+
+      setTooltipWord(cleanedWord);
+      setTooltipPosition({ top, left });
+      setShowTooltip(true);
+
+      // Fetch translation for tooltip
+      try {
+        const targetLang = user?.nativeLanguage || 'vi';
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: cleanedWord,
+            context: '',
+            sourceLang: 'de',
+            targetLang: targetLang
+          })
+        });
+
+        const data = await response.json();
+        if (data.success && data.translation) {
+          setTooltipTranslation(data.translation);
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        setTooltipTranslation('...');
+      }
+    } else {
+      // Desktop: Show full popup
+      const popupWidth = 400;
+      const popupHeight = 230;
+
+      let top = rect.top;
+      let left = rect.right + 15;
+
+      // Check if popup would go off right edge
+      if (left + popupWidth > window.innerWidth - 20) {
+        left = rect.left - popupWidth - 15;
+      }
+
+      // Check vertical position
+      if (top + popupHeight > window.innerHeight - 20) {
+        top = window.innerHeight - popupHeight - 20;
+      }
+      if (top < 20) {
+        top = 20;
+      }
+
+      setSelectedWord(cleanedWord);
+      setPopupPosition({ top, left });
+      setShowVocabPopup(true);
+    }
+  }, [isYouTube, user]);
 
   // Save vocabulary to database
   const saveVocabulary = useCallback(async ({ word, translation, notes }) => {
@@ -1012,7 +1099,19 @@ const ShadowingPageContent = () => {
            />
          </div> */}
 
-         {/* Dictionary Popup */}
+         {/* Mobile Tooltip */}
+         {showTooltip && (
+           <WordTooltip
+             translation={tooltipTranslation}
+             position={tooltipPosition}
+             onClose={() => {
+               setShowTooltip(false);
+               setTooltipTranslation('');
+             }}
+           />
+         )}
+
+         {/* Desktop Dictionary Popup */}
          {showVocabPopup && (
            <DictionaryPopup
              word={selectedWord}

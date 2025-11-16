@@ -169,6 +169,51 @@
   font-weight: 500;
 }
 
+/* Mobile specific styles */
+.mobileOverlay {
+  background: transparent;
+  padding: 0;
+  pointer-events: none;
+}
+
+.mobilePopup {
+  pointer-events: auto;
+  max-width: 250px;
+  margin: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.mobilePopup .header {
+  padding: 8px 10px;
+  border-radius: 8px 8px 0 0;
+}
+
+.mobilePopup .wordTitle {
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.mobilePopup .wordTranslation {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.mobilePopup .closeButton {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+.mobilePopup .content {
+  padding: 8px 10px;
+  max-height: none;
+}
+
+.mobilePopup .loading {
+  padding: 10px;
+  font-size: 11px;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .overlay {
@@ -197,6 +242,11 @@
     max-height: calc(100vh - 140px);
   }
 
+  /* Hide explanation and examples on mobile */
+  .section {
+    display: none;
+  }
+
   .sectionTitle {
     font-size: 13px;
   }
@@ -211,6 +261,10 @@
 
   .exampleTranslation {
     font-size: 11px;
+  }
+
+  .loading {
+    font-size: 12px;
   }
 }
 

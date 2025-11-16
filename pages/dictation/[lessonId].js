@@ -5,6 +5,8 @@ import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
 import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
+import WordTooltip from '../../components/WordTooltip';
+import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
 import styles from '../../styles/dictationPage.module.css';
@@ -55,8 +57,16 @@ const DictationPageContent = () => {
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   
+  // Mobile tooltip states
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipWord, setTooltipWord] = useState('');
+  const [tooltipTranslation, setTooltipTranslation] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  
   // Mobile detection state
   const [isMobile, setIsMobile] = useState(false);
+  
+  const { user } = useAuth();
   
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
@@ -999,7 +1009,7 @@ const DictationPageContent = () => {
   }, [lessonId, transcriptData, currentSentenceIndex]);
 
   // Handle word click for popup (for completed words)
-  const handleWordClickForPopup = useCallback((word, event) => {
+  const handleWordClickForPopup = useCallback(async (word, event) => {
     // Pause main audio nếu đang phát
     if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
       const audio = window.mainAudioRef.current;
@@ -1022,34 +1032,88 @@ const DictationPageContent = () => {
     // Speak the word
     speakText(cleanedWord);
 
-    // Calculate popup position
     const rect = event.target.getBoundingClientRect();
-    const popupWidth = 240;
-    const popupHeight = 230;
+    const isMobileView = window.innerWidth <= 768;
 
-    let top = rect.top;
-    let left = rect.right + 15;
+    if (isMobileView) {
+      // Mobile: Show tooltip above word with boundary checks
+      const tooltipHeight = 50; // Estimated tooltip height
+      const tooltipWidth = 200; // Estimated tooltip width
+      
+      let top = rect.top - 10;
+      let left = rect.left + rect.width / 2;
 
-    // Check if popup would go off right edge
-    if (left + popupWidth / 2 > window.innerWidth - 20) {
-      left = rect.left - popupWidth / 2 - 15;
-      if (left - popupWidth / 2 < 20) {
-        left = rect.left + rect.width / 2;
+      // Keep tooltip within viewport
+      // Check top boundary
+      if (top - tooltipHeight < 10) {
+        top = rect.bottom + 10 + tooltipHeight; // Show below if not enough space above
       }
-    }
 
-    // Check vertical position
-    if (top + popupHeight > window.innerHeight - 20) {
-      top = window.innerHeight - popupHeight - 20;
-    }
-    if (top < 20) {
-      top = 20;
-    }
+      // Check left boundary
+      const halfWidth = tooltipWidth / 2;
+      if (left - halfWidth < 10) {
+        left = halfWidth + 10;
+      }
+      
+      // Check right boundary
+      if (left + halfWidth > window.innerWidth - 10) {
+        left = window.innerWidth - halfWidth - 10;
+      }
 
-    setSelectedWord(cleanedWord);
-    setPopupPosition({ top, left });
-    setShowVocabPopup(true);
-  }, [isYouTube]);
+      setTooltipWord(cleanedWord);
+      setTooltipPosition({ top, left });
+      setShowTooltip(true);
+
+      // Fetch translation for tooltip
+      try {
+        const targetLang = user?.nativeLanguage || 'vi';
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: cleanedWord,
+            context: '',
+            sourceLang: 'de',
+            targetLang: targetLang
+          })
+        });
+
+        const data = await response.json();
+        if (data.success && data.translation) {
+          setTooltipTranslation(data.translation);
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        setTooltipTranslation('...');
+      }
+    } else {
+      // Desktop: Show full popup
+      const popupWidth = 400;
+      const popupHeight = 230;
+
+      let top = rect.top;
+      let left = rect.right + 15;
+
+      // Check if popup would go off right edge
+      if (left + popupWidth > window.innerWidth - 20) {
+        left = rect.left - popupWidth - 15;
+      }
+
+      // Check vertical position
+      if (top + popupHeight > window.innerHeight - 20) {
+        top = window.innerHeight - popupHeight - 20;
+      }
+      if (top < 20) {
+        top = 20;
+      }
+
+      setSelectedWord(cleanedWord);
+      setPopupPosition({ top, left });
+      setShowVocabPopup(true);
+    }
+  }, [isYouTube, user]);
 
   // Double-click hint functionality
   const handleInputClick = useCallback((input, correctWord) => {
@@ -1923,8 +1987,20 @@ const DictationPageContent = () => {
         </div>
       )}
 
-      {/* Dictionary Popup */}
-      {showVocabPopup && (
+      {/* Mobile Tooltip */}
+      {showTooltip && (
+        <WordTooltip
+          translation={tooltipTranslation}
+          position={tooltipPosition}
+          onClose={() => {
+            setShowTooltip(false);
+            setTooltipTranslation('');
+          }}
+        />
+      )}
+
+      {/* Desktop Dictionary Popup */}
+      {showVocabPopup && !isMobile && (
         <DictionaryPopup
           word={selectedWord}
           onClose={() => setShowVocabPopup(false)}

@@ -876,17 +876,43 @@ const SelfLessonPageContent = () => {
 
     // Calculate popup position
     const rect = event.target.getBoundingClientRect();
-    const popupWidth = 240;
-    const popupHeight = 230;
+    const isMobileView = window.innerWidth <= 768;
+    const popupWidth = isMobileView ? 250 : 400;
+    const popupHeight = isMobileView ? 80 : 230;
 
-    let top = rect.top;
-    let left = rect.right + 15;
+    let top = rect.bottom;
+    let left = rect.left + rect.width / 2;
 
-    // Check if popup would go off right edge
-    if (left + popupWidth / 2 > window.innerWidth - 20) {
-      left = rect.left - popupWidth / 2 - 15;
-      if (left - popupWidth / 2 < 20) {
-        left = rect.left + rect.width / 2;
+    // For mobile, center below the word
+    if (isMobileView) {
+      // Check if popup would go below viewport
+      if (top + popupHeight > window.innerHeight - 10) {
+        top = rect.top - popupHeight - 10; // Show above
+      }
+
+      // Keep within horizontal bounds
+      if (left < popupWidth / 2 + 10) {
+        left = popupWidth / 2 + 10;
+      }
+      if (left > window.innerWidth - popupWidth / 2 - 10) {
+        left = window.innerWidth - popupWidth / 2 - 10;
+      }
+    } else {
+      // Desktop: position to the right
+      left = rect.right + 15;
+      top = rect.top;
+
+      // Check if popup would go off right edge
+      if (left + popupWidth > window.innerWidth - 20) {
+        left = rect.left - popupWidth - 15;
+      }
+
+      // Check vertical position
+      if (top + popupHeight > window.innerHeight - 20) {
+        top = window.innerHeight - popupHeight - 20;
+      }
+      if (top < 20) {
+        top = 20;
       }
     }
 
