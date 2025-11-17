@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { fetchWithAuth } from '../lib/api';
+import { toast } from 'react-toastify';
 import styles from '../styles/DictionaryPopup.module.css';
 
 const DICTIONARY_CACHE_KEY = 'dictionary_cache';
@@ -34,11 +36,13 @@ const dictionaryCache = {
   }
 };
 
-const DictionaryPopup = ({ word, onClose, position, arrowPosition }) => {
+const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, context }) => {
   const { user } = useAuth();
   const [wordData, setWordData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -100,6 +104,44 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition }) => {
     }
   };
 
+  const handleSaveWord = async () => {
+    if (!user) {
+      toast.warning('🔐 Bitte melden Sie sich an, um Ihr Vokabular zu speichern!');
+      return;
+    }
+
+    if (!wordData?.translation) {
+      toast.info('⏳ Einen Moment, die Wortbedeutung wird gesucht...');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetchWithAuth('/api/vocabulary', {
+        method: 'POST',
+        body: JSON.stringify({
+          word: word,
+          translation: wordData.translation,
+          context: context || '',
+          lessonId: lessonId || null
+        })
+      });
+
+      if (res.ok) {
+        toast.success('🎉 Wunderbar! Das Wort wurde Ihrem Vokabular hinzugefügt!');
+        setIsSaved(true);
+      } else {
+        const data = await res.json();
+        toast.error('😅 Ups! ' + data.message);
+      }
+    } catch (error) {
+      console.error('Save vocabulary error:', error);
+      toast.error('😢 Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut!');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className={`${styles.overlay} ${isMobile ? styles.mobileOverlay : ''}`} onClick={handleOverlayClick}>
       <div
@@ -121,9 +163,21 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition }) => {
               </div>
             )}
           </div>
-          <button onClick={onClose} className={styles.closeButton}>
-            ✕
-          </button>
+          <div className={styles.headerButtons}>
+            {user && (
+              <button
+                onClick={handleSaveWord}
+                className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
+                disabled={isSaving || isLoading}
+                title={isSaved ? 'Dieses Wort ist bereits in Ihrem Schatz!' : 'Dieses Wort im Schatz speichern'}
+              >
+                {isSaving ? '💫' : isSaved ? '🎉 Gespeichert!' : '⭐ Speichern'}
+              </button>
+            )}
+            <button onClick={onClose} className={styles.closeButton}>
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className={styles.content}>

@@ -108,10 +108,10 @@ const Header = () => {
   };
 
   const navLinks = [
-    { href: '/', label: 'Topics' },
-    { href: '/review', label: 'Review' },
-    { href: '/dashboard/vocabulary', label: 'Vocabulary' },
-    { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/', label: 'Themen' },
+    { href: '/review', label: 'Überprüfung' },
+    { href: '/dashboard/vocabulary', label: 'Vokabular' },
+    { href: '/leaderboard', label: 'Bestenliste' },
   ];
 
   const isActive = (path) => {
@@ -170,7 +170,7 @@ const Header = () => {
               href="/dashboard"
               className={`${styles.navLink} ${isActive('/dashboard') ? styles.active : ''}`}
             >
-              Dashboard
+              Armaturenbrett
             </Link>
           )}
         </nav>
@@ -181,20 +181,20 @@ const Header = () => {
             className={styles.themeToggle}
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title={currentTheme?.label || 'Toggle theme'}
+            title={currentTheme?.label || 'Thema umschalten'}
           >
             {currentTheme?.emoji || '🌅'}
           </button>
 
           <div className={styles.languageSelector}>
-            <span>🇬🇧</span>
-            <span>English</span>
+            <span>🇩🇪</span>
+            <span>Deutsch</span>
             <span>▼</span>
           </div>
 
           {user && (
             <>
-              <div className={styles.pointsBadge} title="Your total points">
+              <div className={styles.pointsBadge} title="Ihre Gesamtpunktzahl">
                 <span className={styles.pointsIcon}>⭐</span>
                 <span className={styles.pointsValue}>{userPoints || 0}</span>
               </div>
@@ -204,7 +204,7 @@ const Header = () => {
                   className={styles.streakBtn} 
                   aria-label="Streak"
                   onClick={() => setStreakPopupOpen(true)}
-                  title="View your learning streak"
+                  title="Ihre Lernserie ansehen"
                 >
                   <span className={styles.streakIcon}>🔥</span>
                   <span className={styles.streakValue}>{currentStreak}</span>
@@ -215,7 +215,7 @@ const Header = () => {
                 )}
               </div>
 
-              <button className={styles.notificationBtn} aria-label="Notifications">
+              <button className={styles.notificationBtn} title="Benachrichtigungen">
                 <span>🔔</span>
                 <span className={styles.notificationBadge}></span>
               </button>
@@ -224,12 +224,12 @@ const Header = () => {
                 <button
                   className={styles.userAvatarBtn}
                   onClick={toggleUserMenu}
-                  aria-label="User menu"
+                  aria-label="Benutzermenü"
                   aria-expanded={userMenuOpen}
                 >
                   <Image
                     src={user.avatar || getDefaultAvatar(user.name)}
-                    alt={user.name || 'User'}
+                     alt={user.name || 'Benutzer'}
                     width={40}
                     height={40}
                     className={styles.userAvatar}
@@ -242,7 +242,7 @@ const Header = () => {
                       <div className={styles.userDropdownAvatar}>
                         <Image
                           src={user.avatar || getDefaultAvatar(user.name)}
-                          alt={user.name || 'User'}
+                          alt={user.name || 'Benutzer'}
                           width={48}
                           height={48}
                           className={styles.dropdownAvatar}
@@ -272,7 +272,7 @@ const Header = () => {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>📚</span>
-                        <span>Mein Wortschatz</span>
+                        <span>Mein Vokabular</span>
                       </Link>
 
                       <Link
@@ -281,7 +281,7 @@ const Header = () => {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>🏆</span>
-                        <span>Leaderboard</span>
+                        <span>Bestenliste</span>
                       </Link>
 
                       <Link
@@ -302,7 +302,7 @@ const Header = () => {
                             onClick={() => setUserMenuOpen(false)}
                           >
                             <span className={styles.dropdownIcon}>👑</span>
-                            <span>Admin Panel</span>
+                            <span>Admin-Bereich</span>
                           </Link>
                         </>
                       )}

@@ -667,11 +667,11 @@ const SelfLessonPageContent = () => {
   const loadTranscript = async (jsonPath) => {
     try {
       const response = await fetch(jsonPath);
-      if (!response.ok) throw new Error(`Không thể tải file JSON tại: ${jsonPath}`);
+      if (!response.ok) throw new Error(`JSON-Datei konnte nicht geladen werden unter: ${jsonPath}`);
       const data = await response.json();
       setTranscriptData(data);
     } catch (error) {
-      console.error('Lỗi tải transcript:', error);
+      console.error('Fehler beim Laden des Transkripts:', error);
     }
   };
 
@@ -1180,254 +1180,254 @@ const SelfLessonPageContent = () => {
       });
       
        const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted, isTextHidden);
-      setProcessedText(processed);
-      
-      if (typeof window !== 'undefined') {
-        window.checkWord = checkWord;
-        window.handleInputClick = handleInputClick;
-        window.handleInputFocus = handleInputFocus;
-        window.handleInputBlur = handleInputBlur;
-        window.saveWord = saveWord;
-        window.showHint = showHint;
-        window.handleWordClickForPopup = handleWordClickForPopup;
-        window.disableArrowKeys = (e) => {
-          // Prevent all arrow keys and space from being typed in input fields
-          if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
-            e.preventDefault();
-          }
-        };
-      }
-    }
-   }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, isTextHidden]);
-
-  const handleBackToHome = () => router.push('/');
-
-  const handleModeSelect = (lesson, mode) => {
-    router.push(`/${mode}/${lesson.id}`);
-  };
-
-  const handleShowModePopup = () => {
-    setShowModePopup(true);
-  };
-
-  const handleCloseModePopup = () => {
-    setShowModePopup(false);
-  };
-
-  if (loading) {
-    return (
-      <div className={styles.centeredState}>
-        <div style={{ textAlign: 'center' }}>
-          <h2>⏳ Lektion lädt...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  if (!lesson) {
-    return (
-      <div className={styles.centeredState}>
-        <div style={{ textAlign: 'center' }}>
-          <h1>❌ Lektion nicht gefunden</h1>
-           <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
-          <button 
-            onClick={handleBackToHome}
-            style={{ 
-              marginTop: '30px', 
-              padding: '12px 24px', 
-              fontSize: '16px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            ← Zur Startseite
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const sentenceListClassNames = {
-    item: styles.sentenceItem,
-    itemActive: styles.sentenceItemActive,
-    itemPlaying: styles.sentenceItemPlaying,
-    number: styles.sentenceNumber,
-    content: styles.sentenceContent,
-    text: styles.sentenceText,
-    time: styles.sentenceTime,
-    actions: styles.sentenceActions,
-    actionButton: styles.sentenceActionButton
-  };
-
-  const footerClassNames = {
-    wrapper: styles.footerControls,
-    button: styles.footerButton,
-    icon: styles.footerIcon,
-    label: styles.footerLabel
-  };
-
-  return (
-    <>
-      <Head>
-        <title>{lesson.displayTitle} - Self-created Lesson</title>
-        <meta name="description" content={`Selbst erstellte Lektion: ${lesson.title}`} />
-      </Head>
-      
-      <div className={styles.page}>
-        {!isYouTube && (
-          <audio ref={audioRef} controls style={{ display: 'none' }}>
-            <source src={lesson.audio} type="audio/mp3" />
-            Trình duyệt của bạn không hỗ trợ thẻ audio.
-          </audio>
-        )}
-        
-
-
-
-
-          <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
-           <div className={styles.layout}>
-             {/* LEFT SIDE: Medien */}
-             <div className={styles.mediaSection}>
-               <div className={styles.mediaContainer}>
-                 <div className={styles.mediaPlayer}>
-                      <div className={styles.mediaArtwork}>
-                        <div className={styles.artworkInner} style={{ position: 'relative', overflow: 'hidden' }}>
-                          {isYouTube ? (
-                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                              <div id="youtube-player" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
-                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
-                            </div>
-                          ) : (
+       setProcessedText(processed);
+       
+       if (typeof window !== 'undefined') {
+         window.checkWord = checkWord;
+         window.handleInputClick = handleInputClick;
+         window.handleInputFocus = handleInputFocus;
+         window.handleInputBlur = handleInputBlur;
+         window.saveWord = saveWord;
+         window.showHint = showHint;
+         window.handleWordClickForPopup = handleWordClickForPopup;
+         window.disableArrowKeys = (e) => {
+           // Prevent all arrow keys and space from being typed in input fields
+           if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
+             e.preventDefault();
+           }
+         };
+       }
+     }
+    }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, isTextHidden]);
+ 
+   const handleBackToHome = () => router.push('/');
+ 
+   const handleModeSelect = (lesson, mode) => {
+     router.push(`/${mode}/${lesson.id}`);
+   };
+ 
+   const handleShowModePopup = () => {
+     setShowModePopup(true);
+   };
+ 
+   const handleCloseModePopup = () => {
+     setShowModePopup(false);
+   };
+ 
+   if (loading) {
+     return (
+       <div className={styles.centeredState}>
+         <div style={{ textAlign: 'center' }}>
+           <h2>⏳ Lektion lädt...</h2>
+         </div>
+       </div>
+     );
+   }
+ 
+   if (!lesson) {
+     return (
+       <div className={styles.centeredState}>
+         <div style={{ textAlign: 'center' }}>
+           <h1>❌ Lektion nicht gefunden</h1>
+            <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
+           <button 
+             onClick={handleBackToHome}
+             style={{ 
+               marginTop: '30px', 
+               padding: '12px 24px', 
+               fontSize: '16px',
+               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+               color: 'white',
+               border: 'none',
+               borderRadius: '8px',
+               cursor: 'pointer'
+             }}
+           >
+             ← Zur Startseite
+           </button>
+         </div>
+       </div>
+     );
+   }
+ 
+   const sentenceListClassNames = {
+     item: styles.sentenceItem,
+     itemActive: styles.sentenceItemActive,
+     itemPlaying: styles.sentenceItemPlaying,
+     number: styles.sentenceNumber,
+     content: styles.sentenceContent,
+     text: styles.sentenceText,
+     time: styles.sentenceTime,
+     actions: styles.sentenceActions,
+     actionButton: styles.sentenceActionButton
+   };
+ 
+   const footerClassNames = {
+     wrapper: styles.footerControls,
+     button: styles.footerButton,
+     icon: styles.footerIcon,
+     label: styles.footerLabel
+   };
+ 
+   return (
+     <>
+       <Head>
+         <title>{lesson.displayTitle} - Self-created Lesson</title>
+         <meta name="description" content={`Selbst erstellte Lektion: ${lesson.title}`} />
+       </Head>
+       
+       <div className={styles.page}>
+         {!isYouTube && (
+           <audio ref={audioRef} controls style={{ display: 'none' }}>
+             <source src={lesson.audio} type="audio/mp3" />
+             Ihr Browser unterstützt das Audio-Element nicht.
+           </audio>
+         )}
+         
+ 
+ 
+ 
+ 
+           <div className={`${styles.appContainer} ${styles.appContainerOffset}`}>
+            <div className={styles.layout}>
+              {/* LEFT SIDE: Medien */}
+              <div className={styles.mediaSection}>
+                <div className={styles.mediaContainer}>
+                  <div className={styles.mediaPlayer}>
+                       <div className={styles.mediaArtwork}>
+                         <div className={styles.artworkInner} style={{ position: 'relative', overflow: 'hidden' }}>
+                           {isYouTube ? (
+                             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                               <div id="youtube-player" style={{ width: '100%', height: '100%', pointerEvents: 'none' }}></div>
+                               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
+                             </div>
+                           ) : (
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                     
+                     <div className={styles.mediaInfo}>
+                       <div className={styles.mediaTitle}>{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
+                       <div className={styles.mediaArtist}>{lesson.description || 'Deutschunterricht'}</div>
+                     </div>
+ 
+                     <div className={styles.mediaProgressContainer}>
+                       <div className={styles.mediaProgress} onClick={handleProgressClick}>
+                         <div className={styles.mediaProgressFill} style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
+                       </div>
+                      <div className={styles.mediaTime}>
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+ 
+                     <div className={styles.mediaControls}>
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToPreviousSentence} title="Vorheriger Satz">
+                         <svg viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                         </svg>
+                       </button>
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonLarge}`} onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
+                         {isPlaying ? (
                            <svg viewBox="0 0 24 24" fill="currentColor">
-                             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                           </svg>
+                         ) : (
+                           <svg viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M8 5v14l11-7z"/>
                            </svg>
                          )}
-                       </div>
+                       </button>
+                       <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToNextSentence} title="Nächster Satz">
+                         <svg viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                         </svg>
+                       </button>
                      </div>
-                    
-                    <div className={styles.mediaInfo}>
-                      <div className={styles.mediaTitle}>{lesson.displayTitle || lesson.title || `Lektion ${lessonId}`}</div>
-                      <div className={styles.mediaArtist}>{lesson.description || 'Deutschunterricht'}</div>
-                    </div>
-
-                    <div className={styles.mediaProgressContainer}>
-                      <div className={styles.mediaProgress} onClick={handleProgressClick}>
-                        <div className={styles.mediaProgressFill} style={{ transform: `scaleX(${duration > 0 ? currentTime / duration : 0})` }} />
-                      </div>
-                     <div className={styles.mediaTime}>
-                       <span>{formatTime(currentTime)}</span>
-                       <span>{formatTime(duration)}</span>
+                  </div>
+                </div>
+              </div>
+ 
+               {/* MIDDLE: Aktueller Satz */}
+               <div className={styles.currentSentenceSection} style={{ flex: '1.5' }}>
+                <div className={styles.currentSentenceContainer}>
+                  <h3>Aktueller Satz</h3>
+                 
+                 {/* Current Sentence Dictation Input */}
+                 {transcriptData[currentSentenceIndex] && (
+                   <div className={styles.transcriptWrapper}>
+                     <div className={styles.sentenceCounterContainer}>
+                       <button 
+                         className={`${styles.navButton} ${styles.prevButton}`}
+                         onClick={goToPreviousSentence}
+                         disabled={currentSentenceIndex === 0}
+                         title="Vorheriger Satz"
+                       >
+                         ‹
+                       </button>
+                       
+                       <div className={styles.sentenceCounter}>
+                         Satz {currentSentenceIndex + 1} / {transcriptData.length}
+                       </div>
+                       
+                       <button 
+                         className={`${styles.navButton} ${styles.nextButton}`}
+                         onClick={goToNextSentence}
+                         disabled={currentSentenceIndex === transcriptData.length - 1}
+                         title="Nächster Satz"
+                       >
+                         ›
+                       </button>
+                     </div>
+                     
+                     <div className={styles.inputArea}>
+                      <div
+                        className={styles.dictationText}
+                        dangerouslySetInnerHTML={{ __html: processedText }}
+                      />
+                     </div>
+                     
+                     <div 
+                       className={`${styles.sentenceTimeContainer} ${isPlaying ? styles.sentenceTimeContainerPlaying : ''}`}
+                       onClick={() => handleSentenceClick(
+                         transcriptData[currentSentenceIndex].start, 
+                         transcriptData[currentSentenceIndex].end
+                       )}
+                        title="Klicken, um diesen Satz abzuspielen oder zu pausieren"
+                     >
+                        <div className={styles.timeProgressBar}>
+                          <div
+                            className={styles.timeProgressFill}
+                            style={{
+                              transform: `scaleX(${isPlaying && transcriptData[currentSentenceIndex]
+                                ? (currentTime - transcriptData[currentSentenceIndex].start) /
+                                  (transcriptData[currentSentenceIndex].end - transcriptData[currentSentenceIndex].start)
+                                : 0})`
+                            }}
+                          />
+                        </div>
+                       <div className={styles.timeDisplay}>
+                         <span className={styles.timeIcon}>{isPlaying ? '▶' : '⏸'}</span>
+                         <span className={styles.timeCurrent}>{formatTime(currentTime)}</span>
+                         <span className={styles.timeSeparator}>/</span>
+                         <span className={styles.timeTotal}>
+                           {formatTime(transcriptData[currentSentenceIndex].start)} - {formatTime(transcriptData[currentSentenceIndex].end)}
+                         </span>
+                       </div>
                      </div>
                    </div>
-
-                    <div className={styles.mediaControls}>
-                      <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToPreviousSentence} title="Vorheriger Satz">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-                        </svg>
-                      </button>
-                      <button className={`${styles.mediaButton} ${styles.mediaButtonLarge}`} onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Abspielen'}>
-                        {isPlaying ? (
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                          </svg>
-                        ) : (
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        )}
-                      </button>
-                      <button className={`${styles.mediaButton} ${styles.mediaButtonSmall}`} onClick={goToNextSentence} title="Nächster Satz">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-                        </svg>
-                      </button>
-                    </div>
-                 </div>
+                 )}
                </div>
              </div>
-
-              {/* MIDDLE: Aktueller Satz */}
-              <div className={styles.currentSentenceSection} style={{ flex: '1.5' }}>
-               <div className={styles.currentSentenceContainer}>
-                 <h3>Aktueller Satz</h3>
-                
-                {/* Current Sentence Dictation Input */}
-                {transcriptData[currentSentenceIndex] && (
-                  <div className={styles.transcriptWrapper}>
-                    <div className={styles.sentenceCounterContainer}>
-                      <button 
-                        className={`${styles.navButton} ${styles.prevButton}`}
-                        onClick={goToPreviousSentence}
-                        disabled={currentSentenceIndex === 0}
-                        title="Vorheriger Satz"
-                      >
-                        ‹
-                      </button>
-                      
-                      <div className={styles.sentenceCounter}>
-                        Satz {currentSentenceIndex + 1} / {transcriptData.length}
-                      </div>
-                      
-                      <button 
-                        className={`${styles.navButton} ${styles.nextButton}`}
-                        onClick={goToNextSentence}
-                        disabled={currentSentenceIndex === transcriptData.length - 1}
-                        title="Nächster Satz"
-                      >
-                        ›
-                      </button>
-                    </div>
-                    
-                    <div className={styles.inputArea}>
-                     <div
-                       className={styles.dictationText}
-                       dangerouslySetInnerHTML={{ __html: processedText }}
-                     />
-                    </div>
-                    
-                    <div 
-                      className={`${styles.sentenceTimeContainer} ${isPlaying ? styles.sentenceTimeContainerPlaying : ''}`}
-                      onClick={() => handleSentenceClick(
-                        transcriptData[currentSentenceIndex].start, 
-                        transcriptData[currentSentenceIndex].end
-                      )}
-                       title="Klicken, um diesen Satz abzuspielen oder zu pausieren"
-                    >
-                       <div className={styles.timeProgressBar}>
-                         <div
-                           className={styles.timeProgressFill}
-                           style={{
-                             transform: `scaleX(${isPlaying && transcriptData[currentSentenceIndex]
-                               ? (currentTime - transcriptData[currentSentenceIndex].start) /
-                                 (transcriptData[currentSentenceIndex].end - transcriptData[currentSentenceIndex].start)
-                               : 0})`
-                           }}
-                         />
-                       </div>
-                      <div className={styles.timeDisplay}>
-                        <span className={styles.timeIcon}>{isPlaying ? '▶' : '⏸'}</span>
-                        <span className={styles.timeCurrent}>{formatTime(currentTime)}</span>
-                        <span className={styles.timeSeparator}>/</span>
-                        <span className={styles.timeTotal}>
-                          {formatTime(transcriptData[currentSentenceIndex].start)} - {formatTime(transcriptData[currentSentenceIndex].end)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-              {/* RIGHT SIDE: Satzliste */}
+             
+               {/* RIGHT SIDE: Satzliste */}
                <div className={styles.sentenceListSection} style={{ flex: '1.2' }}>
                 <div className={styles.sentenceListContainer}>
                   <h3>Satzliste</h3>
-                
+                 
                  {/* Sentence List */}
                  <div className={styles.sentenceList} style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '10px' }}>
                    {transcriptData.map((segment, index) => (
@@ -1447,71 +1447,74 @@ const SelfLessonPageContent = () => {
                      />
                    ))}
                  </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <FooterControls
-          onSeek={handleSeek}
-          onPlayPause={handlePlayPause}
-          isPlaying={isPlaying}
-          classNames={footerClassNames}
-        />
-      </div>
-
-        {showVocabPopup && (
-          <DictionaryPopup
-            word={selectedWord}
-            onClose={() => setShowVocabPopup(false)}
-          />
-        )}
-
-         {showModePopup && lesson && (
-           <ModeSelectionPopup
-             lesson={lesson}
-             onClose={handleCloseModePopup}
-             onSelectMode={handleModeSelect}
-           />
-         )}
-
-         {/* Fixed Modus Toggle Button */}
-         <button
-           onClick={toggleTextVisibility}
-           style={{
-             position: 'fixed',
-             top: '120px',
-             right: '20px',
-             padding: '12px 20px',
-             background: isTextHidden
-               ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-               : 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-             color: 'white',
-             border: 'none',
-             borderRadius: '25px',
-             cursor: 'pointer',
-             fontSize: '14px',
-             fontWeight: 'bold',
-             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-             zIndex: 1000,
-             transition: 'all 0.3s ease',
-             display: 'flex',
-             alignItems: 'center',
-             gap: '8px'
-           }}
-           onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-           onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-           title={isTextHidden ? 'Text anzeigen' : 'Text verbergen'}
-         >
-           <span>👁️</span>
-           <span>{isTextHidden ? 'Versteckt' : 'Sichtbar'}</span>
-         </button>
-       </>
-     );
-  };
-
-const SelfLessonPage = () => {
-  return <SelfLessonPageContent />;
-};
-
-export default SelfLessonPage;
+               </div>
+             </div>
+           </div>
+         </div>
+ 
+         <FooterControls
+           onSeek={handleSeek}
+           onPlayPause={handlePlayPause}
+           isPlaying={isPlaying}
+           classNames={footerClassNames}
+         />
+       </div>
+ 
+       {showVocabPopup && (
+         <DictionaryPopup
+           word={selectedWord}
+           position={popupPosition}
+           lessonId={lessonId}
+           context={transcriptData[currentSentenceIndex]?.text || ''}
+           onClose={() => setShowVocabPopup(false)}
+         />
+       )}
+ 
+          {showModePopup && lesson && (
+            <ModeSelectionPopup
+              lesson={lesson}
+              onClose={handleCloseModePopup}
+              onSelectMode={handleModeSelect}
+            />
+          )}
+ 
+          {/* Fixed Modus Toggle Button */}
+          <button
+            onClick={toggleTextVisibility}
+            style={{
+              position: 'fixed',
+              top: '120px',
+              right: '150px',
+              padding: '12px 20px',
+              background: isTextHidden
+                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                : 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              zIndex: 1000,
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            title={isTextHidden ? 'Text anzeigen' : 'Text verbergen'}
+          >
+            <span>👁️</span>
+            <span>{isTextHidden ? 'Versteckt' : 'Sichtbar'}</span>
+          </button>
+        </>
+      );
+    };
+ 
+ const SelfLessonPage = () => {
+   return <SelfLessonPageContent />;
+ };
+ 
+ export default SelfLessonPage;

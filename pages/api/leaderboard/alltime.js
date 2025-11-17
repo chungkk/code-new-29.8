@@ -1,6 +1,5 @@
 import connectDB from '../../../lib/mongodb';
 import User from '../../../models/User';
-import MonthlyLeaderboard from '../../../lib/models/MonthlyLeaderboard';
 import { verifyToken } from '../../../lib/jwt';
 
 export default async function handler(req, res) {
@@ -23,22 +22,17 @@ export default async function handler(req, res) {
 
     await connectDB();
 
-    // Get year and month from query or use current
-    const now = new Date();
-    const year = parseInt(req.query.year) || now.getFullYear();
-    const month = parseInt(req.query.month) || now.getMonth() + 1; // 1-12
-
     // Get pagination params
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const skip = (page - 1) * limit;
 
-    // Fetch monthly leaderboard data directly from User model
+    // Fetch all-time leaderboard data (users sorted by total points)
     const totalEntries = await User.countDocuments();
 
     const users = await User.find({})
       .select('name email points monthlyPoints streak.currentStreak streak.maxStreak streak.maxStreakThisMonth createdAt')
-      .sort({ monthlyPoints: -1, createdAt: 1 })
+      .sort({ points: -1, createdAt: 1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -49,23 +43,13 @@ export default async function handler(req, res) {
       id: user._id.toString(),
       name: user.name || 'Unknown User',
       email: user.email || '',
+      totalPoints: user.points || 0,
       monthlyPoints: user.monthlyPoints || 0,
+      currentStreak: user.streak?.currentStreak || 0,
+      maxStreak: user.streak?.maxStreak || 0,
       maxStreakThisMonth: user.streak?.maxStreakThisMonth || 0,
       isCurrentUser: currentUserId === user._id.toString()
     }));
-
-    // Calculate countdown to end of month
-    const lastDayOfMonth = new Date(year, month, 0); // Day 0 of next month = last day of current month
-    const endOfMonth = new Date(year, month - 1, lastDayOfMonth.getDate(), 23, 59, 59, 999);
-    const timeRemaining = endOfMonth - now;
-
-    const countdown = {
-      days: Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60 * 24))),
-      hours: Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
-      minutes: Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60))),
-      seconds: Math.max(0, Math.floor((timeRemaining % (1000 * 60)) / 1000)),
-      totalSeconds: Math.max(0, Math.floor(timeRemaining / 1000))
-    };
 
     // Get current user's rank if authenticated
     let currentUserRank = null;
@@ -75,12 +59,12 @@ export default async function handler(req, res) {
         .lean();
 
       if (currentUser) {
-        // Count users with higher monthly points
+        // Count users with higher points
         const usersAbove = await User.countDocuments({
           $or: [
-            { monthlyPoints: { $gt: currentUser.monthlyPoints } },
+            { points: { $gt: currentUser.points } },
             {
-              monthlyPoints: currentUser.monthlyPoints,
+              points: currentUser.points,
               createdAt: { $lt: currentUser.createdAt }
             }
           ]
@@ -88,7 +72,10 @@ export default async function handler(req, res) {
 
         currentUserRank = {
           rank: usersAbove + 1,
+          totalPoints: currentUser.points || 0,
           monthlyPoints: currentUser.monthlyPoints || 0,
+          currentStreak: currentUser.streak?.currentStreak || 0,
+          maxStreak: currentUser.streak?.maxStreak || 0,
           maxStreakThisMonth: currentUser.streak?.maxStreakThisMonth || 0
         };
       }
@@ -98,12 +85,6 @@ export default async function handler(req, res) {
       success: true,
       data: {
         leaderboard,
-        period: {
-          year,
-          month,
-          monthName: new Date(year, month - 1).toLocaleString('vi-VN', { month: 'long', year: 'numeric' })
-        },
-        countdown,
         currentUserRank,
         pagination: {
           currentPage: page,
@@ -116,10 +97,10 @@ export default async function handler(req, res) {
       }
     });
   } catch (error) {
-    console.error('Monthly leaderboard error:', error);
+    console.error('All-time leaderboard error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi tải bảng xếp hạng tháng',
+      message: 'Lỗi khi tải bảng xếp hạng tổng thể',
       error: error.message
     });
   }

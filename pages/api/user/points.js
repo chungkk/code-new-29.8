@@ -1,6 +1,7 @@
 import connectDB from '../../../lib/mongodb';
 import User from '../../../models/User';
 import { verifyToken } from '../../../lib/jwt';
+import { updateUserPointsAndStreak } from '../../../lib/helpers/pointsAndStreaks';
 
 export default async function handler(req, res) {
   try {
@@ -26,31 +27,44 @@ export default async function handler(req, res) {
       // Get user's points
       return res.status(200).json({
         success: true,
-        points: user.points || 0
+        points: user.points || 0,
+        monthlyPoints: user.monthlyPoints || 0,
+        currentStreak: user.streak?.currentStreak || 0,
+        maxStreak: user.streak?.maxStreak || 0,
+        maxStreakThisMonth: user.streak?.maxStreakThisMonth || 0
       });
     }
 
     if (req.method === 'POST') {
       // Update points (add or subtract)
-      const { pointsChange, reason } = req.body;
+      const { pointsChange, reason, completedToday = false } = req.body;
 
       if (typeof pointsChange !== 'number') {
         return res.status(400).json({ message: 'pointsChange phải là số' });
       }
 
-      // Calculate new points, ensuring it doesn't go below 0
-      const currentPoints = user.points || 0;
-      const newPoints = Math.max(0, currentPoints + pointsChange);
-      user.points = newPoints;
+      // Use helper function to update points and streaks
+      const updatedUser = await updateUserPointsAndStreak(user, {
+        points: pointsChange,
+        completedToday: completedToday
+      });
 
-      await user.save();
+      await updatedUser.save();
 
       console.log(`Points updated for user ${user.email}: ${pointsChange} (reason: ${reason || 'N/A'})`);
+      console.log(`  Total: ${updatedUser.points}, Monthly: ${updatedUser.monthlyPoints}`);
+      console.log(`  Current Streak: ${updatedUser.streak.currentStreak}, Max: ${updatedUser.streak.maxStreak}, Max This Month: ${updatedUser.streak.maxStreakThisMonth}`);
 
       return res.status(200).json({
         success: true,
-        points: user.points,
-        pointsChange
+        points: updatedUser.points,
+        monthlyPoints: updatedUser.monthlyPoints,
+        pointsChange,
+        streak: {
+          currentStreak: updatedUser.streak.currentStreak,
+          maxStreak: updatedUser.streak.maxStreak,
+          maxStreakThisMonth: updatedUser.streak.maxStreakThisMonth
+        }
       });
     }
 

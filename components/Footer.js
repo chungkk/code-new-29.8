@@ -14,8 +14,7 @@ const Footer = () => {
             <span className={styles.footerBrandText}>PapaGeil</span>
           </div>
            <p className={styles.footerDescription}>
-             Improve your German pronunciation and speaking skills with modern shadowing
-             and dictation methods.
+             Verbessern Sie Ihre deutsche Aussprache und Sprechfähigkeiten mit modernen Shadowing- und Diktatmethoden.
            </p>
         </div>
 
@@ -23,19 +22,19 @@ const Footer = () => {
           <h4 className={styles.footerSectionTitle}>Information</h4>
           <div className={styles.footerLinks}>
             <Link href="/privacy" className={styles.footerLink}>
-              Privacy Policy
+              Datenschutzrichtlinie
             </Link>
             <Link href="/about" className={styles.footerLink}>
-              About Us
+              Über uns
             </Link>
             <Link href="/terms" className={styles.footerLink}>
-              Terms of Service
+              Nutzungsbedingungen
             </Link>
             <Link href="/contact" className={styles.footerLink}>
-              Contact Us
+              Kontakt
             </Link>
             <Link href="/feedback" className={styles.footerLink}>
-              Feedbacks
+              Feedback
             </Link>
           </div>
         </div>
@@ -47,10 +46,10 @@ const Footer = () => {
               Shadowing
             </Link>
             <Link href="/" className={styles.footerLink}>
-              Dictation
+              Diktat
             </Link>
             <Link href="/dashboard/vocabulary" className={styles.footerLink}>
-              Vocabulary
+              Vokabular
             </Link>
           </div>
         </div>
@@ -58,7 +57,7 @@ const Footer = () => {
 
       <div className={styles.footerBottom}>
         <div className={styles.copyright}>
-          © {currentYear} PAPAGEIL CO., LTD. All rights reserved.
+          © {currentYear} PAPAGEIL CO., LTD. Alle Rechte vorbehalten.
         </div>
 
         <div className={styles.socialLinks}>
@@ -80,9 +79,9 @@ const Footer = () => {
         </div>
 
         <div className={styles.madeWith}>
-          <span>Made with</span>
+          <span>Erstellt mit</span>
           <span className={styles.heart}>❤</span>
-          <span>by PapaGeil</span>
+          <span>von PapaGeil</span>
         </div>
       </div>
     </footer>

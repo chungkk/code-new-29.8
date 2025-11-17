@@ -50,6 +50,14 @@ const UserSchema = new mongoose.Schema({
        type: Number,
        default: 0
      },
+     maxStreak: {
+       type: Number,
+       default: 0
+     },
+     maxStreakThisMonth: {
+       type: Number,
+       default: 0
+     },
      lastActivityDate: {
        type: Date,
        default: null
@@ -63,6 +71,15 @@ const UserSchema = new mongoose.Schema({
      type: Number,
      default: 0,
      min: 0
+   },
+   monthlyPoints: {
+     type: Number,
+     default: 0,
+     min: 0
+   },
+   lastMonthlyReset: {
+     type: Date,
+     default: null
    },
    lastLoginDate: {
      type: Date,

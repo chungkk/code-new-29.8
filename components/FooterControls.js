@@ -39,7 +39,7 @@ const FooterControls = ({
             </span>
             {completedCount > 0 && (
               <span style={{ color: 'var(--accent-blue)', fontSize: '14px' }}>
-                ✓ {completedCount} completed
+                ✓ {completedCount} abgeschlossen
               </span>
             )}
           </div>
@@ -84,7 +84,7 @@ const FooterControls = ({
             }}
           >
             <span>←</span>
-            <span>Previous</span>
+            <span>Zurück</span>
           </button>
 
           <div style={{ flex: 1 }} />
@@ -106,7 +106,7 @@ const FooterControls = ({
                 gap: '8px',
               }}
             >
-              <span>Complete Lesson</span>
+               <span>Lektion abschließen</span>
               <span>✓</span>
             </button>
           ) : (
@@ -128,7 +128,7 @@ const FooterControls = ({
                 gap: '8px',
               }}
             >
-              <span>Next</span>
+               <span>Weiter</span>
               <span>→</span>
             </button>
           )}

@@ -1216,6 +1216,8 @@ const ShadowingPageContent = () => {
              word={selectedWord}
              position={popupPosition}
              arrowPosition={popupArrowPosition}
+             lessonId={lessonId}
+             context={transcriptData[currentSentenceIndex]?.text || ''}
              onClose={() => {
                setShowVocabPopup(false);
                setClickedWordElement(null);
