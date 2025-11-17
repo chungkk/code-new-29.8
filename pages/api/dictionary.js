@@ -18,7 +18,7 @@ const LANGUAGE_NAMES = {
 async function getDictionaryDataWithAI(word, translation, targetLang = 'vi') {
   const apiKey = OPENAI_API_KEY || GROQ_API_KEY;
   const isOpenAI = !!OPENAI_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error('No AI API key available');
   }
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host;
     const baseUrl = `${protocol}://${host}`;
-    
+
     const response = await fetch(`${baseUrl}/api/translate`, {
       method: 'POST',
       headers: {

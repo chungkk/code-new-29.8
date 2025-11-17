@@ -142,51 +142,175 @@
 }
 
 @media (max-width: 768px) {
+  .overlay {
+    padding: 12px;
+  }
+
   .popup {
-    padding: var(--spacing-md);
+    padding: 16px;
     max-width: 90vw;
+  }
+
+  .closeBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    top: 12px;
+    right: 12px;
   }
 
   .popupTitle {
     font-size: 18px;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 14px;
+    padding-right: 32px;
   }
 
   .lessonInfo {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 16px;
+  }
+
+  .lessonTitle {
+    font-size: 15px;
+  }
+
+  .lessonMeta {
+    font-size: 13px;
   }
 
   .modeOption {
-    padding: var(--spacing-md);
+    padding: 14px;
   }
 
   .modeHeader {
-    gap: var(--spacing-sm);
+    gap: 10px;
   }
 
   .modeIcon {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
   }
 
   .modeName {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .modeDescription {
     padding-left: 44px;
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
+  .overlay {
+    padding: 8px;
+  }
+
   .popup {
-    padding: var(--spacing-sm);
+    padding: 14px;
+  }
+
+  .closeBtn {
+    width: 26px;
+    height: 26px;
+    font-size: 18px;
+    top: 10px;
+    right: 10px;
   }
 
   .popupTitle {
     font-size: 16px;
+    margin-bottom: 12px;
+    padding-right: 28px;
+  }
+
+  .lessonInfo {
+    margin-bottom: 14px;
+  }
+
+  .lessonTitle {
+    font-size: 14px;
+  }
+
+  .lessonMeta {
+    font-size: 12px;
+    gap: 10px;
+  }
+
+  .modesContainer {
+    gap: 10px;
+  }
+
+  .modeOption {
+    padding: 12px;
+  }
+
+  .modeHeader {
+    gap: 8px;
+  }
+
+  .modeIcon {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .modeName {
+    font-size: 14px;
+  }
+
+  .modeDescription {
+    padding-left: 38px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .overlay {
+    padding: 6px;
+  }
+
+  .popup {
+    padding: 12px;
+  }
+
+  .closeBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .popupTitle {
+    font-size: 15px;
+    margin-bottom: 10px;
+    padding-right: 26px;
+  }
+
+  .lessonInfo {
+    margin-bottom: 12px;
+  }
+
+  .lessonTitle {
+    font-size: 13px;
+  }
+
+  .lessonMeta {
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .modesContainer {
+    gap: 8px;
+  }
+
+  .modeOption {
+    padding: 10px;
+  }
+
+  .modeHeader {
+    gap: 7px;
   }
 
   .modeIcon {
@@ -196,11 +320,11 @@
   }
 
   .modeName {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .modeDescription {
-    padding-left: 40px;
+    padding-left: 35px;
     font-size: 11px;
   }
 }

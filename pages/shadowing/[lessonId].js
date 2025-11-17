@@ -42,6 +42,8 @@ const ShadowingPageContent = () => {
   const [showVocabPopup, setShowVocabPopup] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  const [popupArrowPosition, setPopupArrowPosition] = useState('right');
+  const [clickedWordElement, setClickedWordElement] = useState(null);
   
   // Mobile tooltip states
   const [showTooltip, setShowTooltip] = useState(false);
@@ -50,12 +52,90 @@ const ShadowingPageContent = () => {
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   
   const { user } = useAuth();
-  
+
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
   const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
+
+  // Leaderboard tracking
+  const sessionStartTimeRef = useRef(Date.now());
+  const completedSentencesRef = useRef(new Set());
+  const lastStatsUpdateRef = useRef(Date.now());
+
+  // Update monthly leaderboard stats
+  const updateMonthlyStats = useCallback(async (forceUpdate = false) => {
+    if (!user) return;
+
+    const now = Date.now();
+    const timeSinceLastUpdate = (now - lastStatsUpdateRef.current) / 1000; // in seconds
+
+    // Only update if at least 60 seconds have passed or force update
+    if (!forceUpdate && timeSinceLastUpdate < 60) return;
+
+    const totalTimeSpent = Math.floor((now - sessionStartTimeRef.current) / 1000);
+    const newSentencesCompleted = completedSentencesRef.current.size;
+
+    // Only update if there's meaningful progress
+    if (totalTimeSpent < 10 && newSentencesCompleted === 0 && !forceUpdate) return;
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) return;
+
+      await fetch('/api/leaderboard/update-monthly-stats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          timeSpent: totalTimeSpent,
+          sentencesCompleted: newSentencesCompleted,
+          lessonsCompleted: 0 // We'll track full lesson completion separately
+        })
+      });
+
+      // Reset tracking after successful update
+      sessionStartTimeRef.current = now;
+      completedSentencesRef.current.clear();
+      lastStatsUpdateRef.current = now;
+    } catch (error) {
+      console.error('Error updating monthly stats:', error);
+    }
+  }, [user]);
+
+  // Track sentence completion
+  useEffect(() => {
+    if (currentSentenceIndex >= 0 && transcriptData[currentSentenceIndex]) {
+      completedSentencesRef.current.add(currentSentenceIndex);
+    }
+  }, [currentSentenceIndex, transcriptData]);
+
+  // Periodic stats update (every 5 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateMonthlyStats(false);
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [updateMonthlyStats]);
+
+  // Save stats on unmount and page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      updateMonthlyStats(true);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Save final stats when component unmounts
+      updateMonthlyStats(true);
+    };
+  }, [updateMonthlyStats]);
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
@@ -379,6 +459,110 @@ const ShadowingPageContent = () => {
     };
   }, [userSeekTimeout]);
 
+  // Calculate popup position based on word element
+  const calculatePopupPosition = useCallback((element, isMobile) => {
+    const rect = element.getBoundingClientRect();
+
+    if (isMobile) {
+      const tooltipHeight = 200;
+      const tooltipWidth = 240;
+      const gapFromWord = 20;
+
+      let top = rect.top - tooltipHeight - gapFromWord;
+      let left = rect.left + rect.width / 2;
+      let arrowPos = 'bottom';
+
+      // Check if there's enough space above
+      if (top < 10) {
+        top = rect.bottom + gapFromWord;
+        arrowPos = 'top';
+      }
+
+      // Center horizontally with bounds checking
+      const halfWidth = tooltipWidth / 2;
+      if (left - halfWidth < 10) {
+        left = halfWidth + 10;
+      }
+      if (left + halfWidth > window.innerWidth - 10) {
+        left = window.innerWidth - halfWidth - 10;
+      }
+
+      return { top, left, arrowPos };
+    } else {
+      const popupWidth = 350;
+      const popupHeight = 280;
+      const gapFromWord = 30;
+
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+
+      let top, left, arrowPos;
+
+      // Default: try to show above
+      if (spaceAbove >= popupHeight + gapFromWord + 20) {
+        top = rect.top - popupHeight - gapFromWord;
+        arrowPos = 'bottom';
+      } else {
+        // Show below if not enough space above
+        top = rect.bottom + gapFromWord;
+        arrowPos = 'top';
+      }
+
+      // Center horizontally with bounds checking
+      left = rect.left + rect.width / 2 - popupWidth / 2;
+
+      if (left < 20) {
+        left = 20;
+      }
+      if (left + popupWidth > window.innerWidth - 20) {
+        left = window.innerWidth - popupWidth - 20;
+      }
+
+      // Ensure popup doesn't go off screen vertically
+      if (top < 20) {
+        top = 20;
+      }
+      if (top + popupHeight > window.innerHeight - 20) {
+        top = window.innerHeight - popupHeight - 20;
+      }
+
+      return { top, left, arrowPos };
+    }
+  }, []);
+
+  // Update popup position on scroll
+  useEffect(() => {
+    if (!showVocabPopup || !clickedWordElement) return;
+
+    let rafId = null;
+    let isUpdating = false;
+
+    const updatePopupPosition = () => {
+      if (!isUpdating) {
+        isUpdating = true;
+        rafId = requestAnimationFrame(() => {
+          const isMobileView = window.innerWidth <= 768;
+          const { top, left, arrowPos } = calculatePopupPosition(clickedWordElement, isMobileView);
+          setPopupPosition({ top, left });
+          setPopupArrowPosition(arrowPos);
+          isUpdating = false;
+        });
+      }
+    };
+
+    // Update on scroll and resize with requestAnimationFrame for smoothness
+    window.addEventListener('scroll', updatePopupPosition, true); // Use capture phase for all scrollable elements
+    window.addEventListener('resize', updatePopupPosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePopupPosition, true);
+      window.removeEventListener('resize', updatePopupPosition);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, [showVocabPopup, clickedWordElement, calculatePopupPosition]);
+
   const loadTranscript = async (jsonPath) => {
     try {
       console.log('Đang tải transcript từ:', jsonPath);
@@ -500,96 +684,19 @@ const ShadowingPageContent = () => {
     // Speak the word
     speakText(cleanedWord);
 
-    const rect = event.target.getBoundingClientRect();
     const isMobileView = window.innerWidth <= 768;
+    const element = event.target;
 
-    if (isMobileView) {
-      // Mobile: Show tooltip above word with boundary checks
-      const tooltipHeight = 50; // Estimated tooltip height
-      const tooltipWidth = 200; // Estimated tooltip width
-      
-      let top = rect.top - 10;
-      let left = rect.left + rect.width / 2;
+    // Calculate position
+    const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
 
-      // Keep tooltip within viewport
-      // Check top boundary
-      if (top - tooltipHeight < 10) {
-        top = rect.bottom + 10 + tooltipHeight; // Show below if not enough space above
-      }
-
-      // Check left boundary
-      const halfWidth = tooltipWidth / 2;
-      if (left - halfWidth < 10) {
-        left = halfWidth + 10;
-      }
-      
-      // Check right boundary
-      if (left + halfWidth > window.innerWidth - 10) {
-        left = window.innerWidth - halfWidth - 10;
-      }
-
-      setTooltipWord(cleanedWord);
-      setTooltipPosition({ top, left });
-      setShowTooltip(true);
-
-      // Check cache first
-      const targetLang = user?.nativeLanguage || 'vi';
-      const cached = translationCache.get(cleanedWord, 'de', targetLang);
-      if (cached) {
-        setTooltipTranslation(cached);
-        return;
-      }
-
-      // Fetch translation for tooltip
-      try {
-        const response = await fetch('/api/translate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: cleanedWord,
-            context: '',
-            sourceLang: 'de',
-            targetLang: targetLang
-          })
-        });
-
-        const data = await response.json();
-        if (data.success && data.translation) {
-          setTooltipTranslation(data.translation);
-          translationCache.set(cleanedWord, data.translation, 'de', targetLang);
-        }
-      } catch (error) {
-        console.error('Translation error:', error);
-        setTooltipTranslation('...');
-      }
-    } else {
-      // Desktop: Show full popup
-      const popupWidth = 400;
-      const popupHeight = 230;
-
-      let top = rect.top;
-      let left = rect.right + 15;
-
-      // Check if popup would go off right edge
-      if (left + popupWidth > window.innerWidth - 20) {
-        left = rect.left - popupWidth - 15;
-      }
-
-      // Check vertical position
-      if (top + popupHeight > window.innerHeight - 20) {
-        top = window.innerHeight - popupHeight - 20;
-      }
-      if (top < 20) {
-        top = 20;
-      }
-
-      setSelectedWord(cleanedWord);
-      setPopupPosition({ top, left });
-      setShowVocabPopup(true);
-    }
-  }, [isYouTube, user]);
+    // Store element reference for scroll updates
+    setClickedWordElement(element);
+    setSelectedWord(cleanedWord);
+    setPopupPosition({ top, left });
+    setPopupArrowPosition(arrowPos);
+    setShowVocabPopup(true);
+  }, [isYouTube, user, calculatePopupPosition]);
 
   // Save vocabulary to database
   const saveVocabulary = useCallback(async ({ word, translation, notes }) => {
@@ -956,11 +1063,24 @@ const ShadowingPageContent = () => {
                  {transcriptData[currentSentenceIndex] && (
                    <div className={styles.currentSentenceDisplay}>
                      <div className={styles.currentSentenceText}>
-                       {transcriptData[currentSentenceIndex].text.split(' ').map((word, idx) => (
-                         <span key={idx} className={styles.word}>
-                           {word}
-                         </span>
-                       ))}
+                       {transcriptData[currentSentenceIndex].text.split(/\s+/).map((word, idx) => {
+                         const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+                         if (cleanWord.length > 0) {
+                           return (
+                             <span
+                               key={idx}
+                               className={styles.word}
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleWordClickForPopup(word, e);
+                               }}
+                             >
+                               {word}
+                             </span>
+                           );
+                         }
+                         return <span key={idx}>{word}</span>;
+                       })}
                      </div>
                      {showIPA && transcriptData[currentSentenceIndex].ipa && (
                        <div className={styles.currentSentenceIPA}>
@@ -1056,25 +1176,7 @@ const ShadowingPageContent = () => {
                        </div>
 
                        <div className={styles.transcriptText}>
-                         {segment.text.split(/\s+/).map((word, wordIndex) => {
-                           const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
-                           if (cleanWord.length > 0) {
-                             return (
-                               <span
-                                 key={wordIndex}
-                                 className={styles.clickableWord}
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   handleWordClickForPopup(word, e);
-                                 }}
-                                 style={{ cursor: 'pointer' }}
-                               >
-                                 {word}{' '}
-                               </span>
-                             );
-                           }
-                           return <span key={wordIndex}>{word} </span>;
-                         })}
+                         {segment.text}
                        </div>
 
                        {showIPA && segment.ipa && (
@@ -1108,23 +1210,16 @@ const ShadowingPageContent = () => {
            />
          </div> */}
 
-         {/* Mobile Tooltip */}
-         {showTooltip && (
-           <WordTooltip
-             translation={tooltipTranslation}
-             position={tooltipPosition}
-             onClose={() => {
-               setShowTooltip(false);
-               setTooltipTranslation('');
-             }}
-           />
-         )}
-
-         {/* Desktop Dictionary Popup */}
+         {/* Dictionary Popup (both mobile and desktop) */}
          {showVocabPopup && (
            <DictionaryPopup
              word={selectedWord}
-             onClose={() => setShowVocabPopup(false)}
+             position={popupPosition}
+             arrowPosition={popupArrowPosition}
+             onClose={() => {
+               setShowVocabPopup(false);
+               setClickedWordElement(null);
+             }}
            />
          )}
        </div>

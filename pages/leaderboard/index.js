@@ -1,59 +1,78 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import useSWR from 'swr';
 import DashboardLayout from '../../components/DashboardLayout';
 import { fetchWithAuth } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../../styles/leaderboard.module.css';
 
+// SWR fetcher function - works with or without authentication
+const fetcher = async (url) => {
+  try {
+    const response = await fetchWithAuth(url);
+    if (response && response.success) {
+      return response.data;
+    }
+    // If fetchWithAuth fails, try without auth
+    const publicResponse = await fetch(url);
+    if (publicResponse.ok) {
+      const data = await publicResponse.json();
+      if (data && data.success) {
+        return data.data;
+      }
+    }
+    throw new Error('Failed to fetch leaderboard data');
+  } catch (error) {
+    // Fallback to public fetch if auth fails
+    try {
+      const publicResponse = await fetch(url);
+      if (publicResponse.ok) {
+        const data = await publicResponse.json();
+        if (data && data.success) {
+          return data.data;
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Fetcher error:', fallbackError);
+    }
+    throw error;
+  }
+};
+
 export default function LeaderboardPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  const [leaderboardData, setLeaderboardData] = useState([]);
-  const [currentUserRank, setCurrentUserRank] = useState(null);
   const [period, setPeriod] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Fetch monthly leaderboard data
-  const fetchLeaderboard = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetchWithAuth(
-        `/api/leaderboard/monthly?year=${period.year}&month=${period.month}&limit=100`
-      );
-
-      if (response && response.success) {
-        setLeaderboardData(response.data.leaderboard || []);
-        setCurrentUserRank(response.data.currentUserRank);
-        setPeriod(response.data.period);
-        if (response.data.countdown) {
-          setCountdown(response.data.countdown);
-        }
-      } else {
-        // Don't show error if it's just empty data
-        setLeaderboardData([]);
-        setError(null);
-      }
-    } catch (err) {
-      console.error('Error fetching leaderboard:', err);
-      // Don't show error for empty data, just log it
-      setLeaderboardData([]);
-      setError(null);
-    } finally {
-      setLoading(false);
+  // Use SWR for caching and automatic revalidation
+  // Allow viewing leaderboard without login (public access)
+  const { data, error, isLoading } = useSWR(
+    !authLoading
+      ? `/api/leaderboard/monthly?year=${period.year}&month=${period.month}&limit=100`
+      : null,
+    fetcher,
+    {
+      revalidateOnFocus: false, // Don't refetch on window focus
+      revalidateOnReconnect: true, // Refetch when reconnecting
+      dedupingInterval: 60000, // Dedupe requests within 60 seconds
+      refreshInterval: 5 * 60 * 1000, // Auto refresh every 5 minutes
     }
-  };
+  );
 
-  // Initial fetch
+  const leaderboardData = data?.leaderboard || [];
+  const currentUserRank = data?.currentUserRank || null;
+
+  // Update countdown from API response
   useEffect(() => {
-    if (!authLoading && user) {
-      fetchLeaderboard();
+    if (data?.countdown) {
+      setCountdown(data.countdown);
     }
-  }, [authLoading, user, period.year, period.month]);
+    if (data?.period) {
+      setPeriod(data.period);
+    }
+  }, [data]);
 
   // Countdown timer update
   useEffect(() => {
@@ -136,10 +155,11 @@ export default function LeaderboardPage() {
     );
   }
 
-  if (!user) {
-    router.push('/auth/login');
-    return null;
-  }
+  // Allow viewing leaderboard without login
+  // if (!user) {
+  //   router.push('/auth/login');
+  //   return null;
+  // }
 
   return (
     <DashboardLayout>
@@ -274,7 +294,6 @@ export default function LeaderboardPage() {
               <div className={styles.rankCard}>
                 <div className={styles.rankBadge}>
                   <span className={styles.rankNumber}>#50</span>
-                  <span className={styles.rankNumber}>#50</span>
                 </div>
                 <div className={styles.avatarFrame}>
                   <div className={styles.frame} data-rank="50">
@@ -317,7 +336,7 @@ export default function LeaderboardPage() {
             )}
 
             {/* Top 3 Users */}
-            {loading ? (
+            {isLoading ? (
               <div className={styles.loading}>Đang tải bảng xếp hạng...</div>
             ) : leaderboardData.length === 0 ? (
               <div className={styles.emptyState}>

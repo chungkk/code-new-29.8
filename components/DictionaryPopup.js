@@ -34,7 +34,7 @@ const dictionaryCache = {
   }
 };
 
-const DictionaryPopup = ({ word, onClose, position }) => {
+const DictionaryPopup = ({ word, onClose, position, arrowPosition }) => {
   const { user } = useAuth();
   const [wordData, setWordData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,9 +54,9 @@ const DictionaryPopup = ({ word, onClose, position }) => {
   useEffect(() => {
     const fetchWordData = async () => {
       if (!word) return;
-      
+
       const targetLang = user?.nativeLanguage || 'vi';
-      
+
       // Check cache first
       const cached = dictionaryCache.get(word, targetLang);
       if (cached) {
@@ -64,7 +64,7 @@ const DictionaryPopup = ({ word, onClose, position }) => {
         setIsLoading(false);
         return;
       }
-      
+
       setIsLoading(true);
       try {
         const response = await fetch('/api/dictionary', {
@@ -102,13 +102,14 @@ const DictionaryPopup = ({ word, onClose, position }) => {
 
   return (
     <div className={`${styles.overlay} ${isMobile ? styles.mobileOverlay : ''}`} onClick={handleOverlayClick}>
-      <div 
+      <div
         className={`${styles.popupContainer} ${isMobile ? styles.mobilePopup : ''}`}
-        style={isMobile && position ? {
+        data-arrow-position={arrowPosition || 'right'}
+        style={position ? {
           position: 'fixed',
           top: `${position.top}px`,
           left: `${position.left}px`,
-          transform: 'translate(-50%, 10px)',
+          transform: isMobile ? 'translate(-50%, 0)' : 'none',
         } : {}}
       >
         <div className={styles.header}>
@@ -127,7 +128,12 @@ const DictionaryPopup = ({ word, onClose, position }) => {
 
         <div className={styles.content}>
           {isLoading ? (
-            <div className={styles.loading}>Lädt...</div>
+            <div className={styles.loading}>
+              <div className={styles.spinnerContainer}>
+                <div className={styles.spinner}></div>
+              </div>
+              <div className={styles.loadingText}>Lädt...</div>
+            </div>
           ) : (
             <>
               {/* Erklärung */}

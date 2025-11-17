@@ -168,36 +168,157 @@
 @media (max-width: 768px) {
   .popup {
     position: fixed;
-    top: 64px;
-    right: 16px;
-    left: 16px;
+    top: 56px;
+    right: 12px;
+    left: 12px;
     min-width: auto;
     max-width: none;
+    padding: 14px;
+  }
+
+  .loading {
+    padding: 20px;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
   }
 
   .streakDisplay {
-    padding: 14px;
-    margin-bottom: 16px;
+    padding: 12px;
+    margin-bottom: 14px;
+    gap: 8px;
   }
 
   .streakIcon {
-    font-size: 32px;
+    font-size: 26px;
   }
 
   .streakValue {
-    font-size: 24px;
+    font-size: 20px;
+  }
+
+  .streakLabel {
+    font-size: 11px;
   }
 
   .dayCircle {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .dayLabel {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .checkmark {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup {
+    top: 52px;
+    right: 8px;
+    left: 8px;
+    padding: 12px;
+  }
+
+  .loading {
+    padding: 16px;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+  }
+
+  .streakDisplay {
+    padding: 10px;
+    margin-bottom: 12px;
+    gap: 6px;
+  }
+
+  .streakIcon {
+    font-size: 22px;
+  }
+
+  .streakValue {
+    font-size: 18px;
+  }
+
+  .streakLabel {
+    font-size: 10px;
+  }
+
+  .weeklyCalendar {
+    gap: 3px;
+  }
+
+  .dayCircle {
+    width: 26px;
+    height: 26px;
+    border-width: 1.5px;
+  }
+
+  .dayLabel {
+    font-size: 8px;
+  }
+
+  .dayContainer {
+    gap: 4px;
+  }
+
+  .checkmark {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .popup {
+    top: 52px;
+    right: 6px;
+    left: 6px;
+    padding: 10px;
+  }
+
+  .streakDisplay {
+    padding: 8px;
+    margin-bottom: 10px;
+    gap: 5px;
+  }
+
+  .streakIcon {
+    font-size: 20px;
+  }
+
+  .streakValue {
     font-size: 16px;
+  }
+
+  .streakLabel {
+    font-size: 9px;
+  }
+
+  .weeklyCalendar {
+    gap: 2px;
+  }
+
+  .dayCircle {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dayLabel {
+    font-size: 7px;
+  }
+
+  .dayContainer {
+    gap: 3px;
+  }
+
+  .checkmark {
+    font-size: 11px;
   }
 }

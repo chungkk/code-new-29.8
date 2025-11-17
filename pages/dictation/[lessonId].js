@@ -66,6 +66,8 @@ const DictationPageContent = () => {
   const [showVocabPopup, setShowVocabPopup] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  const [popupArrowPosition, setPopupArrowPosition] = useState('right');
+  const [clickedWordElement, setClickedWordElement] = useState(null);
   
   // Mobile tooltip states
   const [showTooltip, setShowTooltip] = useState(false);
@@ -100,11 +102,89 @@ const DictationPageContent = () => {
   const [streakIncrements, setStreakIncrements] = useState(0); // Track how many times we've +1 today
   
   const { user } = useAuth();
-  
+
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
+
+  // Leaderboard tracking
+  const sessionStartTimeRef = useRef(Date.now());
+  const completedSentencesForLeaderboardRef = useRef(new Set());
+  const lastStatsUpdateRef = useRef(Date.now());
+
+  // Update monthly leaderboard stats
+  const updateMonthlyStats = useCallback(async (forceUpdate = false) => {
+    if (!user) return;
+
+    const now = Date.now();
+    const timeSinceLastUpdate = (now - lastStatsUpdateRef.current) / 1000; // in seconds
+
+    // Only update if at least 60 seconds have passed or force update
+    if (!forceUpdate && timeSinceLastUpdate < 60) return;
+
+    const totalTimeSpent = Math.floor((now - sessionStartTimeRef.current) / 1000);
+    const newSentencesCompleted = completedSentencesForLeaderboardRef.current.size;
+
+    // Only update if there's meaningful progress
+    if (totalTimeSpent < 10 && newSentencesCompleted === 0 && !forceUpdate) return;
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) return;
+
+      await fetch('/api/leaderboard/update-monthly-stats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          timeSpent: totalTimeSpent,
+          sentencesCompleted: newSentencesCompleted,
+          lessonsCompleted: 0 // We'll track full lesson completion separately
+        })
+      });
+
+      // Reset tracking after successful update
+      sessionStartTimeRef.current = now;
+      completedSentencesForLeaderboardRef.current.clear();
+      lastStatsUpdateRef.current = now;
+    } catch (error) {
+      console.error('Error updating monthly stats:', error);
+    }
+  }, [user]);
+
+  // Track sentence completion for leaderboard
+  useEffect(() => {
+    if (currentSentenceIndex >= 0 && transcriptData[currentSentenceIndex]) {
+      completedSentencesForLeaderboardRef.current.add(currentSentenceIndex);
+    }
+  }, [currentSentenceIndex, transcriptData]);
+
+  // Periodic stats update (every 5 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateMonthlyStats(false);
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [updateMonthlyStats]);
+
+  // Save stats on unmount and page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      updateMonthlyStats(true);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Save final stats when component unmounts
+      updateMonthlyStats(true);
+    };
+  }, [updateMonthlyStats]);
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
@@ -125,15 +205,79 @@ const DictationPageContent = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     // Check on mount
     checkMobile();
-    
+
     // Add resize listener
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Update popup position on scroll
+  useEffect(() => {
+    if (!showVocabPopup || !clickedWordElement) return;
+
+    let rafId = null;
+    let isUpdating = false;
+
+    const updatePopupPosition = () => {
+      if (!isUpdating) {
+        isUpdating = true;
+        rafId = requestAnimationFrame(() => {
+          const rect = clickedWordElement.getBoundingClientRect();
+          const popupWidth = 350;
+          const popupHeight = 280;
+          const gapFromWord = 30;
+
+          const spaceAbove = rect.top;
+          const spaceBelow = window.innerHeight - rect.bottom;
+
+          let top, left, arrowPos;
+
+          if (spaceAbove >= popupHeight + gapFromWord + 20) {
+            top = rect.top - popupHeight - gapFromWord;
+            arrowPos = 'bottom';
+          } else {
+            top = rect.bottom + gapFromWord;
+            arrowPos = 'top';
+          }
+
+          left = rect.left + rect.width / 2 - popupWidth / 2;
+
+          if (left < 20) {
+            left = 20;
+          }
+          if (left + popupWidth > window.innerWidth - 20) {
+            left = window.innerWidth - popupWidth - 20;
+          }
+
+          if (top < 20) {
+            top = 20;
+          }
+          if (top + popupHeight > window.innerHeight - 20) {
+            top = window.innerHeight - popupHeight - 20;
+          }
+
+          setPopupPosition({ top, left });
+          setPopupArrowPosition(arrowPos);
+          isUpdating = false;
+        });
+      }
+    };
+
+    window.addEventListener('scroll', updatePopupPosition, true);
+    window.addEventListener('resize', updatePopupPosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePopupPosition, true);
+      window.removeEventListener('resize', updatePopupPosition);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, [showVocabPopup, clickedWordElement]);
 
   // Extract YouTube video ID from URL
   const getYouTubeVideoId = (url) => {
@@ -1130,28 +1274,48 @@ const DictationPageContent = () => {
         setTooltipTranslation('...');
       }
     } else {
-      // Desktop: Show full popup
-      const popupWidth = 400;
-      const popupHeight = 230;
+      // Desktop: Show full popup (top/bottom only)
+      const popupWidth = 350;
+      const popupHeight = 280;
+      const gapFromWord = 30;
 
-      let top = rect.top;
-      let left = rect.right + 15;
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
 
-      // Check if popup would go off right edge
+      let top, left, arrowPos;
+
+      // Default: try to show above
+      if (spaceAbove >= popupHeight + gapFromWord + 20) {
+        top = rect.top - popupHeight - gapFromWord;
+        arrowPos = 'bottom';
+      } else {
+        // Show below if not enough space above
+        top = rect.bottom + gapFromWord;
+        arrowPos = 'top';
+      }
+
+      // Center horizontally with bounds checking
+      left = rect.left + rect.width / 2 - popupWidth / 2;
+
+      if (left < 20) {
+        left = 20;
+      }
       if (left + popupWidth > window.innerWidth - 20) {
-        left = rect.left - popupWidth - 15;
+        left = window.innerWidth - popupWidth - 20;
       }
 
-      // Check vertical position
-      if (top + popupHeight > window.innerHeight - 20) {
-        top = window.innerHeight - popupHeight - 20;
-      }
+      // Ensure popup doesn't go off screen vertically
       if (top < 20) {
         top = 20;
       }
+      if (top + popupHeight > window.innerHeight - 20) {
+        top = window.innerHeight - popupHeight - 20;
+      }
 
+      setClickedWordElement(event.target);
       setSelectedWord(cleanedWord);
       setPopupPosition({ top, left });
+      setPopupArrowPosition(arrowPos);
       setShowVocabPopup(true);
     }
   }, [isYouTube, user]);
@@ -2459,7 +2623,12 @@ const DictationPageContent = () => {
       {showVocabPopup && !isMobile && (
         <DictionaryPopup
           word={selectedWord}
-          onClose={() => setShowVocabPopup(false)}
+          position={popupPosition}
+          arrowPosition={popupArrowPosition}
+          onClose={() => {
+            setShowVocabPopup(false);
+            setClickedWordElement(null);
+          }}
         />
       )}
 

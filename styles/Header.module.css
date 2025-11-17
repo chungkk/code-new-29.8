@@ -514,12 +514,36 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Mobile Navigation */
+/* Tablet and Mobile Styles */
 @media (max-width: 768px) {
+  .header {
+    padding: 0 12px;
+  }
+
+  .headerContent {
+    height: 56px;
+  }
+
+  .logo {
+    font-size: 18px;
+    gap: 6px;
+  }
+
+  .logoIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    border-width: 1.5px;
+  }
+
+  .logoText {
+    font-size: 18px;
+  }
+
   .nav {
     display: none;
     position: fixed;
-    top: 64px;
+    top: 56px;
     left: 0;
     right: 0;
     background: var(--bg-secondary);
@@ -538,6 +562,8 @@
   .navLink {
     width: 100%;
     text-align: left;
+    font-size: 14px;
+    padding: 8px 12px;
   }
 
   .mobileMenuBtn {
@@ -548,7 +574,59 @@
   }
 
   .rightSection {
-    gap: var(--spacing-sm);
+    gap: 8px;
+  }
+
+  .themeToggle {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .languageSelector {
+    padding: 6px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .pointsBadge {
+    padding: 4px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .pointsIcon {
+    font-size: 14px;
+  }
+
+  .pointsValue {
+    font-size: 13px;
+  }
+
+  .streakBtn {
+    min-width: 52px;
+    height: 32px;
+    padding: 0 10px;
+    gap: 3px;
+  }
+
+  .streakIcon {
+    font-size: 18px;
+  }
+
+  .streakValue {
+    font-size: 14px;
+  }
+
+  .notificationBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .userAvatar {
+    width: 36px;
+    height: 36px;
   }
 
   .unlockBtn {
@@ -556,10 +634,50 @@
     font-size: 13px;
   }
 
+  .loginBtn,
+  .signupBtn {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
   .userDropdown {
-    min-width: 260px;
-    max-width: calc(100vw - 40px);
+    min-width: 250px;
+    max-width: calc(100vw - 32px);
     right: 0;
+    top: calc(100% + 10px);
+  }
+
+  .userDropdownHeader {
+    padding: 14px;
+  }
+
+  .dropdownAvatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .userName {
+    font-size: 15px;
+  }
+
+  .userEmail {
+    font-size: 12px;
+  }
+
+  .userDropdownMenu {
+    padding: 6px;
+  }
+
+  .userDropdownItem {
+    padding: 10px 12px;
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .dropdownIcon {
+    font-size: 16px;
+    width: 22px;
+    height: 22px;
   }
 
   .authButtonsDesktop {
@@ -568,31 +686,247 @@
 
   .authBtnMobile {
     display: block;
+    padding: 6px 14px;
+    font-size: 13px;
   }
 }
 
+/* Small Mobile Devices */
 @media (max-width: 480px) {
+  .header {
+    padding: 0 8px;
+  }
+
   .headerContent {
-    padding: 0 var(--spacing-sm);
+    height: 52px;
   }
 
-  .languageSelector {
-    padding: 6px 8px;
-    font-size: 12px;
+  .logo {
+    font-size: 16px;
+    gap: 4px;
   }
 
-  .userDropdown {
-    position: fixed;
-    top: 64px;
-    right: 16px;
-    left: 16px;
-    min-width: auto;
-    max-width: none;
-    width: auto;
+  .logoIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    border-width: 1.5px;
+  }
+
+  .logoText {
+    font-size: 16px;
+  }
+
+  .nav {
+    top: 52px;
+  }
+
+  .rightSection {
+    gap: 6px;
   }
 
   .themeToggle,
   .languageSelector {
     display: none;
+  }
+
+  .pointsBadge {
+    padding: 3px 8px;
+    font-size: 12px;
+    gap: 3px;
+    border-radius: 16px;
+  }
+
+  .pointsIcon {
+    font-size: 13px;
+  }
+
+  .pointsValue {
+    font-size: 12px;
+  }
+
+  .streakBtn {
+    min-width: 48px;
+    height: 28px;
+    padding: 0 8px;
+    gap: 2px;
+  }
+
+  .streakIcon {
+    font-size: 16px;
+  }
+
+  .streakValue {
+    font-size: 13px;
+  }
+
+  .notificationBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+
+  .notificationBadge {
+    width: 7px;
+    height: 7px;
+    top: 3px;
+    right: 3px;
+  }
+
+  .userAvatar {
+    width: 32px;
+    height: 32px;
+    border-width: 1.5px;
+  }
+
+  .userDropdown {
+    position: fixed;
+    top: 52px;
+    right: 8px;
+    left: 8px;
+    min-width: auto;
+    max-width: none;
+    width: auto;
+  }
+
+  .userDropdownHeader {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .dropdownAvatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .userName {
+    font-size: 14px;
+  }
+
+  .userEmail {
+    font-size: 11px;
+  }
+
+  .userDropdownMenu {
+    padding: 6px;
+  }
+
+  .userDropdownItem {
+    padding: 9px 10px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .dropdownIcon {
+    font-size: 15px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .authBtnMobile {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* Extra Small Mobile Devices */
+@media (max-width: 375px) {
+  .header {
+    padding: 0 6px;
+  }
+
+  .logo {
+    font-size: 15px;
+  }
+
+  .logoIcon {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  .logoText {
+    font-size: 15px;
+  }
+
+  .rightSection {
+    gap: 4px;
+  }
+
+  .pointsBadge {
+    padding: 2px 6px;
+    font-size: 11px;
+  }
+
+  .pointsIcon {
+    font-size: 12px;
+  }
+
+  .pointsValue {
+    font-size: 11px;
+  }
+
+  .streakBtn {
+    min-width: 44px;
+    height: 26px;
+    padding: 0 6px;
+  }
+
+  .streakIcon {
+    font-size: 14px;
+  }
+
+  .streakValue {
+    font-size: 12px;
+  }
+
+  .notificationBtn {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+
+  .userAvatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .userDropdownHeader {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .dropdownAvatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .userName {
+    font-size: 13px;
+  }
+
+  .userEmail {
+    font-size: 10px;
+  }
+
+  .userDropdownMenu {
+    padding: 5px;
+  }
+
+  .userDropdownItem {
+    padding: 8px 9px;
+    font-size: 12px;
+    gap: 7px;
+  }
+
+  .dropdownIcon {
+    font-size: 14px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .authBtnMobile {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 }
