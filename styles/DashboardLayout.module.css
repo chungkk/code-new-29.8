@@ -24,14 +24,24 @@
    ============================================ */
 .sidebar {
   width: 280px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   padding: var(--spacing-xl) var(--spacing-lg);
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
   overflow-y: auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.sidebar.collapsed {
+  width: 80px;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.sidebar.collapsed .sidebarToggleBtn {
+  right: 24px;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -43,12 +53,12 @@
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================
@@ -67,7 +77,7 @@
   padding: 14px 18px;
   border-radius: var(--border-radius);
   text-decoration: none;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   background: transparent;
   font-weight: 600;
   font-size: 15px;
@@ -83,20 +93,20 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--accent-gradient);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .navLink:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
   transform: translateX(4px);
 }
 
 .navLink.active {
-  background: var(--bg-card);
-  color: var(--accent-blue);
+  background: rgba(102, 126, 234, 0.15);
+  color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
@@ -126,6 +136,12 @@
 .navLabel {
   flex: 1;
   letter-spacing: -0.2px;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .navLabel {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ============================================
@@ -140,8 +156,35 @@
 }
 
 /* ============================================
-   MOBILE MENU BUTTON
-   ============================================ */
+     SIDEBAR TOGGLE BUTTON
+     ============================================ */
+.sidebarToggleBtn {
+  position: absolute;
+  bottom: 80px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.sidebarToggleBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* ============================================
+    MOBILE MENU BUTTON
+    ============================================ */
 .mobileMenuBtn {
   display: none;
   position: fixed;
@@ -214,8 +257,17 @@
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
   }
 
+  .sidebar.collapsed {
+    width: 80px;
+    transform: translateX(-100%);
+  }
+
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  .sidebarToggleBtn {
+    display: none;
   }
 
   .main {

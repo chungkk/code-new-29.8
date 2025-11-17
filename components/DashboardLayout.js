@@ -6,6 +6,7 @@ import styles from '../styles/DashboardLayout.module.css';
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: '📊' },
@@ -28,7 +29,7 @@ const DashboardLayout = ({ children }) => {
     <>
       <div className={styles.layout}>
         {/* Sidebar */}
-        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.open : ''}`}>
+        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.open : ''} ${sidebarCollapsed ? styles.collapsed : ''}`}>
           <nav className={styles.nav}>
             {navItems.map((item) => (
               <Link
@@ -42,6 +43,15 @@ const DashboardLayout = ({ children }) => {
               </Link>
             ))}
           </nav>
+
+          {/* Sidebar toggle button */}
+          <button
+            className={styles.sidebarToggleBtn}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label="Toggle sidebar"
+          >
+            {sidebarCollapsed ? '▶' : '◀'}
+          </button>
         </aside>
 
         {/* Main content */}
@@ -49,6 +59,8 @@ const DashboardLayout = ({ children }) => {
           {children}
         </main>
       </div>
+
+
 
       {/* Mobile menu button */}
       <button
