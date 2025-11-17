@@ -15,6 +15,12 @@ export const LANGUAGE_OPTIONS = [
     name: 'English',
     nativeName: 'English',
     flag: '🇬🇧'
+  },
+  {
+    code: 'vi',
+    name: 'Vietnamese',
+    nativeName: 'Tiếng Việt',
+    flag: '🇻🇳'
   }
 ];
 

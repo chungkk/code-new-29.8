@@ -1,0 +1,167 @@
+{
+  "header": {
+    "logo": "PapaGeil",
+    "nav": {
+      "topics": "Chủ đề",
+      "review": "Ôn tập",
+      "vocabulary": "Từ vựng",
+      "leaderboard": "Bảng xếp hạng",
+      "dashboard": "Trang chủ"
+    },
+    "themeToggle": "Đổi giao diện",
+    "language": "Tiếng Việt",
+    "points": "Tổng số điểm của bạn",
+    "streak": "Xem chuỗi học tập của bạn",
+    "notifications": "Thông báo",
+    "userMenu": {
+      "label": "Menu người dùng",
+      "user": "Người dùng",
+      "dashboard": "Trang chủ",
+      "myVocabulary": "Từ vựng của tôi",
+      "leaderboard": "Bảng xếp hạng",
+      "settings": "Cài đặt",
+      "adminArea": "Khu vực quản trị",
+      "logout": "Đăng xuất"
+    },
+    "auth": {
+      "login": "Đăng nhập",
+      "register": "Đăng ký"
+    }
+  },
+  "footer": {
+    "description": "Cải thiện khả năng phát âm và nói tiếng Đức của bạn với phương pháp shadowing và chính tả hiện đại.",
+    "sections": {
+      "information": "Thông tin",
+      "features": "Tính năng"
+    },
+    "links": {
+      "privacy": "Chính sách bảo mật",
+      "about": "Về chúng tôi",
+      "terms": "Điều khoản sử dụng",
+      "contact": "Liên hệ",
+      "feedback": "Phản hồi",
+      "shadowing": "Shadowing",
+      "dictation": "Chính tả",
+      "vocabulary": "Từ vựng"
+    },
+    "copyright": "Tất cả quyền được bảo lưu.",
+    "madeWith": "Được tạo với",
+    "by": "bởi PapaGeil"
+  },
+  "theme": {
+    "sunset": {
+      "label": "Hoàng hôn",
+      "description": "Tông màu cam và hồng ấm áp tạo cảm giác ấm cúng."
+    },
+    "dark": {
+      "label": "Chế độ tối",
+      "description": "Chế độ tối độ tương phản cao cho buổi học muộn."
+    },
+    "light": {
+      "label": "Chế độ sáng",
+      "description": "Chế độ sáng, rõ ràng cho việc học ban ngày."
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Quản lý cài đặt tài khoản và tùy chọn của bạn",
+    "profile": {
+      "title": "Hồ sơ",
+      "name": "Tên:",
+      "email": "Email:",
+      "role": "Vai trò:",
+      "admin": "Quản trị viên",
+      "user": "Người dùng"
+    },
+    "appearance": {
+      "title": "Giao diện",
+      "description": "Chọn bảng màu ưa thích của bạn",
+      "current": "Hiện tại:"
+    },
+    "nativeLanguage": {
+      "title": "Ngôn ngữ mẹ đẻ",
+      "description": "Chọn ngôn ngữ mẹ đẻ của bạn để dịch",
+      "current": "Ngôn ngữ hiện tại:"
+    },
+    "level": {
+      "title": "Trình độ tiếng Đức",
+      "description": "Chọn trình độ tiếng Đức hiện tại của bạn",
+      "beginner": "Người mới bắt đầu (A1-A2)",
+      "experienced": "Nâng cao (B1+)",
+      "all": "Tất cả cấp độ",
+      "hint": "Bài học trên trang chủ sẽ được lọc tự động theo cấp độ bạn chọn"
+    },
+    "password": {
+      "title": "Đổi mật khẩu",
+      "current": "Mật khẩu hiện tại",
+      "new": "Mật khẩu mới",
+      "confirm": "Xác nhận mật khẩu",
+      "button": "Đổi mật khẩu",
+      "updating": "Đang cập nhật...",
+      "errors": {
+        "mismatch": "Mật khẩu mới không khớp!",
+        "minLength": "Mật khẩu mới phải có ít nhất 6 ký tự!",
+        "failed": "Lỗi khi đổi mật khẩu"
+      },
+      "success": "Đổi mật khẩu thành công!"
+    },
+    "updateSuccess": "Cập nhật cài đặt thành công!",
+    "updateError": "Lỗi khi cập nhật"
+  },
+  "seo": {
+    "settings": {
+      "title": "Cài đặt - PapaGeil",
+      "description": "Quản lý cài đặt tài khoản, tùy chọn và hồ sơ của bạn.",
+      "keywords": "cài đặt, hồ sơ, quản lý tài khoản, cài đặt học tiếng Đức"
+    }
+  },
+  "breadcrumb": {
+    "home": "Trang chủ",
+    "dashboard": "Bảng điều khiển",
+    "settings": "Cài đặt"
+  },
+  "dictionaryPopup": {
+    "loginRequired": "Vui lòng đăng nhập để lưu vào từ vựng của bạn!",
+    "searchingMeaning": "Đợi chút, đang tìm nghĩa của từ...",
+    "addedSuccess": "Tuyệt vời! Từ đã được thêm vào từ vựng của bạn!",
+    "addedError": "Ối!",
+    "generalError": "Đã xảy ra lỗi, vui lòng thử lại!",
+    "alreadySaved": "Từ này đã có trong bộ sưu tập của bạn rồi!",
+    "saveToTreasure": "Lưu từ này vào bộ sưu tập",
+    "saved": "Đã lưu!",
+    "save": "Lưu",
+    "loading": "Đang tải...",
+    "explanation": "Giải thích",
+    "examples": "Ví dụ"
+  },
+  "streakPopup": {
+    "label": "chuỗi câu"
+  },
+  "modeSelectionPopup": {
+    "title": "Chọn chế độ học",
+    "dictation": {
+      "name": "Chính tả",
+      "description": "Nghe và gõ những gì bạn nghe được để cải thiện khả năng nghe hiểu và chính tả."
+    },
+    "shadowing": {
+      "name": "Shadowing",
+      "description": "Nghe và lặp lại theo người nói để cải thiện phát âm và khả năng nói trưng trôi."
+    }
+  },
+  "vocabularyPopup": {
+    "details": "Chi tiết từ vựng",
+    "saveTitle": "Lưu vào từ vựng",
+    "translating": "Đang dịch...",
+    "notesLabel": "Ghi chú (tùy chọn)",
+    "notesPlaceholder": "Thêm ghi chú của bạn tại đây...",
+    "cancel": "Hủy",
+    "save": "Lưu vào từ vựng",
+    "saving": "Đang lưu..."
+  },
+  "wordSuggestionPopup": {
+    "chooseWord": "Chọn từ",
+    "generatingSuggestions": "Đang tạo gợi ý...",
+    "correct": "Chính xác! Làm tốt lắm!",
+    "correctWordIs": "Từ đúng là:"
+  }
+}
