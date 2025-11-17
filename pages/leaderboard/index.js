@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
-import DashboardLayout from '../../components/DashboardLayout';
 import { fetchWithAuth } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../../styles/leaderboard.module.css';
@@ -43,14 +42,14 @@ export default function LeaderboardPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  const [period, setPeriod] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+
 
   // Use SWR for caching and automatic revalidation
   // Allow viewing leaderboard without login (public access)
   const { data, error, isLoading } = useSWR(
     !authLoading
-      ? `/api/leaderboard/monthly?year=${period.year}&month=${period.month}&limit=100`
+      ? `/api/leaderboard/monthly?limit=100`
       : null,
     fetcher,
     {
@@ -64,84 +63,11 @@ export default function LeaderboardPage() {
   const leaderboardData = data?.leaderboard || [];
   const currentUserRank = data?.currentUserRank || null;
 
-  // Update countdown from API response
-  useEffect(() => {
-    if (data?.countdown) {
-      setCountdown(data.countdown);
-    }
-    if (data?.period) {
-      setPeriod(data.period);
-    }
-  }, [data]);
 
-  // Countdown timer update
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev.totalSeconds <= 0) {
-          clearInterval(timer);
-          return prev;
-        }
 
-        let { days, hours, minutes, seconds } = prev;
 
-        seconds--;
-        if (seconds < 0) {
-          seconds = 59;
-          minutes--;
-        }
-        if (minutes < 0) {
-          minutes = 59;
-          hours--;
-        }
-        if (hours < 0) {
-          hours = 23;
-          days--;
-        }
 
-        return { days, hours, minutes, seconds, totalSeconds: prev.totalSeconds - 1 };
-      });
-    }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
-
-  // Navigate to previous month
-  const handlePreviousMonth = () => {
-    setPeriod(prev => {
-      const newMonth = prev.month - 1;
-      if (newMonth < 1) {
-        return { year: prev.year - 1, month: 12 };
-      }
-      return { year: prev.year, month: newMonth };
-    });
-  };
-
-  // Navigate to next month
-  const handleNextMonth = () => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-
-    setPeriod(prev => {
-      const newMonth = prev.month + 1;
-      if (newMonth > 12) {
-        const nextYear = prev.year + 1;
-        // Don't allow future months
-        if (nextYear > currentYear) return prev;
-        return { year: nextYear, month: 1 };
-      }
-      // Don't allow future months
-      if (prev.year === currentYear && newMonth > currentMonth) return prev;
-      return { year: prev.year, month: newMonth };
-    });
-  };
-
-  // Check if it's current month
-  const isCurrentMonth = () => {
-    const now = new Date();
-    return period.year === now.getFullYear() && period.month === now.getMonth() + 1;
-  };
 
   // Get top 3 users
   const topThree = leaderboardData.slice(0, 3);
@@ -149,9 +75,7 @@ export default function LeaderboardPage() {
 
   if (authLoading) {
     return (
-      <DashboardLayout>
-        <div className={styles.loading}>Đang tải...</div>
-      </DashboardLayout>
+      <div className={styles.loading}>Đang tải...</div>
     );
   }
 
@@ -162,154 +86,17 @@ export default function LeaderboardPage() {
   // }
 
   return (
-    <DashboardLayout>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Leaderboard</h1>
-          <p className={styles.subtitle}>See the most active learners this month</p>
-        </div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Leaderboard</h1>
+        <p className={styles.subtitle}>See the most active learners this month</p>
+      </div>
 
         <div className={styles.mainCard}>
-          {/* Countdown Section */}
-          {isCurrentMonth() && (
-            <div className={styles.countdownSection}>
-              <div className={styles.countdownLabel}>
-                <svg className={styles.clockIcon} width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <span>Leaderboard closes in:</span>
-              </div>
-              <div className={styles.countdownTimer}>
-                <div className={styles.timeBox}>
-                  <div className={styles.timeValue}>{countdown.days}</div>
-                  <div className={styles.timeLabel}>Days</div>
-                </div>
-                <div className={styles.timeSeparator}>:</div>
-                <div className={styles.timeBox}>
-                  <div className={styles.timeValue}>{countdown.hours}</div>
-                  <div className={styles.timeLabel}>Hours</div>
-                </div>
-                <div className={styles.timeSeparator}>:</div>
-                <div className={styles.timeBox}>
-                  <div className={styles.timeValue}>{countdown.minutes}</div>
-                  <div className={styles.timeLabel}>Minutes</div>
-                </div>
-                <div className={styles.timeSeparator}>:</div>
-                <div className={styles.timeBox}>
-                  <div className={styles.timeValue}>{countdown.seconds}</div>
-                  <div className={styles.timeLabel}>Seconds</div>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* Month Navigation */}
-          <div className={styles.navigation}>
-            <button onClick={handlePreviousMonth} className={styles.navButton}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Previous Month
-            </button>
 
-            <h2 className={styles.monthTitle}>{period.monthName || `Tháng ${period.month} ${period.year}`}</h2>
 
-            <button
-              onClick={handleNextMonth}
-              className={styles.navButton}
-              disabled={isCurrentMonth()}
-            >
-              Next Month
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
 
-          {/* Monthly Rewards Section */}
-          <div className={styles.rewardsSection}>
-            <div className={styles.rewardsHeader}>
-              <img src="/images/trophy-bird.png" alt="Trophy" className={styles.trophyBird} onError={(e) => e.target.style.display = 'none'} />
-              <h3 className={styles.rewardsTitle}>
-                <svg className={styles.trophyIcon} width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                </svg>
-                Monthly Rewards
-              </h3>
-            </div>
-
-            <div className={styles.topRanks}>
-              <div className={styles.rankCard}>
-                <div className={styles.rankBadge}>
-                  <svg className={styles.medalIcon} width="32" height="32" viewBox="0 0 24 24" fill="#FFD700">
-                    <circle cx="12" cy="12" r="8"/>
-                  </svg>
-                  <span className={styles.rankNumber}>#1</span>
-                </div>
-                <div className={styles.avatarFrame}>
-                  <div className={styles.frame} data-rank="1">
-                    <svg width="80" height="80" viewBox="0 0 80 80">
-                      <circle cx="40" cy="40" r="35" fill="var(--bg-secondary)" stroke="#FFD700" strokeWidth="3"/>
-                    </svg>
-                  </div>
-                  <div className={styles.userIcon}>👤</div>
-                </div>
-              </div>
-
-              <div className={styles.rankCard}>
-                <div className={styles.rankBadge}>
-                  <svg className={styles.medalIcon} width="32" height="32" viewBox="0 0 24 24" fill="#C0C0C0">
-                    <circle cx="12" cy="12" r="8"/>
-                  </svg>
-                  <span className={styles.rankNumber}>#2</span>
-                </div>
-                <div className={styles.avatarFrame}>
-                  <div className={styles.frame} data-rank="2">
-                    <svg width="80" height="80" viewBox="0 0 80 80">
-                      <circle cx="40" cy="40" r="35" fill="var(--bg-secondary)" stroke="#C0C0C0" strokeWidth="3"/>
-                    </svg>
-                  </div>
-                  <div className={styles.userIcon}>👤</div>
-                </div>
-              </div>
-
-              <div className={styles.rankCard}>
-                <div className={styles.rankBadge}>
-                  <svg className={styles.medalIcon} width="32" height="32" viewBox="0 0 24 24" fill="#CD7F32">
-                    <circle cx="12" cy="12" r="8"/>
-                  </svg>
-                  <span className={styles.rankNumber}>#3</span>
-                </div>
-                <div className={styles.avatarFrame}>
-                  <div className={styles.frame} data-rank="3">
-                    <svg width="80" height="80" viewBox="0 0 80 80">
-                      <circle cx="40" cy="40" r="35" fill="var(--bg-secondary)" stroke="#CD7F32" strokeWidth="3"/>
-                    </svg>
-                  </div>
-                  <div className={styles.userIcon}>👤</div>
-                </div>
-              </div>
-
-              <div className={styles.rankCard}>
-                <div className={styles.rankBadge}>
-                  <span className={styles.rankNumber}>#50</span>
-                </div>
-                <div className={styles.avatarFrame}>
-                  <div className={styles.frame} data-rank="50">
-                    <svg width="80" height="80" viewBox="0 0 80 80">
-                      <circle cx="40" cy="40" r="35" fill="var(--bg-secondary)" stroke="#E27B58" strokeWidth="3"/>
-                    </svg>
-                  </div>
-                  <div className={styles.userIcon}>👤</div>
-                </div>
-              </div>
-            </div>
-
-            <p className={styles.rewardsNote}>
-              ✨ Receive badges, avatar frames and diamonds at the end of the month ✨
-            </p>
-          </div>
 
           {/* Monthly Ranking Section */}
           <div className={styles.rankingSection}>
@@ -454,7 +241,6 @@ export default function LeaderboardPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 
