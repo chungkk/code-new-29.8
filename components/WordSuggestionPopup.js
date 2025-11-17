@@ -46,9 +46,21 @@ const WordSuggestionPopup = ({
       });
 
       const data = await response.json();
-      
+
       if (data.success && data.options) {
-        setOptions(data.options);
+        // Extra safeguard: Remove duplicates on client side (case-insensitive)
+        const uniqueOptions = [];
+        const seen = new Set();
+
+        for (const option of data.options) {
+          const normalized = option.toLowerCase().trim();
+          if (!seen.has(normalized)) {
+            seen.add(normalized);
+            uniqueOptions.push(option);
+          }
+        }
+
+        setOptions(uniqueOptions);
       } else {
         // Fallback: just show the correct word if API fails
         setOptions([correctWord]);
@@ -106,7 +118,7 @@ const WordSuggestionPopup = ({
             <div className={styles.optionsContainerMobile}>
               {options.map((option, index) => (
                 <button
-                  key={index}
+                  key={`${option.toLowerCase()}-${index}`}
                   className={`${styles.optionButtonMobile} ${
                     selectedOption === option
                       ? isCorrect
@@ -155,7 +167,7 @@ const WordSuggestionPopup = ({
           <div className={styles.optionsContainer}>
             {options.map((option, index) => (
               <button
-                key={index}
+                key={`${option.toLowerCase()}-${index}`}
                 className={`${styles.optionButton} ${
                   selectedOption === option
                     ? isCorrect

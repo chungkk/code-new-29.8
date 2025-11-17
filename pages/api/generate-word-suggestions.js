@@ -170,6 +170,65 @@ function shuffleArray(array) {
   return shuffled;
 }
 
+/**
+ * Remove duplicate words (case-insensitive) and ensure uniqueness
+ */
+function deduplicateWords(words) {
+  const seen = new Set();
+  return words.filter(word => {
+    const normalized = word.toLowerCase().trim();
+    if (seen.has(normalized)) {
+      return false;
+    }
+    seen.add(normalized);
+    return true;
+  });
+}
+
+/**
+ * Generate simple fallback distractors that are different from the correct word
+ */
+function generateFallbackDistractors(correctWord) {
+  const distractors = [];
+
+  // Method 1: Change ending
+  if (correctWord.length > 2) {
+    const variant1 = correctWord.slice(0, -1) + (correctWord[correctWord.length - 1] === 'e' ? 'en' : 'e');
+    if (variant1.toLowerCase() !== correctWord.toLowerCase()) {
+      distractors.push(variant1);
+    }
+  }
+
+  // Method 2: Change last 2 letters
+  if (correctWord.length > 3) {
+    const variant2 = correctWord.slice(0, -2) + correctWord.slice(-2).split('').reverse().join('');
+    if (variant2.toLowerCase() !== correctWord.toLowerCase()) {
+      distractors.push(variant2);
+    }
+  }
+
+  // Method 3: Add/remove letter
+  if (distractors.length < 2 && correctWord.length > 2) {
+    const variant3 = correctWord + 'n';
+    if (variant3.toLowerCase() !== correctWord.toLowerCase()) {
+      distractors.push(variant3);
+    }
+  }
+
+  // Method 4: Duplicate a vowel
+  if (distractors.length < 2) {
+    const vowelIndex = correctWord.search(/[aeiouäöü]/i);
+    if (vowelIndex !== -1) {
+      const variant4 = correctWord.slice(0, vowelIndex + 1) + correctWord[vowelIndex] + correctWord.slice(vowelIndex + 1);
+      if (variant4.toLowerCase() !== correctWord.toLowerCase()) {
+        distractors.push(variant4);
+      }
+    }
+  }
+
+  return distractors;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -200,19 +259,42 @@ export default async function handler(req, res) {
       }
     } catch (error) {
       console.error(`AI generation failed: ${error.message}`);
-      
+
       // Fallback to simple rule-based distractors
-      const fallbackDistractors = [
-        correctWord.slice(0, -1) + (correctWord[correctWord.length - 1] === 'e' ? 'en' : 'e'),
-        correctWord.length > 3 ? correctWord.slice(0, -2) + correctWord.slice(-2).split('').reverse().join('') : correctWord + 's'
-      ];
-      distractors = fallbackDistractors;
+      distractors = generateFallbackDistractors(correctWord);
       method = 'fallback';
     }
 
     // Create options array with correct word and distractors
-    const options = [correctWord, ...distractors];
-    
+    let options = [correctWord, ...distractors];
+    const originalLength = options.length;
+
+    // CRITICAL: Remove duplicates (case-insensitive)
+    options = deduplicateWords(options);
+
+    if (originalLength !== options.length) {
+      console.log(`⚠️ Removed ${originalLength - options.length} duplicate(s) from suggestions`);
+    }
+
+    // Ensure we have at least 3 unique options
+    // If AI/fallback didn't generate enough unique words, add more fallback options
+    if (options.length < 3) {
+      const additionalDistractors = generateFallbackDistractors(correctWord);
+      options = deduplicateWords([...options, ...additionalDistractors]);
+
+      // If still not enough, add simple variations
+      let attempts = 0;
+      while (options.length < 3 && attempts < 5) {
+        const randomSuffix = ['er', 'en', 'es', 't', 'st'][attempts];
+        const variant = correctWord + randomSuffix;
+        options = deduplicateWords([...options, variant]);
+        attempts++;
+      }
+    }
+
+    // Take only first 3 unique options
+    options = options.slice(0, 3);
+
     // Shuffle to randomize position
     const shuffledOptions = shuffleArray(options);
 
