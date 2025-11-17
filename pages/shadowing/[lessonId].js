@@ -58,6 +58,8 @@ const ShadowingPageContent = () => {
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
   const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
+  const activeTranscriptItemRef = useRef(null);
+  const transcriptListRef = useRef(null);
 
   // Leaderboard tracking
   const sessionStartTimeRef = useRef(Date.now());
@@ -452,6 +454,30 @@ const ShadowingPageContent = () => {
     }
   }, [currentTime, transcriptData, currentSentenceIndex, segmentEndTimeLocked, isYouTube, isUserSeeking]);
 
+  // Scroll active sentence to top of transcript
+  const scrollToActiveSentence = useCallback(() => {
+    if (activeTranscriptItemRef.current && transcriptListRef.current) {
+      const container = transcriptListRef.current;
+      const activeItem = activeTranscriptItemRef.current;
+
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+
+      // Calculate the position to scroll to (100px offset so user can see previous sentence)
+      const scrollTop = activeItem.offsetTop - container.offsetTop - 100;
+
+      container.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
+
+  // Auto-scroll to active transcript item within transcript container only
+  useEffect(() => {
+    scrollToActiveSentence();
+  }, [currentSentenceIndex, scrollToActiveSentence]);
+
   // Cleanup user seek timeout
   useEffect(() => {
     return () => {
@@ -640,7 +666,10 @@ const ShadowingPageContent = () => {
 
       // Update currentSentenceIndex to match the clicked sentence
       setCurrentSentenceIndex(clickedIndex);
-    }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex, userSeekTimeout]);
+
+      // Scroll to the sentence immediately
+      setTimeout(() => scrollToActiveSentence(), 100);
+    }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex, userSeekTimeout, scrollToActiveSentence]);
 
   const goToPreviousSentence = useCallback(() => {
     if (currentSentenceIndex > 0) {
@@ -1157,10 +1186,11 @@ const ShadowingPageContent = () => {
                    </div>
                  </div>
 
-                 <div className={styles.transcriptList}>
+                 <div className={styles.transcriptList} ref={transcriptListRef}>
                    {transcriptData.map((segment, index) => (
                      <div
                        key={index}
+                       ref={currentSentenceIndex === index ? activeTranscriptItemRef : null}
                        className={`${styles.transcriptItem} ${currentSentenceIndex === index ? styles.transcriptItemActive : ''}`}
                        onClick={() => handleSentenceClick(segment.start, segment.end)}
                      >

@@ -19,7 +19,7 @@
 /* Main Container */
 .mainContainer {
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: 1fr 520px;
   gap: 18px;
   padding: 24px;
 }
@@ -104,17 +104,17 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 24px;
-  min-height: 100px;
+  padding: 16px;
+  min-height: 70px;
 }
 
 .currentSentenceText {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 600;
   color: white;
   line-height: 1.5;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .word {
@@ -132,7 +132,7 @@
 }
 
 .currentSentenceIPA {
-  font-size: 16px;
+  font-size: 14px;
   color: #94a3b8;
   font-family: 'Courier New', monospace;
   text-align: center;
@@ -533,13 +533,13 @@
 /* Responsive Design */
 @media (min-width: 769px) {
   .videoWrapper {
-    padding-top: 45%;
+    padding-top: 56.25%;
   }
 }
 
 @media (max-width: 1200px) {
   .mainContainer {
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 1fr 520px;
   }
 }
 
