@@ -6,26 +6,21 @@ import React, {
   useMemo,
   useCallback
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ThemeContext = createContext();
 
 export const THEME_OPTIONS = [
   {
     id: 'sunset',
-    label: 'Sonnenuntergang',
-    description: 'Warme Orange- und Pinknuancen für ein gemütliches Gefühl.',
     emoji: '🌅'
   },
   {
     id: 'dark',
-    label: 'Nachtmodus',
-    description: 'Kontrastreicher Dark Mode für späte Lernsessions.',
     emoji: '🌙'
   },
   {
     id: 'light',
-    label: 'Hellmodus',
-    description: 'Heller, klarer Modus für Tageslernen.',
     emoji: '☀️'
   }
 ];
@@ -47,6 +42,7 @@ const resolveInitialTheme = () => {
 };
 
 export function ThemeProvider({ children }) {
+  const { t } = useTranslation();
   const [theme, setThemeState] = useState(resolveInitialTheme);
 
   const applyTheme = useCallback((themeId) => {
@@ -85,19 +81,25 @@ export function ThemeProvider({ children }) {
   }, []);
 
   const value = useMemo(() => {
-    const currentTheme = THEME_OPTIONS.find((option) => option.id === theme) || THEME_OPTIONS[0];
+    const themeOptionsWithTranslations = THEME_OPTIONS.map(option => ({
+      ...option,
+      label: t(`theme.${option.id}.label`),
+      description: t(`theme.${option.id}.description`)
+    }));
+
+    const currentTheme = themeOptionsWithTranslations.find((option) => option.id === theme) || themeOptionsWithTranslations[0];
     const nextThemeId = getNextThemeId(theme);
-    const nextTheme = THEME_OPTIONS.find((option) => option.id === nextThemeId);
+    const nextTheme = themeOptionsWithTranslations.find((option) => option.id === nextThemeId);
 
     return {
       theme,
-      themeOptions: THEME_OPTIONS,
+      themeOptions: themeOptionsWithTranslations,
       currentTheme,
       nextTheme,
       setTheme: selectTheme,
       toggleTheme
     };
-  }, [theme, selectTheme, toggleTheme]);
+  }, [theme, selectTheme, toggleTheme, t]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

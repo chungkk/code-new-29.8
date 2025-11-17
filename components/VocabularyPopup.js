@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { translationCache } from '../lib/translationCache';
 
 const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, position }) => {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [fetchedTranslation, setFetchedTranslation] = useState(translation || '');
@@ -124,7 +126,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
             paddingRight: 'var(--spacing-xl)',
           }}
         >
-          {isSaved ? 'Vocabulary Details' : 'Save to Vocabulary'}
+          {isSaved ? t('vocabularyPopup.details') : t('vocabularyPopup.saveTitle')}
         </h3>
 
         <div style={{ marginBottom: 'var(--spacing-lg)' }}>
@@ -148,7 +150,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
                 fontStyle: 'italic',
               }}
             >
-              Translating...
+              {t('vocabularyPopup.translating')}
             </div>
           ) : fetchedTranslation ? (
             <div
@@ -175,12 +177,12 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
                   marginBottom: 'var(--spacing-sm)',
                 }}
               >
-                Notes (optional)
+                {t('vocabularyPopup.notesLabel')}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add your notes here..."
+                placeholder={t('vocabularyPopup.notesPlaceholder')}
                 rows={4}
                 style={{
                   width: '100%',
@@ -212,7 +214,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
                   fontWeight: '500',
                 }}
               >
-                Cancel
+                {t('vocabularyPopup.cancel')}
               </button>
               <button
                 onClick={handleSave}
@@ -229,7 +231,7 @@ const VocabularyPopup = ({ word, translation, onClose, onSave, isSaved = false, 
                   fontWeight: '600',
                 }}
               >
-                {saving ? 'Saving...' : 'Save to Vocabulary'}
+                {saving ? t('vocabularyPopup.saving') : t('vocabularyPopup.save')}
               </button>
             </div>
           </>

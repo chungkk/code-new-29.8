@@ -2,20 +2,26 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import StreakPopup from './StreakPopup';
 import styles from '../styles/Header.module.css';
 
 const Header = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [streakPopupOpen, setStreakPopupOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const userMenuRef = useRef(null);
+  const languageMenuRef = useRef(null);
   const router = useRouter();
   const { user, logout, userPoints, fetchUserPoints } = useAuth();
   const { theme, toggleTheme, currentTheme } = useTheme();
+  const { currentLanguage, changeLanguage, languages, currentLanguageInfo } = useLanguage();
 
   // Fetch streak data
   const fetchStreakData = useCallback(async () => {
@@ -108,10 +114,10 @@ const Header = () => {
   };
 
   const navLinks = [
-    { href: '/', label: 'Themen' },
-    { href: '/review', label: 'Überprüfung' },
-    { href: '/dashboard/vocabulary', label: 'Vokabular' },
-    { href: '/leaderboard', label: 'Bestenliste' },
+    { href: '/', label: t('header.nav.topics') },
+    { href: '/review', label: t('header.nav.review') },
+    { href: '/dashboard/vocabulary', label: t('header.nav.vocabulary') },
+    { href: '/leaderboard', label: t('header.nav.leaderboard') },
   ];
 
   const isActive = (path) => {
@@ -121,22 +127,25 @@ const Header = () => {
     return router.pathname.startsWith(path);
   };
 
-  // Close user menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false);
       }
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target)) {
+        setLanguageMenuOpen(false);
+      }
     };
 
-    if (userMenuOpen) {
+    if (userMenuOpen || languageMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [userMenuOpen]);
+  }, [userMenuOpen, languageMenuOpen]);
 
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
@@ -170,7 +179,7 @@ const Header = () => {
               href="/dashboard"
               className={`${styles.navLink} ${isActive('/dashboard') ? styles.active : ''}`}
             >
-              Armaturenbrett
+              {t('header.nav.dashboard')}
             </Link>
           )}
         </nav>
@@ -180,31 +189,57 @@ const Header = () => {
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}
-            aria-label="Toggle theme"
-            title={currentTheme?.label || 'Thema umschalten'}
+            aria-label={t('header.themeToggle')}
+            title={currentTheme?.label || t('header.themeToggle')}
           >
             {currentTheme?.emoji || '🌅'}
           </button>
 
-          <div className={styles.languageSelector}>
-            <span>🇩🇪</span>
-            <span>Deutsch</span>
-            <span>▼</span>
+          <div className={styles.languageMenuContainer} ref={languageMenuRef}>
+            <button
+              className={styles.languageSelector}
+              onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
+              aria-label="Language selector"
+              aria-expanded={languageMenuOpen}
+            >
+              <span>{currentLanguageInfo.flag}</span>
+              <span>{currentLanguageInfo.nativeName}</span>
+              <span>▼</span>
+            </button>
+
+            {languageMenuOpen && (
+              <div className={styles.languageDropdown}>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`${styles.languageOption} ${currentLanguage === lang.code ? styles.active : ''}`}
+                    onClick={() => {
+                      changeLanguage(lang.code);
+                      setLanguageMenuOpen(false);
+                    }}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.nativeName}</span>
+                    {currentLanguage === lang.code && <span className={styles.checkmark}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {user && (
             <>
-              <div className={styles.pointsBadge} title="Ihre Gesamtpunktzahl">
+              <div className={styles.pointsBadge} title={t('header.points')}>
                 <span className={styles.pointsIcon}>⭐</span>
                 <span className={styles.pointsValue}>{userPoints || 0}</span>
               </div>
 
               <div className={styles.streakContainer}>
-                <button 
-                  className={styles.streakBtn} 
+                <button
+                  className={styles.streakBtn}
                   aria-label="Streak"
                   onClick={() => setStreakPopupOpen(true)}
-                  title="Ihre Lernserie ansehen"
+                  title={t('header.streak')}
                 >
                   <span className={styles.streakIcon}>🔥</span>
                   <span className={styles.streakValue}>{currentStreak}</span>
@@ -215,7 +250,7 @@ const Header = () => {
                 )}
               </div>
 
-              <button className={styles.notificationBtn} title="Benachrichtigungen">
+              <button className={styles.notificationBtn} title={t('header.notifications')}>
                 <span>🔔</span>
                 <span className={styles.notificationBadge}></span>
               </button>
@@ -224,12 +259,12 @@ const Header = () => {
                 <button
                   className={styles.userAvatarBtn}
                   onClick={toggleUserMenu}
-                  aria-label="Benutzermenü"
+                  aria-label={t('header.userMenu.label')}
                   aria-expanded={userMenuOpen}
                 >
                   <Image
                     src={user.avatar || getDefaultAvatar(user.name)}
-                     alt={user.name || 'Benutzer'}
+                     alt={user.name || t('header.userMenu.user')}
                     width={40}
                     height={40}
                     className={styles.userAvatar}
@@ -242,7 +277,7 @@ const Header = () => {
                       <div className={styles.userDropdownAvatar}>
                         <Image
                           src={user.avatar || getDefaultAvatar(user.name)}
-                          alt={user.name || 'Benutzer'}
+                          alt={user.name || t('header.userMenu.user')}
                           width={48}
                           height={48}
                           className={styles.dropdownAvatar}
@@ -257,13 +292,13 @@ const Header = () => {
                     <div className={styles.userDropdownDivider}></div>
 
                     <div className={styles.userDropdownMenu}>
-                      <Link 
-                        href="/dashboard" 
+                      <Link
+                        href="/dashboard"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>📊</span>
-                        <span>Dashboard</span>
+                        <span>{t('header.userMenu.dashboard')}</span>
                       </Link>
 
                       <Link
@@ -272,7 +307,7 @@ const Header = () => {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>📚</span>
-                        <span>Mein Vokabular</span>
+                        <span>{t('header.userMenu.myVocabulary')}</span>
                       </Link>
 
                       <Link
@@ -281,7 +316,7 @@ const Header = () => {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>🏆</span>
-                        <span>Bestenliste</span>
+                        <span>{t('header.userMenu.leaderboard')}</span>
                       </Link>
 
                       <Link
@@ -290,31 +325,31 @@ const Header = () => {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         <span className={styles.dropdownIcon}>⚙️</span>
-                        <span>Einstellungen</span>
+                        <span>{t('header.userMenu.settings')}</span>
                       </Link>
 
                       {user.role === 'admin' && (
                         <>
                           <div className={styles.userDropdownDivider}></div>
-                          <Link 
-                            href="/admin/dashboard" 
+                          <Link
+                            href="/admin/dashboard"
                             className={`${styles.userDropdownItem} ${styles.adminItem}`}
                             onClick={() => setUserMenuOpen(false)}
                           >
                             <span className={styles.dropdownIcon}>👑</span>
-                            <span>Admin-Bereich</span>
+                            <span>{t('header.userMenu.adminArea')}</span>
                           </Link>
                         </>
                       )}
 
                       <div className={styles.userDropdownDivider}></div>
 
-                      <button 
+                      <button
                         className={`${styles.userDropdownItem} ${styles.logoutItem}`}
                         onClick={handleLogout}
                       >
                         <span className={styles.dropdownIcon}>🚪</span>
-                        <span>Abmelden</span>
+                        <span>{t('header.userMenu.logout')}</span>
                       </button>
                     </div>
                   </div>
@@ -330,20 +365,20 @@ const Header = () => {
                   onClick={() => router.push('/auth/login')}
                   className={styles.loginBtn}
                 >
-                  Anmelden
+                  {t('header.auth.login')}
                 </button>
                 <button
                   onClick={() => router.push('/auth/register')}
                   className={styles.signupBtn}
                 >
-                  Registrieren
+                  {t('header.auth.register')}
                 </button>
               </div>
               <button
                 onClick={() => router.push('/auth/login')}
                 className={styles.authBtnMobile}
               >
-                Anmelden
+                {t('header.auth.login')}
               </button>
             </>
           )}

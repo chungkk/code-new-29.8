@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/WordSuggestionPopup.module.css';
 
 const WordSuggestionPopup = ({ 
@@ -8,8 +9,9 @@ const WordSuggestionPopup = ({
   position,
   onCorrectAnswer, 
   onWrongAnswer, 
-  onClose 
+  onClose
 }) => {
+  const { t } = useTranslation();
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -155,13 +157,13 @@ const WordSuggestionPopup = ({
         </button>
 
         <div className={styles.header}>
-          <h3>Wähle das Wort</h3>
+          <h3>{t('wordSuggestionPopup.chooseWord')}</h3>
         </div>
 
         {loading ? (
           <div className={styles.loading}>
             <div className={styles.spinner}></div>
-            <p>Generiere Vorschläge...</p>
+            <p>{t('wordSuggestionPopup.generatingSuggestions')}</p>
           </div>
         ) : (
           <div className={styles.optionsContainer}>
@@ -197,12 +199,12 @@ const WordSuggestionPopup = ({
             {isCorrect ? (
               <>
                 <span className={styles.feedbackIcon}>🎉</span>
-                <p>Richtig! Gut gemacht!</p>
+                <p>{t('wordSuggestionPopup.correct')}</p>
               </>
             ) : (
               <>
                 <span className={styles.feedbackIcon}>💡</span>
-                <p>Das richtige Wort ist: <strong>{correctWord}</strong></p>
+                <p>{t('wordSuggestionPopup.correctWordIs')} <strong>{correctWord}</strong></p>
               </>
             )}
           </div>

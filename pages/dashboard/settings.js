@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import ProtectedPage from '../../components/ProtectedPage';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -9,6 +10,7 @@ import styles from '../../styles/dashboard.module.css';
 
 
 function SettingsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { theme, themeOptions, setTheme, currentTheme } = useTheme();
 
@@ -24,12 +26,12 @@ function SettingsPage() {
     e.preventDefault();
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Neue Passwörter stimmen nicht überein!');
+      toast.error(t('settings.password.errors.mismatch'));
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      toast.error('Neues Passwort muss mindestens 6 Zeichen lang sein!');
+      toast.error(t('settings.password.errors.minLength'));
       return;
     }
 
@@ -48,7 +50,7 @@ function SettingsPage() {
       });
 
       if (response.ok) {
-        toast.success('Passwort erfolgreich geändert!');
+        toast.success(t('settings.password.success'));
         setPasswordForm({
           currentPassword: '',
           newPassword: '',
@@ -56,11 +58,11 @@ function SettingsPage() {
         });
       } else {
         const error = await response.json();
-        toast.error(error.message || 'Fehler beim Ändern des Passworts');
+        toast.error(error.message || t('settings.password.errors.failed'));
       }
     } catch (error) {
       console.error('Password change error:', error);
-      toast.error('Fehler beim Ändern des Passworts');
+      toast.error(t('settings.password.errors.failed'));
     } finally {
       setPasswordLoading(false);
     }
@@ -78,30 +80,30 @@ function SettingsPage() {
       });
 
       if (response.ok) {
-        toast.success('Einstellungen aktualisiert!');
+        toast.success(t('settings.updateSuccess'));
         setTimeout(() => window.location.reload(), 1000);
       } else {
-        toast.error('Fehler beim Aktualisieren');
+        toast.error(t('settings.updateError'));
       }
     } catch (error) {
       console.error('Update error:', error);
-      toast.error('Fehler beim Aktualisieren');
+      toast.error(t('settings.updateError'));
     }
   };
 
   // Structured data
   const breadcrumbData = generateBreadcrumbStructuredData([
-    { name: 'Home', url: '/' },
-    { name: 'Dashboard', url: '/dashboard' },
-    { name: 'Einstellungen', url: '/dashboard/settings' }
+    { name: t('breadcrumb.home'), url: '/' },
+    { name: t('breadcrumb.dashboard'), url: '/dashboard' },
+    { name: t('breadcrumb.settings'), url: '/dashboard/settings' }
   ]);
 
   return (
     <>
       <SEO
-        title="Einstellungen - PapaGeil"
-        description="Verwalten Sie Ihre Kontoeinstellungen, Präferenzen und Profil."
-        keywords="Einstellungen, Profil, Konto verwalten, Deutsch lernen Einstellungen"
+        title={t('seo.settings.title')}
+        description={t('seo.settings.description')}
+        keywords={t('seo.settings.keywords')}
         structuredData={breadcrumbData}
         noindex={true}
       />
@@ -111,9 +113,9 @@ function SettingsPage() {
           {/* Page Header */}
           <div className={styles.pageHeader}>
             <div>
-              <h1 className={styles.pageTitle}>⚙️ Einstellungen</h1>
+              <h1 className={styles.pageTitle}>⚙️ {t('settings.title')}</h1>
               <p className={styles.pageSubtitle}>
-                Verwalten Sie Ihre Kontoeinstellungen und Präferenzen
+                {t('settings.subtitle')}
               </p>
             </div>
           </div>
@@ -124,22 +126,22 @@ function SettingsPage() {
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>👤</div>
-                <h3 className={styles.settingCardTitle}>Profil</h3>
+                <h3 className={styles.settingCardTitle}>{t('settings.profile.title')}</h3>
               </div>
               <div className={styles.settingCardBody}>
                 <div className={styles.profileInfo}>
                   <div className={styles.profileItem}>
-                    <span className={styles.profileLabel}>Name:</span>
+                    <span className={styles.profileLabel}>{t('settings.profile.name')}</span>
                     <span className={styles.profileValue}>{user?.name}</span>
                   </div>
                   <div className={styles.profileItem}>
-                    <span className={styles.profileLabel}>E-Mail:</span>
+                    <span className={styles.profileLabel}>{t('settings.profile.email')}</span>
                     <span className={styles.profileValue}>{user?.email}</span>
                   </div>
                   <div className={styles.profileItem}>
-                    <span className={styles.profileLabel}>Rolle:</span>
+                    <span className={styles.profileLabel}>{t('settings.profile.role')}</span>
                     <span className={styles.profileValue}>
-                      {user?.role === 'admin' ? 'Administrator' : 'Benutzer'}
+                      {user?.role === 'admin' ? t('settings.profile.admin') : t('settings.profile.user')}
                     </span>
                   </div>
                 </div>
@@ -150,11 +152,11 @@ function SettingsPage() {
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>🎨</div>
-                <h3 className={styles.settingCardTitle}>Darstellung</h3>
+                <h3 className={styles.settingCardTitle}>{t('settings.appearance.title')}</h3>
               </div>
               <div className={styles.settingCardBody}>
                 <p className={styles.settingDescription}>
-                  Wählen Sie Ihr bevorzugtes Farbschema
+                  {t('settings.appearance.description')}
                 </p>
                 <div className={styles.themeOptions}>
                   {themeOptions.map((option) => (
@@ -179,7 +181,7 @@ function SettingsPage() {
                   ))}
                 </div>
                 <p className={styles.settingHint}>
-                  Aktuell: <strong>{currentTheme?.label}</strong>
+                  {t('settings.appearance.current')} <strong>{currentTheme?.label}</strong>
                 </p>
               </div>
             </div>
@@ -188,11 +190,11 @@ function SettingsPage() {
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>🌐</div>
-                <h3 className={styles.settingCardTitle}>Muttersprache</h3>
+                <h3 className={styles.settingCardTitle}>{t('settings.nativeLanguage.title')}</h3>
               </div>
               <div className={styles.settingCardBody}>
                 <p className={styles.settingDescription}>
-                  Wählen Sie Ihre Muttersprache für Übersetzungen
+                  {t('settings.nativeLanguage.description')}
                 </p>
                 <select
                   value={user?.nativeLanguage || 'vi'}
@@ -212,7 +214,7 @@ function SettingsPage() {
                   <option value="zh">🇨🇳 中文</option>
                 </select>
                 <p className={styles.settingHint}>
-                  Aktuelle Sprache: <strong>{user?.nativeLanguage || 'Tiếng Việt'}</strong>
+                  {t('settings.nativeLanguage.current')} <strong>{user?.nativeLanguage || 'Tiếng Việt'}</strong>
                 </p>
               </div>
             </div>
@@ -221,23 +223,23 @@ function SettingsPage() {
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>📊</div>
-                <h3 className={styles.settingCardTitle}>Deutsch-Niveau</h3>
+                <h3 className={styles.settingCardTitle}>{t('settings.level.title')}</h3>
               </div>
               <div className={styles.settingCardBody}>
                 <p className={styles.settingDescription}>
-                  Wählen Sie Ihr aktuelles Deutsch-Niveau
+                  {t('settings.level.description')}
                 </p>
                 <select
                   value={user?.level || 'beginner'}
                   onChange={(e) => handleProfileUpdate('level', e.target.value)}
                   className={styles.settingSelect}
                 >
-                  <option value="beginner">🌱 Anfänger (A1-A2)</option>
-                  <option value="experienced">🚀 Fortgeschritten (B1+)</option>
-                  <option value="all">🎯 Alle Niveaus</option>
+                  <option value="beginner">🌱 {t('settings.level.beginner')}</option>
+                  <option value="experienced">🚀 {t('settings.level.experienced')}</option>
+                  <option value="all">🎯 {t('settings.level.all')}</option>
                 </select>
                 <p className={styles.settingHint}>
-                  Lektionen auf der Startseite werden automatisch nach deinem gewählten Niveau gefiltert
+                  {t('settings.level.hint')}
                 </p>
               </div>
             </div>
@@ -246,26 +248,22 @@ function SettingsPage() {
             <div className={`${styles.settingCard} ${styles.fullWidth}`}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>🔒</div>
-                <h3 className={styles.settingCardTitle}>Passwort ändern</h3>
+                <h3 className={styles.settingCardTitle}>{t('settings.password.title')}</h3>
               </div>
               <div className={styles.settingCardBody}>
-                <p className={styles.settingDescription}>
-                  Ändern Sie Ihr Passwort für mehr Sicherheit
-                </p>
                 <form onSubmit={handlePasswordChange} className={styles.passwordForm}>
                   <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Aktuelles Passwort</label>
+                    <label className={styles.formLabel}>{t('settings.password.current')}</label>
                     <input
                       type="password"
                       value={passwordForm.currentPassword}
                       onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
                       className={styles.formInput}
                       required
-                      placeholder="Ihr aktuelles Passwort eingeben"
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Neues Passwort</label>
+                    <label className={styles.formLabel}>{t('settings.password.new')}</label>
                     <input
                       type="password"
                       value={passwordForm.newPassword}
@@ -273,11 +271,10 @@ function SettingsPage() {
                       className={styles.formInput}
                       required
                       minLength={6}
-                      placeholder="Mindestens 6 Zeichen"
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Neues Passwort bestätigen</label>
+                    <label className={styles.formLabel}>{t('settings.password.confirm')}</label>
                     <input
                       type="password"
                       value={passwordForm.confirmPassword}
@@ -285,7 +282,6 @@ function SettingsPage() {
                       className={styles.formInput}
                       required
                       minLength={6}
-                      placeholder="Neues Passwort wiederholen"
                     />
                   </div>
                   <button
@@ -293,7 +289,7 @@ function SettingsPage() {
                     disabled={passwordLoading}
                     className={styles.submitButton}
                   >
-                    {passwordLoading ? '🔄 Wird geändert...' : '🔒 Passwort ändern'}
+                    {passwordLoading ? `🔄 ${t('settings.password.updating')}` : `🔒 ${t('settings.password.button')}`}
                   </button>
                 </form>
               </div>

@@ -1,8 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/Footer.module.css';
 
 const Footer = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -11,45 +13,45 @@ const Footer = () => {
         <div className={styles.footerSection}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>🦜</div>
-            <span className={styles.footerBrandText}>PapaGeil</span>
+            <span className={styles.footerBrandText}>{t('header.logo')}</span>
           </div>
            <p className={styles.footerDescription}>
-             Verbessern Sie Ihre deutsche Aussprache und Sprechfähigkeiten mit modernen Shadowing- und Diktatmethoden.
+             {t('footer.description')}
            </p>
         </div>
 
         <div className={styles.footerSection}>
-          <h4 className={styles.footerSectionTitle}>Information</h4>
+          <h4 className={styles.footerSectionTitle}>{t('footer.sections.information')}</h4>
           <div className={styles.footerLinks}>
             <Link href="/privacy" className={styles.footerLink}>
-              Datenschutzrichtlinie
+              {t('footer.links.privacy')}
             </Link>
             <Link href="/about" className={styles.footerLink}>
-              Über uns
+              {t('footer.links.about')}
             </Link>
             <Link href="/terms" className={styles.footerLink}>
-              Nutzungsbedingungen
+              {t('footer.links.terms')}
             </Link>
             <Link href="/contact" className={styles.footerLink}>
-              Kontakt
+              {t('footer.links.contact')}
             </Link>
             <Link href="/feedback" className={styles.footerLink}>
-              Feedback
+              {t('footer.links.feedback')}
             </Link>
           </div>
         </div>
 
         <div className={styles.footerSection}>
-          <h4 className={styles.footerSectionTitle}>Features</h4>
+          <h4 className={styles.footerSectionTitle}>{t('footer.sections.features')}</h4>
           <div className={styles.footerLinks}>
             <Link href="/" className={styles.footerLink}>
-              Shadowing
+              {t('footer.links.shadowing')}
             </Link>
             <Link href="/" className={styles.footerLink}>
-              Diktat
+              {t('footer.links.dictation')}
             </Link>
             <Link href="/dashboard/vocabulary" className={styles.footerLink}>
-              Vokabular
+              {t('footer.links.vocabulary')}
             </Link>
           </div>
         </div>
@@ -57,7 +59,7 @@ const Footer = () => {
 
       <div className={styles.footerBottom}>
         <div className={styles.copyright}>
-          © {currentYear} PAPAGEIL CO., LTD. Alle Rechte vorbehalten.
+          © {currentYear} PAPAGEIL CO., LTD. {t('footer.copyright')}
         </div>
 
         <div className={styles.socialLinks}>
@@ -79,9 +81,9 @@ const Footer = () => {
         </div>
 
         <div className={styles.madeWith}>
-          <span>Erstellt mit</span>
+          <span>{t('footer.madeWith')}</span>
           <span className={styles.heart}>❤</span>
-          <span>von PapaGeil</span>
+          <span>{t('footer.by')}</span>
         </div>
       </div>
     </footer>

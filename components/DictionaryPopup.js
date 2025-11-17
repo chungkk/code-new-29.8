@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
@@ -37,6 +38,7 @@ const dictionaryCache = {
 };
 
 const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, context }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [wordData, setWordData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,12 +108,12 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
 
   const handleSaveWord = async () => {
     if (!user) {
-      toast.warning('🔐 Bitte melden Sie sich an, um Ihr Vokabular zu speichern!');
+      toast.warning('🔐 ' + t('dictionaryPopup.loginRequired'));
       return;
     }
 
     if (!wordData?.translation) {
-      toast.info('⏳ Einen Moment, die Wortbedeutung wird gesucht...');
+      toast.info('⏳ ' + t('dictionaryPopup.searchingMeaning'));
       return;
     }
 
@@ -128,15 +130,15 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
       });
 
       if (res.ok) {
-        toast.success('🎉 Wunderbar! Das Wort wurde Ihrem Vokabular hinzugefügt!');
+        toast.success('🎉 ' + t('dictionaryPopup.addedSuccess'));
         setIsSaved(true);
       } else {
         const data = await res.json();
-        toast.error('😅 Ups! ' + data.message);
+        toast.error('😅 ' + t('dictionaryPopup.addedError') + ' ' + data.message);
       }
     } catch (error) {
       console.error('Save vocabulary error:', error);
-      toast.error('😢 Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut!');
+      toast.error('😢 ' + t('dictionaryPopup.generalError'));
     } finally {
       setIsSaving(false);
     }
@@ -169,9 +171,9 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
                 onClick={handleSaveWord}
                 className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
                 disabled={isSaving || isLoading}
-                title={isSaved ? 'Dieses Wort ist bereits in Ihrem Schatz!' : 'Dieses Wort im Schatz speichern'}
+                title={isSaved ? t('dictionaryPopup.alreadySaved') : t('dictionaryPopup.saveToTreasure')}
               >
-                {isSaving ? '💫' : isSaved ? '🎉 Gespeichert!' : '⭐ Speichern'}
+                {isSaving ? '💫' : isSaved ? '🎉 ' + t('dictionaryPopup.saved') : '⭐ ' + t('dictionaryPopup.save')}
               </button>
             )}
             <button onClick={onClose} className={styles.closeButton}>
@@ -186,24 +188,24 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
               <div className={styles.spinnerContainer}>
                 <div className={styles.spinner}></div>
               </div>
-              <div className={styles.loadingText}>Lädt...</div>
+              <div className={styles.loadingText}>{t('dictionaryPopup.loading')}</div>
             </div>
           ) : (
             <>
-              {/* Erklärung */}
+              {/* Explanation */}
               {wordData?.explanation && (
                 <div className={styles.section}>
-                  <h4 className={styles.sectionTitle}>Erklärung</h4>
+                  <h4 className={styles.sectionTitle}>{t('dictionaryPopup.explanation')}</h4>
                   <div className={styles.sectionContent}>
                     {wordData.explanation}
                   </div>
                 </div>
               )}
 
-              {/* Beispiele */}
+              {/* Examples */}
               {wordData?.examples && wordData.examples.length > 0 && (
                 <div className={styles.section}>
-                  <h4 className={styles.sectionTitle}>Beispiele</h4>
+                  <h4 className={styles.sectionTitle}>{t('dictionaryPopup.examples')}</h4>
                   <div className={styles.examples}>
                     {wordData.examples.map((example, index) => (
                       <div key={index} className={styles.example}>

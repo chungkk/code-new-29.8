@@ -1,0 +1,167 @@
+{
+  "header": {
+    "logo": "PapaGeil",
+    "nav": {
+      "topics": "Topics",
+      "review": "Review",
+      "vocabulary": "Vocabulary",
+      "leaderboard": "Leaderboard",
+      "dashboard": "Dashboard"
+    },
+    "themeToggle": "Toggle theme",
+    "language": "English",
+    "points": "Your total points",
+    "streak": "View your learning streak",
+    "notifications": "Notifications",
+    "userMenu": {
+      "label": "User menu",
+      "user": "User",
+      "dashboard": "Dashboard",
+      "myVocabulary": "My Vocabulary",
+      "leaderboard": "Leaderboard",
+      "settings": "Settings",
+      "adminArea": "Admin Area",
+      "logout": "Logout"
+    },
+    "auth": {
+      "login": "Login",
+      "register": "Register"
+    }
+  },
+  "footer": {
+    "description": "Improve your German pronunciation and speaking skills with modern shadowing and dictation methods.",
+    "sections": {
+      "information": "Information",
+      "features": "Features"
+    },
+    "links": {
+      "privacy": "Privacy Policy",
+      "about": "About Us",
+      "terms": "Terms of Service",
+      "contact": "Contact",
+      "feedback": "Feedback",
+      "shadowing": "Shadowing",
+      "dictation": "Dictation",
+      "vocabulary": "Vocabulary"
+    },
+    "copyright": "All rights reserved.",
+    "madeWith": "Made with",
+    "by": "by PapaGeil"
+  },
+  "theme": {
+    "sunset": {
+      "label": "Sunset",
+      "description": "Warm orange and pink tones for a cozy feeling."
+    },
+    "dark": {
+      "label": "Dark Mode",
+      "description": "High-contrast dark mode for late study sessions."
+    },
+    "light": {
+      "label": "Light Mode",
+      "description": "Bright, clear mode for daytime learning."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "profile": {
+      "title": "Profile",
+      "name": "Name:",
+      "email": "Email:",
+      "role": "Role:",
+      "admin": "Administrator",
+      "user": "User"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose your preferred color scheme",
+      "current": "Current:"
+    },
+    "nativeLanguage": {
+      "title": "Native Language",
+      "description": "Choose your native language for translations",
+      "current": "Current language:"
+    },
+    "level": {
+      "title": "German Level",
+      "description": "Choose your current German level",
+      "beginner": "Beginner (A1-A2)",
+      "experienced": "Advanced (B1+)",
+      "all": "All Levels",
+      "hint": "Lessons on the home page will be automatically filtered according to your chosen level"
+    },
+    "password": {
+      "title": "Change Password",
+      "current": "Current Password",
+      "new": "New Password",
+      "confirm": "Confirm Password",
+      "button": "Change Password",
+      "updating": "Updating...",
+      "errors": {
+        "mismatch": "New passwords do not match!",
+        "minLength": "New password must be at least 6 characters long!",
+        "failed": "Error changing password"
+      },
+      "success": "Password changed successfully!"
+    },
+    "updateSuccess": "Settings updated!",
+    "updateError": "Error updating"
+  },
+  "seo": {
+    "settings": {
+      "title": "Settings - PapaGeil",
+      "description": "Manage your account settings, preferences and profile.",
+      "keywords": "settings, profile, account management, German learning settings"
+    }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "dictionaryPopup": {
+    "loginRequired": "Please log in to save to your vocabulary!",
+    "searchingMeaning": "One moment, searching for word meaning...",
+    "addedSuccess": "Wonderful! The word has been added to your vocabulary!",
+    "addedError": "Oops!",
+    "generalError": "An error occurred, please try again!",
+    "alreadySaved": "This word is already in your collection!",
+    "saveToTreasure": "Save this word to collection",
+    "saved": "Saved!",
+    "save": "Save",
+    "loading": "Loading...",
+    "explanation": "Explanation",
+    "examples": "Examples"
+  },
+  "streakPopup": {
+    "label": "sentence streak"
+  },
+  "modeSelectionPopup": {
+    "title": "Choose Learning Mode",
+    "dictation": {
+      "name": "Dictation",
+      "description": "Listen and type what you hear to improve your listening comprehension and spelling."
+    },
+    "shadowing": {
+      "name": "Shadowing",
+      "description": "Listen and repeat after the speaker to improve your pronunciation and speaking fluency."
+    }
+  },
+  "vocabularyPopup": {
+    "details": "Vocabulary Details",
+    "saveTitle": "Save to Vocabulary",
+    "translating": "Translating...",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Add your notes here...",
+    "cancel": "Cancel",
+    "save": "Save to Vocabulary",
+    "saving": "Saving..."
+  },
+  "wordSuggestionPopup": {
+    "chooseWord": "Choose the word",
+    "generatingSuggestions": "Generating suggestions...",
+    "correct": "Correct! Well done!",
+    "correctWordIs": "The correct word is:"
+  }
+}

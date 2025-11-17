@@ -170,6 +170,10 @@
   border-color: var(--accent-blue);
 }
 
+.languageMenuContainer {
+  position: relative;
+}
+
 .languageSelector {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -187,6 +191,50 @@
 .languageSelector:hover {
   background: var(--bg-hover);
   border-color: var(--accent-blue);
+}
+
+.languageDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+.languageOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.languageOption:hover {
+  background: var(--bg-hover);
+}
+
+.languageOption.active {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--accent-blue);
+}
+
+.languageOption .checkmark {
+  margin-left: auto;
+  color: var(--accent-blue);
+  font-weight: bold;
 }
 
 .pointsBadge {

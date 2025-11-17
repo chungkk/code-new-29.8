@@ -1,0 +1,167 @@
+{
+  "header": {
+    "logo": "PapaGeil",
+    "nav": {
+      "topics": "Themen",
+      "review": "Überprüfung",
+      "vocabulary": "Vokabular",
+      "leaderboard": "Bestenliste",
+      "dashboard": "Armaturenbrett"
+    },
+    "themeToggle": "Thema umschalten",
+    "language": "Deutsch",
+    "points": "Ihre Gesamtpunktzahl",
+    "streak": "Ihre Lernserie ansehen",
+    "notifications": "Benachrichtigungen",
+    "userMenu": {
+      "label": "Benutzermenü",
+      "user": "Benutzer",
+      "dashboard": "Dashboard",
+      "myVocabulary": "Mein Vokabular",
+      "leaderboard": "Bestenliste",
+      "settings": "Einstellungen",
+      "adminArea": "Admin-Bereich",
+      "logout": "Abmelden"
+    },
+    "auth": {
+      "login": "Anmelden",
+      "register": "Registrieren"
+    }
+  },
+  "footer": {
+    "description": "Verbessern Sie Ihre deutsche Aussprache und Sprechfähigkeiten mit modernen Shadowing- und Diktatmethoden.",
+    "sections": {
+      "information": "Information",
+      "features": "Features"
+    },
+    "links": {
+      "privacy": "Datenschutzrichtlinie",
+      "about": "Über uns",
+      "terms": "Nutzungsbedingungen",
+      "contact": "Kontakt",
+      "feedback": "Feedback",
+      "shadowing": "Shadowing",
+      "dictation": "Diktat",
+      "vocabulary": "Vokabular"
+    },
+    "copyright": "Alle Rechte vorbehalten.",
+    "madeWith": "Erstellt mit",
+    "by": "von PapaGeil"
+  },
+  "theme": {
+    "sunset": {
+      "label": "Sonnenuntergang",
+      "description": "Warme Orange- und Pinknuancen für ein gemütliches Gefühl."
+    },
+    "dark": {
+      "label": "Nachtmodus",
+      "description": "Kontrastreicher Dark Mode für späte Lernsessions."
+    },
+    "light": {
+      "label": "Hellmodus",
+      "description": "Heller, klarer Modus für Tageslernen."
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihre Kontoeinstellungen und Präferenzen",
+    "profile": {
+      "title": "Profil",
+      "name": "Name:",
+      "email": "E-Mail:",
+      "role": "Rolle:",
+      "admin": "Administrator",
+      "user": "Benutzer"
+    },
+    "appearance": {
+      "title": "Darstellung",
+      "description": "Wählen Sie Ihr bevorzugtes Farbschema",
+      "current": "Aktuell:"
+    },
+    "nativeLanguage": {
+      "title": "Muttersprache",
+      "description": "Wählen Sie Ihre Muttersprache für Übersetzungen",
+      "current": "Aktuelle Sprache:"
+    },
+    "level": {
+      "title": "Deutsch-Niveau",
+      "description": "Wählen Sie Ihr aktuelles Deutsch-Niveau",
+      "beginner": "Anfänger (A1-A2)",
+      "experienced": "Fortgeschritten (B1+)",
+      "all": "Alle Niveaus",
+      "hint": "Lektionen auf der Startseite werden automatisch nach deinem gewählten Niveau gefiltert"
+    },
+    "password": {
+      "title": "Passwort ändern",
+      "current": "Aktuelles Passwort",
+      "new": "Neues Passwort",
+      "confirm": "Passwort bestätigen",
+      "button": "Passwort ändern",
+      "updating": "Wird aktualisiert...",
+      "errors": {
+        "mismatch": "Neue Passwörter stimmen nicht überein!",
+        "minLength": "Neues Passwort muss mindestens 6 Zeichen lang sein!",
+        "failed": "Fehler beim Ändern des Passworts"
+      },
+      "success": "Passwort erfolgreich geändert!"
+    },
+    "updateSuccess": "Einstellungen aktualisiert!",
+    "updateError": "Fehler beim Aktualisieren"
+  },
+  "seo": {
+    "settings": {
+      "title": "Einstellungen - PapaGeil",
+      "description": "Verwalten Sie Ihre Kontoeinstellungen, Präferenzen und Profil.",
+      "keywords": "Einstellungen, Profil, Konto verwalten, Deutsch lernen Einstellungen"
+    }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Einstellungen"
+  },
+  "dictionaryPopup": {
+    "loginRequired": "Bitte melden Sie sich an, um Ihr Vokabular zu speichern!",
+    "searchingMeaning": "Einen Moment, die Wortbedeutung wird gesucht...",
+    "addedSuccess": "Wunderbar! Das Wort wurde Ihrem Vokabular hinzugefügt!",
+    "addedError": "Ups!",
+    "generalError": "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut!",
+    "alreadySaved": "Dieses Wort ist bereits in Ihrem Schatz!",
+    "saveToTreasure": "Dieses Wort im Schatz speichern",
+    "saved": "Gespeichert!",
+    "save": "Speichern",
+    "loading": "Lädt...",
+    "explanation": "Erklärung",
+    "examples": "Beispiele"
+  },
+  "streakPopup": {
+    "label": "Satzserie"
+  },
+  "modeSelectionPopup": {
+    "title": "Lernmodus wählen",
+    "dictation": {
+      "name": "Diktat",
+      "description": "Hören Sie zu und tippen Sie, was Sie hören, um Ihr Hörverständnis und Ihre Rechtschreibung zu verbessern."
+    },
+    "shadowing": {
+      "name": "Shadowing",
+      "description": "Hören Sie zu und wiederholen Sie nach dem Sprecher, um Ihre Aussprache und Sprachflüssigkeit zu verbessern."
+    }
+  },
+  "vocabularyPopup": {
+    "details": "Vokabular-Details",
+    "saveTitle": "Ins Vokabular speichern",
+    "translating": "Übersetzt...",
+    "notesLabel": "Notizen (optional)",
+    "notesPlaceholder": "Fügen Sie hier Ihre Notizen hinzu...",
+    "cancel": "Abbrechen",
+    "save": "Ins Vokabular speichern",
+    "saving": "Wird gespeichert..."
+  },
+  "wordSuggestionPopup": {
+    "chooseWord": "Wähle das Wort",
+    "generatingSuggestions": "Generiere Vorschläge...",
+    "correct": "Richtig! Gut gemacht!",
+    "correctWordIs": "Das richtige Wort ist:"
+  }
+}
