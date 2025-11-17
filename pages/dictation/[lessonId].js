@@ -1801,29 +1801,78 @@ const DictationPageContent = () => {
 
   // Show hint for a word - now opens suggestion popup instead of revealing directly
   const showHint = useCallback((button, correctWord, wordIndex) => {
+    // If user is not logged in, reveal the word directly
+    if (!user) {
+      const container = button.parentElement;
+      const input = container.querySelector('.word-input');
+
+      if (input) {
+        // Save this word completion to database
+        saveWordCompletion(wordIndex, correctWord);
+
+        // Award points for correct word (+1 point) and show animation
+        if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
+          updatePoints(1, `Correct word from hint: ${correctWord}`, button);
+          setWordPointsProcessed(prev => ({
+            ...prev,
+            [currentSentenceIndex]: {
+              ...(prev[currentSentenceIndex] || {}),
+              [wordIndex]: 'correct'
+            }
+          }));
+        }
+
+        // Replace input with correct word
+        const wordSpan = document.createElement("span");
+        wordSpan.className = "correct-word hint-revealed";
+        wordSpan.innerText = correctWord;
+        wordSpan.onclick = function () {
+          if (window.saveWord) window.saveWord(correctWord);
+        };
+
+        // Find the punctuation span
+        const punctuation = container.querySelector('.word-punctuation');
+
+        // Clear container and rebuild
+        container.innerHTML = '';
+        container.appendChild(wordSpan);
+        if (punctuation) {
+          container.appendChild(punctuation);
+        }
+
+        // Save the word
+        saveWord(correctWord);
+
+        // Check if sentence is completed
+        checkSentenceCompletion();
+      }
+      return;
+    }
+
+    // For logged-in users, show suggestion popup
     // Get current sentence context
     const context = transcriptData[currentSentenceIndex]?.text || '';
-    
+
     // Calculate popup position relative to the hint button
     const rect = button.getBoundingClientRect();
     const isMobileView = window.innerWidth <= 768;
-    
+
     let top, left;
-    
+
     if (isMobileView) {
       // Mobile: position below the button, centered horizontally
       const popupWidth = 300; // Estimated mobile popup width
       const popupHeight = 50; // Estimated mobile popup height
-      
+
       top = rect.bottom + 8; // 8px below button
       left = rect.left + (rect.width / 2) - (popupWidth / 2); // Center horizontally
-      
+
       // Keep within screen bounds
       if (left < 10) left = 10;
       if (left + popupWidth > window.innerWidth - 10) {
         left = window.innerWidth - popupWidth - 10;
       }
-      
+
       // If would go off bottom, show above instead
       if (top + popupHeight > window.innerHeight - 10) {
         top = rect.top - popupHeight - 8;
@@ -1832,38 +1881,38 @@ const DictationPageContent = () => {
       // Desktop: position to the right/left of button
       const popupWidth = 280;
       const popupHeight = 250;
-      
+
       top = rect.top;
       left = rect.right + 10;
-      
+
       // Check if popup would go off right edge of screen
       if (left + popupWidth > window.innerWidth - 10) {
         left = rect.left - popupWidth - 10;
       }
-      
+
       // Check if popup would go off left edge
       if (left < 10) {
         left = Math.max(10, (window.innerWidth - popupWidth) / 2);
       }
-      
+
       // Check if popup would go off bottom of screen
       if (top + popupHeight > window.innerHeight - 10) {
         top = Math.max(10, window.innerHeight - popupHeight - 10);
       }
-      
+
       // Check if popup would go off top
       if (top < 10) {
         top = 10;
       }
     }
-    
+
     // Set state for popup
     setSuggestionWord(correctWord);
     setSuggestionWordIndex(wordIndex);
     setSuggestionContext(context);
     setSuggestionPosition({ top, left });
     setShowSuggestionPopup(true);
-  }, [transcriptData, currentSentenceIndex]);
+  }, [transcriptData, currentSentenceIndex, user, saveWord, saveWordCompletion, checkSentenceCompletion, wordPointsProcessed, updatePoints]);
 
   // Handle correct answer from suggestion popup
   const handleCorrectSuggestion = useCallback((correctWord, wordIndex) => {
@@ -2343,6 +2392,15 @@ const DictationPageContent = () => {
         <div className={styles.mainContent}>
           {/* Left Column - Video */}
           <div className={styles.leftSection}>
+            {/* Video Header */}
+            <div className={styles.videoHeader}>
+              <div className={styles.transcriptTabs}>
+                <div className={`${styles.transcriptTab} ${styles.active}`}>
+                  Video
+                </div>
+              </div>
+            </div>
+
             <div className={styles.videoWrapper}>
               {/* Video Container - Always visible */}
               <div className={styles.videoContainer}>

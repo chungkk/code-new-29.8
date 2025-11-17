@@ -1069,23 +1069,29 @@ const ShadowingPageContent = () => {
              <div className={styles.mainContainer}>
                {/* Left Section: Video + Current Sentence + Controls */}
                <div className={styles.leftSection}>
-                 {/* Video Player */}
-                 <div className={styles.videoContainer}>
-                   {isYouTube ? (
-                     <div className={styles.videoWrapper}>
-                       <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
-                       <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
-                     </div>
-                   ) : (
-                     <div className={styles.videoPlaceholder}>
-                       <svg viewBox="0 0 24 24" fill="currentColor">
-                         <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                       </svg>
-                     </div>
-                   )}
-                    <div className={styles.videoTimer}>
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </div>
+                 {/* Video Section */}
+                 <div className={styles.videoSection}>
+                   <div className={styles.videoHeader}>
+                     <h3 className={styles.transcriptTitle}>Video</h3>
+                   </div>
+                   {/* Video Player */}
+                   <div className={styles.videoContainer}>
+                     {isYouTube ? (
+                       <div className={styles.videoWrapper}>
+                         <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
+                         <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
+                       </div>
+                     ) : (
+                       <div className={styles.videoPlaceholder}>
+                         <svg viewBox="0 0 24 24" fill="currentColor">
+                           <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                         </svg>
+                       </div>
+                     )}
+                      <div className={styles.videoTimer}>
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </div>
+                   </div>
                  </div>
 
                  {/* Current Sentence Display */}
