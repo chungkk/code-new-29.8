@@ -45,6 +45,29 @@ const UserSchema = new mongoose.Schema({
      default: 'beginner',
      enum: ['beginner', 'experienced', 'all']
    },
+   streak: {
+     currentStreak: {
+       type: Number,
+       default: 0
+     },
+     lastActivityDate: {
+       type: Date,
+       default: null
+     },
+     weeklyProgress: {
+       type: [Boolean],
+       default: [false, false, false, false, false, false, false]
+     }
+   },
+   points: {
+     type: Number,
+     default: 0,
+     min: 0
+   },
+   lastLoginDate: {
+     type: Date,
+     default: null
+   },
    createdAt: {
      type: Date,
      default: Date.now

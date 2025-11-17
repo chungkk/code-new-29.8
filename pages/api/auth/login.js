@@ -30,6 +30,35 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
+    // Check daily login bonus
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : null;
+    
+    let dailyBonusAwarded = false;
+    
+    if (lastLogin) {
+      const lastLoginDay = new Date(
+        lastLogin.getFullYear(),
+        lastLogin.getMonth(),
+        lastLogin.getDate()
+      );
+      
+      // If last login was not today, award daily bonus
+      if (lastLoginDay.getTime() !== today.getTime()) {
+        user.points = (user.points || 0) + 1;
+        user.lastLoginDate = now;
+        await user.save();
+        dailyBonusAwarded = true;
+      }
+    } else {
+      // First login ever
+      user.points = (user.points || 0) + 1;
+      user.lastLoginDate = now;
+      await user.save();
+      dailyBonusAwarded = true;
+    }
+
     const token = generateToken({
       userId: user._id,
       email: user.email,
@@ -47,8 +76,10 @@ export default async function handler(req, res) {
         email: user.email,
         role: user.role,
         nativeLanguage: user.nativeLanguage,
-        level: user.level
-      }
+        level: user.level,
+        points: user.points || 0
+      },
+      dailyBonusAwarded
     });
   } catch (error) {
     console.error('Login error:', error);

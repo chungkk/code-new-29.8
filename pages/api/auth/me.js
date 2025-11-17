@@ -33,7 +33,8 @@ export default async function handler(req, res) {
         email: user.email,
         role: user.role,
         nativeLanguage: user.nativeLanguage,
-        level: user.level
+        level: user.level,
+        points: user.points || 0
       }
     });
   } catch (error) {

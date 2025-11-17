@@ -6,7 +6,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
   z-index: 10000;
   animation: fadeIn 0.2s ease-out;
   pointer-events: all;
@@ -22,11 +23,15 @@
 }
 
 .popup {
-  background: white;
+  background: linear-gradient(145deg, rgba(30, 33, 57, 0.98) 0%, rgba(20, 23, 47, 0.98) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.3);
   border-radius: 12px;
   padding: 16px;
   width: 280px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(102, 126, 234, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   position: absolute;
   animation: popIn 0.2s ease-out;
   z-index: 10001;
@@ -48,10 +53,11 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #999;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   line-height: 1;
   padding: 0;
@@ -60,23 +66,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
 
 .closeButton:hover {
-  color: #333;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  transform: rotate(90deg);
 }
 
 .header {
   margin-bottom: 12px;
   text-align: center;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .header h3 {
   font-size: 16px;
-  color: #1a1a1a;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(224, 231, 255, 0.95) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
 .loading {
@@ -91,10 +108,11 @@
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #f3f3f3;
+  border: 3px solid rgba(102, 126, 234, 0.2);
   border-top: 3px solid #667eea;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
 @keyframes spin {
@@ -103,7 +121,7 @@
 }
 
 .loading p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   margin: 0;
 }
@@ -119,10 +137,10 @@
   width: 100%;
   padding: 12px 14px;
   font-size: 15px;
-  font-weight: 500;
-  color: #333;
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.08) 0%, rgba(30, 33, 57, 0.95) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.25);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -134,10 +152,13 @@
 }
 
 .optionButton:hover:not(:disabled) {
-  background: #f0f0f0;
-  border-color: #667eea;
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.15) 0%, rgba(30, 33, 57, 1) 100%);
+  border-color: rgba(102, 126, 234, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 
+    0 4px 12px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .optionButton:active:not(:disabled) {
@@ -172,10 +193,13 @@
 
 /* Correct answer state */
 .optionButton.correct {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.95) 100%);
+  border: 2px solid #10b981;
   color: white;
   animation: correctPulse 0.5s ease-out;
+  box-shadow: 
+    0 4px 16px rgba(16, 185, 129, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @keyframes correctPulse {
@@ -192,10 +216,13 @@
 
 /* Wrong answer state */
 .optionButton.wrong {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-color: #ef4444;
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.95) 100%);
+  border: 2px solid #ef4444;
   color: white;
   animation: shake 0.5s ease-out;
+  box-shadow: 
+    0 4px 16px rgba(239, 68, 68, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 @keyframes shake {
@@ -212,10 +239,13 @@
 
 /* Show correct answer when user selected wrong */
 .optionButton.showCorrect {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.95) 100%);
+  border: 2px solid #10b981;
   color: white;
   animation: highlightCorrect 0.8s ease-out;
+  box-shadow: 
+    0 4px 16px rgba(16, 185, 129, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @keyframes highlightCorrect {
@@ -238,6 +268,7 @@
   gap: 8px;
   animation: slideDown 0.3s ease-out;
   margin-top: 8px;
+  border: 1px solid;
 }
 
 @keyframes slideDown {
@@ -252,13 +283,19 @@
 }
 
 .feedbackCorrect {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  border: 2px solid #10b981;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 
+    0 2px 8px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .feedbackWrong {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border: 2px solid #ef4444;
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 
+    0 2px 8px rgba(239, 68, 68, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .feedbackIcon {
@@ -269,37 +306,104 @@
 .feedback p {
   margin: 0;
   font-size: 13px;
-  color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.9);
   flex: 1;
+  font-weight: 500;
 }
 
 .feedback strong {
   font-weight: 700;
-  color: #059669;
+  color: #10b981;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .popup {
-    padding: 14px;
-    width: 250px;
-  }
+/* Mobile specific styles */
+.popupMobile {
+  padding: 8px;
+  width: auto;
+  max-width: 90vw;
+  border-width: 1.5px;
+}
 
-  .header h3 {
-    font-size: 14px;
-  }
+.loadingMobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
 
-  .optionButton {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
+.loadingMobile .spinner {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
 
-  .feedback {
-    padding: 8px;
-    font-size: 12px;
-  }
+.optionsContainerMobile {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  justify-content: center;
+}
 
-  .feedbackIcon {
-    font-size: 18px;
+.optionButtonMobile {
+  flex: 1;
+  min-width: 80px;
+  max-width: 120px;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.08) 0%, rgba(30, 33, 57, 0.95) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.25);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.optionButtonMobile:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.optionButtonMobile.correct {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.95) 100%);
+  border-color: #10b981;
+  color: white;
+  animation: correctPulseMobile 0.4s ease-out;
+}
+
+.optionButtonMobile.wrong {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.95) 100%);
+  border-color: #ef4444;
+  color: white;
+  animation: shakeMobile 0.4s ease-out;
+}
+
+.optionButtonMobile.showCorrect {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.95) 100%);
+  border-color: #10b981;
+  color: white;
+}
+
+@keyframes correctPulseMobile {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes shakeMobile {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25%, 75% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
   }
 }

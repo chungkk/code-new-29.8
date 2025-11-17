@@ -4,15 +4,54 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import StreakPopup from './StreakPopup';
 import styles from '../styles/Header.module.css';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [streakPopupOpen, setStreakPopupOpen] = useState(false);
   const userMenuRef = useRef(null);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, userPoints, fetchUserPoints } = useAuth();
   const { theme, toggleTheme, currentTheme } = useTheme();
+
+  // Fetch user points on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      fetchUserPoints();
+
+      // Expose refresh function globally for dictation page
+      if (typeof window !== 'undefined') {
+        window.refreshUserPoints = fetchUserPoints;
+      }
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.refreshUserPoints = null;
+      }
+    };
+  }, [user, fetchUserPoints]);
+
+  // Listen for points update events from other pages
+  useEffect(() => {
+    const handlePointsUpdate = () => {
+      if (user) {
+        fetchUserPoints();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pointsUpdated', handlePointsUpdate);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('pointsUpdated', handlePointsUpdate);
+      }
+    };
+  }, [user, fetchUserPoints]);
 
   // Tạo avatar mặc định từ initials
   const getDefaultAvatar = (name) => {
@@ -117,6 +156,26 @@ const Header = () => {
 
           {user && (
             <>
+              <div className={styles.pointsBadge} title="Your total points">
+                <span className={styles.pointsIcon}>⭐</span>
+                <span className={styles.pointsValue}>{userPoints || 0}</span>
+              </div>
+
+              <div className={styles.streakContainer}>
+                <button 
+                  className={styles.streakBtn} 
+                  aria-label="Streak"
+                  onClick={() => setStreakPopupOpen(true)}
+                  title="View your learning streak"
+                >
+                  <span>🔥</span>
+                </button>
+
+                {streakPopupOpen && (
+                  <StreakPopup onClose={() => setStreakPopupOpen(false)} />
+                )}
+              </div>
+
               <button className={styles.notificationBtn} aria-label="Notifications">
                 <span>🔔</span>
                 <span className={styles.notificationBadge}></span>

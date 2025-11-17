@@ -15,11 +15,21 @@ const WordSuggestionPopup = ({
   const [selectedOption, setSelectedOption] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     loadSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [correctWord]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const loadSuggestions = async () => {
     setLoading(true);
@@ -76,6 +86,48 @@ const WordSuggestionPopup = ({
     }
   };
 
+  if (isMobile) {
+    // Mobile layout - simple horizontal 3 buttons
+    return (
+      <div className={styles.overlay} onClick={handleOverlayClick}>
+        <div 
+          className={`${styles.popup} ${styles.popupMobile}`}
+          style={{
+            position: 'absolute',
+            top: `${position?.top || 0}px`,
+            left: `${position?.left || 0}px`,
+          }}
+        >
+          {loading ? (
+            <div className={styles.loadingMobile}>
+              <div className={styles.spinner}></div>
+            </div>
+          ) : (
+            <div className={styles.optionsContainerMobile}>
+              {options.map((option, index) => (
+                <button
+                  key={index}
+                  className={`${styles.optionButtonMobile} ${
+                    selectedOption === option
+                      ? isCorrect
+                        ? styles.correct
+                        : styles.wrong
+                      : ''
+                  } ${showResult && option.toLowerCase() === correctWord.toLowerCase() ? styles.showCorrect : ''}`}
+                  onClick={() => handleOptionClick(option)}
+                  disabled={showResult}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout - original vertical with header
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div 

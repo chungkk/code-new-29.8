@@ -7,6 +7,7 @@ import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
+import PointsAnimation from '../../components/PointsAnimation';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -53,6 +54,12 @@ const DictationPageContent = () => {
   const [completedSentences, setCompletedSentences] = useState([]);
   const [completedWords, setCompletedWords] = useState({}); // { sentenceIndex: { wordIndex: correctWord } }
   const [progressLoaded, setProgressLoaded] = useState(false);
+  
+  // Points tracking - track which words have been scored
+  const [wordPointsProcessed, setWordPointsProcessed] = useState({}); // { sentenceIndex: { wordIndex: 'correct' | 'incorrect' } }
+  
+  // Points animation states
+  const [pointsAnimations, setPointsAnimations] = useState([]); // Array of { id, points, position }
   
   // Vocabulary popup states
   const [showVocabPopup, setShowVocabPopup] = useState(false);
@@ -1203,6 +1210,89 @@ const DictationPageContent = () => {
     }, 200);
   }, [completedSentences, currentSentenceIndex, completedWords, saveProgress]);
 
+  // Show points animation
+  const showPointsAnimation = useCallback((points, element) => {
+    if (!element) return;
+    
+    // Get element position (starting point)
+    const rect = element.getBoundingClientRect();
+    const startPosition = {
+      top: rect.top + rect.height / 2 - 10,
+      left: rect.left + rect.width / 2
+    };
+    
+    // Get header points badge position (end point)
+    const headerBadge = document.querySelector('[title="Your total points"]');
+    let endPosition = null;
+
+    if (headerBadge) {
+      const badgeRect = headerBadge.getBoundingClientRect();
+      endPosition = {
+        top: badgeRect.top + badgeRect.height / 2,
+        left: badgeRect.left + badgeRect.width / 2
+      };
+    } else {
+      // Fallback: animate upwards if header badge not found
+      endPosition = {
+        top: startPosition.top - 100,
+        left: startPosition.left
+      };
+    }
+    
+    const animationId = Date.now() + Math.random();
+    setPointsAnimations(prev => [...prev, { 
+      id: animationId, 
+      points, 
+      startPosition,
+      endPosition 
+    }]);
+    
+    // Remove animation after it completes
+    setTimeout(() => {
+      setPointsAnimations(prev => prev.filter(a => a.id !== animationId));
+    }, 1000);
+  }, []);
+
+  // Update points function
+  const updatePoints = useCallback(async (pointsChange, reason, element = null) => {
+    if (!user) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await fetch('/api/user/points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ pointsChange, reason })
+      });
+      
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Points updated: ${pointsChange > 0 ? '+' : ''}${pointsChange} (${reason})`);
+
+          // Show animation
+          if (element) {
+            showPointsAnimation(pointsChange, element);
+          }
+
+          // Trigger points refresh in AuthContext (if available)
+          if (typeof window !== 'undefined') {
+            if (window.refreshUserPoints) {
+              window.refreshUserPoints();
+            }
+            // Also emit custom event for Header to listen
+            window.dispatchEvent(new CustomEvent('pointsUpdated', { detail: { pointsChange, reason } }));
+          }
+        }
+    } catch (error) {
+      console.error('Error updating points:', error);
+    }
+  }, [user, showPointsAnimation]);
+
   // Update input background
   const updateInputBackground = useCallback((input, correctWord) => {
     if (input.value.toLowerCase() === correctWord.substring(0, input.value.length).toLowerCase()) {
@@ -1226,6 +1316,19 @@ const DictationPageContent = () => {
       // Save this word completion to database
       saveWordCompletion(wordIndex, correctWord);
       
+      // Award points for correct word (+1 point)
+      const wordKey = `${currentSentenceIndex}-${wordIndex}`;
+      if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
+        updatePoints(1, `Correct word: ${correctWord}`, input);
+        setWordPointsProcessed(prev => ({
+          ...prev,
+          [currentSentenceIndex]: {
+            ...(prev[currentSentenceIndex] || {}),
+            [wordIndex]: 'correct'
+          }
+        }));
+      }
+      
       const wordSpan = document.createElement("span");
       wordSpan.className = "correct-word";
       wordSpan.innerText = correctWord;
@@ -1248,8 +1351,24 @@ const DictationPageContent = () => {
       }, 100);
     } else {
       updateInputBackground(input, sanitizedCorrectWord);
+      
+      // Deduct points for incorrect attempt (-0.5 points, only once per word)
+      if (input.value.length === sanitizedCorrectWord.length) {
+        // Only deduct when user has typed the full word length
+        const wordKey = `${currentSentenceIndex}-${wordIndex}`;
+        if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
+          updatePoints(-0.5, `Incorrect word attempt: ${input.value}`, input);
+          setWordPointsProcessed(prev => ({
+            ...prev,
+            [currentSentenceIndex]: {
+              ...(prev[currentSentenceIndex] || {}),
+              [wordIndex]: 'incorrect'
+            }
+          }));
+        }
+      }
     }
-  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion]);
+  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints]);
 
   /**
    * Seeded random number generator for deterministic word selection
@@ -1360,33 +1479,55 @@ const DictationPageContent = () => {
     
     // Calculate popup position relative to the hint button
     const rect = button.getBoundingClientRect();
-    const popupWidth = 280;
-    const popupHeight = 250; // Estimated max height
+    const isMobileView = window.innerWidth <= 768;
     
-    // Position popup to the right of the button by default
-    let top = rect.top;
-    let left = rect.right + 10;
+    let top, left;
     
-    // Check if popup would go off right edge of screen
-    if (left + popupWidth > window.innerWidth - 10) {
-      // Position to the left instead
-      left = rect.left - popupWidth - 10;
-    }
-    
-    // Check if popup would go off left edge
-    if (left < 10) {
-      // Center horizontally instead
-      left = Math.max(10, (window.innerWidth - popupWidth) / 2);
-    }
-    
-    // Check if popup would go off bottom of screen
-    if (top + popupHeight > window.innerHeight - 10) {
-      top = Math.max(10, window.innerHeight - popupHeight - 10);
-    }
-    
-    // Check if popup would go off top
-    if (top < 10) {
-      top = 10;
+    if (isMobileView) {
+      // Mobile: position below the button, centered horizontally
+      const popupWidth = 300; // Estimated mobile popup width
+      const popupHeight = 50; // Estimated mobile popup height
+      
+      top = rect.bottom + 8; // 8px below button
+      left = rect.left + (rect.width / 2) - (popupWidth / 2); // Center horizontally
+      
+      // Keep within screen bounds
+      if (left < 10) left = 10;
+      if (left + popupWidth > window.innerWidth - 10) {
+        left = window.innerWidth - popupWidth - 10;
+      }
+      
+      // If would go off bottom, show above instead
+      if (top + popupHeight > window.innerHeight - 10) {
+        top = rect.top - popupHeight - 8;
+      }
+    } else {
+      // Desktop: position to the right/left of button
+      const popupWidth = 280;
+      const popupHeight = 250;
+      
+      top = rect.top;
+      left = rect.right + 10;
+      
+      // Check if popup would go off right edge of screen
+      if (left + popupWidth > window.innerWidth - 10) {
+        left = rect.left - popupWidth - 10;
+      }
+      
+      // Check if popup would go off left edge
+      if (left < 10) {
+        left = Math.max(10, (window.innerWidth - popupWidth) / 2);
+      }
+      
+      // Check if popup would go off bottom of screen
+      if (top + popupHeight > window.innerHeight - 10) {
+        top = Math.max(10, window.innerHeight - popupHeight - 10);
+      }
+      
+      // Check if popup would go off top
+      if (top < 10) {
+        top = 10;
+      }
     }
     
     // Set state for popup
@@ -1408,6 +1549,18 @@ const DictationPageContent = () => {
       if (input) {
         // Save this word completion to database
         saveWordCompletion(wordIndex, correctWord);
+        
+        // Award points for correct word (+1 point) and show animation
+        if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
+          updatePoints(1, `Correct word from hint: ${correctWord}`, button);
+          setWordPointsProcessed(prev => ({
+            ...prev,
+            [currentSentenceIndex]: {
+              ...(prev[currentSentenceIndex] || {}),
+              [wordIndex]: 'correct'
+            }
+          }));
+        }
         
         // Replace input with correct word
         const wordSpan = document.createElement("span");
@@ -1437,15 +1590,24 @@ const DictationPageContent = () => {
     
     // Close popup
     setShowSuggestionPopup(false);
-    toast.success('Richtig! Gut gemacht!');
-  }, [saveWord, checkSentenceCompletion, saveWordCompletion]);
+  }, [saveWord, checkSentenceCompletion, saveWordCompletion, wordPointsProcessed, currentSentenceIndex, updatePoints]);
 
   // Handle wrong answer from suggestion popup
   const handleWrongSuggestion = useCallback((correctWord, wordIndex, selectedWord) => {
     // Close popup after showing feedback
     setShowSuggestionPopup(false);
-    toast.error(`Falsch! Das richtige Wort ist: ${correctWord}`);
-  }, []);
+
+    // Show points animation for wrong suggestion
+    const wrongButton = document.querySelector('.popup .optionButton.wrong') ||
+                       document.querySelector('.popup .optionButtonMobile.wrong') ||
+                       document.querySelector('.popupMobile .optionButtonMobile.wrong');
+    if (wrongButton) {
+      showPointsAnimation(-0.5, wrongButton);
+    }
+
+    // Update points
+    updatePoints(-0.5, `Wrong suggestion selected: ${selectedWord}, correct: ${correctWord}`);
+  }, [showPointsAnimation, updatePoints]);
 
   /**
    * ============================================================================
@@ -1665,6 +1827,7 @@ const DictationPageContent = () => {
         window.saveWord = saveWord;
         window.showHint = showHint;
         window.handleWordClickForPopup = handleWordClickForPopup;
+        window.showPointsAnimation = showPointsAnimation;
         window.disableArrowKeys = (e) => {
           // Prevent all arrow keys and space from being typed in input fields
           if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
@@ -1673,7 +1836,7 @@ const DictationPageContent = () => {
         };
       }
     }
-  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, hidePercentage]);
+  }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, hidePercentage, showPointsAnimation]);
 
   const handleBackToHome = () => router.push('/');
 
@@ -2095,6 +2258,17 @@ const DictationPageContent = () => {
           onClose={() => setShowSuggestionPopup(false)}
         />
       )}
+
+      {/* Points animations */}
+      {pointsAnimations.map(animation => (
+        <PointsAnimation
+          key={animation.id}
+          points={animation.points}
+          startPosition={animation.startPosition}
+          endPosition={animation.endPosition}
+          onComplete={() => {}}
+        />
+      ))}
     </div>
   );
 };

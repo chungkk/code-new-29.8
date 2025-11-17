@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userPoints, setUserPoints] = useState(0);
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -28,6 +29,8 @@ export function AuthProvider({ children }) {
         // Lưu custom token để tương thích với hệ thống JWT hiện tại
         if (session.customToken && typeof window !== 'undefined') {
           localStorage.setItem('token', session.customToken);
+          // Fetch user points sau khi set token
+          fetchUserPoints();
         }
         setLoading(false);
       } else {
@@ -57,6 +60,7 @@ export function AuthProvider({ children }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        setUserPoints(data.user.points || 0);
       } else {
         // Chỉ xóa token khi chắc chắn token không hợp lệ (401, 403)
         // KHÔNG xóa khi lỗi server (500) hoặc lỗi khác
@@ -143,6 +147,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem('token', data.token);
       }
       setUser(data.user);
+      setUserPoints(data.user.points || 0);
 
       return { success: true };
     } catch (error) {
@@ -168,6 +173,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem('token', data.token);
       }
       setUser(data.user);
+      setUserPoints(data.user.points || 0);
 
       return { success: true };
     } catch (error) {
@@ -199,6 +205,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem('token', data.token);
       }
       setUser(data.user);
+      setUserPoints(data.user.points || 0);
 
       return { success: true };
     } catch (error) {
@@ -207,6 +214,7 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('token');
       }
       setUser(null);
+      setUserPoints(0);
       router.push('/auth/login');
       return { success: false, error: error.message };
     }
@@ -222,11 +230,36 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const fetchUserPoints = async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) return;
+
+      const res = await fetch('/api/user/points', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUserPoints(data.points || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user points:', error);
+    }
+  };
+
+  const updateUserPoints = (newPoints) => {
+    setUserPoints(newPoints);
+  };
+
   const logout = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
     }
     setUser(null);
+    setUserPoints(0);
     // Nếu đang dùng NextAuth session, đăng xuất NextAuth
     if (session) {
       await nextAuthSignOut({ redirect: false });
@@ -235,7 +268,18 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshToken, loginWithGoogle }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      userPoints, 
+      login, 
+      register, 
+      logout, 
+      refreshToken, 
+      loginWithGoogle, 
+      fetchUserPoints,
+      updateUserPoints 
+    }}>
       {children}
     </AuthContext.Provider>
   );
