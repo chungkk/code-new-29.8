@@ -64,21 +64,21 @@
 }
 
 /* ============================================
-   PAGE HEADER
-   ============================================ */
+    PAGE HEADER
+    ============================================ */
 .pageHeader {
-  margin-bottom: 40px;
-  padding-bottom: 28px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 2px solid var(--border-color);
   animation: slideInLeft 0.5s ease-out;
 }
 
 .pageTitle {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 12px 0;
-  letter-spacing: -0.8px;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.6px;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -87,7 +87,7 @@
 }
 
 .pageSubtitle {
-  font-size: 17px;
+  font-size: 15px;
   color: var(--text-secondary);
   margin: 0;
   font-weight: 500;
@@ -95,23 +95,23 @@
 }
 
 /* ============================================
-   STATS OVERVIEW CARDS
-   ============================================ */
+    STATS OVERVIEW CARDS
+    ============================================ */
 .statsOverview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-  margin-bottom: 48px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .statCard {
   background: var(--bg-card);
-  padding: 32px;
+  padding: 16px;
   border-radius: var(--border-radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 12px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--border-color);
   position: relative;
@@ -148,14 +148,14 @@
 .statCard:nth-child(4) { animation-delay: 0.4s; }
 
 .statIcon {
-  font-size: 48px;
-  width: 80px;
-  height: 80px;
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-secondary);
-  border-radius: 16px;
+  border-radius: 10px;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
@@ -170,16 +170,16 @@
 }
 
 .statValue {
-  font-size: 38px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   line-height: 1;
-  letter-spacing: -1px;
+  letter-spacing: -0.6px;
 }
 
 .statLabel {
-  font-size: 14px;
+  font-size: 11px;
   color: var(--text-secondary);
   font-weight: 600;
   line-height: 1.3;

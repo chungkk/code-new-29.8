@@ -1,0 +1,642 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 200px);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #7B9CD8;
+  margin: 0;
+}
+
+/* Main Card */
+.mainCard {
+  background: linear-gradient(180deg, rgba(123, 104, 238, 0.1) 0%, rgba(26, 29, 53, 0.8) 100%);
+  border: 2px solid rgba(123, 104, 238, 0.3);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(123, 104, 238, 0.15);
+}
+
+/* Countdown Section */
+.countdownSection {
+  text-align: center;
+  padding: 2rem 0;
+  border-bottom: 2px solid rgba(123, 104, 238, 0.2);
+  margin-bottom: 2rem;
+}
+
+.countdownLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #C8A2C8;
+  margin-bottom: 1.5rem;
+}
+
+.clockIcon {
+  color: #C8A2C8;
+}
+
+.countdownTimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.timeBox {
+  background: rgba(123, 104, 238, 0.15);
+  border: 2px solid rgba(123, 104, 238, 0.4);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.timeValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #E8DEF8;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.timeLabel {
+  font-size: 0.875rem;
+  color: #C8A2C8;
+  text-transform: capitalize;
+}
+
+.timeSeparator {
+  font-size: 2rem;
+  color: #7B68EE;
+  font-weight: 700;
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(123, 104, 238, 0.2);
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(123, 104, 238, 0.2);
+  color: #E8DEF8;
+  border: 1px solid rgba(123, 104, 238, 0.4);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover:not(:disabled) {
+  background: rgba(123, 104, 238, 0.3);
+  border-color: rgba(123, 104, 238, 0.6);
+  transform: translateY(-2px);
+}
+
+.navButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.monthTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #E8A4C8;
+  margin: 0;
+  text-align: center;
+}
+
+/* Rewards Section */
+.rewardsSection {
+  text-align: center;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.05) 0%, rgba(232, 164, 200, 0.05) 100%);
+  border-radius: 16px;
+}
+
+.rewardsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.trophyBird {
+  width: 60px;
+  height: 60px;
+}
+
+.rewardsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #E8A4C8;
+  margin: 0;
+}
+
+.trophyIcon {
+  color: #FFD700;
+}
+
+.topRanks {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.rankCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rankBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.rankNumber {
+  color: #E8DEF8;
+}
+
+.medalIcon {
+  filter: drop-shadow(0 4px 12px currentColor);
+}
+
+.avatarFrame {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.frame[data-rank="1"] svg circle {
+  stroke: #FFD700;
+  filter: drop-shadow(0 0 12px #FFD700);
+}
+
+.frame[data-rank="2"] svg circle {
+  stroke: #C0C0C0;
+  filter: drop-shadow(0 0 12px #C0C0C0);
+}
+
+.frame[data-rank="3"] svg circle {
+  stroke: #CD7F32;
+  filter: drop-shadow(0 0 12px #CD7F32);
+}
+
+.frame[data-rank="50"] svg circle {
+  stroke: #E27B58;
+  filter: drop-shadow(0 0 8px #E27B58);
+}
+
+.userIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+}
+
+.rewardsNote {
+  font-size: 1rem;
+  color: #D4AF37;
+  margin: 0;
+}
+
+/* Ranking Section */
+.rankingSection {
+  margin-top: 2rem;
+}
+
+.rankingTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+/* Current User Card */
+.currentUserCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(123, 104, 238, 0.2) 100%);
+  border: 2px solid rgba(74, 144, 226, 0.5);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+}
+
+/* User Cards */
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: rgba(30, 33, 57, 0.6);
+  border: 2px solid rgba(123, 104, 238, 0.2);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.userCard:hover {
+  background: rgba(30, 33, 57, 0.8);
+  border-color: rgba(123, 104, 238, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(123, 104, 238, 0.2);
+}
+
+.userCard.currentUser {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.15) 0%, rgba(123, 104, 238, 0.15) 100%);
+  border-color: rgba(74, 144, 226, 0.5);
+}
+
+/* Rank 1 - Gold */
+.userCard.rank1 {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 223, 0, 0.05) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 4px 24px rgba(255, 215, 0, 0.2);
+}
+
+/* Rank 2 - Silver */
+.userCard.rank2 {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(192, 192, 192, 0.05) 100%);
+  border: 2px solid rgba(192, 192, 192, 0.5);
+  box-shadow: 0 4px 24px rgba(192, 192, 192, 0.2);
+}
+
+/* Rank 3 - Bronze */
+.userCard.rank3 {
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.15) 0%, rgba(205, 127, 50, 0.05) 100%);
+  border: 2px solid rgba(205, 127, 50, 0.5);
+  box-shadow: 0 4px 24px rgba(205, 127, 50, 0.2);
+}
+
+.trophyBadge {
+  flex-shrink: 0;
+  color: #FFD700;
+}
+
+.rankBadgeSmall {
+  flex-shrink: 0;
+  background: rgba(123, 104, 238, 0.3);
+  color: #A8C5E8;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.rankBadgeLarge {
+  flex-shrink: 0;
+  background: rgba(123, 104, 238, 0.3);
+  color: #A8C5E8;
+  padding: 0.75rem 1.5rem;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.userAvatar {
+  flex-shrink: 0;
+}
+
+.avatarCircle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 3px solid rgba(123, 104, 238, 0.3);
+}
+
+.avatarCircle[data-rank="1"] {
+  border-color: #FFD700;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+}
+
+.avatarCircle[data-rank="2"] {
+  border-color: #C0C0C0;
+  box-shadow: 0 0 16px rgba(192, 192, 192, 0.4);
+}
+
+.avatarCircle[data-rank="3"] {
+  border-color: #CD7F32;
+  box-shadow: 0 0 16px rgba(205, 127, 50, 0.4);
+}
+
+.userDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.userLabel {
+  font-size: 0.875rem;
+  color: #7B9CD8;
+  margin-top: 0.25rem;
+}
+
+.userStats {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: #A8C5E8;
+}
+
+.stat svg {
+  color: #7B68EE;
+}
+
+.userPoints {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pointBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgba(123, 104, 238, 0.2);
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #D4C5F9;
+}
+
+.pointBadge svg {
+  color: #FFD700;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+/* Loading & Error States */
+.loading,
+.error,
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #A8C5E8;
+  font-size: 1.125rem;
+}
+
+.error {
+  color: #FF6B6B;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .topRanks {
+    gap: 1rem;
+  }
+
+  .rankCard {
+    gap: 0.5rem;
+  }
+
+  .avatarFrame {
+    width: 64px;
+    height: 64px;
+  }
+
+  .userIcon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .mainCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .countdownTimer {
+    gap: 0.5rem;
+  }
+
+  .timeBox {
+    min-width: 70px;
+    padding: 0.75rem 1rem;
+  }
+
+  .timeValue {
+    font-size: 1.75rem;
+  }
+
+  .timeLabel {
+    font-size: 0.75rem;
+  }
+
+  .navigation {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .monthTitle {
+    font-size: 1.5rem;
+    width: 100%;
+    order: -1;
+  }
+
+  .topRanks {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .rankCard {
+    flex: 0 0 calc(50% - 0.5rem);
+  }
+
+  .userCard {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .userStats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .rankBadgeLarge {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .mainCard {
+    padding: 1rem;
+  }
+
+  .countdownLabel {
+    font-size: 0.8rem;
+  }
+
+  .timeBox {
+    min-width: 55px;
+    padding: 0.5rem;
+  }
+
+  .timeValue {
+    font-size: 1.25rem;
+  }
+
+  .timeLabel {
+    font-size: 0.65rem;
+  }
+
+  .timeSeparator {
+    font-size: 1.25rem;
+  }
+
+  .monthTitle {
+    font-size: 1.25rem;
+  }
+
+  .rewardsTitle {
+    font-size: 1rem;
+  }
+
+  .rankingTitle {
+    font-size: 1rem;
+  }
+
+  .rankCard {
+    flex: 0 0 100%;
+  }
+
+  .avatarCircle {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .userName {
+    font-size: 0.95rem;
+  }
+
+  .stat {
+    font-size: 0.75rem;
+  }
+
+  .pointBadge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .userPoints {
+    flex-wrap: wrap;
+  }
+
+  .navButton {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .rankBadgeSmall {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}

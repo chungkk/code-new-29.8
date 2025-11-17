@@ -74,6 +74,7 @@ const Header = () => {
     { href: '/', label: 'Topics' },
     { href: '/review', label: 'Review' },
     { href: '/dashboard/vocabulary', label: 'Vocabulary' },
+    { href: '/leaderboard', label: 'Leaderboard' },
   ];
 
   const isActive = (path) => {
@@ -227,8 +228,8 @@ const Header = () => {
                         <span>Dashboard</span>
                       </Link>
 
-                      <Link 
-                        href="/dashboard/vocabulary" 
+                      <Link
+                        href="/dashboard/vocabulary"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >
@@ -236,8 +237,17 @@ const Header = () => {
                         <span>Mein Wortschatz</span>
                       </Link>
 
-                      <Link 
-                        href="/dashboard/settings" 
+                      <Link
+                        href="/leaderboard"
+                        className={styles.userDropdownItem}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <span className={styles.dropdownIcon}>🏆</span>
+                        <span>Leaderboard</span>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/settings"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >
