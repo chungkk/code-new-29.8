@@ -79,12 +79,12 @@ export default async function handler(req, res) {
         // Reset streak when user makes a mistake
         user.streak.currentStreak = 0;
 
-        // Clear today's check-in from weekly progress when resetting
-        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
-        user.streak.weeklyProgress[adjustedDay] = false;
+        // NOTE: We do NOT clear today's check-in from weeklyProgress
+        // Once you've checked in for the day (completed 2 sentences),
+        // that check-in persists even if you make mistakes later
+        // The check-in represents "I practiced today", not "I have a perfect streak"
 
-        console.log('Streak reset to 0 due to mistake, cleared today from weekly progress');
+        console.log('Streak reset to 0 due to mistake (check-in preserved)');
 
         // Save and return immediately - don't update lastActivityDate when resetting
         await user.save();
