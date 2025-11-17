@@ -24,10 +24,34 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       // Get user's streak data
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      let weeklyProgress = user.streak?.weeklyProgress || [false, false, false, false, false, false, false];
+      const lastActivityDate = user.streak?.lastActivityDate;
+      
+      // If there's a streak and last activity was today, ensure today is marked in weeklyProgress
+      if (user.streak?.currentStreak > 0 && lastActivityDate) {
+        const lastActivity = new Date(lastActivityDate);
+        const lastActivityDay = new Date(
+          lastActivity.getFullYear(),
+          lastActivity.getMonth(),
+          lastActivity.getDate()
+        );
+        
+        // If last activity was today, mark today in weeklyProgress
+        if (lastActivityDay.getTime() === today.getTime()) {
+          const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
+          weeklyProgress = [...weeklyProgress];
+          weeklyProgress[adjustedDay] = true;
+        }
+      }
+      
       const streakData = {
         currentStreak: user.streak?.currentStreak || 0,
-        weeklyProgress: user.streak?.weeklyProgress || [false, false, false, false, false, false, false],
-        lastActivityDate: user.streak?.lastActivityDate || null
+        weeklyProgress: weeklyProgress,
+        lastActivityDate: lastActivityDate || null
       };
 
       return res.status(200).json({
@@ -37,10 +61,11 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      // Update streak (called when user completes an activity)
+      // Update streak (increment or reset)
+      const { action } = req.body; // 'increment' or 'reset'
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
+
       // Initialize streak object if it doesn't exist
       if (!user.streak) {
         user.streak = {
@@ -50,53 +75,67 @@ export default async function handler(req, res) {
         };
       }
 
-      const lastActivity = user.streak.lastActivityDate 
+      if (action === 'reset') {
+        // Reset streak when user makes a mistake
+        user.streak.currentStreak = 0;
+
+        // Clear today's check-in from weekly progress when resetting
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
+        user.streak.weeklyProgress[adjustedDay] = false;
+
+        console.log('Streak reset to 0 due to mistake, cleared today from weekly progress');
+
+        // Save and return immediately - don't update lastActivityDate when resetting
+        await user.save();
+
+        return res.status(200).json({
+          success: true,
+          currentStreak: user.streak.currentStreak,
+          weeklyProgress: user.streak.weeklyProgress,
+          lastActivityDate: user.streak.lastActivityDate
+        });
+      } else {
+        // Increment streak (default action)
+        user.streak.currentStreak += 1;
+        console.log('Streak incremented to:', user.streak.currentStreak);
+      }
+
+      // Update weekly progress (mark today as active)
+      const lastActivity = user.streak.lastActivityDate
         ? new Date(user.streak.lastActivityDate)
         : null;
 
-      // Check if this is the first activity today
       if (lastActivity) {
         const lastActivityDay = new Date(
-          lastActivity.getFullYear(), 
-          lastActivity.getMonth(), 
+          lastActivity.getFullYear(),
+          lastActivity.getMonth(),
           lastActivity.getDate()
         );
-        
-        // If already logged activity today, just return current data
-        if (lastActivityDay.getTime() === today.getTime()) {
-          return res.status(200).json({
-            success: true,
-            currentStreak: user.streak.currentStreak,
-            weeklyProgress: user.streak.weeklyProgress,
-            lastActivityDate: user.streak.lastActivityDate,
-            alreadyLoggedToday: true
-          });
-        }
 
-        // Check if streak is broken (more than 1 day gap)
-        const daysDifference = Math.floor((today - lastActivityDay) / (1000 * 60 * 60 * 24));
-        
-        if (daysDifference > 1) {
-          // Streak broken, reset to 1
-          user.streak.currentStreak = 1;
-          user.streak.weeklyProgress = [false, false, false, false, false, false, false];
-        } else if (daysDifference === 1) {
-          // Continue streak
-          user.streak.currentStreak += 1;
+        // Check if it's a different day
+        if (lastActivityDay.getTime() !== today.getTime()) {
+          const daysDifference = Math.floor((today - lastActivityDay) / (1000 * 60 * 60 * 24));
+
+          if (daysDifference > 1) {
+            // Multiple days gap - reset weekly progress
+            user.streak.weeklyProgress = [false, false, false, false, false, false, false];
+          }
         }
-      } else {
-        // First time logging activity
-        user.streak.currentStreak = 1;
       }
 
-      // Update weekly progress
-      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
-      user.streak.weeklyProgress[adjustedDay] = true;
+      // Only mark today in weekly progress when achieving FIRST streak of the day
+      // This is the "check-in" - you must complete 2 sentences to check in
+      if (user.streak.currentStreak === 1) {
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
+        user.streak.weeklyProgress[adjustedDay] = true;
+        console.log('✓ Check-in marked for day:', adjustedDay);
 
-      // If we've completed the week and it's Sunday, reset for new week
-      if (dayOfWeek === 0 && user.streak.weeklyProgress.every(day => day)) {
-        user.streak.weeklyProgress = [false, false, false, false, false, false, true]; // Only Sunday is marked
+        // If we've completed the week and it's Sunday, reset for new week
+        if (dayOfWeek === 0 && user.streak.weeklyProgress.every(day => day)) {
+          user.streak.weeklyProgress = [false, false, false, false, false, false, true]; // Only Sunday is marked
+        }
       }
 
       user.streak.lastActivityDate = now;

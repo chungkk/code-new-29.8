@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -11,30 +11,59 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [streakPopupOpen, setStreakPopupOpen] = useState(false);
+  const [currentStreak, setCurrentStreak] = useState(0);
   const userMenuRef = useRef(null);
   const router = useRouter();
   const { user, logout, userPoints, fetchUserPoints } = useAuth();
   const { theme, toggleTheme, currentTheme } = useTheme();
 
-  // Fetch user points on mount and when user changes
+  // Fetch streak data
+  const fetchStreakData = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/user/streak', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCurrentStreak(data.currentStreak || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching streak data:', error);
+    }
+  }, [user]);
+
+  // Fetch user points and streak on mount and when user changes
   useEffect(() => {
     if (user) {
       fetchUserPoints();
+      fetchStreakData();
 
-      // Expose refresh function globally for dictation page
+      // Expose refresh functions globally for dictation page
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = fetchUserPoints;
+        window.refreshStreakData = fetchStreakData;
       }
     }
 
     return () => {
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = null;
+        window.refreshStreakData = null;
       }
     };
-  }, [user, fetchUserPoints]);
+  }, [user, fetchUserPoints, fetchStreakData]);
 
-  // Listen for points update events from other pages
+  // Listen for points and streak update events from other pages
   useEffect(() => {
     const handlePointsUpdate = () => {
       if (user) {
@@ -42,16 +71,24 @@ const Header = () => {
       }
     };
 
+    const handleStreakUpdate = () => {
+      if (user) {
+        fetchStreakData();
+      }
+    };
+
     if (typeof window !== 'undefined') {
       window.addEventListener('pointsUpdated', handlePointsUpdate);
+      window.addEventListener('streakUpdated', handleStreakUpdate);
     }
 
     return () => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('pointsUpdated', handlePointsUpdate);
+        window.removeEventListener('streakUpdated', handleStreakUpdate);
       }
     };
-  }, [user, fetchUserPoints]);
+  }, [user, fetchUserPoints, fetchStreakData]);
 
   // Tạo avatar mặc định từ initials
   const getDefaultAvatar = (name) => {
@@ -169,7 +206,8 @@ const Header = () => {
                   onClick={() => setStreakPopupOpen(true)}
                   title="View your learning streak"
                 >
-                  <span>🔥</span>
+                  <span className={styles.streakIcon}>🔥</span>
+                  <span className={styles.streakValue}>{currentStreak}</span>
                 </button>
 
                 {streakPopupOpen && (

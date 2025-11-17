@@ -11,12 +11,6 @@ const StreakPopup = ({ onClose }) => {
 
   const dayLabels = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
-  useEffect(() => {
-    loadStreakData();
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleClickOutside = (event) => {
     if (popupRef.current && !popupRef.current.contains(event.target)) {
       onClose();
@@ -26,7 +20,17 @@ const StreakPopup = ({ onClose }) => {
   const loadStreakData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/user/streak');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/user/streak', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -42,6 +46,24 @@ const StreakPopup = ({ onClose }) => {
     }
   };
 
+  useEffect(() => {
+    loadStreakData();
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Listen for streak updates
+    const handleStreakUpdate = () => {
+      console.log('StreakPopup: Received streakUpdated event, reloading data...');
+      loadStreakData();
+    };
+    window.addEventListener('streakUpdated', handleStreakUpdate);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('streakUpdated', handleStreakUpdate);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className={styles.popup} ref={popupRef}>
       {loading ? (
@@ -54,7 +76,7 @@ const StreakPopup = ({ onClose }) => {
             <span className={styles.streakIcon}>🔥</span>
             <div className={styles.streakInfo}>
               <span className={styles.streakValue}>{streakData.currentStreak}</span>
-              <span className={styles.streakLabel}>day streak</span>
+              <span className={styles.streakLabel}>sentence streak</span>
             </div>
           </div>
 

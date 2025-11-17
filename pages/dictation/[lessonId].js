@@ -8,6 +8,7 @@ import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
+import StreakNotification from '../../components/StreakNotification';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -81,6 +82,22 @@ const DictationPageContent = () => {
   const [suggestionWordIndex, setSuggestionWordIndex] = useState(null);
   const [suggestionContext, setSuggestionContext] = useState('');
   const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0 });
+  
+  // Streak notification state
+  const [showStreakNotification, setShowStreakNotification] = useState(false);
+  const [streakUpdatedToday, setStreakUpdatedToday] = useState(() => {
+    // Check localStorage if streak was already updated today
+    if (typeof window === 'undefined') return false;
+    const lastUpdate = localStorage.getItem('streakLastUpdate');
+    if (!lastUpdate) return false;
+    
+    const today = new Date().toDateString();
+    return lastUpdate === today;
+  });
+  
+  // Consecutive sentence completion counter for streak
+  const [consecutiveSentences, setConsecutiveSentences] = useState(0);
+  const [streakIncrements, setStreakIncrements] = useState(0); // Track how many times we've +1 today
   
   const { user } = useAuth();
   
@@ -1194,6 +1211,84 @@ const DictationPageContent = () => {
     });
   }, [currentSentenceIndex, completedSentences, saveProgress]);
 
+  // Mark today's activity (first sentence completion)
+  const markTodayActivity = useCallback(async () => {
+    if (!user) return;
+    
+    // Check if already marked today
+    if (streakUpdatedToday) {
+      console.log('Today already marked for streak');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/user/streak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Today marked for streak:', data);
+        
+        // Mark as updated for this session and save to localStorage
+        setStreakUpdatedToday(true);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('streakLastUpdate', new Date().toDateString());
+        }
+        
+        // Trigger streak refresh in Header
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('streakUpdated'));
+        }
+      }
+    } catch (error) {
+      console.error('Error marking today activity:', error);
+    }
+  }, [user, streakUpdatedToday]);
+
+  // Increment streak (+1)
+  const incrementStreak = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/user/streak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Streak incremented:', data);
+        
+        // Show streak notification
+        setShowStreakNotification(true);
+        
+        // Track number of increments today
+        setStreakIncrements(prev => prev + 1);
+        
+        // Trigger streak refresh in Header
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('streakUpdated'));
+        }
+      }
+    } catch (error) {
+      console.error('Error incrementing streak:', error);
+    }
+  }, [user]);
+
   // Check if current sentence is completed
   const checkSentenceCompletion = useCallback(() => {
     setTimeout(() => {
@@ -1206,9 +1301,31 @@ const DictationPageContent = () => {
         setCompletedSentences(updatedCompleted);
         saveProgress(updatedCompleted, completedWords);
         console.log(`Sentence ${currentSentenceIndex} completed!`);
+        
+        // Streak logic: Start counting from 2nd sentence
+        const newConsecutive = consecutiveSentences + 1;
+        setConsecutiveSentences(newConsecutive);
+
+        console.log(`Consecutive sentences: ${newConsecutive}`);
+
+        // Sentence 1: Just mark today, no streak yet
+        if (newConsecutive === 1) {
+          console.log('First sentence - no streak yet (streak = 0)');
+          // Just trigger Header refresh to mark today as active
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('streakUpdated'));
+          }
+        }
+
+        // Sentence 2+: Increment streak and show notification
+        if (newConsecutive >= 2) {
+          const streakCount = newConsecutive - 1; // Streak = consecutive - 1
+          console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
+          incrementStreak();
+        }
       }
     }, 200);
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress]);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, streakUpdatedToday, markTodayActivity, incrementStreak]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
@@ -1351,12 +1468,23 @@ const DictationPageContent = () => {
       }, 100);
     } else {
       updateInputBackground(input, sanitizedCorrectWord);
-      
+
+      console.log('🔍 Word incorrect:', {
+        input: input.value,
+        correct: sanitizedCorrectWord,
+        inputLength: input.value.length,
+        correctLength: sanitizedCorrectWord.length,
+        wordIndex,
+        alreadyProcessed: wordPointsProcessed[currentSentenceIndex]?.[wordIndex]
+      });
+
       // Deduct points for incorrect attempt (-0.5 points, only once per word)
       if (input.value.length === sanitizedCorrectWord.length) {
+        console.log('✓ Length matches! Checking if word already processed...');
         // Only deduct when user has typed the full word length
         const wordKey = `${currentSentenceIndex}-${wordIndex}`;
         if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
+          console.log('✓ Word not yet processed! Proceeding with penalty and streak reset...');
           updatePoints(-0.5, `Incorrect word attempt: ${input.value}`, input);
           setWordPointsProcessed(prev => ({
             ...prev,
@@ -1365,10 +1493,45 @@ const DictationPageContent = () => {
               [wordIndex]: 'incorrect'
             }
           }));
+
+          // Reset consecutive sentence counter when user makes a mistake
+          console.log('❌ Mistake made! Resetting consecutive counter from', consecutiveSentences, 'to 0');
+          setConsecutiveSentences(0);
+
+          // Clear streak-related local storage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('streakLastUpdate');
+          }
+          setStreakUpdatedToday(false);
+          setStreakIncrements(0);
+
+          // Always reset streak in database when user makes a mistake
+          // This ensures streak is reset even if consecutiveSentences is 0
+          const token = localStorage.getItem('token');
+          if (token && user) {
+            fetch('/api/user/streak', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ action: 'reset' })
+            }).then(() => {
+              console.log('Streak reset to 0 in database');
+              // Trigger streak refresh in Header
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('streakUpdated'));
+              }
+            }).catch(err => console.error('Error resetting streak:', err));
+          }
+        } else {
+          console.log('⚠️ Word already processed, skipping penalty and streak reset');
         }
+      } else {
+        console.log('⚠️ Length mismatch, waiting for full word length');
       }
     }
-  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints]);
+  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints, consecutiveSentences, user]);
 
   /**
    * Seeded random number generator for deterministic word selection
@@ -1607,7 +1770,37 @@ const DictationPageContent = () => {
 
     // Update points
     updatePoints(-0.5, `Wrong suggestion selected: ${selectedWord}, correct: ${correctWord}`);
-  }, [showPointsAnimation, updatePoints]);
+
+    // Reset streak when wrong word is selected
+    console.log('❌ Wrong word selected from suggestion! Resetting streak...');
+    setConsecutiveSentences(0);
+
+    // Clear streak-related local storage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('streakLastUpdate');
+    }
+    setStreakUpdatedToday(false);
+    setStreakIncrements(0);
+
+    // Always reset streak in database when user makes a mistake
+    const token = localStorage.getItem('token');
+    if (token && user) {
+      fetch('/api/user/streak', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'reset' })
+      }).then(() => {
+        console.log('Streak reset to 0 in database (wrong suggestion)');
+        // Trigger streak refresh in Header
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('streakUpdated'));
+        }
+      }).catch(err => console.error('Error resetting streak:', err));
+    }
+  }, [showPointsAnimation, updatePoints, user]);
 
   /**
    * ============================================================================
@@ -1868,6 +2061,23 @@ const DictationPageContent = () => {
     return totalWords > 0 ? Math.round((completedWordsCount / totalWords) * 100) : 0;
   }, [transcriptData, completedWords]);
 
+  // Sort transcript indices to prioritize incomplete sentences
+  const sortedTranscriptIndices = useMemo(() => {
+    if (!transcriptData || transcriptData.length === 0) return [];
+
+    return [...Array(transcriptData.length).keys()].sort((a, b) => {
+      const aCompleted = completedSentences.includes(a);
+      const bCompleted = completedSentences.includes(b);
+
+      // Incomplete sentences come first
+      if (!aCompleted && bCompleted) return -1;
+      if (aCompleted && !bCompleted) return 1;
+
+      // If both have same completion status, maintain original order
+      return a - b;
+    });
+  }, [transcriptData, completedSentences]);
+
   if (loading) {
     return (
       <div className={styles.centeredState}>
@@ -2109,6 +2319,12 @@ const DictationPageContent = () => {
 
                       return updatedWords;
                     });
+
+                    // Check sentence completion after revealing all words
+                    // This will trigger streak logic if sentence is completed
+                    setTimeout(() => {
+                      checkSentenceCompletion();
+                    }, 300);
                   }}
                 >
                   Show all words
@@ -2148,27 +2364,28 @@ const DictationPageContent = () => {
               </div>
             </div>
             
-            <div className={styles.transcriptSection}>
-              <div className={styles.transcriptList}>
-                {transcriptData.map((segment, index) => {
-                  const isCompleted = completedSentences.includes(index);
-                  const sentenceWordsCompleted = completedWords[index] || {};
+             <div className={styles.transcriptSection}>
+               <div className={styles.transcriptList}>
+                 {sortedTranscriptIndices.map((originalIndex) => {
+                   const segment = transcriptData[originalIndex];
+                   const isCompleted = completedSentences.includes(originalIndex);
+                   const sentenceWordsCompleted = completedWords[originalIndex] || {};
 
-                  return (
-                    <div
-                      key={index}
-                      className={`${styles.transcriptItem} ${index === currentSentenceIndex ? styles.active : ''}`}
-                      onClick={() => handleSentenceClick(segment.start, segment.end)}
-                    >
-                      <div className={styles.transcriptItemNumber}>#{index + 1}</div>
-                      <div className={styles.transcriptItemText}>
-                        {isCompleted ? segment.text : maskTextByPercentage(segment.text, index, hidePercentage, sentenceWordsCompleted)}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                   return (
+                     <div
+                       key={originalIndex}
+                       className={`${styles.transcriptItem} ${originalIndex === currentSentenceIndex ? styles.active : ''}`}
+                       onClick={() => handleSentenceClick(segment.start, segment.end)}
+                     >
+                       <div className={styles.transcriptItemNumber}>#{originalIndex + 1}</div>
+                       <div className={styles.transcriptItemText}>
+                         {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, hidePercentage, sentenceWordsCompleted)}
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
           </div>
         </div>
       </div>
@@ -2269,6 +2486,12 @@ const DictationPageContent = () => {
           onComplete={() => {}}
         />
       ))}
+
+      {/* Streak notification */}
+      <StreakNotification 
+        show={showStreakNotification}
+        onComplete={() => setShowStreakNotification(false)}
+      />
     </div>
   );
 };
