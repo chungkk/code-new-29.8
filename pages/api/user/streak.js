@@ -100,6 +100,18 @@ export default async function handler(req, res) {
         // Increment streak (default action)
         user.streak.currentStreak += 1;
         console.log('Streak incremented to:', user.streak.currentStreak);
+
+        // Update maxStreak if current streak is higher
+        if (user.streak.currentStreak > (user.streak.maxStreak || 0)) {
+          user.streak.maxStreak = user.streak.currentStreak;
+          console.log('New max streak achieved:', user.streak.maxStreak);
+        }
+
+        // Update maxStreakThisMonth if current streak is higher
+        if (user.streak.currentStreak > (user.streak.maxStreakThisMonth || 0)) {
+          user.streak.maxStreakThisMonth = user.streak.currentStreak;
+          console.log('New max streak this month:', user.streak.maxStreakThisMonth);
+        }
       }
 
       // Update weekly progress (mark today as active)

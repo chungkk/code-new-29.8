@@ -34,7 +34,14 @@ export default async function handler(req, res) {
         role: user.role,
         nativeLanguage: user.nativeLanguage,
         level: user.level,
-        points: user.points || 0
+        points: user.points || 0,
+        streak: user.streak || {
+          currentStreak: 0,
+          maxStreak: 0,
+          maxStreakThisMonth: 0,
+          lastActivityDate: null,
+          weeklyProgress: [false, false, false, false, false, false, false]
+        }
       }
     });
   } catch (error) {

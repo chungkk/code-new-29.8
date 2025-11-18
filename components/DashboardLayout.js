@@ -6,7 +6,7 @@ import styles from '../styles/DashboardLayout.module.css';
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: '📊' },
