@@ -51,6 +51,9 @@ const ShadowingPageContent = () => {
   const [tooltipTranslation, setTooltipTranslation] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
 
+  // Progress loading state
+  const [progressLoaded, setProgressLoaded] = useState(false);
+
   // Study time tracking
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -61,7 +64,7 @@ const ShadowingPageContent = () => {
   const pauseTimeoutRef = useRef(null);
   const hasStartedTimerRef = useRef(false); // Track if timer has been started
   const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
-  const DEBUG_TIMER = true; // Set to true to enable timer logs
+  const DEBUG_TIMER = false; // Set to true to enable timer logs
 
   const { user } = useAuth();
 
@@ -151,52 +154,50 @@ const ShadowingPageContent = () => {
     };
   }, [updateMonthlyStats]);
 
-  // Load study time and video timestamp from database
+  // Load progress from database
   useEffect(() => {
     const loadProgress = async () => {
-      console.log('[SHADOWING] loadProgress called, lessonId:', lessonId, 'user:', user ? 'logged in' : 'not logged in');
-
       if (!lessonId) {
-        console.log('[SHADOWING] No lessonId, skipping load');
+        setProgressLoaded(true);
         return;
       }
-
+      
       // Wait for user to load before trying to get progress
       if (!user) {
-        console.log('[SHADOWING] No user, skipping load');
-        return;
+        return; // Don't set progressLoaded yet, wait for user
       }
-
+      
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          console.log('[SHADOWING] No token, skipping load');
+          setProgressLoaded(true);
           return;
         }
-
-        console.log('[SHADOWING] Fetching progress from API...');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+        
         const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=shadowing`, {
           headers: {
             'Authorization': `Bearer ${token}`
-          }
+          },
+          signal: controller.signal
         });
-
-        console.log('[SHADOWING] API response status:', res.status);
-
+        
+        clearTimeout(timeoutId);
+        
         if (res.ok) {
           const apiResponse = await res.json();
-          console.log('[SHADOWING] Raw API response:', apiResponse);
+          if (DEBUG_TIMER) console.log('Raw API response:', apiResponse);
 
           // Extract progress and studyTime
           const data = apiResponse.progress || apiResponse;
           const loadedStudyTime = apiResponse.studyTime || 0;
 
-          console.log('[SHADOWING] Extracted studyTime:', loadedStudyTime);
-
           // Load study time (with validation)
           const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
           setStudyTime(validatedLoadedTime);
-          console.log('[SHADOWING] Study time set to:', validatedLoadedTime);
+          if (DEBUG_TIMER) console.log('Loaded study time:', validatedLoadedTime);
 
           // Load video timestamp
           const loadedVideoTimestamp = data.videoTimestamp;
@@ -205,20 +206,24 @@ const ShadowingPageContent = () => {
             localStorage.setItem(`videoTimestamp_${lessonId}_shadowing`, loadedVideoTimestamp.toString());
             if (DEBUG_TIMER) console.log('Loaded video timestamp:', loadedVideoTimestamp);
           }
-        } else {
-          console.error('[SHADOWING] API returned error status:', res.status);
         }
       } catch (error) {
-        console.error('[SHADOWING] Error loading progress:', error);
+        if (error.name === 'AbortError') {
+          console.warn('Timeout loading progress, continuing without saved progress');
+        } else {
+          console.error('Error loading progress:', error);
+        }
+      } finally {
+        setProgressLoaded(true);
       }
     };
-
+    
     loadProgress();
-  }, [lessonId, user]); // Reload when user is ready
+  }, [lessonId, user]); // Add user dependency so it reloads when user is ready
 
   // Restore video position from saved timestamp
   useEffect(() => {
-    if (!lessonId || duration === 0) return;
+    if (!progressLoaded || !lessonId || duration === 0) return;
 
     const savedTimestamp = localStorage.getItem(`videoTimestamp_${lessonId}_shadowing`);
     if (savedTimestamp) {
@@ -236,7 +241,7 @@ const ShadowingPageContent = () => {
         }
       }
     }
-  }, [lessonId, duration, isYouTube]);
+  }, [progressLoaded, lessonId, duration, isYouTube]);
 
   // Auto-save video timestamp periodically (every 5 seconds)
   useEffect(() => {
@@ -393,26 +398,19 @@ const ShadowingPageContent = () => {
     };
   }, []);
 
-  // Keep latest studyTime in ref to avoid recreating effect
-  const studyTimeRef = useRef(studyTime);
-  useEffect(() => {
-    studyTimeRef.current = studyTime;
-  }, [studyTime]);
-
   // Save study time periodically (every 30 seconds) and on unmount
   useEffect(() => {
     const saveStudyTime = async () => {
-      const currentStudyTime = studyTimeRef.current;
-      if (!user || !lessonId || currentStudyTime === 0) return;
+      if (!user || !lessonId || studyTime === 0) return;
 
       // Validate before saving
-      const validatedStudyTime = Math.min(currentStudyTime, MAX_STUDY_TIME);
+      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
 
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch('/api/progress', {
+        await fetch('/api/progress', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -424,13 +422,7 @@ const ShadowingPageContent = () => {
             studyTime: validatedStudyTime
           })
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('[SHADOWING] Save error:', errorData);
-        } else {
-          if (DEBUG_TIMER) console.log('Study time saved:', validatedStudyTime);
-        }
+        if (DEBUG_TIMER) console.log('Study time saved:', validatedStudyTime);
       } catch (error) {
         console.error('Error saving study time:', error);
       }
@@ -451,7 +443,7 @@ const ShadowingPageContent = () => {
       // Save final time when component unmounts
       saveStudyTime();
     };
-  }, [user, lessonId]); // Removed studyTime from dependencies
+  }, [user, lessonId, studyTime]);
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
