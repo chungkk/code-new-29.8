@@ -23,20 +23,29 @@ async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const { word, translation, context, lessonId } = req.body;
+      const { word, translation, context, lessonId, phonetics, partOfSpeech, level, definition, examples } = req.body;
 
       if (!word || !translation) {
         return res.status(400).json({ message: 'Word và translation là bắt buộc' });
       }
 
+      const updateData = {
+        translation,
+        context: context || '',
+        lessonId: lessonId || null,
+        updatedAt: new Date()
+      };
+
+      // Add optional fields if provided
+      if (phonetics) updateData.phonetics = phonetics;
+      if (partOfSpeech) updateData.partOfSpeech = partOfSpeech;
+      if (level) updateData.level = level;
+      if (definition) updateData.definition = definition;
+      if (examples) updateData.examples = examples;
+
       await Vocabulary.findOneAndUpdate(
         { userId: req.user._id, word: word.toLowerCase() },
-        {
-          translation,
-          context: context || '',
-          lessonId: lessonId || null,
-          updatedAt: new Date()
-        },
+        updateData,
         { upsert: true, new: true }
       );
 

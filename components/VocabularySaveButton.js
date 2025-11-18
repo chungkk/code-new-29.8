@@ -8,6 +8,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
   const [showPopup, setShowPopup] = useState(false);
   const [translation, setTranslation] = useState('');
   const [saving, setSaving] = useState(false);
+  const [fetchingDetails, setFetchingDetails] = useState(false);
 
   if (!user) return null;
 
@@ -19,14 +20,66 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
     setSaving(true);
     try {
+      // First, try to fetch dictionary details
+      let dictionaryData = null;
+      try {
+        setFetchingDetails(true);
+        const dictRes = await fetch('/api/dictionary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            word,
+            sourceLang: 'de',
+            targetLang: 'vi'
+          })
+        });
+
+        if (dictRes.ok) {
+          const dictJson = await dictRes.json();
+          if (dictJson.success) {
+            dictionaryData = dictJson.data;
+          }
+        }
+      } catch (dictError) {
+        console.log('Dictionary fetch failed, continuing without details:', dictError);
+      } finally {
+        setFetchingDetails(false);
+      }
+
+      // Prepare vocabulary data
+      const vocabularyData = {
+        word,
+        translation: translation.trim(),
+        context: context || '',
+        lessonId
+      };
+
+      // Add dictionary details if available
+      if (dictionaryData) {
+        if (dictionaryData.partOfSpeech) {
+          vocabularyData.partOfSpeech = dictionaryData.partOfSpeech;
+        }
+        if (dictionaryData.explanation) {
+          vocabularyData.definition = dictionaryData.explanation;
+        }
+        if (dictionaryData.examples && dictionaryData.examples.length > 0) {
+          vocabularyData.examples = dictionaryData.examples.map(ex => ({
+            text: ex.de || ex.text,
+            translation: ex.translation
+          }));
+        }
+        // Add placeholder phonetics (can be enhanced with actual IPA data)
+        vocabularyData.phonetics = {
+          us: `/${word}/`,
+          uk: `/${word}/`
+        };
+      }
+
       const res = await fetchWithAuth('/api/vocabulary', {
         method: 'POST',
-        body: JSON.stringify({
-          word,
-          translation: translation.trim(),
-          context: context || '',
-          lessonId
-        })
+        body: JSON.stringify(vocabularyData)
       });
 
       if (res.ok) {
@@ -141,6 +194,20 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
               />
             </div>
 
+            {fetchingDetails && (
+              <div style={{
+                marginBottom: '15px',
+                padding: '10px',
+                background: '#e3f2fd',
+                borderRadius: '5px',
+                fontSize: '13px',
+                color: '#1976d2',
+                textAlign: 'center'
+              }}>
+                ⏳ Đang tải thông tin chi tiết từ điển...
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={handleSave}
@@ -156,13 +223,14 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                   fontWeight: 'bold'
                 }}
               >
-                {saving ? 'Đang lưu...' : 'Lưu'}
+                {saving ? (fetchingDetails ? 'Đang tải thông tin...' : 'Đang lưu...') : 'Lưu'}
               </button>
               <button
                 onClick={() => {
                   setShowPopup(false);
                   setTranslation('');
                 }}
+                disabled={saving}
                 style={{
                   flex: 1,
                   padding: '10px',
@@ -170,8 +238,9 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                   color: 'white',
                   border: 'none',
                   borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  opacity: saving ? 0.6 : 1
                 }}
               >
                 Hủy
