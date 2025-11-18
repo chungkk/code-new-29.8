@@ -37,24 +37,16 @@ const LessonCard = ({ lesson, onClick }) => {
     return count.toString();
   };
 
-  const getDifficultyClass = (difficulty) => {
-    if (!difficulty) return 'beginner';
-    return difficulty.toLowerCase();
+  const getDifficultyClass = (level) => {
+    if (!level) return 'beginner';
+    const levelLower = level.toLowerCase();
+    if (levelLower === 'a1' || levelLower === 'a2') return 'beginner';
+    return 'experienced';
   };
 
-  const getDifficultyLabel = (difficulty) => {
-    if (!difficulty) return 'A1';
-    const diffMap = {
-      beginner: 'A1',
-      a1: 'A1',
-      a2: 'A2',
-      b1: 'B1',
-      b2: 'B2',
-      experienced: 'B2',
-      c1: 'C1',
-      c2: 'C2',
-    };
-    return diffMap[difficulty.toLowerCase()] || difficulty.toUpperCase();
+  const getDifficultyLabel = (level) => {
+    if (!level) return 'A1';
+    return level.toUpperCase();
   };
 
   return (
@@ -81,9 +73,9 @@ const LessonCard = ({ lesson, onClick }) => {
           </div>
 
           <div
-            className={`${styles.difficultyBadge} ${styles[getDifficultyClass(lesson.difficulty)]}`}
+            className={`${styles.difficultyBadge} ${styles[getDifficultyClass(lesson.level)]}`}
           >
-            {getDifficultyLabel(lesson.difficulty)}
+            {getDifficultyLabel(lesson.level)}
           </div>
         </div>
 
