@@ -19,7 +19,7 @@
   background: var(--bg-card);
   border-radius: var(--border-radius);
   padding: var(--spacing-xl);
-  max-width: 500px;
+  max-width: 580px;
   width: 100%;
   position: relative;
   border: 1px solid var(--border-color);
@@ -89,15 +89,16 @@
 
 .modesContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--spacing-md);
 }
 
 .modeOption {
+  flex: 1;
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -106,39 +107,42 @@
 .modeOption:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(74, 144, 226, 0.6);
-  transform: translateX(4px);
+  transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .modeHeader {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
+  text-align: center;
 }
 
 .modeIcon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   background: var(--accent-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .modeName {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .modeDescription {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.5;
-  padding-left: 56px;
+  line-height: 1.4;
+  margin-top: var(--spacing-sm);
+  text-align: center;
 }
 
 @media (max-width: 768px) {
@@ -177,12 +181,18 @@
     font-size: 13px;
   }
 
+  .modesContainer {
+    flex-direction: column;
+  }
+
   .modeOption {
     padding: 14px;
   }
 
   .modeHeader {
+    flex-direction: row;
     gap: 10px;
+    text-align: left;
   }
 
   .modeIcon {
@@ -196,8 +206,9 @@
   }
 
   .modeDescription {
-    padding-left: 44px;
+    margin-top: var(--spacing-xs);
     font-size: 13px;
+    text-align: left;
   }
 }
 
@@ -238,6 +249,7 @@
   }
 
   .modesContainer {
+    flex-direction: column;
     gap: 10px;
   }
 
@@ -246,7 +258,9 @@
   }
 
   .modeHeader {
+    flex-direction: row;
     gap: 8px;
+    text-align: left;
   }
 
   .modeIcon {
@@ -260,8 +274,9 @@
   }
 
   .modeDescription {
-    padding-left: 38px;
+    margin-top: var(--spacing-xs);
     font-size: 12px;
+    text-align: left;
   }
 }
 
@@ -302,6 +317,7 @@
   }
 
   .modesContainer {
+    flex-direction: column;
     gap: 8px;
   }
 
@@ -310,7 +326,9 @@
   }
 
   .modeHeader {
+    flex-direction: row;
     gap: 7px;
+    text-align: left;
   }
 
   .modeIcon {
@@ -324,7 +342,8 @@
   }
 
   .modeDescription {
-    padding-left: 35px;
+    margin-top: var(--spacing-xs);
     font-size: 11px;
+    text-align: left;
   }
 }
