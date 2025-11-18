@@ -7,18 +7,23 @@ async function handler(req, res) {
   
   if (req.method === 'POST') {
     try {
-      const { lessonId, mode, progress } = req.body;
-      
+      const { lessonId, mode, progress, studyTime } = req.body;
+
       // Find existing progress or create new one
-      let userProgress = await UserProgress.findOne({ 
-        userId: req.user._id, 
-        lessonId, 
-        mode 
+      let userProgress = await UserProgress.findOne({
+        userId: req.user._id,
+        lessonId,
+        mode
       });
-      
+
       if (userProgress) {
         // Update existing progress
-        userProgress.progress = progress;
+        if (progress !== undefined) {
+          userProgress.progress = progress;
+        }
+        if (studyTime !== undefined) {
+          userProgress.studyTime = studyTime;
+        }
         await userProgress.save(); // This triggers pre-save middleware
       } else {
         // Create new progress
@@ -26,14 +31,16 @@ async function handler(req, res) {
           userId: req.user._id,
           lessonId,
           mode,
-          progress
+          progress: progress || {},
+          studyTime: studyTime || 0
         });
         await userProgress.save(); // This triggers pre-save middleware
       }
-      
-      return res.status(200).json({ 
+
+      return res.status(200).json({
         message: 'Lưu tiến trình thành công',
-        completionPercent: userProgress.completionPercent 
+        completionPercent: userProgress.completionPercent,
+        studyTime: userProgress.studyTime
       });
     } catch (error) {
       console.error('Save progress error:', error);
@@ -47,7 +54,10 @@ async function handler(req, res) {
 
       if (lessonId && mode) {
         const progressDoc = await UserProgress.findOne({ userId: req.user._id, lessonId, mode });
-        return res.status(200).json(progressDoc ? progressDoc.progress : {});
+        return res.status(200).json(progressDoc ? {
+          progress: progressDoc.progress,
+          studyTime: progressDoc.studyTime || 0
+        } : { progress: {}, studyTime: 0 });
       }
 
       const allProgress = await UserProgress.find({ userId: req.user._id });

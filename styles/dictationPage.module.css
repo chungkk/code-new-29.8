@@ -218,6 +218,29 @@
   margin: 0;
 }
 
+.studyTimer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.timerIcon {
+  font-size: 16px;
+}
+
+.timerText {
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 /* Video Title Box - Always visible */
 .videoTitleBox {
   padding: var(--spacing-md);

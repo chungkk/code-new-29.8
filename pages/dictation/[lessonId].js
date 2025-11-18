@@ -100,7 +100,15 @@ const DictationPageContent = () => {
   // Consecutive sentence completion counter for streak
   const [consecutiveSentences, setConsecutiveSentences] = useState(0);
   const [streakIncrements, setStreakIncrements] = useState(0); // Track how many times we've +1 today
-  
+
+  // Study time tracking
+  const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+  const timerIntervalRef = useRef(null);
+  const inactivityTimeoutRef = useRef(null);
+  const hasStartedTimerRef = useRef(false); // Track if timer has been started
+
   const { user } = useAuth();
 
   const audioRef = useRef(null);
@@ -199,6 +207,129 @@ const DictationPageContent = () => {
       }
     };
   }, []);
+
+  // Study timer - starts when user plays video for the first time
+  // Only stops on inactivity (3 min) or page unload
+  useEffect(() => {
+    // Start timer when user plays video for the first time
+    if (isPlaying && !hasStartedTimerRef.current) {
+      console.log('Starting timer (first play)...');
+      hasStartedTimerRef.current = true;
+      setIsTimerRunning(true);
+      setLastActivityTime(Date.now());
+
+      // Start timer interval (update every second)
+      timerIntervalRef.current = setInterval(() => {
+        setStudyTime(prev => {
+          console.log('Timer tick:', prev + 1);
+          return prev + 1;
+        });
+      }, 1000);
+    }
+  }, [isPlaying]);
+
+  // Cleanup timer only on unmount
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) {
+        console.log('Cleaning up timer on unmount');
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  // Inactivity detection - stop timer after 3 minutes of no activity
+  useEffect(() => {
+    if (!isTimerRunning) return;
+
+    // Clear existing timeout
+    if (inactivityTimeoutRef.current) {
+      clearTimeout(inactivityTimeoutRef.current);
+    }
+
+    // Set new timeout for 3 minutes (180000ms)
+    inactivityTimeoutRef.current = setTimeout(() => {
+      console.log('User inactive for 3 minutes, stopping timer');
+      setIsTimerRunning(false);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    }, 3 * 60 * 1000);
+
+    return () => {
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
+      }
+    };
+  }, [lastActivityTime, isTimerRunning]);
+
+  // Track user activity to reset inactivity timer
+  useEffect(() => {
+    const handleActivity = () => {
+      setLastActivityTime(Date.now());
+    };
+
+    // Listen to various user activities
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('scroll', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+    };
+  }, []);
+
+  // Save study time periodically (every 30 seconds) and on unmount
+  useEffect(() => {
+    const saveStudyTime = async () => {
+      if (!user || !lessonId || studyTime === 0) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            lessonId,
+            mode: 'dictation',
+            studyTime
+          })
+        });
+        console.log('Study time saved:', studyTime);
+      } catch (error) {
+        console.error('Error saving study time:', error);
+      }
+    };
+
+    // Save every 30 seconds
+    const interval = setInterval(saveStudyTime, 30000);
+
+    // Save on beforeunload
+    const handleBeforeUnload = () => {
+      saveStudyTime();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Save final time when component unmounts
+      saveStudyTime();
+    };
+  }, [user, lessonId, studyTime]);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -511,13 +642,22 @@ const DictationPageContent = () => {
         clearTimeout(timeoutId);
         
         if (res.ok) {
-          const data = await res.json();
-          console.log('Raw API response:', data);
-          
+          const apiResponse = await res.json();
+          console.log('Raw API response:', apiResponse);
+
+          // Extract progress and studyTime
+          const data = apiResponse.progress || apiResponse;
+          const loadedStudyTime = apiResponse.studyTime || 0;
+
+          // Load study time
+          setStudyTime(loadedStudyTime);
+          console.log('Loaded study time:', loadedStudyTime);
+
           if (data && Object.keys(data).length > 0) {
             const loadedSentences = data.completedSentences || [];
             const loadedWords = data.completedWords || {};
-            
+            const loadedVideoTimestamp = data.videoTimestamp;
+
             // Normalize keys to numbers
             const normalizedWords = {};
             Object.keys(loadedWords).forEach(sentenceIdx => {
@@ -528,12 +668,21 @@ const DictationPageContent = () => {
                 normalizedWords[numIdx][numWordIdx] = loadedWords[sentenceIdx][wordIdx];
               });
             });
-            
+
             setCompletedSentences(loadedSentences);
             setCompletedWords(normalizedWords);
+
+            // Restore video position if available
+            if (loadedVideoTimestamp && loadedVideoTimestamp > 0) {
+              // Save to localStorage as backup
+              localStorage.setItem(`videoTimestamp_${lessonId}_dictation`, loadedVideoTimestamp.toString());
+              console.log('Loaded video timestamp:', loadedVideoTimestamp);
+            }
+
             console.log('Loaded and normalized progress:', {
               completedSentences: loadedSentences,
-              completedWords: normalizedWords
+              completedWords: normalizedWords,
+              videoTimestamp: loadedVideoTimestamp
             });
           }
         }
@@ -551,7 +700,45 @@ const DictationPageContent = () => {
     loadProgress();
   }, [lessonId]);
 
+  // Restore video position from saved timestamp
+  useEffect(() => {
+    if (!progressLoaded || !lessonId || duration === 0) return;
 
+    const savedTimestamp = localStorage.getItem(`videoTimestamp_${lessonId}_dictation`);
+    if (savedTimestamp) {
+      const timestamp = parseFloat(savedTimestamp);
+      if (timestamp > 0 && timestamp < duration) {
+        console.log('Restoring video position to:', timestamp);
+
+        // Seek to saved position
+        if (isYouTube && youtubePlayerRef.current?.seekTo) {
+          youtubePlayerRef.current.seekTo(timestamp, true);
+          setCurrentTime(timestamp);
+        } else if (audioRef.current) {
+          audioRef.current.currentTime = timestamp;
+          setCurrentTime(timestamp);
+        }
+      }
+    }
+  }, [progressLoaded, lessonId, duration, isYouTube]);
+
+  // Auto-save video timestamp periodically (every 5 seconds)
+  useEffect(() => {
+    if (!lessonId || currentTime === 0) return;
+
+    const saveTimestamp = () => {
+      // Save to localStorage
+      localStorage.setItem(`videoTimestamp_${lessonId}_dictation`, currentTime.toString());
+    };
+
+    // Save immediately
+    saveTimestamp();
+
+    // Set up interval to save every 5 seconds
+    const intervalId = setInterval(saveTimestamp, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [lessonId, currentTime]);
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
@@ -1029,6 +1216,15 @@ const DictationPageContent = () => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // Format study time to HH:MM:SS
+  const formatStudyTime = (totalSeconds) => {
+    if (!isFinite(totalSeconds)) return '00:00:00';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   // Character replacement for German umlauts
   const replaceCharacters = useCallback((input) => {
     const currentTime = Date.now();
@@ -1112,7 +1308,8 @@ const DictationPageContent = () => {
             currentSentenceIndex,
             totalSentences: transcriptData.length,
             correctWords: correctWordsCount,
-            totalWords
+            totalWords,
+            videoTimestamp: currentTime // Save current video position
           }
         }),
         signal: controller.signal
@@ -2400,6 +2597,10 @@ const DictationPageContent = () => {
             {/* Video Header */}
             <div className={styles.videoHeader}>
               <h3 className={styles.transcriptTitle}>Video</h3>
+              <div className={styles.studyTimer}>
+                <span className={styles.timerIcon}>⏱️</span>
+                <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
+              </div>
             </div>
 
             <div className={styles.videoWrapper}>
