@@ -2394,9 +2394,7 @@ const DictationPageContent = () => {
           <div className={styles.leftSection}>
             {/* Video Header */}
             <div className={styles.videoHeader}>
-              <div className={styles.dictationHeaderTitle}>
-                Video
-              </div>
+              <h3 className={styles.transcriptTitle}>Video</h3>
             </div>
 
             <div className={styles.videoWrapper}>
@@ -2468,9 +2466,9 @@ const DictationPageContent = () => {
           <div className={styles.middleSection}>
             {/* Dictation Header */}
             <div className={styles.dictationHeader}>
-              <div className={styles.dictationHeaderTitle}>
+              <h3 className={styles.transcriptTitle}>
                 {isMobile ? `#${currentSentenceIndex + 1}` : 'Dictation'}
-              </div>
+              </h3>
               {/* Hide Level Selector */}
               <div className={styles.hideLevelSelector}>
                 <select
@@ -2567,9 +2565,9 @@ const DictationPageContent = () => {
           {/* Right Column - Transcript List */}
           <div className={styles.rightSection}>
             <div className={styles.transcriptHeader}>
-              <div className={styles.dictationHeaderTitle}>
+              <h3 className={styles.transcriptTitle}>
                 Transcript
-              </div>
+              </h3>
               <div className={styles.transcriptProgress}>
                 <div className={styles.progressBar}>
                   <div
