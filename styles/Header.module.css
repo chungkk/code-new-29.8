@@ -10,8 +10,19 @@
   right: 0;
   z-index: 1000;
   backdrop-filter: blur(12px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
+}
+
+/* Light theme - stronger shadow for depth */
+[data-theme="light"] .header {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1.5px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .header {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .headerContent {

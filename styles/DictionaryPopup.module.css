@@ -4,11 +4,20 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 9999;
   padding: 20px;
   overflow-y: auto;
   animation: fadeIn 0.2s ease-out;
+}
+
+/* Light theme - lighter overlay */
+[data-theme="light"] .overlay {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .overlay {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 @keyframes fadeIn {
@@ -25,12 +34,22 @@
   border-radius: 8px;
   max-width: 350px;
   margin: 0 auto;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-xl);
   animation: slideDown 0.3s ease-out;
   border: 1px solid var(--border-color, #e0e0e0);
   position: relative;
   transition: top 0.15s ease-out, left 0.15s ease-out, opacity 0.2s ease-out;
   will-change: top, left;
+}
+
+[data-theme="light"] .popupContainer {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-color);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), var(--shadow-xl);
+}
+
+[data-theme="dark"] .popupContainer {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* Arrow pointing to the word */

@@ -55,9 +55,13 @@ const ShadowingPageContent = () => {
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+  const [lastPauseTime, setLastPauseTime] = useState(null); // Track when video was paused
   const timerIntervalRef = useRef(null);
   const inactivityTimeoutRef = useRef(null);
+  const pauseTimeoutRef = useRef(null);
   const hasStartedTimerRef = useRef(false); // Track if timer has been started
+  const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
+  const DEBUG_TIMER = true; // Set to true to enable timer logs
 
   const { user } = useAuth();
 
@@ -150,40 +154,67 @@ const ShadowingPageContent = () => {
   // Load study time and video timestamp from database
   useEffect(() => {
     const loadProgress = async () => {
-      if (!lessonId || !user) return;
+      console.log('[SHADOWING] loadProgress called, lessonId:', lessonId, 'user:', user ? 'logged in' : 'not logged in');
+
+      if (!lessonId) {
+        console.log('[SHADOWING] No lessonId, skipping load');
+        return;
+      }
+
+      // Wait for user to load before trying to get progress
+      if (!user) {
+        console.log('[SHADOWING] No user, skipping load');
+        return;
+      }
 
       try {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+          console.log('[SHADOWING] No token, skipping load');
+          return;
+        }
 
+        console.log('[SHADOWING] Fetching progress from API...');
         const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=shadowing`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        console.log('[SHADOWING] API response status:', res.status);
+
         if (res.ok) {
-          const data = await res.json();
-          const loadedStudyTime = data.studyTime || 0;
-          setStudyTime(loadedStudyTime);
-          console.log('Loaded study time:', loadedStudyTime);
+          const apiResponse = await res.json();
+          console.log('[SHADOWING] Raw API response:', apiResponse);
+
+          // Extract progress and studyTime
+          const data = apiResponse.progress || apiResponse;
+          const loadedStudyTime = apiResponse.studyTime || 0;
+
+          console.log('[SHADOWING] Extracted studyTime:', loadedStudyTime);
+
+          // Load study time (with validation)
+          const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
+          setStudyTime(validatedLoadedTime);
+          console.log('[SHADOWING] Study time set to:', validatedLoadedTime);
 
           // Load video timestamp
-          const progressData = data.progress || {};
-          const loadedVideoTimestamp = progressData.videoTimestamp;
+          const loadedVideoTimestamp = data.videoTimestamp;
           if (loadedVideoTimestamp && loadedVideoTimestamp > 0) {
             // Save to localStorage as backup
             localStorage.setItem(`videoTimestamp_${lessonId}_shadowing`, loadedVideoTimestamp.toString());
-            console.log('Loaded video timestamp:', loadedVideoTimestamp);
+            if (DEBUG_TIMER) console.log('Loaded video timestamp:', loadedVideoTimestamp);
           }
+        } else {
+          console.error('[SHADOWING] API returned error status:', res.status);
         }
       } catch (error) {
-        console.error('Error loading progress:', error);
+        console.error('[SHADOWING] Error loading progress:', error);
       }
     };
 
     loadProgress();
-  }, [lessonId, user]);
+  }, [lessonId, user]); // Reload when user is ready
 
   // Restore video position from saved timestamp
   useEffect(() => {
@@ -226,32 +257,90 @@ const ShadowingPageContent = () => {
   }, [lessonId, currentTime]);
 
   // Study timer - starts when user plays video for the first time
-  // Only stops on inactivity (3 min) or page unload
+  // Stops on inactivity (3 min), pause > 30s, or page unload
   useEffect(() => {
     // Start timer when user plays video for the first time
     if (isPlaying && !hasStartedTimerRef.current) {
-      console.log('Starting timer (first play)...');
+      if (DEBUG_TIMER) console.log('Starting timer (first play)...');
       hasStartedTimerRef.current = true;
       setIsTimerRunning(true);
       setLastActivityTime(Date.now());
+      setLastPauseTime(null);
 
       // Start timer interval (update every second)
       timerIntervalRef.current = setInterval(() => {
         setStudyTime(prev => {
-          console.log('Timer tick:', prev + 1);
+          // Enforce maximum study time
+          if (prev >= MAX_STUDY_TIME) {
+            if (DEBUG_TIMER) console.log('Maximum study time reached');
+            return MAX_STUDY_TIME;
+          }
+          if (DEBUG_TIMER) console.log('Timer tick:', prev + 1);
           return prev + 1;
         });
       }, 1000);
     }
-  }, [isPlaying]);
+
+    // Handle pause: track pause time and set timeout to stop timer after 30s
+    if (!isPlaying && hasStartedTimerRef.current && isTimerRunning) {
+      const pauseTime = Date.now();
+      setLastPauseTime(pauseTime);
+
+      // Clear existing pause timeout
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+
+      // Stop timer after 30 seconds of pause
+      pauseTimeoutRef.current = setTimeout(() => {
+        if (DEBUG_TIMER) console.log('Video paused for 30s, stopping timer');
+        setIsTimerRunning(false);
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
+      }, 30000); // 30 seconds
+    }
+
+    // Handle resume: clear pause timeout and restart timer if needed
+    if (isPlaying && lastPauseTime && !isTimerRunning && hasStartedTimerRef.current) {
+      if (DEBUG_TIMER) console.log('Resuming timer after pause');
+      
+      // Clear pause timeout
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
+      }
+
+      setLastPauseTime(null);
+      setIsTimerRunning(true);
+      setLastActivityTime(Date.now());
+
+      // Restart timer interval
+      timerIntervalRef.current = setInterval(() => {
+        setStudyTime(prev => {
+          if (prev >= MAX_STUDY_TIME) {
+            if (DEBUG_TIMER) console.log('Maximum study time reached');
+            return MAX_STUDY_TIME;
+          }
+          if (DEBUG_TIMER) console.log('Timer tick:', prev + 1);
+          return prev + 1;
+        });
+      }, 1000);
+    }
+  }, [isPlaying, lastPauseTime, isTimerRunning]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
     return () => {
       if (timerIntervalRef.current) {
-        console.log('Cleaning up timer on unmount');
+        if (DEBUG_TIMER) console.log('Cleaning up timer on unmount');
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
+      }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
       }
     };
   }, []);
@@ -267,7 +356,7 @@ const ShadowingPageContent = () => {
 
     // Set new timeout for 3 minutes (180000ms)
     inactivityTimeoutRef.current = setTimeout(() => {
-      console.log('User inactive for 3 minutes, stopping timer');
+      if (DEBUG_TIMER) console.log('User inactive for 3 minutes, stopping timer');
       setIsTimerRunning(false);
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
@@ -304,16 +393,26 @@ const ShadowingPageContent = () => {
     };
   }, []);
 
+  // Keep latest studyTime in ref to avoid recreating effect
+  const studyTimeRef = useRef(studyTime);
+  useEffect(() => {
+    studyTimeRef.current = studyTime;
+  }, [studyTime]);
+
   // Save study time periodically (every 30 seconds) and on unmount
   useEffect(() => {
     const saveStudyTime = async () => {
-      if (!user || !lessonId || studyTime === 0) return;
+      const currentStudyTime = studyTimeRef.current;
+      if (!user || !lessonId || currentStudyTime === 0) return;
+
+      // Validate before saving
+      const validatedStudyTime = Math.min(currentStudyTime, MAX_STUDY_TIME);
 
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        await fetch('/api/progress', {
+        const response = await fetch('/api/progress', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -322,10 +421,16 @@ const ShadowingPageContent = () => {
           body: JSON.stringify({
             lessonId,
             mode: 'shadowing',
-            studyTime
+            studyTime: validatedStudyTime
           })
         });
-        console.log('Study time saved:', studyTime);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('[SHADOWING] Save error:', errorData);
+        } else {
+          if (DEBUG_TIMER) console.log('Study time saved:', validatedStudyTime);
+        }
       } catch (error) {
         console.error('Error saving study time:', error);
       }
@@ -346,7 +451,7 @@ const ShadowingPageContent = () => {
       // Save final time when component unmounts
       saveStudyTime();
     };
-  }, [user, lessonId, studyTime]);
+  }, [user, lessonId]); // Removed studyTime from dependencies
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {

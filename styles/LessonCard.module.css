@@ -1,31 +1,42 @@
 /* Lesson Card Styles */
 
 .lessonCard {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-card);
   border-radius: var(--border-radius);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
 }
 
-/* Light theme - viền mờ hơn */
+/* Dark theme specific styles */
+[data-theme="dark"] .lessonCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Light theme - stronger borders and shadows */
 [data-theme="light"] .lessonCard {
-  border: 2px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-elevated);
 }
 
 .lessonCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--accent-blue);
+}
+
+[data-theme="dark"] .lessonCard:hover {
   background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 [data-theme="light"] .lessonCard:hover {
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
-  border-color: rgba(102, 126, 234, 0.5);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-hover);
 }
 
 .thumbnailContainer {
@@ -165,7 +176,7 @@
 
 .actionBtn {
   flex: 1;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 6px 10px;
@@ -178,12 +189,28 @@
   justify-content: center;
   gap: 3px;
   font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .actionBtn {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+[data-theme="light"] .actionBtn {
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
 }
 
 .actionBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(74, 144, 226, 0.5);
+  background: var(--bg-hover);
+  border-color: var(--accent-blue);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .actionBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .actionBtn svg {

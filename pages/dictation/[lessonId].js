@@ -105,9 +105,13 @@ const DictationPageContent = () => {
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [lastActivityTime, setLastActivityTime] = useState(Date.now());
+  const [lastPauseTime, setLastPauseTime] = useState(null); // Track when video was paused
   const timerIntervalRef = useRef(null);
   const inactivityTimeoutRef = useRef(null);
+  const pauseTimeoutRef = useRef(null);
   const hasStartedTimerRef = useRef(false); // Track if timer has been started
+  const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
+  const DEBUG_TIMER = false; // Set to true to enable timer logs
 
   const { user } = useAuth();
 
@@ -209,32 +213,90 @@ const DictationPageContent = () => {
   }, []);
 
   // Study timer - starts when user plays video for the first time
-  // Only stops on inactivity (3 min) or page unload
+  // Stops on inactivity (3 min), pause > 30s, or page unload
   useEffect(() => {
     // Start timer when user plays video for the first time
     if (isPlaying && !hasStartedTimerRef.current) {
-      console.log('Starting timer (first play)...');
+      if (DEBUG_TIMER) console.log('Starting timer (first play)...');
       hasStartedTimerRef.current = true;
       setIsTimerRunning(true);
       setLastActivityTime(Date.now());
+      setLastPauseTime(null);
 
       // Start timer interval (update every second)
       timerIntervalRef.current = setInterval(() => {
         setStudyTime(prev => {
-          console.log('Timer tick:', prev + 1);
+          // Enforce maximum study time
+          if (prev >= MAX_STUDY_TIME) {
+            if (DEBUG_TIMER) console.log('Maximum study time reached');
+            return MAX_STUDY_TIME;
+          }
+          if (DEBUG_TIMER) console.log('Timer tick:', prev + 1);
           return prev + 1;
         });
       }, 1000);
     }
-  }, [isPlaying]);
+
+    // Handle pause: track pause time and set timeout to stop timer after 30s
+    if (!isPlaying && hasStartedTimerRef.current && isTimerRunning) {
+      const pauseTime = Date.now();
+      setLastPauseTime(pauseTime);
+
+      // Clear existing pause timeout
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+      }
+
+      // Stop timer after 30 seconds of pause
+      pauseTimeoutRef.current = setTimeout(() => {
+        if (DEBUG_TIMER) console.log('Video paused for 30s, stopping timer');
+        setIsTimerRunning(false);
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
+      }, 30000); // 30 seconds
+    }
+
+    // Handle resume: clear pause timeout and restart timer if needed
+    if (isPlaying && lastPauseTime && !isTimerRunning && hasStartedTimerRef.current) {
+      if (DEBUG_TIMER) console.log('Resuming timer after pause');
+      
+      // Clear pause timeout
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
+      }
+
+      setLastPauseTime(null);
+      setIsTimerRunning(true);
+      setLastActivityTime(Date.now());
+
+      // Restart timer interval
+      timerIntervalRef.current = setInterval(() => {
+        setStudyTime(prev => {
+          if (prev >= MAX_STUDY_TIME) {
+            if (DEBUG_TIMER) console.log('Maximum study time reached');
+            return MAX_STUDY_TIME;
+          }
+          if (DEBUG_TIMER) console.log('Timer tick:', prev + 1);
+          return prev + 1;
+        });
+      }, 1000);
+    }
+  }, [isPlaying, lastPauseTime, isTimerRunning]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
     return () => {
       if (timerIntervalRef.current) {
-        console.log('Cleaning up timer on unmount');
+        if (DEBUG_TIMER) console.log('Cleaning up timer on unmount');
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
+      }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
       }
     };
   }, []);
@@ -250,7 +312,7 @@ const DictationPageContent = () => {
 
     // Set new timeout for 3 minutes (180000ms)
     inactivityTimeoutRef.current = setTimeout(() => {
-      console.log('User inactive for 3 minutes, stopping timer');
+      if (DEBUG_TIMER) console.log('User inactive for 3 minutes, stopping timer');
       setIsTimerRunning(false);
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
@@ -292,6 +354,9 @@ const DictationPageContent = () => {
     const saveStudyTime = async () => {
       if (!user || !lessonId || studyTime === 0) return;
 
+      // Validate before saving
+      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
+
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -305,10 +370,10 @@ const DictationPageContent = () => {
           body: JSON.stringify({
             lessonId,
             mode: 'dictation',
-            studyTime
+            studyTime: validatedStudyTime
           })
         });
-        console.log('Study time saved:', studyTime);
+        if (DEBUG_TIMER) console.log('Study time saved:', validatedStudyTime);
       } catch (error) {
         console.error('Error saving study time:', error);
       }
@@ -622,6 +687,11 @@ const DictationPageContent = () => {
         return;
       }
       
+      // Wait for user to load before trying to get progress
+      if (!user) {
+        return; // Don't set progressLoaded yet, wait for user
+      }
+      
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -643,15 +713,16 @@ const DictationPageContent = () => {
         
         if (res.ok) {
           const apiResponse = await res.json();
-          console.log('Raw API response:', apiResponse);
+          if (DEBUG_TIMER) console.log('Raw API response:', apiResponse);
 
           // Extract progress and studyTime
           const data = apiResponse.progress || apiResponse;
           const loadedStudyTime = apiResponse.studyTime || 0;
 
-          // Load study time
-          setStudyTime(loadedStudyTime);
-          console.log('Loaded study time:', loadedStudyTime);
+          // Load study time (with validation)
+          const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
+          setStudyTime(validatedLoadedTime);
+          if (DEBUG_TIMER) console.log('Loaded study time:', validatedLoadedTime);
 
           if (data && Object.keys(data).length > 0) {
             const loadedSentences = data.completedSentences || [];
@@ -676,14 +747,16 @@ const DictationPageContent = () => {
             if (loadedVideoTimestamp && loadedVideoTimestamp > 0) {
               // Save to localStorage as backup
               localStorage.setItem(`videoTimestamp_${lessonId}_dictation`, loadedVideoTimestamp.toString());
-              console.log('Loaded video timestamp:', loadedVideoTimestamp);
+              if (DEBUG_TIMER) console.log('Loaded video timestamp:', loadedVideoTimestamp);
             }
 
-            console.log('Loaded and normalized progress:', {
-              completedSentences: loadedSentences,
-              completedWords: normalizedWords,
-              videoTimestamp: loadedVideoTimestamp
-            });
+            if (DEBUG_TIMER) {
+              console.log('Loaded and normalized progress:', {
+                completedSentences: loadedSentences,
+                completedWords: normalizedWords,
+                videoTimestamp: loadedVideoTimestamp
+              });
+            }
           }
         }
       } catch (error) {
@@ -698,7 +771,7 @@ const DictationPageContent = () => {
     };
     
     loadProgress();
-  }, [lessonId]);
+  }, [lessonId, user]); // Add user dependency so it reloads when user is ready
 
   // Restore video position from saved timestamp
   useEffect(() => {
@@ -1058,6 +1131,23 @@ const DictationPageContent = () => {
     // Update currentSentenceIndex to match the clicked sentence
     setCurrentSentenceIndex(clickedIndex);
   }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex, userSeekTimeout]);
+
+  // Sort transcript indices to prioritize incomplete sentences
+  const sortedTranscriptIndices = useMemo(() => {
+    if (!transcriptData || transcriptData.length === 0) return [];
+
+    return [...Array(transcriptData.length).keys()].sort((a, b) => {
+      const aCompleted = completedSentences.includes(a);
+      const bCompleted = completedSentences.includes(b);
+
+      // Incomplete sentences come first
+      if (!aCompleted && bCompleted) return -1;
+      if (aCompleted && !bCompleted) return 1;
+
+      // If both have same completion status, maintain original order
+      return a - b;
+    });
+  }, [transcriptData, completedSentences]);
 
   const goToPreviousSentence = useCallback(() => {
     // Find current position in sorted list
@@ -2476,23 +2566,6 @@ const DictationPageContent = () => {
 
     return totalWords > 0 ? Math.round((completedWordsCount / totalWords) * 100) : 0;
   }, [transcriptData, completedWords]);
-
-  // Sort transcript indices to prioritize incomplete sentences
-  const sortedTranscriptIndices = useMemo(() => {
-    if (!transcriptData || transcriptData.length === 0) return [];
-
-    return [...Array(transcriptData.length).keys()].sort((a, b) => {
-      const aCompleted = completedSentences.includes(a);
-      const bCompleted = completedSentences.includes(b);
-
-      // Incomplete sentences come first
-      if (!aCompleted && bCompleted) return -1;
-      if (aCompleted && !bCompleted) return 1;
-
-      // If both have same completion status, maintain original order
-      return a - b;
-    });
-  }, [transcriptData, completedSentences]);
 
   // Set initial sentence to first incomplete sentence when progress is loaded
   useEffect(() => {

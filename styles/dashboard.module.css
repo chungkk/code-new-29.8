@@ -128,7 +128,7 @@
   background: var(--bg-card);
   padding: 16px;
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -138,6 +138,17 @@
   overflow: hidden;
   animation: fadeInScale 0.5s ease-out;
   animation-fill-mode: both;
+}
+
+/* Light theme enhancements */
+[data-theme="light"] .statCard {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .statCard {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .statCard::before {
@@ -154,8 +165,12 @@
 
 .statCard:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-hover);
   border-color: var(--accent-blue);
+}
+
+[data-theme="dark"] .statCard:hover {
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
 }
 
 .statCard:hover::before {
@@ -177,12 +192,26 @@
   background: var(--bg-secondary);
   border-radius: 10px;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+/* Light theme - add subtle gradient background */
+[data-theme="light"] .statIcon {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .statIcon {
+  background: var(--bg-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .statCard:hover .statIcon {
   transform: rotate(-5deg) scale(1.1);
+  box-shadow: var(--shadow-md);
 }
 
 .statContent {
@@ -245,7 +274,7 @@
 .lessonCard {
   background: var(--bg-card);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--border-color);
@@ -256,10 +285,23 @@
   animation: fadeInScale 0.5s ease-out;
 }
 
+[data-theme="light"] .lessonCard {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-color);
+}
+
+[data-theme="dark"] .lessonCard {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
 .lessonCard:hover {
   transform: translateY(-8px);
-  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-hover);
   border-color: var(--accent-blue);
+}
+
+[data-theme="dark"] .lessonCard:hover {
+  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
 }
 
 /* Status Badge */
