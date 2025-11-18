@@ -565,7 +565,7 @@ const DictationPageContent = () => {
           setCurrentTime(currentTime);
 
           if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
-            player.pauseVideo();
+            if (player.pauseVideo) player.pauseVideo();
             setIsPlaying(false);
             setSegmentPlayEndTime(null);
           }
@@ -731,7 +731,7 @@ const DictationPageContent = () => {
       if (!player) return;
 
       if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-        player.pauseVideo();
+        if (player.pauseVideo) player.pauseVideo();
         setIsPlaying(false);
       } else {
         if (transcriptData.length > 0 && currentSentenceIndex < transcriptData.length) {
@@ -741,12 +741,12 @@ const DictationPageContent = () => {
              if (player.seekTo) player.seekTo(currentSentence.start);
            }
 
-          player.playVideo();
+          if (player.playVideo) player.playVideo();
           setIsPlaying(true);
           setSegmentPlayEndTime(currentSentence.end);
           setSegmentEndTimeLocked(false); // Cho phép chuyển câu tự động khi phát liên tục
         } else {
-          player.playVideo();
+          if (player.playVideo) player.playVideo();
           setIsPlaying(true);
           setSegmentEndTimeLocked(false);
         }
@@ -789,9 +789,9 @@ const DictationPageContent = () => {
     if (isYouTube) {
       const player = youtubePlayerRef.current;
       if (!player || !player.seekTo) return;
-      
+
       player.seekTo(currentSentence.start);
-      player.playVideo();
+      if (player.playVideo) player.playVideo();
       setIsPlaying(true);
       setSegmentPlayEndTime(currentSentence.end);
       setSegmentEndTimeLocked(true);
@@ -821,7 +821,7 @@ const DictationPageContent = () => {
       // Pause the current sentence
       if (isYouTube) {
         const player = youtubePlayerRef.current;
-        if (player) player.pauseVideo();
+        if (player && player.pauseVideo) player.pauseVideo();
       } else {
         const audio = audioRef.current;
         if (audio) audio.pause();
@@ -844,7 +844,7 @@ const DictationPageContent = () => {
         const player = youtubePlayerRef.current;
         if (!player) return;
         if (player.seekTo) player.seekTo(seekTime);
-        player.playVideo();
+        if (player.playVideo) player.playVideo();
       } else {
         const audio = audioRef.current;
         if (!audio) return;
@@ -1199,7 +1199,7 @@ const DictationPageContent = () => {
     if (isYouTube && youtubePlayerRef.current) {
       const player = youtubePlayerRef.current;
       if (player.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-        player.pauseVideo();
+        if (player.pauseVideo) player.pauseVideo();
       }
     }
 
