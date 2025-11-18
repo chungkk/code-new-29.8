@@ -84,10 +84,14 @@ export default async function handler(req, res) {
 
     const itemCount = srt.split('\n\n').filter(block => block.trim()).length;
 
+    // Get video duration in seconds
+    const videoDuration = info.basic_info?.duration || 0;
+
     return res.status(200).json({
       success: true,
       srt: srt,
       itemCount: itemCount,
+      videoDuration: videoDuration,
       message: 'SRT đã được tải thành công từ YouTube!'
     });
 

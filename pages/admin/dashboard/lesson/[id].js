@@ -23,7 +23,8 @@ function LessonFormPage() {
     title: '',
     displayTitle: '',
     description: '',
-    level: 'A1'
+    level: 'A1',
+    videoDuration: 0
   });
 
   const [audioSource, setAudioSource] = useState('file');
@@ -58,7 +59,8 @@ function LessonFormPage() {
           title: lesson.title,
           displayTitle: lesson.displayTitle,
           description: lesson.description,
-          level: lesson.level || 'A1'
+          level: lesson.level || 'A1',
+          videoDuration: lesson.videoDuration || 0
         });
       } else {
         toast.error('Lektion nicht gefunden');
@@ -172,6 +174,9 @@ function LessonFormPage() {
 
       const data = await res.json();
       setSrtText(data.srt);
+      if (data.videoDuration) {
+        setFormData(prev => ({ ...prev, videoDuration: data.videoDuration }));
+      }
       toast.success(data.message || `SRT erfolgreich von YouTube geladen!`);
     } catch (error) {
       console.error('YouTube SRT error:', error);
@@ -292,14 +297,16 @@ function LessonFormPage() {
           audio: finalAudioPath || 'youtube',
           json: finalJsonPath,
           youtubeUrl: finalYoutubeUrl || undefined,
-          thumbnail: finalThumbnailPath || undefined
+          thumbnail: finalThumbnailPath || undefined,
+          videoDuration: formData.videoDuration || undefined
         };
       } else {
         lessonData = {
           title: formData.title,
           displayTitle: formData.displayTitle,
           description: formData.description,
-          level: formData.level
+          level: formData.level,
+          videoDuration: formData.videoDuration || undefined
         };
       }
 
@@ -444,6 +451,35 @@ function LessonFormPage() {
               />
               {errors.description && <span className={styles.errorText}>{errors.description}</span>}
             </div>
+
+            {(audioSource === 'youtube' || (!isNewLesson && formData.videoDuration > 0)) && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Video-Dauer (MM:SS)
+                </label>
+                <input
+                  type="text"
+                  value={formData.videoDuration > 0 ? `${Math.floor(formData.videoDuration / 60)}:${(formData.videoDuration % 60).toString().padStart(2, '0')}` : '0:00'}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const match = value.match(/^(\d+):(\d{0,2})$/);
+                    if (match) {
+                      const minutes = parseInt(match[1]) || 0;
+                      const seconds = parseInt(match[2]) || 0;
+                      setFormData({ ...formData, videoDuration: minutes * 60 + seconds });
+                    }
+                  }}
+                  className={styles.input}
+                  placeholder="Automatisch gefüllt beim SRT-Laden"
+                  readOnly={isNewLesson}
+                />
+                {formData.videoDuration > 0 && (
+                  <small className={styles.helperText}>
+                    {formData.videoDuration} Sekunden
+                  </small>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Audio & SRT (only for new lessons) */}
