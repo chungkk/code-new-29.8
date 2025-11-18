@@ -120,8 +120,6 @@ const Header = () => {
 
   const navLinks = [
     { href: '/', label: t('header.nav.topics') },
-    { href: '/review', label: t('header.nav.review') },
-    { href: '/dashboard/vocabulary', label: t('header.nav.vocabulary') },
     { href: '/leaderboard', label: t('header.nav.leaderboard') },
   ];
 
@@ -182,14 +180,6 @@ const Header = () => {
               {link.label}
             </Link>
           ))}
-          {user && (
-            <Link
-              href="/dashboard"
-              className={`${styles.navLink} ${isActive('/dashboard') ? styles.active : ''}`}
-            >
-              {t('header.nav.dashboard')}
-            </Link>
-          )}
         </nav>
 
         <div className={styles.rightSection}>

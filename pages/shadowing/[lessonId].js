@@ -198,14 +198,6 @@ const ShadowingPageContent = () => {
           const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
           setStudyTime(validatedLoadedTime);
           if (DEBUG_TIMER) console.log('Loaded study time:', validatedLoadedTime);
-
-          // Load video timestamp
-          const loadedVideoTimestamp = data.videoTimestamp;
-          if (loadedVideoTimestamp && loadedVideoTimestamp > 0) {
-            // Save to localStorage as backup
-            localStorage.setItem(`videoTimestamp_${lessonId}_shadowing`, loadedVideoTimestamp.toString());
-            if (DEBUG_TIMER) console.log('Loaded video timestamp:', loadedVideoTimestamp);
-          }
         }
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -221,45 +213,7 @@ const ShadowingPageContent = () => {
     loadProgress();
   }, [lessonId, user]); // Add user dependency so it reloads when user is ready
 
-  // Restore video position from saved timestamp
-  useEffect(() => {
-    if (!progressLoaded || !lessonId || duration === 0) return;
 
-    const savedTimestamp = localStorage.getItem(`videoTimestamp_${lessonId}_shadowing`);
-    if (savedTimestamp) {
-      const timestamp = parseFloat(savedTimestamp);
-      if (timestamp > 0 && timestamp < duration) {
-        console.log('Restoring video position to:', timestamp);
-
-        // Seek to saved position
-        if (isYouTube && youtubePlayerRef.current?.seekTo) {
-          youtubePlayerRef.current.seekTo(timestamp, true);
-          setCurrentTime(timestamp);
-        } else if (audioRef.current) {
-          audioRef.current.currentTime = timestamp;
-          setCurrentTime(timestamp);
-        }
-      }
-    }
-  }, [progressLoaded, lessonId, duration, isYouTube]);
-
-  // Auto-save video timestamp periodically (every 5 seconds)
-  useEffect(() => {
-    if (!lessonId || currentTime === 0) return;
-
-    const saveTimestamp = () => {
-      // Save to localStorage
-      localStorage.setItem(`videoTimestamp_${lessonId}_shadowing`, currentTime.toString());
-    };
-
-    // Save immediately
-    saveTimestamp();
-
-    // Set up interval to save every 5 seconds
-    const intervalId = setInterval(saveTimestamp, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [lessonId, currentTime]);
 
   // Study timer - starts when user plays video for the first time
   // Stops on inactivity (3 min), pause > 30s, or page unload
@@ -1146,7 +1100,6 @@ const ShadowingPageContent = () => {
 
           saveProgress({
             currentSentenceIndex,
-            videoTimestamp: player.getCurrentTime ? player.getCurrentTime() : 0,
             lastPlayed: new Date()
           });
         } else {
@@ -1174,7 +1127,6 @@ const ShadowingPageContent = () => {
 
           saveProgress({
             currentSentenceIndex,
-            videoTimestamp: audio.currentTime,
             lastPlayed: new Date()
           });
         } else {

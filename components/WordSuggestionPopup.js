@@ -100,113 +100,61 @@ const WordSuggestionPopup = ({
     }
   };
 
-  if (isMobile) {
-    // Mobile layout - simple horizontal 3 buttons
-    return (
-      <div className={styles.overlay} onClick={handleOverlayClick}>
-        <div 
-          className={`${styles.popup} ${styles.popupMobile}`}
-          style={{
-            position: 'absolute',
-            top: `${position?.top || 0}px`,
-            left: `${position?.left || 0}px`,
-          }}
-        >
-          {loading ? (
-            <div className={styles.loadingMobile}>
-              <div className={styles.spinner}></div>
-            </div>
-          ) : (
-            <div className={styles.optionsContainerMobile}>
-              {options.map((option, index) => (
-                <button
-                  key={`${option.toLowerCase()}-${index}`}
-                  className={`${styles.optionButtonMobile} ${
-                    selectedOption === option
-                      ? isCorrect
-                        ? styles.correct
-                        : styles.wrong
-                      : ''
-                  } ${showResult && option.toLowerCase() === correctWord.toLowerCase() ? styles.showCorrect : ''}`}
-                  onClick={() => handleOptionClick(option)}
-                  disabled={showResult}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // Determine if popup should appear on left or right of word
+  const shouldShowOnLeft = () => {
+    if (!position) return false;
+    const screenWidth = window.innerWidth;
+    const spaceOnRight = screenWidth - position.left;
+    const estimatedPopupWidth = isMobile ? 280 : 350; // Approximate max width
+    return spaceOnRight < estimatedPopupWidth && position.left > estimatedPopupWidth;
+  };
 
-  // Desktop layout - original vertical with header
+  const showOnLeft = shouldShowOnLeft();
+
+  // Simple horizontal layout for all screens
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div 
-        className={styles.popup}
+        className={`${styles.popup} ${isMobile ? styles.popupMobile : ''} ${showOnLeft ? styles.positionLeft : styles.positionRight}`}
         style={{
           position: 'absolute',
           top: `${position?.top || 0}px`,
           left: `${position?.left || 0}px`,
         }}
       >
-        <button className={styles.closeButton} onClick={onClose} aria-label="Close">
-          ×
-        </button>
-
-        <div className={styles.header}>
-          <h3>{t('wordSuggestionPopup.chooseWord')}</h3>
-        </div>
-
         {loading ? (
-          <div className={styles.loading}>
+          <div className={isMobile ? styles.loadingMobile : styles.loading}>
             <div className={styles.spinner}></div>
-            <p>{t('wordSuggestionPopup.generatingSuggestions')}</p>
           </div>
         ) : (
-          <div className={styles.optionsContainer}>
-            {options.map((option, index) => (
-              <button
-                key={`${option.toLowerCase()}-${index}`}
-                className={`${styles.optionButton} ${
-                  selectedOption === option
-                    ? isCorrect
-                      ? styles.correct
-                      : styles.wrong
-                    : ''
-                } ${showResult && option.toLowerCase() === correctWord.toLowerCase() ? styles.showCorrect : ''}`}
-                onClick={() => handleOptionClick(option)}
-                disabled={showResult}
-              >
-                <span className={styles.optionText}>{option}</span>
-                {showResult && selectedOption === option && (
-                  <span className={styles.resultIcon}>
-                    {isCorrect ? '✓' : '✗'}
-                  </span>
-                )}
-                {showResult && !isCorrect && option.toLowerCase() === correctWord.toLowerCase() && (
-                  <span className={styles.resultIcon}>✓</span>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+          <div className={isMobile ? styles.optionsContainerMobile : styles.optionsContainer}>
+            {options.map((option, index) => {
+              // When correct: only show the selected correct word
+              if (showResult && isCorrect && option !== selectedOption) {
+                return null;
+              }
 
-        {showResult && (
-          <div className={`${styles.feedback} ${isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}`}>
-            {isCorrect ? (
-              <>
-                <span className={styles.feedbackIcon}>🎉</span>
-                <p>{t('wordSuggestionPopup.correct')}</p>
-              </>
-            ) : (
-              <>
-                <span className={styles.feedbackIcon}>💡</span>
-                <p>{t('wordSuggestionPopup.correctWordIs')} <strong>{correctWord}</strong></p>
-              </>
-            )}
+              // Determine if this is the wrong answer or correct answer button
+              const isSelectedWrong = showResult && !isCorrect && option === selectedOption;
+              const isShowingCorrect = showResult && !isCorrect && option.toLowerCase() === correctWord.toLowerCase();
+              const isShowingWrongOption = showResult && !isCorrect && option !== selectedOption && option.toLowerCase() !== correctWord.toLowerCase();
+
+              return (
+                <button
+                  key={`${option.toLowerCase()}-${index}`}
+                  className={`${isMobile ? styles.optionButtonMobile : styles.optionButton} ${
+                    selectedOption === option && isCorrect ? styles.correctFall : ''
+                  } ${showResult && !isCorrect ? styles.wrongShake : ''}`}
+                  style={{
+                    '--fall-direction': showOnLeft ? '1' : '-1', // 1 = right, -1 = left
+                  }}
+                  onClick={() => handleOptionClick(option)}
+                  disabled={showResult}
+                >
+                  {option}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -46,6 +46,9 @@ const DictationPageContent = () => {
   // Track last 's' keystroke time for timeout logic
   const lastSKeystrokeTime = useRef({});
 
+  // Track if we've already jumped to first incomplete sentence
+  const hasJumpedToIncomplete = useRef(false);
+
   // Touch swipe handling
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -727,7 +730,6 @@ const DictationPageContent = () => {
           if (data && Object.keys(data).length > 0) {
             const loadedSentences = data.completedSentences || [];
             const loadedWords = data.completedWords || {};
-            const loadedVideoTimestamp = data.videoTimestamp;
 
             // Normalize keys to numbers
             const normalizedWords = {};
@@ -743,18 +745,10 @@ const DictationPageContent = () => {
             setCompletedSentences(loadedSentences);
             setCompletedWords(normalizedWords);
 
-            // Restore video position if available
-            if (loadedVideoTimestamp && loadedVideoTimestamp > 0) {
-              // Save to localStorage as backup
-              localStorage.setItem(`videoTimestamp_${lessonId}_dictation`, loadedVideoTimestamp.toString());
-              if (DEBUG_TIMER) console.log('Loaded video timestamp:', loadedVideoTimestamp);
-            }
-
             if (DEBUG_TIMER) {
               console.log('Loaded and normalized progress:', {
                 completedSentences: loadedSentences,
-                completedWords: normalizedWords,
-                videoTimestamp: loadedVideoTimestamp
+                completedWords: normalizedWords
               });
             }
           }
@@ -773,45 +767,7 @@ const DictationPageContent = () => {
     loadProgress();
   }, [lessonId, user]); // Add user dependency so it reloads when user is ready
 
-  // Restore video position from saved timestamp
-  useEffect(() => {
-    if (!progressLoaded || !lessonId || duration === 0) return;
 
-    const savedTimestamp = localStorage.getItem(`videoTimestamp_${lessonId}_dictation`);
-    if (savedTimestamp) {
-      const timestamp = parseFloat(savedTimestamp);
-      if (timestamp > 0 && timestamp < duration) {
-        console.log('Restoring video position to:', timestamp);
-
-        // Seek to saved position
-        if (isYouTube && youtubePlayerRef.current?.seekTo) {
-          youtubePlayerRef.current.seekTo(timestamp, true);
-          setCurrentTime(timestamp);
-        } else if (audioRef.current) {
-          audioRef.current.currentTime = timestamp;
-          setCurrentTime(timestamp);
-        }
-      }
-    }
-  }, [progressLoaded, lessonId, duration, isYouTube]);
-
-  // Auto-save video timestamp periodically (every 5 seconds)
-  useEffect(() => {
-    if (!lessonId || currentTime === 0) return;
-
-    const saveTimestamp = () => {
-      // Save to localStorage
-      localStorage.setItem(`videoTimestamp_${lessonId}_dictation`, currentTime.toString());
-    };
-
-    // Save immediately
-    saveTimestamp();
-
-    // Set up interval to save every 5 seconds
-    const intervalId = setInterval(saveTimestamp, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [lessonId, currentTime]);
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
@@ -1404,8 +1360,7 @@ const DictationPageContent = () => {
             currentSentenceIndex,
             totalSentences: transcriptData.length,
             correctWords: correctWordsCount,
-            totalWords,
-            videoTimestamp: currentTime // Save current video position
+            totalWords
           }
         }),
         signal: controller.signal
@@ -2153,34 +2108,60 @@ const DictationPageContent = () => {
     let top, left;
 
     if (isMobileView) {
-      // Mobile: position below the button, centered horizontally
+      // Mobile: position to the right/left of button, centered vertically
       const popupWidth = 300; // Estimated mobile popup width
       const popupHeight = 50; // Estimated mobile popup height
 
-      top = rect.bottom + 8; // 8px below button
-      left = rect.left + (rect.width / 2) - (popupWidth / 2); // Center horizontally
+      top = rect.top + (rect.height / 2); // Center vertically with the button
+      
+      // Determine if there's more space on right or left
+      const spaceOnRight = window.innerWidth - rect.right;
+      const spaceOnLeft = rect.left;
+
+      if (spaceOnRight >= popupWidth + 10) {
+        // Show on right if there's enough space
+        left = rect.right + 5;
+      } else if (spaceOnLeft >= popupWidth + 10) {
+        // Show on left if there's enough space
+        left = rect.left - popupWidth - 5;
+      } else if (spaceOnRight > spaceOnLeft) {
+        // Show on right even if tight
+        left = rect.right + 5;
+      } else {
+        // Show on left even if tight
+        left = rect.left - popupWidth - 5;
+      }
 
       // Keep within screen bounds
-      if (left < 10) left = 10;
+      if (left < 10) {
+        left = 10;
+      }
       if (left + popupWidth > window.innerWidth - 10) {
         left = window.innerWidth - popupWidth - 10;
       }
-
-      // If would go off bottom, show above instead
-      if (top + popupHeight > window.innerHeight - 10) {
-        top = rect.top - popupHeight - 8;
-      }
     } else {
-      // Desktop: position to the right/left of button
+      // Desktop: position to the right/left of button, centered vertically
       const popupWidth = 280;
       const popupHeight = 250;
 
-      top = rect.top;
-      left = rect.right + 10;
+      top = rect.top + (rect.height / 2); // Center vertically with the button
+      
+      // Determine if there's more space on right or left
+      const spaceOnRight = window.innerWidth - rect.right;
+      const spaceOnLeft = rect.left;
 
-      // Check if popup would go off right edge of screen
-      if (left + popupWidth > window.innerWidth - 10) {
-        left = rect.left - popupWidth - 10;
+      if (spaceOnRight >= popupWidth + 10) {
+        // Show on right if there's enough space
+        left = rect.right + 5;
+      } else if (spaceOnLeft >= popupWidth + 10) {
+        // Show on left if there's enough space
+        left = rect.left - popupWidth - 5;
+      } else if (spaceOnRight > spaceOnLeft) {
+        // Show on right even if tight
+        left = rect.right + 5;
+      } else {
+        // Show on left even if tight
+        left = rect.left - popupWidth - 5;
       }
 
       // Check if popup would go off left edge
@@ -2569,18 +2550,30 @@ const DictationPageContent = () => {
 
   // Set initial sentence to first incomplete sentence when progress is loaded
   useEffect(() => {
-    if (progressLoaded && sortedTranscriptIndices.length > 0 && currentSentenceIndex === 0) {
-      // Check if current sentence (0) is already incomplete
-      const isCurrentIncomplete = !completedSentences.includes(currentSentenceIndex);
+    if (progressLoaded && sortedTranscriptIndices.length > 0 && !hasJumpedToIncomplete.current && transcriptData.length > 0) {
+      // Always jump to first incomplete sentence in sorted list
+      const firstIncompleteSentence = sortedTranscriptIndices[0];
       
-      // If current sentence is completed, jump to first incomplete one
-      if (!isCurrentIncomplete && sortedTranscriptIndices[0] !== currentSentenceIndex) {
-        const firstIncompleteSentence = sortedTranscriptIndices[0];
-        console.log('Jumping to first incomplete sentence:', firstIncompleteSentence);
-        setCurrentSentenceIndex(firstIncompleteSentence);
+      console.log('Jumping to first incomplete sentence:', firstIncompleteSentence);
+      setCurrentSentenceIndex(firstIncompleteSentence);
+      
+      // Also seek video to that sentence's start time
+      const targetSentence = transcriptData[firstIncompleteSentence];
+      if (targetSentence) {
+        // Seek to the sentence without auto-playing
+        if (isYouTube && youtubePlayerRef.current?.seekTo) {
+          youtubePlayerRef.current.seekTo(targetSentence.start, true);
+          setCurrentTime(targetSentence.start);
+        } else if (audioRef.current) {
+          audioRef.current.currentTime = targetSentence.start;
+          setCurrentTime(targetSentence.start);
+        }
+        setSegmentPlayEndTime(targetSentence.end);
       }
+      
+      hasJumpedToIncomplete.current = true;
     }
-  }, [progressLoaded, sortedTranscriptIndices, completedSentences, currentSentenceIndex]);
+  }, [progressLoaded, sortedTranscriptIndices, completedSentences, transcriptData, isYouTube]);
 
   if (loading) {
     return (

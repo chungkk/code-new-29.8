@@ -12,19 +12,8 @@ function VocabularyPage() {
   const router = useRouter();
   const [vocabulary, setVocabulary] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState('list'); // list, flashcard, write
   const [selectedWord, setSelectedWord] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, placement: 'bottom' });
-
-  // Flashcard state
-  const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-
-  // Write mode state
-  const [currentWriteIndex, setCurrentWriteIndex] = useState(0);
-  const [writeAnswer, setWriteAnswer] = useState('');
-  const [showWriteFeedback, setShowWriteFeedback] = useState(false);
-  const [isWriteCorrect, setIsWriteCorrect] = useState(false);
 
   useEffect(() => {
     loadVocabulary();
@@ -142,47 +131,9 @@ function VocabularyPage() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [selectedWord]);
 
-  // Flashcard functions
-  const nextFlashcard = () => {
-    setIsFlipped(false);
-    setCurrentFlashcardIndex((prev) => 
-      prev < vocabulary.length - 1 ? prev + 1 : 0
-    );
-  };
 
-  const prevFlashcard = () => {
-    setIsFlipped(false);
-    setCurrentFlashcardIndex((prev) => 
-      prev > 0 ? prev - 1 : vocabulary.length - 1
-    );
-  };
 
-  // Write mode functions
-  const checkWriteAnswer = () => {
-    const currentWord = vocabulary[currentWriteIndex];
-    const isCorrect = writeAnswer.trim().toLowerCase() === currentWord.word.toLowerCase();
-    setIsWriteCorrect(isCorrect);
-    setShowWriteFeedback(true);
 
-    if (isCorrect) {
-      setTimeout(() => {
-        nextWriteQuestion();
-      }, 1500);
-    }
-  };
-
-  const skipWriteQuestion = () => {
-    nextWriteQuestion();
-  };
-
-  const nextWriteQuestion = () => {
-    setWriteAnswer('');
-    setShowWriteFeedback(false);
-    setIsWriteCorrect(false);
-    setCurrentWriteIndex((prev) => 
-      prev < vocabulary.length - 1 ? prev + 1 : 0
-    );
-  };
 
   // Render List View
   const renderListView = () => (
@@ -313,143 +264,9 @@ function VocabularyPage() {
     </>
   );
 
-  // Render Flashcard View
-  const renderFlashcardView = () => {
-    if (vocabulary.length === 0) return null;
-    const currentVocab = vocabulary[currentFlashcardIndex];
 
-    return (
-      <div className={styles.flashcardContainer}>
-        <div>
-          <div
-            className={styles.flashcard}
-            onClick={() => setIsFlipped(!isFlipped)}
-          >
-            <div className={`${styles.flashcardInner} ${isFlipped ? styles.flipped : ''}`}>
-              {/* Front - Word */}
-              <div className={styles.flashcardFront}>
-                <div className={styles.flashcardWord}>{currentVocab.word}</div>
-                {currentVocab.level && <span className={styles.level}>{currentVocab.level}</span>}
-                <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                  Klicken zum Umdrehen
-                </p>
-              </div>
 
-              {/* Back - Translation & Details */}
-              <div className={styles.flashcardBack}>
-                <div className={styles.flashcardTranslation}>{currentVocab.translation}</div>
-                {currentVocab.definition && (
-                  <div className={styles.flashcardDefinition}>{currentVocab.definition}</div>
-                )}
-                {currentVocab.partOfSpeech && (
-                  <div className={styles.partOfSpeech} style={{ marginTop: '1rem' }}>
-                    {currentVocab.partOfSpeech}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
-          <div className={styles.flashcardControls}>
-            <button className={`${styles.flashcardBtn} ${styles.prevBtn}`} onClick={prevFlashcard}>
-              ← Zurück
-            </button>
-            <button className={`${styles.flashcardBtn} ${styles.nextBtn}`} onClick={nextFlashcard}>
-              Weiter →
-            </button>
-          </div>
-
-          <div className={styles.flashcardCounter}>
-            {currentFlashcardIndex + 1} / {vocabulary.length}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render Write View
-  const renderWriteView = () => {
-    if (vocabulary.length === 0) return null;
-    const currentVocab = vocabulary[currentWriteIndex];
-
-    return (
-      <div className={styles.writeContainer}>
-        <div className={styles.writeProgress}>
-          Frage {currentWriteIndex + 1} / {vocabulary.length}
-        </div>
-
-        <div className={styles.writeCard}>
-          <div className={styles.writeQuestion}>
-            Wie lautet das deutsche Wort für:<br />
-            <strong style={{ color: '#64b5f6', fontSize: '1.5rem' }}>
-              {currentVocab.translation}
-            </strong>
-          </div>
-
-          {currentVocab.context && (
-            <div style={{ 
-              color: 'var(--text-secondary)', 
-              fontStyle: 'italic', 
-              marginBottom: '1.5rem',
-              textAlign: 'center'
-            }}>
-              Kontext: &ldquo;{currentVocab.context}&rdquo;
-            </div>
-          )}
-
-          <input
-            type="text"
-            className={`${styles.writeInput} ${
-              showWriteFeedback ? (isWriteCorrect ? styles.correct : styles.incorrect) : ''
-            }`}
-            value={writeAnswer}
-            onChange={(e) => setWriteAnswer(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !showWriteFeedback && checkWriteAnswer()}
-            placeholder="Tippe hier deine Antwort..."
-            disabled={showWriteFeedback}
-            autoFocus
-          />
-
-          {showWriteFeedback && (
-            <div className={`${styles.writeFeedback} ${isWriteCorrect ? styles.correct : styles.incorrect}`}>
-              {isWriteCorrect ? (
-                <>✓ Richtig!</>
-              ) : (
-                <>✗ Falsch! Die richtige Antwort ist: <strong>{currentVocab.word}</strong></>
-              )}
-            </div>
-          )}
-
-          <div className={styles.writeControls}>
-            {!showWriteFeedback ? (
-              <>
-                <button
-                  className={`${styles.writeBtn} ${styles.checkBtn}`}
-                  onClick={checkWriteAnswer}
-                  disabled={!writeAnswer.trim()}
-                >
-                  Überprüfen
-                </button>
-                <button
-                  className={`${styles.writeBtn} ${styles.skipBtn}`}
-                  onClick={skipWriteQuestion}
-                >
-                  Überspringen
-                </button>
-              </>
-            ) : !isWriteCorrect ? (
-              <button
-                className={`${styles.writeBtn} ${styles.nextBtn}`}
-                onClick={nextWriteQuestion}
-              >
-                Weiter →
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const breadcrumbData = generateBreadcrumbStructuredData([
     { name: 'Home', url: '/' },
@@ -480,30 +297,6 @@ function VocabularyPage() {
             </p>
           </div>
 
-          {/* View Tabs */}
-          <div className={styles.viewTabs}>
-            <button
-              className={`${styles.tabButton} ${activeView === 'list' ? styles.active : ''}`}
-              onClick={() => setActiveView('list')}
-            >
-              📋 List
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeView === 'flashcard' ? styles.active : ''}`}
-              onClick={() => setActiveView('flashcard')}
-              disabled={vocabulary.length === 0}
-            >
-              🃏 Flashcard
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeView === 'write' ? styles.active : ''}`}
-              onClick={() => setActiveView('write')}
-              disabled={vocabulary.length === 0}
-            >
-              ✍️ Write
-            </button>
-          </div>
-
           {/* Content */}
           {loading ? (
             <div className={styles.loadingState}>
@@ -519,11 +312,7 @@ function VocabularyPage() {
               </p>
             </div>
           ) : (
-            <>
-              {activeView === 'list' && renderListView()}
-              {activeView === 'flashcard' && renderFlashcardView()}
-              {activeView === 'write' && renderWriteView()}
-            </>
+            renderListView()
           )}
         </div>
       </DashboardLayout>
