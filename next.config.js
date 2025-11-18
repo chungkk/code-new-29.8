@@ -118,7 +118,39 @@ const nextConfig = {
         destination: '/:path+',
         permanent: true,
       },
+      // Redirect old URLs to new ones (if any)
+      {
+        source: '/lessons',
+        destination: '/',
+        permanent: true,
+      },
+      // Redirect www to non-www
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.papageil.net',
+          },
+        ],
+        destination: 'https://papageil.net/:path*',
+        permanent: true,
+      },
     ];
+  },
+
+  // Environment variables for SEO
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://papageil.net',
+    NEXT_PUBLIC_SITE_NAME: 'PapaGeil',
+    NEXT_PUBLIC_DEFAULT_LOCALE: 'de',
+  },
+
+  // Internationalization (i18n) configuration for SEO
+  i18n: {
+    locales: ['de', 'en', 'vi'],
+    defaultLocale: 'de',
+    localeDetection: false,
   },
 }
 

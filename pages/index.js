@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import SEO, { generateBreadcrumbStructuredData } from '../components/SEO';
+import SEO, { generateBreadcrumbStructuredData, generateCourseStructuredData, generateFAQStructuredData } from '../components/SEO';
 import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
 import { useAuth } from '../context/AuthContext';
@@ -150,13 +150,44 @@ const HomePage = () => {
     }
   ];
 
+  // Generate structured data for the homepage
+  const faqData = [
+    {
+      question: "Was ist die Shadowing-Methode?",
+      answer: "Shadowing ist eine Sprach-Lerntechnik, bei der Sie gleichzeitig mit einem Muttersprachler sprechen, um Aussprache, Rhythmus und Intonation zu verbessern."
+    },
+    {
+      question: "Für welche Sprachniveaus ist PapaGeil geeignet?",
+      answer: "PapaGeil bietet Lektionen für alle Niveaus von A1 (Anfänger) bis C2 (Fortgeschrittene) nach dem Gemeinsamen Europäischen Referenzrahmen."
+    },
+    {
+      question: "Kann ich meine eigenen YouTube-Videos verwenden?",
+      answer: "Ja! Sie können jeden YouTube-Link einfügen und wir erstellen automatisch eine interaktive Lektion mit Untertiteln für Sie."
+    },
+    {
+      question: "Wie funktioniert die Diktat-Methode?",
+      answer: "Bei der Diktat-Methode hören Sie sich Audio an und schreiben das Gehörte auf. Dies verbessert Ihr Hörverstehen und Ihre Rechtschreibung."
+    },
+    {
+      question: "Ist PapaGeil kostenlos?",
+      answer: "PapaGeil bietet viele kostenlose Lektionen. Premium-Funktionen wie unbegrenzte selbsterstellte Lektionen sind für registrierte Nutzer verfügbar."
+    }
+  ];
+
+  const combinedStructuredData = [
+    breadcrumbData,
+    generateCourseStructuredData(lessons, difficultyFilter),
+    generateFAQStructuredData(faqData)
+  ];
+
   return (
     <>
       <SEO
-        title="PapaGeil - Lerne Deutsch mit YouTube Videos"
-        description="Verbessere dein Deutsch durch Shadowing und Diktat-Übungen mit authentischen YouTube-Videos. Über 100+ interaktive Lektionen für alle Niveaus A1-C2."
-        keywords="Deutsch lernen, Shadowing, Diktat, YouTube Deutsch lernen, Aussprache üben, Deutsch Übungen, German learning, Deutsch A1-C2, Hörverstehen"
-        structuredData={breadcrumbData}
+        title="PapaGeil - Lerne Deutsch mit YouTube Videos | Shadowing & Diktat"
+        description="Verbessere dein Deutsch durch interaktive Shadowing und Diktat-Übungen mit authentischen YouTube-Videos. ✓ 100+ Lektionen ✓ Alle Niveaus A1-C2 ✓ Kostenlos starten"
+        keywords="Deutsch lernen online, German learning, Shadowing Methode, Diktat Übungen, YouTube Deutsch lernen, Aussprache verbessern, Deutsch Kurs online, A1 A2 B1 B2 C1 C2, Hörverstehen Deutsch, deutsche Sprache, German pronunciation, learn German free"
+        ogImage="/og-image.jpg"
+        structuredData={combinedStructuredData}
       />
 
       <div className="main-container">

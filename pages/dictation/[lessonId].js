@@ -2369,11 +2369,16 @@ const DictationPageContent = () => {
   return (
     <div className={styles.page}>
       <SEO 
-        title={`Diktat: ${lesson.displayTitle || lesson.title}`}
-        description={`Diktat Übung: ${lesson.title}. Verbessere dein Hörverstehen und Schreiben durch Diktat-Übungen.`}
-        keywords={`Diktat, ${lesson.title}, Deutschlernen, Hörverstehen, Schreiben`}
+        title={`${lesson.displayTitle || lesson.title} - Diktat Übung | PapaGeil`}
+        description={`Verbessere dein Deutsch mit Diktat: "${lesson.title}". ✓ Level ${lesson.difficulty || 'A1-C2'} ✓ Hörverstehen trainieren ✓ Rechtschreibung üben ✓ Mit sofortigem Feedback`}
+        keywords={`Diktat ${lesson.title}, Deutsch Diktat üben, ${lesson.difficulty || 'A1-C2'} Deutsch, Hörverstehen Deutsch, Rechtschreibung Deutsch, PapaGeil Diktat, German dictation practice, Deutsch schreiben lernen`}
         ogType="video.other"
-        ogImage={lesson.thumbnail}
+        ogImage={lesson.thumbnail || '/og-image.jpg'}
+        canonicalUrl={`/dictation/${lessonId}`}
+        locale="de_DE"
+        author="PapaGeil"
+        publishedTime={lesson.createdAt}
+        modifiedTime={lesson.updatedAt || lesson.createdAt}
         structuredData={structuredDataArray}
       />
 

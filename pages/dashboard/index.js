@@ -87,9 +87,11 @@ function DashboardIndex() {
   return (
     <>
       <SEO
-        title="Mein Dashboard - PapaGeil"
-        description="Verfolgen Sie Ihren Deutsch-Lernfortschritt, verwalten Sie Ihren persönlichen Wortschatz und überprüfen Sie Ihre abgeschlossenen Lektionen."
-        keywords="Deutsch Dashboard, Lernfortschritt, Wortschatz, Vokabeln speichern, Deutsch Übungsverlauf"
+        title="Mein Dashboard | PapaGeil - Deutsch Lernen"
+        description="Verfolgen Sie Ihren Deutsch-Lernfortschritt in Echtzeit. ✓ Personalisierte Statistiken ✓ Vokabeltrainer ✓ Lernhistorie ✓ Fortschrittsverfolgung für alle Niveaus A1-C2"
+        keywords="PapaGeil Dashboard, Deutsch Lernfortschritt, Vokabeltrainer, Wortschatz verwalten, German learning progress, Deutsch Statistiken"
+        canonicalUrl="/dashboard"
+        locale="de_DE"
         structuredData={breadcrumbData}
         noindex={true}
       />

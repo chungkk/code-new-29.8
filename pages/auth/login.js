@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import SEO from '../../components/SEO';
+import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
@@ -31,13 +31,21 @@ export default function Login() {
     return null;
   }
 
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Anmelden', url: '/auth/login' }
+  ]);
+
   return (
     <>
       <SEO
-        title="Anmelden - PapaGeil"
-        description="Melden Sie sich an, um Ihre Deutsch-Lernreise fortzusetzen. Greifen Sie auf personalisierte Lektionen, Fortschrittsverfolgung und Wortschatz zu."
-        keywords="PapaGeil Login, Anmelden, Deutsch lernen Login"
+        title="Anmelden | PapaGeil - Deutsch Lernen"
+        description="Melden Sie sich bei PapaGeil an, um Ihre Deutsch-Lernreise fortzusetzen. ✓ Personalisierte Lektionen ✓ Fortschrittsverfolgung ✓ Vokabeltrainer ✓ Alle Niveaus A1-C2"
+        keywords="PapaGeil Login, Anmelden, Deutsch lernen Login, German learning account, PapaGeil Konto"
+        canonicalUrl="/auth/login"
+        locale="de_DE"
         noindex={true}
+        structuredData={breadcrumbData}
       />
 
       <div className={styles.authContainer}>

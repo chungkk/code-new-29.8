@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import SEO from '../../components/SEO';
+import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import AuthForm from '../../components/AuthForm';
@@ -30,13 +30,21 @@ export default function Register() {
     return null;
   }
 
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Registrieren', url: '/auth/register' }
+  ]);
+
   return (
     <>
       <SEO
-        title="Registrieren - PapaGeil"
-        description="Erstellen Sie ein kostenloses Konto und starten Sie Ihre Deutsch-Lernreise mit interaktiven Shadowing und Diktat-Übungen."
-        keywords="PapaGeil Registrierung, Konto erstellen, Deutsch lernen kostenlos, Deutsch lernen App"
+        title="Kostenlos Registrieren | PapaGeil - Deutsch Lernen"
+        description="Erstellen Sie Ihr kostenloses PapaGeil-Konto und starten Sie heute mit interaktiven Deutsch-Lektionen. ✓ Shadowing-Methode ✓ Diktat-Übungen ✓ Fortschrittsverfolgung ✓ Alle Niveaus A1-C2"
+        keywords="PapaGeil Registrierung, kostenloses Konto, Deutsch lernen kostenlos, German learning app, Deutsch Kurs anmelden, free German course"
+        canonicalUrl="/auth/register"
+        locale="de_DE"
         noindex={true}
+        structuredData={breadcrumbData}
       />
 
       <div className={styles.authContainer}>

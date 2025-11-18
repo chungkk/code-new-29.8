@@ -1036,11 +1036,16 @@ const ShadowingPageContent = () => {
   return (
     <>
       <SEO
-        title={`${lesson.displayTitle || lesson.title} - PapaGeil Shadowing Übung`}
-        description={`Übe deine deutsche Aussprache mit dieser Shadowing-Lektion: ${lesson.title}. Höre zu und sprich nach, um dein Deutsch zu verbessern.`}
-        keywords={`Shadowing ${lesson.title}, Deutsch Aussprache üben, PapaGeil Shadowing, ${lesson.displayTitle}, Deutsch Hörverstehen`}
-        image={lesson.thumbnail || undefined}
-        type="video.other"
+        title={`${lesson.displayTitle || lesson.title} - Shadowing Übung | PapaGeil`}
+        description={`Verbessere deine deutsche Aussprache mit Shadowing: "${lesson.title}". ✓ Level ${lesson.difficulty || 'A1-C2'} ✓ Interaktive Übung ✓ Mit Untertiteln und IPA-Transkription`}
+        keywords={`Shadowing ${lesson.title}, Deutsch Aussprache üben, ${lesson.difficulty || 'A1-C2'} Deutsch, Shadowing Methode, PapaGeil ${lesson.displayTitle}, Deutsch sprechen lernen, German pronunciation practice, Hörverstehen Deutsch`}
+        ogImage={lesson.thumbnail || '/og-image.jpg'}
+        ogType="video.other"
+        canonicalUrl={`/shadowing/${lessonId}`}
+        locale="de_DE"
+        author="PapaGeil"
+        publishedTime={lesson.createdAt}
+        modifiedTime={lesson.updatedAt || lesson.createdAt}
         structuredData={structuredDataArray}
       />
 
