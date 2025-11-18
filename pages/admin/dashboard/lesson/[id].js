@@ -21,7 +21,6 @@ function LessonFormPage() {
   const [formData, setFormData] = useState({
     id: '',
     title: '',
-    displayTitle: '',
     description: '',
     level: 'A1',
     videoDuration: 0
@@ -57,7 +56,6 @@ function LessonFormPage() {
         setFormData({
           id: lesson.id,
           title: lesson.title,
-          displayTitle: lesson.displayTitle,
           description: lesson.description,
           level: lesson.level || 'A1',
           videoDuration: lesson.videoDuration || 0
@@ -194,7 +192,6 @@ function LessonFormPage() {
     // Validate required fields
     if (!isNewLesson && !formData.id.trim()) newErrors.id = 'ID ist erforderlich';
     if (!formData.title.trim()) newErrors.title = 'Titel ist erforderlich';
-    if (!formData.displayTitle.trim()) newErrors.displayTitle = 'Anzeigetitel ist erforderlich';
     if (!formData.description.trim()) newErrors.description = 'Beschreibung ist erforderlich';
     if (!formData.level) newErrors.level = 'Niveau ist erforderlich';
 
@@ -303,7 +300,6 @@ function LessonFormPage() {
       } else {
         lessonData = {
           title: formData.title,
-          displayTitle: formData.displayTitle,
           description: formData.description,
           level: formData.level,
           videoDuration: formData.videoDuration || undefined
@@ -392,22 +388,6 @@ function LessonFormPage() {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>
-                  Anzeigetitel (Display Title) *
-                </label>
-                <input
-                  type="text"
-                  value={formData.displayTitle}
-                  onChange={(e) => setFormData({ ...formData, displayTitle: e.target.value })}
-                  className={`${styles.input} ${errors.displayTitle ? styles.error : ''}`}
-                  placeholder="Anzeige für Benutzer"
-                />
-                {errors.displayTitle && <span className={styles.errorText}>{errors.displayTitle}</span>}
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
                   Niveau (Level) *
                 </label>
                 <select
@@ -415,27 +395,15 @@ function LessonFormPage() {
                   onChange={(e) => setFormData({ ...formData, level: e.target.value })}
                   className={`${styles.select} ${errors.level ? styles.error : ''}`}
                 >
-                  <option value="A1">A1 - Anfänger</option>
-                  <option value="A2">A2 - Elementar</option>
-                  <option value="B1">B1 - Mittelstufe</option>
-                  <option value="B2">B2 - Oberstufe</option>
-                  <option value="C1">C1 - Fortgeschritten</option>
-                  <option value="C2">C2 - Muttersprachlich</option>
+                  <option value="A1">A1</option>
+                  <option value="A2">A2</option>
+                  <option value="B1">B1</option>
+                  <option value="B2">B2</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
                 </select>
                 {errors.level && <span className={styles.errorText}>{errors.level}</span>}
               </div>
-
-              {!isNewLesson && (
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>ID (nicht änderbar)</label>
-                  <input
-                    type="text"
-                    value={formData.id}
-                    disabled
-                    className={styles.input}
-                  />
-                </div>
-              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -452,32 +420,15 @@ function LessonFormPage() {
               {errors.description && <span className={styles.errorText}>{errors.description}</span>}
             </div>
 
-            {(audioSource === 'youtube' || (!isNewLesson && formData.videoDuration > 0)) && (
+            {!isNewLesson && (
               <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Video-Dauer (MM:SS)
-                </label>
+                <label className={styles.label}>ID (nicht änderbar)</label>
                 <input
                   type="text"
-                  value={formData.videoDuration > 0 ? `${Math.floor(formData.videoDuration / 60)}:${(formData.videoDuration % 60).toString().padStart(2, '0')}` : '0:00'}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const match = value.match(/^(\d+):(\d{0,2})$/);
-                    if (match) {
-                      const minutes = parseInt(match[1]) || 0;
-                      const seconds = parseInt(match[2]) || 0;
-                      setFormData({ ...formData, videoDuration: minutes * 60 + seconds });
-                    }
-                  }}
+                  value={formData.id}
+                  disabled
                   className={styles.input}
-                  placeholder="Automatisch gefüllt beim SRT-Laden"
-                  readOnly={isNewLesson}
                 />
-                {formData.videoDuration > 0 && (
-                  <small className={styles.helperText}>
-                    {formData.videoDuration} Sekunden
-                  </small>
-                )}
               </div>
             )}
           </div>
@@ -486,27 +437,9 @@ function LessonFormPage() {
           {isNewLesson && (
             <>
               <div className={styles.formSection}>
-                <h2 className={styles.sectionTitle}>🎵 Audio-Quelle *</h2>
+                <h2 className={styles.sectionTitle}>🎵 Audio/Video Quelle *</h2>
 
                 <div className={styles.radioGroup}>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      value="file"
-                      checked={audioSource === 'file'}
-                      onChange={(e) => setAudioSource(e.target.value)}
-                    />
-                    Datei hochladen
-                  </label>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      value="url"
-                      checked={audioSource === 'url'}
-                      onChange={(e) => setAudioSource(e.target.value)}
-                    />
-                    URL eingeben
-                  </label>
                   <label className={styles.radioLabel}>
                     <input
                       type="radio"
@@ -516,10 +449,47 @@ function LessonFormPage() {
                     />
                     YouTube Video
                   </label>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      value="file"
+                      checked={audioSource === 'file'}
+                      onChange={(e) => setAudioSource(e.target.value)}
+                    />
+                    Audio-Datei
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      value="url"
+                      checked={audioSource === 'url'}
+                      onChange={(e) => setAudioSource(e.target.value)}
+                    />
+                    Audio-URL
+                  </label>
                 </div>
 
+                {audioSource === 'youtube' && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>YouTube URL *</label>
+                    <input
+                      type="url"
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className={styles.input}
+                    />
+                    {formData.videoDuration > 0 && (
+                      <small className={styles.helperText}>
+                        ⏱️ Dauer: {Math.floor(formData.videoDuration / 60)}:{(formData.videoDuration % 60).toString().padStart(2, '0')}
+                      </small>
+                    )}
+                  </div>
+                )}
+
                 {audioSource === 'file' && (
-                  <div className={styles.fileUpload}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Audio-Datei *</label>
                     <input
                       type="file"
                       accept="audio/*"
@@ -531,23 +501,16 @@ function LessonFormPage() {
                 )}
 
                 {audioSource === 'url' && (
-                  <input
-                    type="url"
-                    value={audioUrl}
-                    onChange={(e) => setAudioUrl(e.target.value)}
-                    placeholder="https://example.com/audio.mp3"
-                    className={styles.input}
-                  />
-                )}
-
-                {audioSource === 'youtube' && (
-                  <input
-                    type="url"
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className={styles.input}
-                  />
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Audio-URL *</label>
+                    <input
+                      type="url"
+                      value={audioUrl}
+                      onChange={(e) => setAudioUrl(e.target.value)}
+                      placeholder="https://example.com/audio.mp3"
+                      className={styles.input}
+                    />
+                  </div>
                 )}
 
                 {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
@@ -583,20 +546,9 @@ function LessonFormPage() {
               )}
 
               <div className={styles.formSection}>
-                <h2 className={styles.sectionTitle}>📝 SRT-Text *</h2>
+                <h2 className={styles.sectionTitle}>📝 Untertitel (SRT) *</h2>
 
                 <div className={styles.srtActions}>
-                  {audioSource !== 'youtube' && (
-                    <button
-                      type="button"
-                      onClick={handleTranscribe}
-                      disabled={transcribing || (!audioFile && !audioUrl.trim())}
-                      className={styles.actionButton}
-                    >
-                      {transcribing ? '⏳ Generiere...' : '🎙️ SRT aus Audio generieren'}
-                    </button>
-                  )}
-
                   {audioSource === 'youtube' && (
                     <button
                       type="button"
@@ -605,6 +557,17 @@ function LessonFormPage() {
                       className={styles.actionButton}
                     >
                       {fetchingYouTubeSRT ? '⏳ Lade...' : '📺 SRT von YouTube laden'}
+                    </button>
+                  )}
+
+                  {audioSource !== 'youtube' && (
+                    <button
+                      type="button"
+                      onClick={handleTranscribe}
+                      disabled={transcribing || (!audioFile && !audioUrl.trim())}
+                      className={styles.actionButton}
+                    >
+                      {transcribing ? '⏳ Generiere...' : '🎙️ SRT aus Audio generieren'}
                     </button>
                   )}
                 </div>
