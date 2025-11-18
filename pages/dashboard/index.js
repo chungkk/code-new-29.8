@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import ProtectedPage from '../../components/ProtectedPage';
@@ -16,7 +16,7 @@ function DashboardIndex() {
   const [progress, setProgress] = useState([]);
   const [allLessons, setAllLessons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeProgressTab, setActiveProgressTab] = useState('inProgress');
+  const [activeProgressTab, setActiveProgressTab] = useState('all');
   const [maxStreak, setMaxStreak] = useState(0);
 
   const loadData = useCallback(async () => {
@@ -26,7 +26,9 @@ function DashboardIndex() {
       // Load progress first
       const progressRes = await fetchWithAuth('/api/progress');
       const progressData = await progressRes.json();
-      setProgress(Array.isArray(progressData) ? progressData : []);
+      const validProgress = Array.isArray(progressData) ? progressData : [];
+      setProgress(validProgress);
+      console.log('📊 Progress loaded:', validProgress.length, 'records');
 
       // Load streak data
       try {
@@ -40,25 +42,36 @@ function DashboardIndex() {
       }
 
       // Load ALL lessons (sorted by order)
-      const lessonsRes = await fetch('/api/lessons');
-      const lessonsData = await lessonsRes.json();
+      try {
+        const lessonsRes = await fetchWithAuth('/api/lessons');
+        console.log('📡 Lessons API response status:', lessonsRes.status);
 
-      // Handle both old array format and new object format
-      const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
+        const lessonsData = await lessonsRes.json();
+        console.log('📦 Lessons raw data:', lessonsData);
 
-      if (lessons && lessons.length > 0) {
-        // Sort by newest first (createdAt descending)
-        const sortedLessons = [...lessons].sort((a, b) => {
-          const dateA = new Date(a.createdAt || 0);
-          const dateB = new Date(b.createdAt || 0);
-          return dateB - dateA; // Newest first
-        });
-        setAllLessons(sortedLessons);
-      } else {
+        // Handle both old array format and new object format
+        const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
+        console.log('📚 Lessons parsed:', lessons.length, 'lessons');
+
+        if (lessons && lessons.length > 0) {
+          // Sort by newest first (createdAt descending)
+          const sortedLessons = [...lessons].sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA; // Newest first
+          });
+          setAllLessons(sortedLessons);
+          console.log('✅ All lessons set:', sortedLessons.length);
+        } else {
+          setAllLessons([]);
+          console.log('⚠️ No lessons found in response');
+        }
+      } catch (lessonError) {
+        console.error('❌ Error loading lessons:', lessonError);
         setAllLessons([]);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -68,7 +81,7 @@ function DashboardIndex() {
     loadData();
   }, [loadData]);
 
-  const calculateProgress = (lessonId) => {
+  const calculateProgress = useCallback((lessonId) => {
     const lessonProgress = progress.filter(p => p.lessonId === lessonId);
     if (lessonProgress.length === 0) return 0;
 
@@ -76,23 +89,54 @@ function DashboardIndex() {
     const maxProgress = Math.max(...lessonProgress.map(p => p.completionPercent || 0));
 
     return Math.min(100, maxProgress);
+  }, [progress]);
+
+  // Get progress details for a lesson (both modes)
+  const getProgressDetails = (lessonId) => {
+    const lessonProgress = progress.filter(p => p.lessonId === lessonId);
+
+    const shadowingProgress = lessonProgress.find(p => p.mode === 'shadowing');
+    const dictationProgress = lessonProgress.find(p => p.mode === 'dictation');
+
+    return {
+      shadowing: shadowingProgress?.completionPercent || 0,
+      dictation: dictationProgress?.completionPercent || 0,
+      shadowingLastAccessed: shadowingProgress?.lastAccessed,
+      dictationLastAccessed: dictationProgress?.lastAccessed,
+      overall: calculateProgress(lessonId)
+    };
   };
 
-  // Filter lessons based on active progress tab
-  const getFilteredLessons = () => {
-    if (activeProgressTab === 'completed') {
-      // Only show lessons with 100% progress
-      return allLessons.filter(lesson => calculateProgress(lesson.id) === 100);
-    } else {
-      // Only show lessons with progress > 0 and < 100 (started but not completed)
-      return allLessons.filter(lesson => {
-        const p = calculateProgress(lesson.id);
-        return p > 0 && p < 100;
-      });
+  // Filter lessons based on active progress tab (memoized for performance)
+  const filteredLessons = useMemo(() => {
+    console.log('🔍 Filtering lessons, tab:', activeProgressTab, 'Total lessons:', allLessons.length, 'Progress records:', progress.length);
+
+    if (allLessons.length === 0) {
+      console.log('⚠️ No lessons available yet');
+      return [];
     }
-  };
 
-  const filteredLessons = getFilteredLessons();
+    if (progress.length === 0) {
+      console.log('⚠️ No progress records yet');
+      return [];
+    }
+
+    const filtered = allLessons.filter(lesson => {
+      const prog = calculateProgress(lesson.id);
+      console.log(`  Checking ${lesson.displayTitle || lesson.title}: ${prog}%`);
+
+      if (activeProgressTab === 'all') {
+        return prog > 0;
+      } else if (activeProgressTab === 'completed') {
+        return prog === 100;
+      } else {
+        return prog > 0 && prog < 100;
+      }
+    });
+
+    console.log('✅ Filtered result:', filtered.length, 'lessons for tab:', activeProgressTab);
+    return filtered;
+  }, [allLessons, progress, activeProgressTab, calculateProgress]);
 
   if (loading) {
     return (
@@ -168,6 +212,13 @@ function DashboardIndex() {
               {/* Progress Tabs */}
               <div className={styles.progressTabs}>
                 <button
+                  className={`${styles.progressTab} ${styles.all} ${activeProgressTab === 'all' ? styles.active : ''}`}
+                  onClick={() => setActiveProgressTab('all')}
+                >
+                  <span className={styles.tabIcon}>📚</span>
+                  All Learned
+                </button>
+                <button
                   className={`${styles.progressTab} ${styles.completed} ${activeProgressTab === 'completed' ? styles.active : ''}`}
                   onClick={() => setActiveProgressTab('completed')}
                 >
@@ -187,7 +238,9 @@ function DashboardIndex() {
               {filteredLessons.length === 0 ? (
                 <div className={styles.emptyLessons}>
                   <p className={styles.emptyText}>
-                    {activeProgressTab === 'completed'
+                    {activeProgressTab === 'all'
+                      ? 'No learned lessons yet. Start learning now!'
+                      : activeProgressTab === 'completed'
                       ? 'No completed lessons yet'
                       : 'No lessons in progress'}
                   </p>
@@ -196,6 +249,7 @@ function DashboardIndex() {
                 <div className={styles.lessonsGrid}>
                   {filteredLessons.map((lesson) => {
                     const progressPercent = calculateProgress(lesson.id);
+                    const progressDetails = getProgressDetails(lesson.id);
                     return (
                       <div key={lesson.id} className={styles.lessonCard}>
                         {/* Status Badge */}
@@ -228,10 +282,10 @@ function DashboardIndex() {
                           </span>
                         </div>
 
-                        {/* Progress Section */}
+                        {/* Progress Section - Detailed */}
                         <div className={styles.progressSection}>
                           <div className={styles.progressInfo}>
-                            <span className={styles.progressLabel}>Fortschritt</span>
+                            <span className={styles.progressLabel}>Overall Progress</span>
                             <span className={styles.progressPercent}>{progressPercent}%</span>
                           </div>
                           <div className={styles.progressBar}>
@@ -239,6 +293,34 @@ function DashboardIndex() {
                               className={styles.progressFill}
                               style={{ width: `${progressPercent}%` }}
                             />
+                          </div>
+
+                          {/* Mode-specific Progress */}
+                          <div className={styles.modeProgress}>
+                            <div className={styles.modeProgressItem}>
+                              <div className={styles.modeProgressHeader}>
+                                <span className={styles.modeLabel}>🎤 Shadowing</span>
+                                <span className={styles.modePercent}>{progressDetails.shadowing}%</span>
+                              </div>
+                              <div className={styles.modeProgressBar}>
+                                <div
+                                  className={`${styles.modeProgressFill} ${styles.shadowingFill}`}
+                                  style={{ width: `${progressDetails.shadowing}%` }}
+                                />
+                              </div>
+                            </div>
+                            <div className={styles.modeProgressItem}>
+                              <div className={styles.modeProgressHeader}>
+                                <span className={styles.modeLabel}>✍️ Dictation</span>
+                                <span className={styles.modePercent}>{progressDetails.dictation}%</span>
+                              </div>
+                              <div className={styles.modeProgressBar}>
+                                <div
+                                  className={`${styles.modeProgressFill} ${styles.dictationFill}`}
+                                  style={{ width: `${progressDetails.dictation}%` }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
 
