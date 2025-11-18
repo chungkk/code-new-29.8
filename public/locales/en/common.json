@@ -49,10 +49,6 @@
     "by": "by PapaGeil"
   },
   "theme": {
-    "sunset": {
-      "label": "Sunset",
-      "description": "Warm orange and pink tones for a cozy feeling."
-    },
     "dark": {
       "label": "Dark Mode",
       "description": "High-contrast dark mode for late study sessions."

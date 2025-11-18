@@ -37,7 +37,7 @@
   border-radius: 16px;
   overflow: hidden;
   background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--border-color);
 }
 
 .videoWrapper {
@@ -102,7 +102,7 @@
 /* Current Sentence Display */
 .currentSentenceDisplay {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
   min-height: 70px;
@@ -111,7 +111,7 @@
 .currentSentenceText {
   font-size: 20px;
   font-weight: 600;
-  color: white;
+  color: var(--text-primary);
   line-height: 1.5;
   text-align: center;
   margin-bottom: 8px;
@@ -162,15 +162,15 @@
 }
 
 .audioButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   border-color: rgba(74, 144, 226, 0.5);
   color: white;
 }
 
 /* Controls Wrapper */
 .controlsWrapper {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -327,7 +327,7 @@
 
 .iconButton:hover,
 .speedButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   border-color: rgba(74, 144, 226, 0.5);
   color: white;
 }
@@ -344,10 +344,11 @@
 .videoSection {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .videoHeader {
@@ -356,18 +357,19 @@
   align-items: center;
   padding: 18px 20px;
   min-height: 56px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-hover);
 }
 
 /* Transcript Section */
 .transcriptSection {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .transcriptHeader {
@@ -376,8 +378,8 @@
   align-items: center;
   padding: 18px 20px;
   min-height: 56px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-hover);
 }
 
 .transcriptTabs {
@@ -409,7 +411,7 @@
 .progressBar {
   width: 120px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -431,7 +433,7 @@
 .transcriptTitle {
   font-size: 16px;
   font-weight: 600;
-  color: white;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -442,7 +444,7 @@
 
 .headerControlButton {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   color: #94a3b8;
   padding: 6px 12px;
   border-radius: 6px;
@@ -456,7 +458,7 @@
 }
 
 .headerControlButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   color: white;
 }
 
@@ -536,7 +538,7 @@
 
 .transcriptActionBtn {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   color: #94a3b8;
   width: 28px;
   height: 28px;
@@ -550,7 +552,7 @@
 }
 
 .transcriptActionBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-color);
   border-color: rgba(74, 144, 226, 0.5);
   color: white;
 }
@@ -558,7 +560,7 @@
 .transcriptText {
   font-size: 15px;
   line-height: 1.6;
-  color: white;
+  color: var(--text-primary);
   font-weight: 500;
   margin-bottom: 6px;
 }

@@ -49,10 +49,6 @@
     "by": "von PapaGeil"
   },
   "theme": {
-    "sunset": {
-      "label": "Sonnenuntergang",
-      "description": "Warme Orange- und Pinknuancen für ein gemütliches Gefühl."
-    },
     "dark": {
       "label": "Nachtmodus",
       "description": "Kontrastreicher Dark Mode für späte Lernsessions."

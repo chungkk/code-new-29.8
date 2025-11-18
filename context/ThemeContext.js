@@ -12,10 +12,6 @@ const ThemeContext = createContext();
 
 export const THEME_OPTIONS = [
   {
-    id: 'sunset',
-    emoji: '🌅'
-  },
-  {
     id: 'dark',
     emoji: '🌙'
   },
@@ -25,7 +21,7 @@ export const THEME_OPTIONS = [
   }
 ];
 
-const DEFAULT_THEME_ID = THEME_OPTIONS[0].id;
+const DEFAULT_THEME_ID = 'light';
 
 const getNextThemeId = (currentId) => {
   const currentIndex = THEME_OPTIONS.findIndex((option) => option.id === currentId);
