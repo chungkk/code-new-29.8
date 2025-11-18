@@ -284,7 +284,7 @@ const DictationPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, lastPauseTime, isTimerRunning]);
+  }, [isPlaying]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
