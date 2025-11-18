@@ -21,6 +21,7 @@ const Header = () => {
   const [currentStreak, setCurrentStreak] = useState(0);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
+  const notificationMenuRef = useRef(null);
   const router = useRouter();
   const { user, logout, userPoints, fetchUserPoints } = useAuth();
   const { theme, toggleTheme, currentTheme } = useTheme();
@@ -140,16 +141,19 @@ const Header = () => {
       if (languageMenuRef.current && !languageMenuRef.current.contains(event.target)) {
         setLanguageMenuOpen(false);
       }
+      if (notificationMenuRef.current && !notificationMenuRef.current.contains(event.target)) {
+        setNotificationDropdownOpen(false);
+      }
     };
 
-    if (userMenuOpen || languageMenuOpen) {
+    if (userMenuOpen || languageMenuOpen || notificationDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [userMenuOpen, languageMenuOpen]);
+  }, [userMenuOpen, languageMenuOpen, notificationDropdownOpen]);
 
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
@@ -254,7 +258,7 @@ const Header = () => {
                 )}
               </div>
 
-              <div className={styles.notificationContainer}>
+              <div className={styles.notificationContainer} ref={notificationMenuRef}>
                 <button
                   className={styles.notificationBtn}
                   onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}

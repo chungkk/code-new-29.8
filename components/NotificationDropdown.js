@@ -8,15 +8,34 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const popupRef = useRef(null);
 
-  const handleClickOutside = (event) => {
-    if (popupRef.current && !popupRef.current.contains(event.target)) {
-      onClose();
-    }
-  };
-
   useEffect(() => {
     fetchNotifications();
-    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Auto mark all as read when opening notification dropdown
+    const autoMarkAllAsRead = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch('/api/notifications/mark-all-read', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          // Update unread count in context/header
+          if (typeof window !== 'undefined' && window.refreshNotificationCount) {
+            window.refreshNotificationCount();
+          }
+        }
+      } catch (error) {
+        console.error('Error auto-marking all as read:', error);
+      }
+    };
+    
+    autoMarkAllAsRead();
 
     // Listen for notification updates
     const handleNotificationUpdate = () => {
@@ -25,7 +44,6 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     window.addEventListener('notificationUpdated', handleNotificationUpdate);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('notificationUpdated', handleNotificationUpdate);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,7 +55,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/notifications', {
+      const response = await fetch('/api/notifications?limit=2', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -94,9 +112,45 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         setNotifications(prevNotifications =>
           prevNotifications.map(notif => ({ ...notif, read: true }))
         );
+        
+        // Update unread count in context/header
+        if (typeof window !== 'undefined' && window.refreshNotificationCount) {
+          window.refreshNotificationCount();
+        }
       }
     } catch (error) {
       console.error('Error marking all as read:', error);
+    }
+  };
+
+  const deleteNotification = async (notificationId, event) => {
+    // Prevent triggering parent onClick
+    event.stopPropagation();
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Remove notification from list
+        setNotifications(prevNotifications =>
+          prevNotifications.filter(notif => notif._id !== notificationId)
+        );
+        
+        // Update unread count in context/header
+        if (typeof window !== 'undefined' && window.refreshNotificationCount) {
+          window.refreshNotificationCount();
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
     }
   };
 
@@ -173,6 +227,14 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                 </span>
               </div>
               {!notification.read && <div className={styles.unreadDot}></div>}
+              <button 
+                className={styles.deleteBtn}
+                onClick={(e) => deleteNotification(notification._id, e)}
+                title={t('notifications.delete') || 'Delete'}
+                aria-label="Delete notification"
+              >
+                ✕
+              </button>
             </div>
           ))
         )}

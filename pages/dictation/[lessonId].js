@@ -1060,22 +1060,28 @@ const DictationPageContent = () => {
   }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex, userSeekTimeout]);
 
   const goToPreviousSentence = useCallback(() => {
-    if (currentSentenceIndex > 0) {
-      const newIndex = currentSentenceIndex - 1;
+    // Find current position in sorted list
+    const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
+    if (currentPositionInSorted > 0) {
+      // Get previous index from sorted list
+      const newIndex = sortedTranscriptIndices[currentPositionInSorted - 1];
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick, sortedTranscriptIndices]);
 
   const goToNextSentence = useCallback(() => {
-    if (currentSentenceIndex < transcriptData.length - 1) {
-      const newIndex = currentSentenceIndex + 1;
+    // Find current position in sorted list
+    const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
+    if (currentPositionInSorted < sortedTranscriptIndices.length - 1) {
+      // Get next index from sorted list
+      const newIndex = sortedTranscriptIndices[currentPositionInSorted + 1];
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
     }
-  }, [currentSentenceIndex, transcriptData, handleSentenceClick]);
+  }, [currentSentenceIndex, transcriptData, handleSentenceClick, sortedTranscriptIndices]);
 
   // Touch swipe handlers
   const handleTouchStart = useCallback((e) => {
@@ -2488,6 +2494,21 @@ const DictationPageContent = () => {
     });
   }, [transcriptData, completedSentences]);
 
+  // Set initial sentence to first incomplete sentence when progress is loaded
+  useEffect(() => {
+    if (progressLoaded && sortedTranscriptIndices.length > 0 && currentSentenceIndex === 0) {
+      // Check if current sentence (0) is already incomplete
+      const isCurrentIncomplete = !completedSentences.includes(currentSentenceIndex);
+      
+      // If current sentence is completed, jump to first incomplete one
+      if (!isCurrentIncomplete && sortedTranscriptIndices[0] !== currentSentenceIndex) {
+        const firstIncompleteSentence = sortedTranscriptIndices[0];
+        console.log('Jumping to first incomplete sentence:', firstIncompleteSentence);
+        setCurrentSentenceIndex(firstIncompleteSentence);
+      }
+    }
+  }, [progressLoaded, sortedTranscriptIndices, completedSentences, currentSentenceIndex]);
+
   if (loading) {
     return (
       <div className={styles.centeredState}>
@@ -2757,7 +2778,7 @@ const DictationPageContent = () => {
                 <button 
                   className={styles.nextButton}
                   onClick={goToNextSentence}
-                  disabled={currentSentenceIndex >= transcriptData.length - 1}
+                  disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
                 >
                   Next
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -2844,7 +2865,7 @@ const DictationPageContent = () => {
           <button 
             className={styles.mobileControlBtn}
             onClick={goToPreviousSentence}
-            disabled={currentSentenceIndex === 0}
+            disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) === 0}
             title="Previous"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2855,7 +2876,7 @@ const DictationPageContent = () => {
           <button 
             className={styles.mobileControlBtn}
             onClick={goToNextSentence}
-            disabled={currentSentenceIndex >= transcriptData.length - 1}
+            disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
             title="Next"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
