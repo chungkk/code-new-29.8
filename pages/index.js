@@ -84,6 +84,11 @@ const HomePage = () => {
   };
 
   const handleModeSelect = (lesson, mode) => {
+    // Increment view count
+    fetch(`/api/lessons/${lesson.id}/view`, {
+      method: 'POST'
+    }).catch(err => console.error('Error incrementing view count:', err));
+    
     // Navigate to the specific lesson and mode
     router.push(`/${mode}/${lesson.id}`);
   };
