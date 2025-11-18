@@ -2394,10 +2394,8 @@ const DictationPageContent = () => {
           <div className={styles.leftSection}>
             {/* Video Header */}
             <div className={styles.videoHeader}>
-              <div className={styles.transcriptTabs}>
-                <div className={`${styles.transcriptTab} ${styles.active}`}>
-                  Video
-                </div>
+              <div className={styles.dictationHeaderTitle}>
+                Video
               </div>
             </div>
 
@@ -2468,33 +2466,33 @@ const DictationPageContent = () => {
 
           {/* Middle Column - Dictation Area */}
           <div className={styles.middleSection}>
-            <div className={styles.dictationContainer}>
-              {/* Dictation Header */}
-              <div className={styles.dictationHeader}>
-                <div className={styles.dictationHeaderTitle}>
-                  {isMobile ? `#${currentSentenceIndex + 1}` : 'Dictation'}
-                </div>
-                {/* Hide Level Selector */}
-                <div className={styles.hideLevelSelector}>
-                  <select
-                    value={hidePercentage}
-                    onChange={(e) => setHidePercentage(Number(e.target.value))}
-                    className={styles.hideLevelDropdown}
-                    title="Wählen Sie den Schwierigkeitsgrad"
-                  >
-                    <option value={30}>Easy (30%)</option>
-                    <option value={60}>Medium (60%)</option>
-                    <option value={100}>Hard (100%)</option>
-                  </select>
-                </div>
-                {!isMobile && (
-                  <div className={styles.sentenceCounter}>
-                    #{currentSentenceIndex + 1} / {transcriptData.length}
-                  </div>
-                )}
+            {/* Dictation Header */}
+            <div className={styles.dictationHeader}>
+              <div className={styles.dictationHeaderTitle}>
+                {isMobile ? `#${currentSentenceIndex + 1}` : 'Dictation'}
               </div>
-              
-                <div
+              {/* Hide Level Selector */}
+              <div className={styles.hideLevelSelector}>
+                <select
+                  value={hidePercentage}
+                  onChange={(e) => setHidePercentage(Number(e.target.value))}
+                  className={styles.hideLevelDropdown}
+                  title="Wählen Sie den Schwierigkeitsgrad"
+                >
+                  <option value={30}>Easy (30%)</option>
+                  <option value={60}>Medium (60%)</option>
+                  <option value={100}>Hard (100%)</option>
+                </select>
+              </div>
+              {!isMobile && (
+                <div className={styles.sentenceCounter}>
+                  #{currentSentenceIndex + 1} / {transcriptData.length}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.dictationContainer}>
+              <div
                   className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
                   dangerouslySetInnerHTML={{ __html: processedText }}
                   onTouchStart={handleTouchStart}
@@ -2569,10 +2567,8 @@ const DictationPageContent = () => {
           {/* Right Column - Transcript List */}
           <div className={styles.rightSection}>
             <div className={styles.transcriptHeader}>
-              <div className={styles.transcriptTabs}>
-                <div className={`${styles.transcriptTab} ${styles.active}`}>
-                  Transcript
-                </div>
+              <div className={styles.dictationHeaderTitle}>
+                Transcript
               </div>
               <div className={styles.transcriptProgress}>
                 <div className={styles.progressBar}>

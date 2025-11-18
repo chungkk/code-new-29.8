@@ -41,6 +41,7 @@
   flex-direction: column;
   height: 550px;
   min-height: 300px;
+  gap: var(--spacing-md);
 }
 
 /* Left Section - Video and Controls */
@@ -48,6 +49,7 @@
   display: flex;
   flex-direction: column;
   height: 550px;
+  gap: var(--spacing-md);
 }
 
 /* Video Wrapper - Main container for entire video column */
@@ -59,20 +61,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  height: 100%;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* Right Section - Transcript List */
 .rightSection {
   position: sticky;
   top: 80px;
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 550px;
+  gap: var(--spacing-md);
 }
 
 /* Breadcrumb */
@@ -187,20 +187,31 @@
   gap: 4px;
 }
 
-/* Video Header */
-.videoHeader {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
+/* Column Headers - Unified styling for all three columns */
+.videoHeader,
+.dictationHeader,
+.transcriptHeader {
+  padding: 12px var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   background: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
+  height: 48px; /* Fixed height for consistency */
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
-.videoHeaderTitle {
-  font-size: 13px;
+.videoHeaderTitle,
+.dictationHeaderTitle {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
 }
 
 /* Video Title Box - Always visible */
@@ -531,17 +542,7 @@
 }
 
 /* Transcript Panel - Right Side */
-.transcriptHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-card);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+/* Transcript Header now uses unified styling above */
 
 .transcriptTabs {
   display: flex;
@@ -573,15 +574,16 @@
 .transcriptProgress {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 120px;
+  gap: 8px;
+  min-width: 100px;
+  flex-shrink: 0;
 }
 
 .progressBar {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -732,19 +734,22 @@
 }
 
 .progressText {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-primary);
-  min-width: 42px;
+  min-width: 38px;
   text-align: right;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
 }
 
 .transcriptSection {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
 }
 
 .transcriptList {
@@ -873,27 +878,12 @@
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
   gap: var(--spacing-sm);
   overflow: hidden;
 }
 
-/* Dictation Header - matching Transcript Header style */
-.dictationHeader {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-.dictationHeaderTitle {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+/* Dictation Header specific styles removed - now using unified .dictationHeader above */
 
 .sentenceCounter {
   font-size: 12px;
@@ -912,9 +902,9 @@
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
   border: 2px solid rgba(102, 126, 234, 0.3);
   color: var(--text-primary);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -922,6 +912,8 @@
   box-shadow:
     0 2px 8px rgba(102, 126, 234, 0.2),
     inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  height: 28px;
+  line-height: 1.2;
 }
 
 .hideLevelDropdown:hover {
