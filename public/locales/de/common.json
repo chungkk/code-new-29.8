@@ -159,5 +159,16 @@
     "generatingSuggestions": "Generiere Vorschläge...",
     "correct": "Richtig! Gut gemacht!",
     "correctWordIs": "Das richtige Wort ist:"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "loading": "Wird geladen...",
+    "noNotifications": "Noch keine Benachrichtigungen",
+    "justNow": "Gerade eben",
+    "minutesAgo": "vor {{count}} Minuten",
+    "hoursAgo": "vor {{count}} Stunden",
+    "daysAgo": "vor {{count}} Tagen",
+    "weeksAgo": "vor {{count}} Wochen"
   }
 }

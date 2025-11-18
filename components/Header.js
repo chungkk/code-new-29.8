@@ -6,7 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNotifications } from '../context/NotificationContext';
 import StreakPopup from './StreakPopup';
+import NotificationDropdown from './NotificationDropdown';
 import styles from '../styles/Header.module.css';
 
 const Header = () => {
@@ -15,6 +17,7 @@ const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [streakPopupOpen, setStreakPopupOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
@@ -22,6 +25,7 @@ const Header = () => {
   const { user, logout, userPoints, fetchUserPoints } = useAuth();
   const { theme, toggleTheme, currentTheme } = useTheme();
   const { currentLanguage, changeLanguage, languages, currentLanguageInfo } = useLanguage();
+  const { unreadCount, fetchUnreadCount } = useNotifications();
 
   // Fetch streak data
   const fetchStreakData = useCallback(async () => {
@@ -250,10 +254,30 @@ const Header = () => {
                 )}
               </div>
 
-              <button className={styles.notificationBtn} title={t('header.notifications')}>
-                <span>🔔</span>
-                <span className={styles.notificationBadge}></span>
-              </button>
+              <div className={styles.notificationContainer}>
+                <button
+                  className={styles.notificationBtn}
+                  onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                  title={t('header.notifications')}
+                  aria-label={t('header.notifications')}
+                  aria-expanded={notificationDropdownOpen}
+                >
+                  <span>🔔</span>
+                  {unreadCount > 0 && (
+                    <span className={styles.notificationBadge}>{unreadCount > 9 ? '9+' : unreadCount}</span>
+                  )}
+                </button>
+
+                {notificationDropdownOpen && (
+                  <NotificationDropdown
+                    isOpen={notificationDropdownOpen}
+                    onClose={() => {
+                      setNotificationDropdownOpen(false);
+                      fetchUnreadCount();
+                    }}
+                  />
+                )}
+              </div>
 
               <div className={styles.userMenuContainer} ref={userMenuRef}>
                 <button

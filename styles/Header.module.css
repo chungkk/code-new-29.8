@@ -320,6 +320,10 @@
   transform: scale(0.95);
 }
 
+.notificationContainer {
+  position: relative;
+}
+
 .notificationBtn {
   background: transparent;
   border: none;
@@ -341,14 +345,33 @@
 
 .notificationBadge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #ef4444;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ff3b3b 0%, #dc2626 100%);
   color: white;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
   border: 2px solid var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 4px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.6), 0 0 0 2px rgba(255, 59, 59, 0.3);
+  animation: notificationPulse 2s ease-in-out infinite;
+}
+
+@keyframes notificationPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.6), 0 0 0 2px rgba(255, 59, 59, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 2px 12px rgba(239, 68, 68, 0.8), 0 0 0 3px rgba(255, 59, 59, 0.5);
+  }
 }
 
 /* User Menu Container */

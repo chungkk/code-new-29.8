@@ -1,6 +1,7 @@
 import connectDB from '../../../lib/mongodb';
 import User from '../../../models/User';
 import { verifyToken } from '../../../lib/jwt';
+import { createCheckInNotification } from '../../../lib/helpers/notifications';
 
 export default async function handler(req, res) {
   try {
@@ -131,6 +132,9 @@ export default async function handler(req, res) {
         const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Monday = 0, Sunday = 6
         user.streak.weeklyProgress[adjustedDay] = true;
         console.log('✓ Check-in marked for day:', adjustedDay);
+
+        // Create check-in success notification (user earned 10 points for daily check-in)
+        createCheckInNotification(user._id.toString(), 10);
 
         // If we've completed the week and it's Sunday, reset for new week
         if (dayOfWeek === 0 && user.streak.weeklyProgress.every(day => day)) {

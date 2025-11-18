@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { LanguageProvider } from '../context/LanguageContext';
+import { NotificationProvider } from '../context/NotificationContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.css';
@@ -33,29 +34,31 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
-            <Head>
-              <title>papageil.net</title>
-              <meta name="description" content="Learn German with Shadowing and Dictation methods" />
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <link rel="icon" href="/favicon.ico" />
-            </Head>
+            <NotificationProvider>
+              <Head>
+                <title>papageil.net</title>
+                <meta name="description" content="Learn German with Shadowing and Dictation methods" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="icon" href="/favicon.ico" />
+              </Head>
 
-            <div className="App">
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </div>
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
+              <div className="App">
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </div>
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+              />
+            </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>

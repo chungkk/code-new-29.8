@@ -159,5 +159,16 @@
     "generatingSuggestions": "Đang tạo gợi ý...",
     "correct": "Chính xác! Làm tốt lắm!",
     "correctWordIs": "Từ đúng là:"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "loading": "Đang tải...",
+    "noNotifications": "Chưa có thông báo nào",
+    "justNow": "Vừa xong",
+    "minutesAgo": "{{count}} phút trước",
+    "hoursAgo": "{{count}} giờ trước",
+    "daysAgo": "{{count}} ngày trước",
+    "weeksAgo": "{{count}} tuần trước"
   }
 }

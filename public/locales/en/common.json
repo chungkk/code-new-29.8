@@ -159,5 +159,16 @@
     "generatingSuggestions": "Generating suggestions...",
     "correct": "Correct! Well done!",
     "correctWordIs": "The correct word is:"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "loading": "Loading...",
+    "noNotifications": "No notifications yet",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hours ago",
+    "daysAgo": "{{count}} days ago",
+    "weeksAgo": "{{count}} weeks ago"
   }
 }

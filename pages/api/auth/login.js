@@ -1,6 +1,7 @@
 import connectDB from '../../../lib/mongodb';
 import User from '../../../models/User';
 import { generateToken } from '../../../lib/jwt';
+import { createWelcomeBackNotification } from '../../../lib/helpers/notifications';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -43,13 +44,16 @@ export default async function handler(req, res) {
         lastLogin.getMonth(),
         lastLogin.getDate()
       );
-      
+
       // If last login was not today, award daily bonus
       if (lastLoginDay.getTime() !== today.getTime()) {
         user.points = (user.points || 0) + 1;
         user.lastLoginDate = now;
         await user.save();
         dailyBonusAwarded = true;
+
+        // Create welcome back notification
+        createWelcomeBackNotification(user._id.toString(), user.name);
       }
     } else {
       // First login ever
