@@ -192,6 +192,7 @@ const ShadowingPageContent = () => {
           return prev + 1;
         });
       }, 1000);
+      return;
     }
 
     // Handle pause: track pause time and set timeout to stop timer after 30s
@@ -213,10 +214,11 @@ const ShadowingPageContent = () => {
           timerIntervalRef.current = null;
         }
       }, 30000); // 30 seconds
+      return;
     }
 
     // Handle resume: clear pause timeout and restart timer if needed
-    if (isPlaying && lastPauseTime && !isTimerRunning && hasStartedTimerRef.current) {
+    if (isPlaying && lastPauseTime !== null && !isTimerRunning && hasStartedTimerRef.current) {
       if (DEBUG_TIMER) console.log('Resuming timer after pause');
       
       // Clear pause timeout
@@ -241,7 +243,7 @@ const ShadowingPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, lastPauseTime, isTimerRunning]);
+  }, [isPlaying]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -399,16 +401,33 @@ const ShadowingPageContent = () => {
 
     const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const videoId = getYouTubeVideoId(lesson.youtubeUrl);
-    if (!videoId) return;
+    if (!videoId) {
+      console.error('Invalid YouTube URL:', lesson.youtubeUrl);
+      return;
+    }
+
+    // Check if player container exists
+    const playerContainer = document.getElementById('youtube-player-shadowing');
+    if (!playerContainer) {
+      console.error('YouTube player container not found');
+      return;
+    }
 
     // Destroy existing player if any
     if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
-      youtubePlayerRef.current.destroy();
+      try {
+        youtubePlayerRef.current.destroy();
+      } catch (e) {
+        console.error('Error destroying previous player:', e);
+      }
       youtubePlayerRef.current = null;
     }
 
-    // Create the player
-    youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+    // Small delay to ensure DOM is ready
+    const initTimer = setTimeout(() => {
+      try {
+        // Create the player
+        youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
       height: '100%',
       width: '100%',
       videoId: videoId,
@@ -456,6 +475,10 @@ const ShadowingPageContent = () => {
         }
       }
     });
+      } catch (error) {
+        console.error('Error initializing YouTube player:', error);
+      }
+    }, 100); // 100ms delay
 
     // Add resize listener to adjust player size when window resizes (desktop only)
     const handleResize = () => {
@@ -478,11 +501,16 @@ const ShadowingPageContent = () => {
     window.addEventListener('orientationchange', handleResize);
 
     return () => {
+      clearTimeout(initTimer);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
 
       if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
-        youtubePlayerRef.current.destroy();
+        try {
+          youtubePlayerRef.current.destroy();
+        } catch (e) {
+          console.error('Error destroying player on cleanup:', e);
+        }
         youtubePlayerRef.current = null;
       }
     };
