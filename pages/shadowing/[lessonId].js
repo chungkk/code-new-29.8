@@ -73,6 +73,7 @@ const ShadowingPageContent = () => {
 
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
+  const playerContainerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
   const { saveProgress } = useProgress(lessonId, 'shadowing');
@@ -399,19 +400,21 @@ const ShadowingPageContent = () => {
       return; // Wait for API to be ready
     }
 
-    const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
-    const videoId = getYouTubeVideoId(lesson.youtubeUrl);
-    if (!videoId) {
-      console.error('Invalid YouTube URL:', lesson.youtubeUrl);
-      return;
-    }
+    const initializeYouTubePlayer = () => {
+      const playerOrigin = typeof window !== 'undefined' ? window.location.origin : undefined;
+      const videoId = getYouTubeVideoId(lesson.youtubeUrl);
+      if (!videoId) {
+        console.error('Invalid YouTube URL:', lesson.youtubeUrl);
+        return;
+      }
 
-    // Check if player container exists
-    const playerContainer = document.getElementById('youtube-player-shadowing');
-    if (!playerContainer) {
-      console.error('YouTube player container not found');
-      return;
-    }
+      // Check if player container exists
+      if (!playerContainerRef.current) {
+        console.error('YouTube player container not found, retrying...');
+        // Retry after a short delay
+        setTimeout(initializeYouTubePlayer, 100);
+        return;
+      }
 
     // Destroy existing player if any
     if (youtubePlayerRef.current && youtubePlayerRef.current.destroy) {
@@ -423,69 +426,66 @@ const ShadowingPageContent = () => {
       youtubePlayerRef.current = null;
     }
 
-    // Small delay to ensure DOM is ready
-    const initTimer = setTimeout(() => {
-      try {
-        // Create the player
-        youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
-      height: '100%',
-      width: '100%',
-      videoId: videoId,
-      playerVars: {
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        origin: playerOrigin,
-        cc_load_policy: 0,
-        rel: 0,
-        showinfo: 0,
-        iv_load_policy: 3,
-        enablejsapi: 1,
-        widget_referrer: playerOrigin,
-        autohide: 1,
-      },
-      events: {
-        onReady: (event) => {
-          setDuration(event.target.getDuration());
-          
-          // Only set size on desktop - mobile uses CSS aspect-ratio
-          const isMobile = window.innerWidth <= 768;
-          if (!isMobile) {
-            const playerElement = document.getElementById('youtube-player-shadowing');
-            if (playerElement && playerElement.parentElement) {
-              // Get parent container (videoPlayerWrapper) dimensions
-              const wrapper = playerElement.parentElement;
-              const rect = wrapper.getBoundingClientRect();
+      // Small delay to ensure DOM is ready
+      const initTimer = setTimeout(() => {
+        try {
+          // Create the player
+          youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          origin: playerOrigin,
+        },
+        events: {
+          onReady: (event) => {
+            setDuration(event.target.getDuration());
 
-              // Set player size to fill the container
-              if (rect.width > 0 && rect.height > 0) {
-                event.target.setSize(rect.width, rect.height);
+            // Only set size on desktop - mobile uses CSS aspect-ratio
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+              if (playerContainerRef.current && playerContainerRef.current.parentElement) {
+                // Get parent container (videoPlayerWrapper) dimensions
+                const wrapper = playerContainerRef.current.parentElement;
+                const rect = wrapper.getBoundingClientRect();
+
+                // Set player size to fill the container
+                if (rect.width > 0 && rect.height > 0) {
+                  event.target.setSize(rect.width, rect.height);
+                }
               }
             }
-          }
-        },
-        onStateChange: (event) => {
-          if (event.data === window.YT.PlayerState.PLAYING) {
-            setIsPlaying(true);
-          } else if (event.data === window.YT.PlayerState.PAUSED) {
-            setIsPlaying(false);
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setIsPlaying(false);
+            }
           }
         }
-      }
-    });
-      } catch (error) {
-        console.error('Error initializing YouTube player:', error);
-      }
-    }, 100); // 100ms delay
+      });
+        } catch (error) {
+          console.error('Error initializing YouTube player:', error);
+        }
+      }, 100); // 100ms delay
+    };
+
+    // Start initialization
+    initializeYouTubePlayer();
 
     // Add resize listener to adjust player size when window resizes (desktop only)
     const handleResize = () => {
       const isMobile = window.innerWidth <= 768;
       if (!isMobile && youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
-        const playerElement = document.getElementById('youtube-player-shadowing');
-        if (playerElement && playerElement.parentElement) {
+        if (playerContainerRef.current && playerContainerRef.current.parentElement) {
           const wrapper = playerElement.parentElement;
           const rect = wrapper.getBoundingClientRect();
 
@@ -1289,11 +1289,11 @@ const ShadowingPageContent = () => {
                    </div>
                    {/* Video Player */}
                    <div className={styles.videoContainer}>
-                     {isYouTube ? (
-                       <div className={styles.videoWrapper}>
-                         <div id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
-                         <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
-                       </div>
+                      {isYouTube ? (
+                        <div className={styles.videoWrapper}>
+                          <div ref={playerContainerRef} id="youtube-player-shadowing" style={{ width: '100%', height: '100%' }}></div>
+                          <div className={styles.videoOverlay} onClick={() => transcriptData[currentSentenceIndex] && handleSentenceClick(transcriptData[currentSentenceIndex].start, transcriptData[currentSentenceIndex].end)}></div>
+                        </div>
                      ) : (
                        <div className={styles.videoPlaceholder}>
                          <svg viewBox="0 0 24 24" fill="currentColor">
