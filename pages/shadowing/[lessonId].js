@@ -74,6 +74,7 @@ const ShadowingPageContent = () => {
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const playerContainerRef = useRef(null);
+  const initTimerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
   const { saveProgress } = useProgress(lessonId, 'shadowing');
@@ -427,7 +428,7 @@ const ShadowingPageContent = () => {
     }
 
       // Small delay to ensure DOM is ready
-      const initTimer = setTimeout(() => {
+      initTimerRef.current = setTimeout(() => {
         try {
           // Create the player
           youtubePlayerRef.current = new window.YT.Player('youtube-player-shadowing', {
@@ -501,7 +502,10 @@ const ShadowingPageContent = () => {
     window.addEventListener('orientationchange', handleResize);
 
     return () => {
-      clearTimeout(initTimer);
+      if (initTimerRef.current) {
+        clearTimeout(initTimerRef.current);
+        initTimerRef.current = null;
+      }
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
 
@@ -907,21 +911,53 @@ const ShadowingPageContent = () => {
     const cleanedWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
     if (!cleanedWord) return;
 
-    // Speak the word
+    // Speak the word (always, for both guests and users)
     speakText(cleanedWord);
+
+    // Only show translation popup/tooltip for logged-in users
+    if (!user) {
+      return;
+    }
 
     const isMobileView = window.innerWidth <= 768;
     const element = event.target;
 
-    // Calculate position
-    const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
+    if (isMobileView) {
+      // Mobile: show simple tooltip with translation only
+      const rect = element.getBoundingClientRect();
+      const tooltipTop = rect.top - 10;
+      const tooltipLeft = rect.left + rect.width / 2;
 
-    // Store element reference for scroll updates
-    setClickedWordElement(element);
-    setSelectedWord(cleanedWord);
-    setPopupPosition({ top, left });
-    setPopupArrowPosition(arrowPos);
-    setShowVocabPopup(true);
+      setTooltipWord(cleanedWord);
+      setTooltipPosition({ top: tooltipTop, left: tooltipLeft });
+      setShowTooltip(true);
+
+      // Fetch translation
+      let translation = translationCache.get(cleanedWord, 'de', 'vi');
+      if (!translation) {
+        try {
+          const response = await fetch(`/api/translate?text=${encodeURIComponent(cleanedWord)}&sourceLang=de&targetLang=vi`);
+          if (response.ok) {
+            const data = await response.json();
+            translation = data.translation;
+            translationCache.set(cleanedWord, translation, 'de', 'vi');
+          }
+        } catch (error) {
+          console.error('Translation error:', error);
+          translation = 'Übersetzung nicht verfügbar';
+        }
+      }
+      setTooltipTranslation(translation || 'Übersetzung nicht verfügbar');
+    } else {
+      // Desktop: show full popup
+      const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
+
+      setClickedWordElement(element);
+      setSelectedWord(cleanedWord);
+      setPopupPosition({ top, left });
+      setPopupArrowPosition(arrowPos);
+      setShowVocabPopup(true);
+    }
   }, [isYouTube, user, calculatePopupPosition]);
 
   // Save vocabulary to database
@@ -1425,7 +1461,24 @@ const ShadowingPageContent = () => {
                        </div>
 
                        <div className={styles.transcriptText}>
-                         {segment.text}
+                         {segment.text.split(/\s+/).map((word, idx) => {
+                           const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+                           if (cleanWord.length > 0) {
+                             return (
+                               <span
+                                 key={idx}
+                                 className={styles.word}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleWordClickForPopup(word, e);
+                                 }}
+                               >
+                                 {word}{' '}
+                               </span>
+                             );
+                           }
+                           return <span key={idx}>{word} </span>;
+                         })}
                        </div>
 
                        {showIPA && segment.ipa && (
@@ -1459,7 +1512,7 @@ const ShadowingPageContent = () => {
            />
          </div> */}
 
-         {/* Dictionary Popup (both mobile and desktop) */}
+         {/* Dictionary Popup (desktop only) */}
          {showVocabPopup && (
            <DictionaryPopup
              word={selectedWord}
@@ -1471,6 +1524,15 @@ const ShadowingPageContent = () => {
                setShowVocabPopup(false);
                setClickedWordElement(null);
              }}
+           />
+         )}
+
+         {/* Word Tooltip (mobile only - simple translation) */}
+         {showTooltip && (
+           <WordTooltip
+             translation={tooltipTranslation}
+             position={tooltipPosition}
+             onClose={() => setShowTooltip(false)}
            />
          )}
        </div>
