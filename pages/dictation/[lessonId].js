@@ -630,7 +630,9 @@ const DictationPageContent = () => {
 
   // Load progress from SWR hook
   useEffect(() => {
-    if (loadedProgress && Object.keys(loadedProgress).length > 0) {
+    // Wait until loadedProgress is actually loaded (not undefined)
+    // It can be null or empty object for new users, that's ok
+    if (loadedProgress !== undefined) {
       const loadedSentences = loadedProgress.completedSentences || [];
       const loadedWords = loadedProgress.completedWords || {};
 
@@ -654,6 +656,9 @@ const DictationPageContent = () => {
           completedWords: normalizedWords
         });
       }
+      
+      // Only set progressLoaded to true after we've processed the data
+      setProgressLoaded(true);
     }
 
     if (loadedStudyTime !== undefined) {
@@ -661,8 +666,6 @@ const DictationPageContent = () => {
       setStudyTime(validatedLoadedTime);
       if (DEBUG_TIMER) console.log('Loaded study time from SWR:', validatedLoadedTime);
     }
-
-    setProgressLoaded(true);
   }, [loadedProgress, loadedStudyTime]);
 
 
@@ -990,7 +993,7 @@ const DictationPageContent = () => {
   const sortedTranscriptIndices = useMemo(() => {
     if (!transcriptData || transcriptData.length === 0) return [];
 
-    return [...Array(transcriptData.length).keys()].sort((a, b) => {
+    const sorted = [...Array(transcriptData.length).keys()].sort((a, b) => {
       const aCompleted = completedSentences.includes(a);
       const bCompleted = completedSentences.includes(b);
 
@@ -1001,6 +1004,15 @@ const DictationPageContent = () => {
       // If both have same completion status, maintain original order
       return a - b;
     });
+    
+    console.log('🔢 Sorted transcript indices:', {
+      total: sorted.length,
+      completed: completedSentences.length,
+      firstFew: sorted.slice(0, 10),
+      completedList: completedSentences
+    });
+    
+    return sorted;
   }, [transcriptData, completedSentences]);
 
   const goToPreviousSentence = useCallback(() => {
@@ -1129,6 +1141,14 @@ const DictationPageContent = () => {
       
       if (!response.ok) throw new Error(`Không thể tải file JSON tại: ${jsonPath}`);
       const data = await response.json();
+      
+      console.log('📝 Transcript loaded:', {
+        path: jsonPath,
+        totalSentences: data.length,
+        firstSentence: data[0]?.text?.substring(0, 50) + '...',
+        lastSentence: data[data.length - 1]?.text?.substring(0, 50) + '...'
+      });
+      
       setTranscriptData(data);
     } catch (error) {
       if (error.name === 'AbortError') {
@@ -2452,7 +2472,15 @@ const DictationPageContent = () => {
       // Always jump to first incomplete sentence in sorted list
       const firstIncompleteSentence = sortedTranscriptIndices[0];
       
-      console.log('Jumping to first incomplete sentence:', firstIncompleteSentence);
+      console.log('🎯 Jump Logic Debug:', {
+        totalSentences: transcriptData.length,
+        sortedIndicesLength: sortedTranscriptIndices.length,
+        completedSentences: completedSentences,
+        firstIncompleteSentence: firstIncompleteSentence,
+        isFirstCompleted: completedSentences.includes(firstIncompleteSentence),
+        sortedIndices: sortedTranscriptIndices.slice(0, 10) // Show first 10
+      });
+      
       setCurrentSentenceIndex(firstIncompleteSentence);
       
       // Also seek video to that sentence's start time
@@ -2681,75 +2709,181 @@ const DictationPageContent = () => {
             </div>
 
             <div className={styles.dictationContainer}>
-              <div
-                  className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
-                  dangerouslySetInnerHTML={{ __html: processedText }}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                />
-
-              <div className={styles.dictationActions}>
-                {/* Desktop: Show both buttons side by side */}
-                <button
-                  className={styles.showAllWordsButton}
-                  onClick={() => {
-                    // Reveal all words by batch updating state
-                    const allInputs = document.querySelectorAll('.word-input');
-                    const wordsToComplete = {};
-
-                    allInputs.forEach((input) => {
-                      const wordIndexMatch = input.id.match(/word-(\d+)/);
-                      if (wordIndexMatch) {
-                        const wordIndex = parseInt(wordIndexMatch[1]);
-                        const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-                        wordsToComplete[wordIndex] = correctWord;
-                        // Save each word to vocabulary
-                        saveWord(correctWord);
+              {/* Mobile: Horizontal Scrollable Slides */}
+              {isMobile ? (
+                <div className={styles.dictationSlidesWrapper}>
+                  <div 
+                    className={styles.dictationSlides}
+                    ref={(el) => {
+                      if (el && transcriptData.length > 0) {
+                        const currentSlide = el.children[sortedTranscriptIndices.indexOf(currentSentenceIndex)];
+                        if (currentSlide) {
+                          currentSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
                       }
-                    });
+                    }}
+                  >
+                    {sortedTranscriptIndices.map((originalIndex) => {
+                      const sentence = transcriptData[originalIndex];
+                      const isCompleted = completedSentences.includes(originalIndex);
+                      const sentenceWordsCompleted = completedWords[originalIndex] || {};
+                      const isActive = originalIndex === currentSentenceIndex;
+                      
+                      // Generate processed text for this sentence
+                      const sentenceProcessedText = processLevelUp(
+                        sentence.text,
+                        isCompleted,
+                        sentenceWordsCompleted,
+                        hidePercentage
+                      );
 
-                    // Batch update all words at once
-                    setCompletedWords(prevWords => {
-                      const updatedWords = { ...prevWords };
+                      return (
+                        <div
+                          key={originalIndex}
+                          className={`${styles.dictationSlide} ${isActive ? styles.dictationSlideActive : ''}`}
+                          onClick={() => {
+                            if (!isActive) {
+                              setCurrentSentenceIndex(originalIndex);
+                              handleSentenceClick(sentence.start, sentence.end);
+                            }
+                          }}
+                        >
+                          {isCompleted && (
+                            <div className={styles.slideHeader}>
+                              <span className={styles.slideCompleted}>✓</span>
+                            </div>
+                          )}
+                          <div
+                            className={`${styles.dictationInputArea} ${swipeDirection && isActive ? styles[`swipe-${swipeDirection}`] : ''}`}
+                            dangerouslySetInnerHTML={{ __html: sentenceProcessedText }}
+                            onTouchStart={isActive ? handleTouchStart : undefined}
+                            onTouchMove={isActive ? handleTouchMove : undefined}
+                            onTouchEnd={isActive ? handleTouchEnd : undefined}
+                          />
+                          {isActive && (
+                            <div className={styles.dictationActions}>
+                              <button
+                                className={styles.showAllWordsButton}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Reveal all words for current sentence
+                                  const slideElement = e.currentTarget.closest(`.${styles.dictationSlide}`);
+                                  const allInputs = slideElement.querySelectorAll('.word-input');
+                                  const wordsToComplete = {};
 
-                      if (!updatedWords[currentSentenceIndex]) {
-                        updatedWords[currentSentenceIndex] = {};
-                      }
+                                  allInputs.forEach((input) => {
+                                    const wordIndexMatch = input.id.match(/word-(\d+)/);
+                                    if (wordIndexMatch) {
+                                      const wordIndex = parseInt(wordIndexMatch[1]);
+                                      const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                                      wordsToComplete[wordIndex] = correctWord;
+                                      saveWord(correctWord);
+                                    }
+                                  });
 
-                      // Merge all completed words
-                      updatedWords[currentSentenceIndex] = {
-                        ...updatedWords[currentSentenceIndex],
-                        ...wordsToComplete
-                      };
+                                  setCompletedWords(prevWords => {
+                                    const updatedWords = { ...prevWords };
+                                    if (!updatedWords[currentSentenceIndex]) {
+                                      updatedWords[currentSentenceIndex] = {};
+                                    }
+                                    updatedWords[currentSentenceIndex] = {
+                                      ...updatedWords[currentSentenceIndex],
+                                      ...wordsToComplete
+                                    };
+                                    saveProgress(completedSentences, updatedWords);
+                                    return updatedWords;
+                                  });
 
-                      // Save to database with updated data
-                      saveProgress(completedSentences, updatedWords);
+                                  setTimeout(() => {
+                                    checkSentenceCompletion();
+                                  }, 300);
+                                }}
+                              >
+                                Show all
+                              </button>
+                              
+                              <button 
+                                className={styles.nextButton}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  goToNextSentence();
+                                }}
+                                disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
+                              >
+                                Next
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* Desktop: Single Sentence View */
+                <>
+                  <div
+                    className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
+                    dangerouslySetInnerHTML={{ __html: processedText }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                  />
 
-                      return updatedWords;
-                    });
+                  <div className={styles.dictationActions}>
+                    <button
+                      className={styles.showAllWordsButton}
+                      onClick={() => {
+                        const allInputs = document.querySelectorAll('.word-input');
+                        const wordsToComplete = {};
 
-                    // Check sentence completion after revealing all words
-                    // This will trigger streak logic if sentence is completed
-                    setTimeout(() => {
-                      checkSentenceCompletion();
-                    }, 300);
-                  }}
-                >
-                  Show all words
-                </button>
-                
-                <button 
-                  className={styles.nextButton}
-                  onClick={goToNextSentence}
-                  disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
-                >
-                  Next
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                  </svg>
-                </button>
-              </div>
+                        allInputs.forEach((input) => {
+                          const wordIndexMatch = input.id.match(/word-(\d+)/);
+                          if (wordIndexMatch) {
+                            const wordIndex = parseInt(wordIndexMatch[1]);
+                            const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                            wordsToComplete[wordIndex] = correctWord;
+                            saveWord(correctWord);
+                          }
+                        });
+
+                        setCompletedWords(prevWords => {
+                          const updatedWords = { ...prevWords };
+                          if (!updatedWords[currentSentenceIndex]) {
+                            updatedWords[currentSentenceIndex] = {};
+                          }
+                          updatedWords[currentSentenceIndex] = {
+                            ...updatedWords[currentSentenceIndex],
+                            ...wordsToComplete
+                          };
+                          saveProgress(completedSentences, updatedWords);
+                          return updatedWords;
+                        });
+
+                        setTimeout(() => {
+                          checkSentenceCompletion();
+                        }, 300);
+                      }}
+                    >
+                      Show all words
+                    </button>
+                    
+                    <button 
+                      className={styles.nextButton}
+                      onClick={goToNextSentence}
+                      disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
+                    >
+                      Next
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
