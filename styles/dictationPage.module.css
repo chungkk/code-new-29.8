@@ -777,6 +777,9 @@
   background: var(--bg-secondary);
   border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
+  scroll-behavior: smooth;
+  scroll-padding-top: 20px;
+  scroll-padding-bottom: 20px;
 }
 
 .transcriptList {
@@ -803,6 +806,8 @@
 .transcriptItem.active {
   border-color: var(--accent-blue);
   background: rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  transform: scale(1.01);
 }
 
 .transcriptItemNumber {
@@ -963,6 +968,162 @@
   background: var(--bg-card);
   color: var(--text-primary);
   padding: 8px;
+}
+
+/* Auto-Jump Toggle Switch - iOS Style Playful Design */
+.autoJumpToggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+  padding: 0;
+  flex-shrink: 0;
+  border: none;
+  overflow: visible;
+}
+
+/* Track (Background) - ON State */
+.autoJumpToggle[data-active="true"] {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow:
+    0 2px 8px rgba(16, 185, 129, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.autoJumpToggle[data-active="true"]:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(16, 185, 129, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Track (Background) - OFF State */
+.autoJumpToggle[data-active="false"] {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  box-shadow:
+    0 2px 8px rgba(100, 116, 139, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.autoJumpToggle[data-active="false"]:hover {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(100, 116, 139, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Sliding Ball */
+.autoJumpToggle::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+/* Ball moves to right when ON */
+.autoJumpToggle[data-active="true"]::before {
+  left: 26px;
+  background: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%);
+  box-shadow:
+    0 3px 8px rgba(16, 185, 129, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+/* Ball stays left when OFF */
+.autoJumpToggle[data-active="false"]::before {
+  left: 2px;
+}
+
+/* Icon container - positioned inside the ball */
+.autoJumpToggle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Hide the SVG - we'll use emoji/text instead */
+.autoJumpToggle svg {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 2;
+  stroke-width: 2.5;
+}
+
+/* Icon positioning - ON state (ball on right) */
+.autoJumpToggle[data-active="true"] svg {
+  left: 33px;
+  transform: translateY(-50%);
+  color: #10b981;
+  filter: drop-shadow(0 1px 2px rgba(16, 185, 129, 0.3));
+  animation: iconBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Icon positioning - OFF state (ball on left) */
+.autoJumpToggle[data-active="false"] svg {
+  left: 9px;
+  transform: translateY(-50%);
+  color: #64748b;
+  filter: drop-shadow(0 1px 2px rgba(100, 116, 139, 0.2));
+  animation: iconBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconBounceIn {
+  0% {
+    transform: translateY(-50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Active/Click effect */
+.autoJumpToggle:active {
+  transform: scale(0.95);
+}
+
+.autoJumpToggle:active::before {
+  width: 28px;
+}
+
+/* Hover lift effect */
+.autoJumpToggle:hover::before {
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .dictationInputArea {
@@ -1906,13 +2067,46 @@
     font-size: 11px;
     padding: 4px 8px;
     border-radius: 6px;
-    position: absolute;
-    right: 12px;
     background: rgba(102, 126, 234, 0.2);
     backdrop-filter: blur(10px) saturate(180%);
     -webkit-backdrop-filter: blur(10px) saturate(180%);
     border: 1px solid rgba(102, 126, 234, 0.4);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Mobile auto-jump toggle - compact size */
+  .autoJumpToggle {
+    width: 44px !important;
+    height: 24px !important;
+    border-radius: 16px !important;
+  }
+
+  .autoJumpToggle::before {
+    width: 20px !important;
+    height: 20px !important;
+    top: 2px !important;
+    left: 2px !important;
+  }
+
+  .autoJumpToggle[data-active="true"]::before {
+    left: 22px !important;
+  }
+
+  .autoJumpToggle[data-active="false"]::before {
+    left: 2px !important;
+  }
+
+  .autoJumpToggle svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .autoJumpToggle[data-active="true"] svg {
+    left: 28px !important;
+  }
+
+  .autoJumpToggle[data-active="false"] svg {
+    left: 8px !important;
   }
 
   /* Hide video title on mobile to save space */
