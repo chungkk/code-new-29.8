@@ -1,4 +1,4 @@
-import { requireAuth } from '../../lib/authMiddleware';
+import { optionalAuth } from '../../lib/authMiddleware';
 import { UserProgress } from '../../lib/models/UserProgress';
 import connectDB from '../../lib/mongodb';
 
@@ -7,6 +7,14 @@ async function handler(req, res) {
   
   if (req.method === 'POST') {
     try {
+      // Guest users cannot save progress
+      if (!req.user) {
+        return res.status(401).json({ 
+          message: 'Vui lòng đăng nhập để lưu tiến trình',
+          requiresAuth: true 
+        });
+      }
+
       const { lessonId, mode, progress, studyTime } = req.body;
 
       // Find existing progress or create new one
@@ -50,6 +58,15 @@ async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      // Guest users get empty progress
+      if (!req.user) {
+        return res.status(200).json({ 
+          progress: {}, 
+          studyTime: 0,
+          isGuest: true 
+        });
+      }
+
       const { lessonId, mode } = req.query;
 
       if (lessonId && mode) {
@@ -70,4 +87,4 @@ async function handler(req, res) {
   return res.status(405).json({ message: 'Method not allowed' });
 }
 
-export default requireAuth(handler);
+export default optionalAuth(handler);

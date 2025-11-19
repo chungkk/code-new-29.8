@@ -4,18 +4,23 @@ import SEO, { generateBreadcrumbStructuredData, generateCourseStructuredData, ge
 import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
 import { useAuth } from '../context/AuthContext';
+import { useLessons, prefetchLessons } from '../lib/hooks/useLessons';
 
 const HomePage = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [lessons, setLessons] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const itemsPerPage = 15;
   const router = useRouter();
   const { user } = useAuth();
+
+  // Use SWR for data fetching with automatic caching
+  const { lessons, totalPages, isLoading: loading } = useLessons({
+    page: currentPage,
+    limit: itemsPerPage,
+    difficulty: difficultyFilter
+  });
 
   // Self-create lesson states
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -32,39 +37,21 @@ const HomePage = () => {
     }
   }, [user]);
 
-  const fetchLessons = useCallback(async (page = 1, difficulty = difficultyFilter) => {
-    try {
-      setLoading(true);
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: itemsPerPage.toString()
-      });
-
-      if (difficulty && difficulty !== 'all') {
-        queryParams.set('difficulty', difficulty);
-      }
-
-      const res = await fetch(`/api/lessons?${queryParams.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setLessons(data.lessons || []);
-        setTotalPages(data.totalPages || 1);
-        // No need to sort - backend already sorted by createdAt descending
-      }
-    } catch (error) {
-      console.error('Error loading lessons:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [difficultyFilter, itemsPerPage]);
-
-  useEffect(() => {
-    fetchLessons(currentPage, difficultyFilter);
-  }, [currentPage, difficultyFilter, fetchLessons]);
-
+  // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [difficultyFilter]);
+
+  // Prefetch next page for smoother pagination
+  useEffect(() => {
+    if (currentPage < totalPages) {
+      prefetchLessons({
+        page: currentPage + 1,
+        limit: itemsPerPage,
+        difficulty: difficultyFilter
+      });
+    }
+  }, [currentPage, totalPages, difficultyFilter]);
 
   const nextPage = () => {
     if (currentPage < totalPages) {

@@ -662,10 +662,10 @@
 
   /* Fix YouTube video to fill container on mobile */
   .videoWrapper {
-    padding-top: 0 !important;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
     position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
   }
 
   /* Ensure YouTube iframe fills container on mobile */

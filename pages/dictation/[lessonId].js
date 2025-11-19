@@ -9,6 +9,8 @@ import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
 import StreakNotification from '../../components/StreakNotification';
+import { useLessonData } from '../../lib/hooks/useLessonData';
+import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -32,9 +34,10 @@ const DictationPageContent = () => {
   const [isUserSeeking, setIsUserSeeking] = useState(false);
   const [userSeekTimeout, setUserSeekTimeout] = useState(null);
   const [isTextHidden, setIsTextHidden] = useState(true);
-  const [lesson, setLesson] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [hidePercentage, setHidePercentage] = useState(30); // 30%, 60%, or 100% - default to Easy mode
+
+  // Use SWR hook for combined lesson + progress data
+  const { lesson, progress: loadedProgress, studyTime: loadedStudyTime, isLoading: loading } = useLessonData(lessonId, 'dictation');
   
   // Dictation specific states (from ckk)
   const [savedWords, setSavedWords] = useState([]);
@@ -486,40 +489,13 @@ const DictationPageContent = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Load YouTube iframe API script
+  // Use centralized YouTube API manager
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Check if API is already loaded
-    if (window.YT && window.YT.Player) {
-      setIsYouTubeAPIReady(true);
-      return;
-    }
-
-    // Check if script is already being loaded
-    if (window.YT) {
-      // API is loading, wait for it
-      const checkInterval = setInterval(() => {
-        if (window.YT && window.YT.Player) {
-          setIsYouTubeAPIReady(true);
-          clearInterval(checkInterval);
-        }
-      }, 100);
-      return () => clearInterval(checkInterval);
-    }
-
-    // Load the YouTube iframe API script
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    tag.async = true;
-
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    // Set up the callback for when API is ready
-    window.onYouTubeIframeAPIReady = () => {
-      setIsYouTubeAPIReady(true);
-    };
+    youtubeAPI.waitForAPI()
+      .then(() => setIsYouTubeAPIReady(true))
+      .catch(err => console.error('YouTube API error:', err));
   }, []);
 
   // Set isYouTube flag
@@ -583,15 +559,20 @@ const DictationPageContent = () => {
         events: {
           onReady: (event) => {
             setDuration(event.target.getDuration());
-            const playerElement = document.getElementById('youtube-player');
-            if (playerElement && playerElement.parentElement) {
-              // Get parent container (videoPlayerWrapper) dimensions
-              const wrapper = playerElement.parentElement;
-              const rect = wrapper.getBoundingClientRect();
+            
+            // Only set size on desktop - mobile uses CSS aspect-ratio or height
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+              const playerElement = document.getElementById('youtube-player');
+              if (playerElement && playerElement.parentElement) {
+                // Get parent container (videoPlayerWrapper) dimensions
+                const wrapper = playerElement.parentElement;
+                const rect = wrapper.getBoundingClientRect();
 
-              // Set player size to fill the container
-              if (rect.width > 0 && rect.height > 0) {
-                event.target.setSize(rect.width, rect.height);
+                // Set player size to fill the container
+                if (rect.width > 0 && rect.height > 0) {
+                  event.target.setSize(rect.width, rect.height);
+                }
               }
             }
           },
@@ -609,9 +590,10 @@ const DictationPageContent = () => {
     // Start initialization
     initializePlayer();
 
-    // Add resize listener to adjust player size when window resizes
+    // Add resize listener to adjust player size when window resizes (desktop only)
     const handleResize = () => {
-      if (youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
+      const isMobile = window.innerWidth <= 768;
+      if (!isMobile && youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
         const playerElement = document.getElementById('youtube-player');
         if (playerElement && playerElement.parentElement) {
           const wrapper = playerElement.parentElement;
@@ -639,133 +621,49 @@ const DictationPageContent = () => {
     };
   }, [isYouTube, isYouTubeAPIReady, lesson]);
 
-  // Fetch lesson data from API
+  // Load transcript when lesson is ready (from SWR)
   useEffect(() => {
-    const fetchLesson = async () => {
-      if (!lessonId) return;
-      
-      try {
-        setLoading(true);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-        
-        const res = await fetch(`/api/lessons/${lessonId}`, {
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!res.ok) {
-          throw new Error('Lesson not found');
-        }
-        
-        const data = await res.json();
-        setLesson(data);
-        console.log('Lesson loaded:', data);
-        
-        if (data.json) {
-          loadTranscript(data.json);
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Request timeout loading lesson');
-        } else {
-          console.error('Error loading lesson:', error);
-        }
-        setLesson(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchLesson();
-  }, [lessonId]);
+    if (lesson && lesson.json) {
+      loadTranscript(lesson.json);
+    }
+  }, [lesson]);
 
-  // Load progress from database
+  // Load progress from SWR hook
   useEffect(() => {
-    const loadProgress = async () => {
-      if (!lessonId) {
-        setProgressLoaded(true);
-        return;
-      }
-      
-      // Wait for user to load before trying to get progress
-      if (!user) {
-        return; // Don't set progressLoaded yet, wait for user
-      }
-      
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setProgressLoaded(true);
-          return;
-        }
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
-        
-        const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=dictation`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          signal: controller.signal
+    if (loadedProgress && Object.keys(loadedProgress).length > 0) {
+      const loadedSentences = loadedProgress.completedSentences || [];
+      const loadedWords = loadedProgress.completedWords || {};
+
+      // Normalize keys to numbers
+      const normalizedWords = {};
+      Object.keys(loadedWords).forEach(sentenceIdx => {
+        const numIdx = parseInt(sentenceIdx);
+        normalizedWords[numIdx] = {};
+        Object.keys(loadedWords[sentenceIdx]).forEach(wordIdx => {
+          const numWordIdx = parseInt(wordIdx);
+          normalizedWords[numIdx][numWordIdx] = loadedWords[sentenceIdx][wordIdx];
         });
-        
-        clearTimeout(timeoutId);
-        
-        if (res.ok) {
-          const apiResponse = await res.json();
-          if (DEBUG_TIMER) console.log('Raw API response:', apiResponse);
+      });
 
-          // Extract progress and studyTime
-          const data = apiResponse.progress || apiResponse;
-          const loadedStudyTime = apiResponse.studyTime || 0;
+      setCompletedSentences(loadedSentences);
+      setCompletedWords(normalizedWords);
 
-          // Load study time (with validation)
-          const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
-          setStudyTime(validatedLoadedTime);
-          if (DEBUG_TIMER) console.log('Loaded study time:', validatedLoadedTime);
-
-          if (data && Object.keys(data).length > 0) {
-            const loadedSentences = data.completedSentences || [];
-            const loadedWords = data.completedWords || {};
-
-            // Normalize keys to numbers
-            const normalizedWords = {};
-            Object.keys(loadedWords).forEach(sentenceIdx => {
-              const numIdx = parseInt(sentenceIdx);
-              normalizedWords[numIdx] = {};
-              Object.keys(loadedWords[sentenceIdx]).forEach(wordIdx => {
-                const numWordIdx = parseInt(wordIdx);
-                normalizedWords[numIdx][numWordIdx] = loadedWords[sentenceIdx][wordIdx];
-              });
-            });
-
-            setCompletedSentences(loadedSentences);
-            setCompletedWords(normalizedWords);
-
-            if (DEBUG_TIMER) {
-              console.log('Loaded and normalized progress:', {
-                completedSentences: loadedSentences,
-                completedWords: normalizedWords
-              });
-            }
-          }
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.warn('Timeout loading progress, continuing without saved progress');
-        } else {
-          console.error('Error loading progress:', error);
-        }
-      } finally {
-        setProgressLoaded(true);
+      if (DEBUG_TIMER) {
+        console.log('Loaded and normalized progress from SWR:', {
+          completedSentences: loadedSentences,
+          completedWords: normalizedWords
+        });
       }
-    };
-    
-    loadProgress();
-  }, [lessonId, user]); // Add user dependency so it reloads when user is ready
+    }
+
+    if (loadedStudyTime !== undefined) {
+      const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
+      setStudyTime(validatedLoadedTime);
+      if (DEBUG_TIMER) console.log('Loaded study time from SWR:', validatedLoadedTime);
+    }
+
+    setProgressLoaded(true);
+  }, [loadedProgress, loadedStudyTime]);
 
 
 

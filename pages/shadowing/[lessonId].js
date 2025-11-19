@@ -7,6 +7,8 @@ import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
 import { useProgress } from '../../lib/hooks/useProgress';
+import { useLessonData } from '../../lib/hooks/useLessonData';
+import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
@@ -26,11 +28,12 @@ const ShadowingPageContent = () => {
   const [segmentPlayEndTime, setSegmentPlayEndTime] = useState(null);
   const [segmentEndTimeLocked, setSegmentEndTimeLocked] = useState(false);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
-  const [lesson, setLesson] = useState(null);
   const [pausedPositions, setPausedPositions] = useState({}); // { sentenceIndex: pausedTime }
-  const [loading, setLoading] = useState(true);
   const [isUserSeeking, setIsUserSeeking] = useState(false);
   const [userSeekTimeout, setUserSeekTimeout] = useState(null);
+
+  // Use SWR hook for combined lesson + progress data
+  const { lesson, progress: loadedProgress, studyTime: loadedStudyTime, isLoading: loading } = useLessonData(lessonId, 'shadowing');
 
   // Parroto-style controls
   const [autoStop, setAutoStop] = useState(true);
@@ -72,7 +75,7 @@ const ShadowingPageContent = () => {
   const youtubePlayerRef = useRef(null);
   const [isYouTube, setIsYouTube] = useState(false);
   const [isYouTubeAPIReady, setIsYouTubeAPIReady] = useState(false);
-  const { progress, saveProgress } = useProgress(lessonId, 'shadowing');
+  const { saveProgress } = useProgress(lessonId, 'shadowing');
   const activeTranscriptItemRef = useRef(null);
   const transcriptListRef = useRef(null);
 
@@ -154,64 +157,15 @@ const ShadowingPageContent = () => {
     };
   }, [updateMonthlyStats]);
 
-  // Load progress from database
+  // Load progress from SWR hook
   useEffect(() => {
-    const loadProgress = async () => {
-      if (!lessonId) {
-        setProgressLoaded(true);
-        return;
-      }
-      
-      // Wait for user to load before trying to get progress
-      if (!user) {
-        return; // Don't set progressLoaded yet, wait for user
-      }
-      
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setProgressLoaded(true);
-          return;
-        }
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
-        
-        const res = await fetch(`/api/progress?lessonId=${lessonId}&mode=shadowing`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (res.ok) {
-          const apiResponse = await res.json();
-          if (DEBUG_TIMER) console.log('Raw API response:', apiResponse);
-
-          // Extract progress and studyTime
-          const data = apiResponse.progress || apiResponse;
-          const loadedStudyTime = apiResponse.studyTime || 0;
-
-          // Load study time (with validation)
-          const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
-          setStudyTime(validatedLoadedTime);
-          if (DEBUG_TIMER) console.log('Loaded study time:', validatedLoadedTime);
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.warn('Timeout loading progress, continuing without saved progress');
-        } else {
-          console.error('Error loading progress:', error);
-        }
-      } finally {
-        setProgressLoaded(true);
-      }
-    };
-    
-    loadProgress();
-  }, [lessonId, user]); // Add user dependency so it reloads when user is ready
+    if (loadedStudyTime !== undefined) {
+      const validatedLoadedTime = Math.min(loadedStudyTime, MAX_STUDY_TIME);
+      setStudyTime(validatedLoadedTime);
+      if (DEBUG_TIMER) console.log('Loaded study time from SWR:', validatedLoadedTime);
+      setProgressLoaded(true);
+    }
+  }, [loadedStudyTime]);
 
 
 
@@ -421,40 +375,13 @@ const ShadowingPageContent = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
-  // Load YouTube iframe API script
+  // Use centralized YouTube API manager
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Check if API is already loaded
-    if (window.YT && window.YT.Player) {
-      setIsYouTubeAPIReady(true);
-      return;
-    }
-
-    // Check if script is already being loaded
-    if (window.YT) {
-      // API is loading, wait for it
-      const checkInterval = setInterval(() => {
-        if (window.YT && window.YT.Player) {
-          setIsYouTubeAPIReady(true);
-          clearInterval(checkInterval);
-        }
-      }, 100);
-      return () => clearInterval(checkInterval);
-    }
-
-    // Load the YouTube iframe API script
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    tag.async = true;
-
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    // Set up the callback for when API is ready
-    window.onYouTubeIframeAPIReady = () => {
-      setIsYouTubeAPIReady(true);
-    };
+    youtubeAPI.waitForAPI()
+      .then(() => setIsYouTubeAPIReady(true))
+      .catch(err => console.error('YouTube API error:', err));
   }, []);
 
   // Initialize YouTube player when API is ready and lesson is loaded
@@ -503,15 +430,20 @@ const ShadowingPageContent = () => {
       events: {
         onReady: (event) => {
           setDuration(event.target.getDuration());
-          const playerElement = document.getElementById('youtube-player-shadowing');
-          if (playerElement && playerElement.parentElement) {
-            // Get parent container (videoPlayerWrapper) dimensions
-            const wrapper = playerElement.parentElement;
-            const rect = wrapper.getBoundingClientRect();
+          
+          // Only set size on desktop - mobile uses CSS aspect-ratio
+          const isMobile = window.innerWidth <= 768;
+          if (!isMobile) {
+            const playerElement = document.getElementById('youtube-player-shadowing');
+            if (playerElement && playerElement.parentElement) {
+              // Get parent container (videoPlayerWrapper) dimensions
+              const wrapper = playerElement.parentElement;
+              const rect = wrapper.getBoundingClientRect();
 
-            // Set player size to fill the container
-            if (rect.width > 0 && rect.height > 0) {
-              event.target.setSize(rect.width, rect.height);
+              // Set player size to fill the container
+              if (rect.width > 0 && rect.height > 0) {
+                event.target.setSize(rect.width, rect.height);
+              }
             }
           }
         },
@@ -525,9 +457,10 @@ const ShadowingPageContent = () => {
       }
     });
 
-    // Add resize listener to adjust player size when window resizes
+    // Add resize listener to adjust player size when window resizes (desktop only)
     const handleResize = () => {
-      if (youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
+      const isMobile = window.innerWidth <= 768;
+      if (!isMobile && youtubePlayerRef.current && youtubePlayerRef.current.setSize) {
         const playerElement = document.getElementById('youtube-player-shadowing');
         if (playerElement && playerElement.parentElement) {
           const wrapper = playerElement.parentElement;
@@ -555,36 +488,12 @@ const ShadowingPageContent = () => {
     };
   }, [lesson, isYouTubeAPIReady]);
 
-  // Fetch lesson data from API
+  // Load transcript when lesson is ready (from SWR)
   useEffect(() => {
-    const fetchLesson = async () => {
-      if (!lessonId) return;
-      
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/lessons/${lessonId}`);
-        
-        if (!res.ok) {
-          throw new Error('Lesson not found');
-        }
-        
-        const data = await res.json();
-        setLesson(data);
-        console.log('Lesson loaded:', data);
-        
-        if (data.json) {
-          loadTranscript(data.json);
-        }
-      } catch (error) {
-        console.error('Error loading lesson:', error);
-        setLesson(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchLesson();
-  }, [lessonId]);
+    if (lesson && lesson.json) {
+      loadTranscript(lesson.json);
+    }
+  }, [lesson]);
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
