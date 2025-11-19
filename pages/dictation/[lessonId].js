@@ -1622,15 +1622,46 @@ const DictationPageContent = () => {
   // Check if current sentence is completed
   const checkSentenceCompletion = useCallback(() => {
     setTimeout(() => {
-      const allInputs = document.querySelectorAll(".word-input");
-      const remainingInputs = Array.from(allInputs);
+      // Check if this sentence is already marked as completed
+      if (completedSentences.includes(currentSentenceIndex)) {
+        return;
+      }
+
+      // Get the sentence text and count total words that need to be filled
+      const sentence = transcriptData[currentSentenceIndex];
+      if (!sentence) return;
+
+      const words = sentence.text.split(/\s+/);
       
-      if (remainingInputs.length === 0 && !completedSentences.includes(currentSentenceIndex)) {
+      // Determine which words need to be filled based on hidePercentage
+      const validWordIndices = [];
+      words.forEach((word, idx) => {
+        const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+        if (pureWord.length >= 1) {
+          validWordIndices.push(idx);
+        }
+      });
+
+      // Calculate how many words to hide (same logic as processLevelUp)
+      const totalValidWords = validWordIndices.length;
+      const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
+
+      // Count how many words are completed for this sentence
+      const completedWordsCount = Object.keys(completedWords[currentSentenceIndex] || {}).length;
+
+      console.log(`Checking sentence ${currentSentenceIndex}:`, {
+        totalValidWords,
+        wordsToHideCount,
+        completedWordsCount,
+        completedWords: completedWords[currentSentenceIndex]
+      });
+
+      if (completedWordsCount >= wordsToHideCount && wordsToHideCount > 0) {
         // All words are correct, mark sentence as completed
         const updatedCompleted = [...completedSentences, currentSentenceIndex];
         setCompletedSentences(updatedCompleted);
         saveProgress(updatedCompleted, completedWords);
-        console.log(`Sentence ${currentSentenceIndex} completed!`);
+        console.log(`✅ Sentence ${currentSentenceIndex} completed!`);
         
         // Streak logic: Start counting from 2nd sentence
         const newConsecutive = consecutiveSentences + 1;
@@ -1653,9 +1684,44 @@ const DictationPageContent = () => {
           console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
           incrementStreak();
         }
+
+        // Auto-navigate to next incomplete sentence after a short delay
+        setTimeout(() => {
+          // Find current position in sorted list
+          const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
+          console.log('🎯 Auto-navigation:', {
+            currentSentenceIndex,
+            currentPositionInSorted,
+            sortedLength: sortedTranscriptIndices.length,
+            updatedCompleted
+          });
+          
+          // Find next incomplete sentence (first incomplete in sorted list after current)
+          let nextIncompleteIndex = -1;
+          for (let i = 0; i < sortedTranscriptIndices.length; i++) {
+            const sentenceIdx = sortedTranscriptIndices[i];
+            if (!updatedCompleted.includes(sentenceIdx)) {
+              nextIncompleteIndex = sentenceIdx;
+              console.log(`✅ Found next incomplete sentence at index ${nextIncompleteIndex}`);
+              break;
+            }
+          }
+          
+          // Navigate to next incomplete sentence if found
+          if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
+            console.log(`🚀 Navigating to sentence ${nextIncompleteIndex}`);
+            setCurrentSentenceIndex(nextIncompleteIndex);
+            const item = transcriptData[nextIncompleteIndex];
+            if (item) {
+              handleSentenceClick(item.start, item.end);
+            }
+          } else {
+            console.log('🎉 All sentences completed!');
+          }
+        }, 400); // Increased to 400ms to let user see completion + smooth scroll
       }
-    }, 200);
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, streakUpdatedToday, markTodayActivity, incrementStreak]);
+    }, 50); // Reduced to 50ms for faster detection
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, streakUpdatedToday, markTodayActivity, incrementStreak, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
@@ -2718,6 +2784,7 @@ const DictationPageContent = () => {
                       if (el && transcriptData.length > 0) {
                         const currentSlide = el.children[sortedTranscriptIndices.indexOf(currentSentenceIndex)];
                         if (currentSlide) {
+                          // Use smooth scroll with CSS scroll-behavior
                           currentSlide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                         }
                       }

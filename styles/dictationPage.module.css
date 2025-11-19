@@ -1087,6 +1087,8 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   height: 100%;
+  scroll-snap-stop: always;
+  scroll-padding: 0 calc((100vw - 85%) / 2);
 }
 
 .dictationSlides::-webkit-scrollbar {
@@ -1097,13 +1099,18 @@
   flex: 0 0 85%;
   scroll-snap-align: center;
   background: var(--bg-card);
-  border: 2px solid var(--border-color);
-  border-radius: 20px;
-  padding: 16px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 16px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 6px;
+  transition: 
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
+    filter 0.3s ease-out;
   cursor: pointer;
   min-height: 0;
   height: 100%;
@@ -1125,18 +1132,66 @@
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
   transform: scale(1.02);
   pointer-events: auto;
+  animation: slideActivate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideActivate {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
 }
 
 /* Non-active slides have reduced opacity on mobile */
 @media (max-width: 768px) {
   .dictationSlide {
-    opacity: 0.7;
-    transform: scale(0.95);
+    opacity: 0.6;
+    transform: scale(0.92);
+    filter: blur(0.5px);
   }
 
   .dictationSlideActive {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0px);
+  }
+  
+  /* Smooth scroll behavior for mobile */
+  .dictationSlides {
+    scroll-behavior: smooth;
+  }
+  
+  /* Smoother scrolling with custom timing */
+  @supports (scroll-behavior: smooth) {
+    .dictationSlides {
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: calc((100vw - 94%) / 2);
+    }
+  }
+  
+  /* Add a subtle bounce effect on slide activation */
+  .dictationSlideActive {
+    animation: slideActivateMobile 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes slideActivateMobile {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+    filter: blur(1px);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -1145,35 +1200,35 @@
   justify-content: flex-end;
   align-items: center;
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   z-index: 10;
 }
 
 .slideCompleted {
-  font-size: 24px;
+  font-size: 18px;
   color: #10b981;
   background: rgba(16, 185, 129, 0.15);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: checkmarkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  animation: checkmarkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
 }
 
 @keyframes checkmarkPop {
   0% {
-    transform: scale(0);
+    transform: scale(0) rotate(-180deg);
     opacity: 0;
   }
-  50% {
-    transform: scale(1.2);
+  60% {
+    transform: scale(1.3) rotate(10deg);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
@@ -1885,11 +1940,11 @@
   }
 
   .dictationSlides {
-    padding: 8px calc((100vw - 90%) / 2);
+    padding: 6px calc((100vw - 94%) / 2);
   }
 
   .dictationSlide {
-    flex: 0 0 90%;
+    flex: 0 0 94%;
   }
 
   .dictationSlide .dictationInputArea {
@@ -1897,21 +1952,97 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    font-size: 10px;
+    line-height: 1.3;
+    padding: 8px 4px 4px 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 3px 4px;
+    row-gap: 4px;
+  }
+
+  /* Override word-input sizing in slides */
+  .dictationSlide .dictationInputArea :global(.word-input) {
+    height: 20px !important;
+    min-height: 20px !important;
+    font-size: 10px !important;
+    padding: 2px 5px !important;
+    min-width: 28px;
+    max-width: 95px;
+    width: auto !important;
+    border-radius: 4px !important;
+    border-width: 1px !important;
+    line-height: 1.3 !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    align-self: flex-end !important;
+  }
+
+  .dictationSlide .dictationInputArea :global(.correct-word),
+  .dictationSlide .dictationInputArea :global(.hint-revealed),
+  .dictationSlide .dictationInputArea :global(.revealed-word) {
+    height: 20px !important;
+    min-height: 20px !important;
+    font-size: 10px !important;
+    padding: 2px 5px !important;
+    line-height: 1.3 !important;
+    border-radius: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    align-self: flex-end !important;
+  }
+
+  .dictationSlide .dictationInputArea :global(.hint-btn) {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 8px !important;
+    border-radius: 4px !important;
+    border-width: 1.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    order: -1 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .dictationSlide .dictationInputArea :global(.word-container) {
+    min-height: auto;
+    height: auto;
+    gap: 2px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+    vertical-align: bottom;
+    line-height: 1;
+  }
+  
+  .dictationSlide .dictationInputArea :global(.word-punctuation) {
+    display: none !important;
   }
 
   .dictationActions {
     flex-shrink: 0;
-    padding-top: 8px;
+    padding-top: 4px;
     margin-top: auto;
+    gap: 4px;
   }
 
   /* Mobile slide buttons */
   .dictationSlide .showAllWordsButton,
   .dictationSlide .nextButton {
-    font-size: 13px;
-    padding: 10px 16px;
-    border-radius: 12px;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 8px;
     font-weight: 600;
+    height: 28px;
   }
 
   .dictationSlide .showAllWordsButton {
@@ -1919,7 +2050,12 @@
   }
 
   .dictationSlide .nextButton {
-    min-width: 80px;
+    min-width: 70px;
+  }
+  
+  .dictationSlide .nextButton svg {
+    width: 12px;
+    height: 12px;
   }
 
   /* Style video wrapper on mobile */
