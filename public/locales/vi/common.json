@@ -56,6 +56,10 @@
     "light": {
       "label": "Chế độ sáng",
       "description": "Chế độ sáng, rõ ràng cho việc học ban ngày."
+    },
+    "auto": {
+      "label": "Tự động",
+      "description": "Theo cài đặt hệ thống của thiết bị."
     }
   },
   "settings": {

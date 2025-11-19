@@ -18,18 +18,33 @@ export const THEME_OPTIONS = [
   {
     id: 'light',
     emoji: '☀️'
+  },
+  {
+    id: 'auto',
+    emoji: '🌗'
   }
 ];
 
-const DEFAULT_THEME_ID = 'light';
+let DEFAULT_THEME_ID = 'light'; // Will be updated from server settings
 
 const getNextThemeId = (currentId) => {
-  const currentIndex = THEME_OPTIONS.findIndex((option) => option.id === currentId);
-  if (currentIndex === -1) {
-    return DEFAULT_THEME_ID;
+  // Only cycle between light and dark for toggle (skip auto)
+  if (currentId === 'light') return 'dark';
+  return 'light';
+};
+
+const getSystemTheme = () => {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches 
+    ? 'dark' 
+    : 'light';
+};
+
+const resolveThemeFromPreference = (preference) => {
+  if (preference === 'auto') {
+    return getSystemTheme();
   }
-  const nextIndex = (currentIndex + 1) % THEME_OPTIONS.length;
-  return THEME_OPTIONS[nextIndex].id;
+  return preference;
 };
 
 const resolveInitialTheme = () => {
@@ -39,7 +54,8 @@ const resolveInitialTheme = () => {
 
 export function ThemeProvider({ children }) {
   const { t } = useTranslation();
-  const [theme, setThemeState] = useState(resolveInitialTheme);
+  const [themePreference, setThemePreference] = useState(resolveInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState(resolveInitialTheme);
 
   const applyTheme = useCallback((themeId) => {
     if (typeof document === 'undefined') return;
@@ -47,33 +63,98 @@ export function ThemeProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    // On client mount, check localStorage and update theme if different
-    if (typeof window !== 'undefined') {
-      const savedTheme = window.localStorage.getItem('theme');
-      const isValid = THEME_OPTIONS.some((option) => option.id === savedTheme);
-      if (isValid && savedTheme !== theme) {
-        setThemeState(savedTheme);
-      } else if (!isValid) {
-        window.localStorage.setItem('theme', theme);
+    // Fetch system settings and set default theme
+    const initializeTheme = async () => {
+      if (typeof window === 'undefined') return;
+
+      try {
+        // Check if user has saved preference in localStorage
+        const savedTheme = window.localStorage.getItem('theme');
+        
+        if (savedTheme) {
+          // User has a saved preference - use it
+          const isValid = THEME_OPTIONS.some((option) => option.id === savedTheme);
+          if (isValid && savedTheme !== themePreference) {
+            setThemePreference(savedTheme);
+            return;
+          }
+        }
+
+        // No saved preference - fetch default from server
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const settings = await response.json();
+          const serverDefaultTheme = settings.defaultTheme || 'light';
+          
+          // Update default theme constant
+          DEFAULT_THEME_ID = serverDefaultTheme;
+          
+          // Apply server default theme
+          const isValid = THEME_OPTIONS.some((option) => option.id === serverDefaultTheme);
+          if (isValid) {
+            setThemePreference(serverDefaultTheme);
+            window.localStorage.setItem('theme', serverDefaultTheme);
+          }
+        } else {
+          // Fallback to light if API fails
+          window.localStorage.setItem('theme', themePreference);
+        }
+      } catch (error) {
+        console.error('Failed to fetch theme settings:', error);
+        // Fallback to current preference
+        window.localStorage.setItem('theme', themePreference);
       }
-    }
+    };
+
+    initializeTheme();
   }, []); // Run only once on mount
 
+  // Update resolved theme when preference changes
   useEffect(() => {
-    applyTheme(theme);
+    const resolved = resolveThemeFromPreference(themePreference);
+    setResolvedTheme(resolved);
+    applyTheme(resolved);
+    
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('theme', theme);
+      window.localStorage.setItem('theme', themePreference);
     }
-  }, [theme, applyTheme]);
+  }, [themePreference, applyTheme]);
+
+  // Listen for system theme changes when in auto mode
+  useEffect(() => {
+    if (typeof window === 'undefined' || themePreference !== 'auto') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      const resolved = getSystemTheme();
+      setResolvedTheme(resolved);
+      applyTheme(resolved);
+    };
+
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+    // Fallback for older browsers
+    else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+  }, [themePreference, applyTheme]);
 
   const selectTheme = useCallback((themeId) => {
     const isValidTheme = THEME_OPTIONS.some((option) => option.id === themeId);
     if (!isValidTheme) return;
-    setThemeState((current) => (current === themeId ? current : themeId));
+    setThemePreference((current) => (current === themeId ? current : themeId));
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState((current) => getNextThemeId(current));
+    // Toggle only cycles between light and dark, ignoring auto
+    setThemePreference((current) => {
+      const resolved = resolveThemeFromPreference(current);
+      return getNextThemeId(resolved);
+    });
   }, []);
 
   const value = useMemo(() => {
@@ -83,19 +164,20 @@ export function ThemeProvider({ children }) {
       description: t(`theme.${option.id}.description`)
     }));
 
-    const currentTheme = themeOptionsWithTranslations.find((option) => option.id === theme) || themeOptionsWithTranslations[0];
-    const nextThemeId = getNextThemeId(theme);
+    const currentThemeOption = themeOptionsWithTranslations.find((option) => option.id === themePreference) || themeOptionsWithTranslations[0];
+    const nextThemeId = getNextThemeId(resolvedTheme);
     const nextTheme = themeOptionsWithTranslations.find((option) => option.id === nextThemeId);
 
     return {
-      theme,
+      theme: resolvedTheme, // The actual applied theme (light or dark)
+      themePreference, // User's preference (light, dark, or auto)
       themeOptions: themeOptionsWithTranslations,
-      currentTheme,
+      currentTheme: currentThemeOption,
       nextTheme,
       setTheme: selectTheme,
       toggleTheme
     };
-  }, [theme, selectTheme, toggleTheme, t]);
+  }, [resolvedTheme, themePreference, selectTheme, toggleTheme, t]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

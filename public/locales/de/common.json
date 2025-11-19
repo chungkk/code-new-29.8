@@ -56,6 +56,10 @@
     "light": {
       "label": "Hellmodus",
       "description": "Heller, klarer Modus für Tageslernen."
+    },
+    "auto": {
+      "label": "Automatisch",
+      "description": "Folgt den Systemeinstellungen Ihres Geräts."
     }
   },
   "settings": {
