@@ -864,16 +864,32 @@ const ShadowingPageContent = () => {
 
   const loadTranscript = async (jsonPath) => {
     try {
-      console.log('Đang tải transcript từ:', jsonPath);
-      const response = await fetch(jsonPath);
-      if (!response.ok) {
-        throw new Error(`Không thể tải file JSON tại: ${jsonPath}`);
-      }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const response = await fetch(jsonPath, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) throw new Error(`Không thể tải file JSON tại: ${jsonPath}`);
       const data = await response.json();
-      console.log('Transcript đã tải thành công:', data);
+      
+      console.log('📝 Transcript loaded:', {
+        path: jsonPath,
+        totalSentences: data.length,
+        firstSentence: data[0]?.text?.substring(0, 50) + '...',
+        lastSentence: data[data.length - 1]?.text?.substring(0, 50) + '...'
+      });
+      
       setTranscriptData(data);
     } catch (error) {
-      console.error('Lỗi tải transcript:', error);
+      if (error.name === 'AbortError') {
+        console.error('Timeout loading transcript:', jsonPath);
+      } else {
+        console.error('Lỗi tải transcript:', error);
+      }
     }
   };
 
