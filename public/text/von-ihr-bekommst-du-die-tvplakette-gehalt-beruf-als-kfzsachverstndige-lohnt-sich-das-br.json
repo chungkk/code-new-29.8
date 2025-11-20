@@ -1,0 +1,607 @@
+[
+    {
+        "text": "N/A Ich glaube, ich gehöre zu den Gutverdienern.",
+        "start": 0,
+        "end": 4.48
+    },
+    {
+        "text": "Da haben wir schon was, was nicht passt.",
+        "start": 5.5600000000000005,
+        "end": 8.96
+    },
+    {
+        "text": "Da macht man sich schon manchmal Gedanken: Hab ich alles gesehen?",
+        "start": 9.12,
+        "end": 12.719
+    },
+    {
+        "text": "Hi, ich bin Cassandra, 26 und amtlich anerkannte Sachverständige beim TÜV.",
+        "start": 18.76,
+        "end": 24.36
+    },
+    {
+        "text": "Meist fahr ich mit dem Auto in die Arbeit.",
+        "start": 25.48,
+        "end": 28.72
+    },
+    {
+        "text": "In Ingolstadt haben wir von 7.30 bis 17.30 geöffnet.",
+        "start": 28.8,
+        "end": 32.239
+    },
+    {
+        "text": "was ist in dem Koffer? Mein Tablet zum Prüfen, Adapter zum Fahrzeugsysteme auslesen.",
+        "start": 33.24,
+        "end": 40.76
+    },
+    {
+        "text": "Stempelplaketten. Wenn alles gut läuft, gibt's eine neue Plakette.",
+        "start": 40.84,
+        "end": 46
+    },
+    {
+        "text": "Die kommt hinten ans Kennzeichen. Als amtlich anerkannte Sachverständige bin ich zuständig für HU, AU, Eintragungen.",
+        "start": 46.08,
+        "end": 56.24
+    },
+    {
+        "text": "Andere Rad-Reifen-Kombinationen oder Motorumbauten.",
+        "start": 56.32,
+        "end": 60.8
+    },
+    {
+        "text": "Alles, was ihr sagt, ist jetzt auf Mikro, also sagt nur nette Dinge.",
+        "start": 60.96,
+        "end": 64.92
+    },
+    {
+        "text": "Als Erstes muss ich den Rechner hochfahren.",
+        "start": 66.84,
+        "end": 69.52
+    },
+    {
+        "text": "Eigentlich ist es ein guter Arbeitstag, wenn die Leute halbwegs zufrieden waren mit den Ergebnissen",
+        "start": 69.68,
+        "end": 77.16
+    },
+    {
+        "text": "und glücklich vom Hof gehen. Auch wenn sie Mängel haben, dass sie trotzdem Danke sagen.",
+        "start": 77.24,
+        "end": 82.84
+    },
+    {
+        "text": "Manchmal verkleb ich den ganzen Tag zwei Plaketten. Das ist ärgerlich.",
+        "start": 82.92,
+        "end": 87.68
+    },
+    {
+        "text": "Aber ich bin dazu da, um zu schauen,",
+        "start": 87.76,
+        "end": 89.96
+    },
+    {
+        "text": "ob alles okay ist und was repariert werden muss.",
+        "start": 90.04,
+        "end": 92.96
+    },
+    {
+        "text": "Ich hab jetzt ein Auto von der Werkstatt. Der ist abgemeldet.",
+        "start": 93.04,
+        "end": 97
+    },
+    {
+        "text": "N/A Wir sind Händler und brauchen TÜV für die Ausfuhrkennzeichen.",
+        "start": 97,
+        "end": 103.759
+    },
+    {
+        "text": "Bei der HU fang ich an, indem ich mir das Auto schnappe.",
+        "start": 103.84,
+        "end": 108.079
+    },
+    {
+        "text": "Ich schau, ob Scheibenwaschanlage und Hupe funktionieren.",
+        "start": 108.16,
+        "end": 111.64
+    },
+    {
+        "text": "Ich fahr dann auf den Bremsen-Prüfstand.",
+        "start": 111.8,
+        "end": 114.2
+    },
+    {
+        "text": "Mit den Bremsen war alles gut. Jetzt schau ich die Lichter an.",
+        "start": 114.36,
+        "end": 119.04
+    },
+    {
+        "text": "Ob alle funktionieren. Wenn man da reinschaut, sieht man eine gestrichelte Linie.",
+        "start": 119.12,
+        "end": 124.759
+    },
+    {
+        "text": "Das muss auf einer Höhe sein.",
+        "start": 124.84,
+        "end": 126.84
+    },
+    {
+        "text": "Die meisten, die hier arbeiten, haben studiert, sind Ingenieure.",
+        "start": 127,
+        "end": 131.84
+    },
+    {
+        "text": "Und haben dann die Ausbildung zur amtlich anerkannten Sachverständigen gemacht.",
+        "start": 131.92,
+        "end": 136.56
+    },
+    {
+        "text": "Zum Ende der Ausbildung hat man die amtliche Anerkennung vom Ministerium.",
+        "start": 136.64,
+        "end": 141.04
+    },
+    {
+        "text": "Dann kriegt man seine Stempel und Plaketten und darf selbstständig prüfen.",
+        "start": 141.2,
+        "end": 145.32
+    },
+    {
+        "text": "N/A Dann mach ich jetzt die AU.",
+        "start": 152,
+        "end": 154.2
+    },
+    {
+        "text": "Wenn abgasrelevante Fehler drauf sind, zeigt es mir das an.",
+        "start": 154.36,
+        "end": 158.48
+    },
+    {
+        "text": "Dann ist die AU nicht bestanden.",
+        "start": 158.56,
+        "end": 160.76
+    },
+    {
+        "text": "Für 30 Sekunden halte ich die Drehzahl.",
+        "start": 160.92,
+        "end": 163.24
+    },
+    {
+        "text": "Das Gerät misst, ob der CO-Wert passt und der Lambda-Wert.",
+        "start": 163.32,
+        "end": 167.24
+    },
+    {
+        "text": "Grün heißt: Alles okay. Jetzt zeigt es Rot an, weil ich Gas geben soll.",
+        "start": 167.4,
+        "end": 171.92
+    },
+    {
+        "text": "Der hat die AU bestanden. Die Wertewaren, wie sie sein sollen.",
+        "start": 172.08,
+        "end": 176.36
+    },
+    {
+        "text": "Als ich mein erstes Auto gekauft hab, hab ich eine Liste bekommen",
+        "start": 176.44,
+        "end": 180.36
+    },
+    {
+        "text": "mit Sachen, die repariert werden müssen.",
+        "start": 180.44,
+        "end": 182.84
+    },
+    {
+        "text": "Der Herr, der mir das beigebracht hat, hatte wahnsinnig Ahnung.",
+        "start": 182.92,
+        "end": 186.72
+    },
+    {
+        "text": "Und da hab ich gesagt: Ich will auch mal so schlau sein.",
+        "start": 186.8,
+        "end": 191.04
+    },
+    {
+        "text": "Jetzt schau ich mir die Bremsscheiben und -Belege an.",
+        "start": 191.12,
+        "end": 195.12
+    },
+    {
+        "text": "Ich dreh den Reifen, schau, ob was im Profil steckt.",
+        "start": 195.2,
+        "end": 199.12
+    },
+    {
+        "text": "Oder ob der Reifen sonderlich abgefahren ist.",
+        "start": 199.2,
+        "end": 202.36
+    },
+    {
+        "text": "Dann eben auf den Prüfbericht Stempel und Unterschrift.",
+        "start": 206.84,
+        "end": 211
+    },
+    {
+        "text": "Und dann kriegen sie ihr Fahrzeug wieder.",
+        "start": 211.6,
+        "end": 213.92
+    },
+    {
+        "text": "Ich hoffe, dass sie sich darüber freuen.",
+        "start": 214.08,
+        "end": 216.76
+    },
+    {
+        "text": "N/A Einmal Prüfbericht. Keine Mängel. Bremsen und Abgas hat gepasst.",
+        "start": 218,
+        "end": 223.72
+    },
+    {
+        "text": "Danke Ihnen. - Tschau. Ich denke, so richtig wertschätzen tun uns die wenigsten.",
+        "start": 223.8,
+        "end": 230
+    },
+    {
+        "text": "Viele meinen: Okay, gehört dazu. Auto wieder zum TÜV.",
+        "start": 230.08,
+        "end": 234.08
+    },
+    {
+        "text": "Die sind nicht so begeistert. N/A Die Frage ist: Bevor ich die falschen bestelle,",
+        "start": 234.16,
+        "end": 240.68
+    },
+    {
+        "text": "möcht ich gern wissen, welche ich fahren darf.",
+        "start": 240.76,
+        "end": 244.239
+    },
+    {
+        "text": "Schauen wir es mal durch. Das sollte der sein. Dann dürfen Sie diese Felgengrößen alle fahren.",
+        "start": 247.2,
+        "end": 253.28
+    },
+    {
+        "text": "Da haben Sie mir geholfen. Danke schön.",
+        "start": 253.44,
+        "end": 256.36
+    },
+    {
+        "text": "Der Seat gehört Ihnen? Schlüssel steckt?",
+        "start": 259,
+        "end": 261.6
+    },
+    {
+        "text": "Würde ich nehmen. Was haben Sie für ein Bauchgefühl?",
+        "start": 261.8,
+        "end": 266.48
+    },
+    {
+        "text": "Ja, eigentlich ganz gut. Aber mal schauen.",
+        "start": 266.56,
+        "end": 271.28
+    },
+    {
+        "text": "Ja, ist schon ein bisschen älter.",
+        "start": 271.44,
+        "end": 273.96
+    },
+    {
+        "text": "Schlimm ist es, wenn so gefährliche Mängel vorhanden sind,",
+        "start": 274.68,
+        "end": 278.08
+    },
+    {
+        "text": "dass der Kunde mit dem Kfz den Hof nicht mehr verlassen darf.",
+        "start": 278.16,
+        "end": 281.76
+    },
+    {
+        "text": "Das führt oft zu Diskussionen. Rost hab ich schon gesehen.",
+        "start": 281.92,
+        "end": 284
+    },
+    {
+        "text": "N/A Da müsste man genauer schauen, ob es durchgerostet ist.",
+        "start": 284,
+        "end": 288.88
+    },
+    {
+        "text": "Also da ist der Schweller durchgerostet.",
+        "start": 296.92,
+        "end": 299.92
+    },
+    {
+        "text": "Da ist ein Riesenloch drin. Da fehlt vorn die letzte Ecke.",
+        "start": 300,
+        "end": 303.92
+    },
+    {
+        "text": "ich schreib die ersten Mängel gleich mal auf.",
+        "start": 304,
+        "end": 307.04
+    },
+    {
+        "text": "Zum Glück hatte ich den Fall noch nicht, dass ich was so Schlimmes übersehen hab,",
+        "start": 307.2,
+        "end": 310.76
+    },
+    {
+        "text": "dass Menschen zu Schaden gekommen sind.",
+        "start": 310.84,
+        "end": 312.56
+    },
+    {
+        "text": "Wenn ich absichtlich was verbockt habe, kann es richtig Ärger geben.",
+        "start": 312.72,
+        "end": 317.56
+    },
+    {
+        "text": "Mit Freiheitsstrafe und meine Anerkennung ist dann auch weg.",
+        "start": 317.64,
+        "end": 321.88
+    },
+    {
+        "text": "Dann bin ich arbeitslos. Also im schlimmsten Fall hängt einiges dran.",
+        "start": 321.96,
+        "end": 326.76
+    },
+    {
+        "text": "Aber deswegen gibt man sich Mühe, dass so was nicht passiert N/A",
+        "start": 326.84,
+        "end": 331.16
+    },
+    {
+        "text": "Wenn ich hier ein Loch reinmachen könnte, wär's durch.",
+        "start": 331.16,
+        "end": 335.24
+    },
+    {
+        "text": "Oder wenn schon ein Loch drin ist.",
+        "start": 335.32,
+        "end": 337.92
+    },
+    {
+        "text": "Ich versuch da nicht unbedingt mit Gewalt etwas kaputt zu machen.",
+        "start": 338,
+        "end": 342.4
+    },
+    {
+        "text": "Aber wenn ich damit durch eine massive Metallachse komme, ist die vorher schon kaputt.",
+        "start": 342.48,
+        "end": 349.04
+    },
+    {
+        "text": "Das war mal die Bodenplatte, die Bodengruppe.",
+        "start": 350.2,
+        "end": 353.6
+    },
+    {
+        "text": "Das Loch hab nicht ich reingemacht.",
+        "start": 353.68,
+        "end": 356.36
+    },
+    {
+        "text": "Das war schon. Das ist der Teppich von der Rücksitzbank.",
+        "start": 356.44,
+        "end": 359.84
+    },
+    {
+        "text": "Der bekommt keine Plakette von mir.",
+        "start": 360,
+        "end": 362.4
+    },
+    {
+        "text": "Die wird nicht glücklich sein. Wer ist das schon, wenn's Auto durchgerostet ist?",
+        "start": 362.56,
+        "end": 369.08
+    },
+    {
+        "text": "Ich sag auch, was gut war. Die Bremswerte waren in Ordnung.",
+        "start": 369.16,
+        "end": 373.64
+    },
+    {
+        "text": "AU hat er auch bestanden. Es wäre nur die Nachkontrolle von der HU.",
+        "start": 373.72,
+        "end": 378.8
+    },
+    {
+        "text": "Ich hoffe, sie nimmt es verständnisvoll auf.",
+        "start": 378.88,
+        "end": 381.8
+    },
+    {
+        "text": "Es gab mal einen älteren Herrn, der mich angeschrien hat,",
+        "start": 381.96,
+        "end": 386.199
+    },
+    {
+        "text": "obwohl ich ihm vernünftig das Problem erklären wollte.",
+        "start": 386.28,
+        "end": 390.36
+    },
+    {
+        "text": "Das wollte er nicht einsehen. N/A So, also ein paar Sachen müssen Sie erledigen.",
+        "start": 390.44,
+        "end": 403
+    },
+    {
+        "text": "Das Licht war zu hoch. Das hab ich schon erledigt. Das passt.",
+        "start": 403.08,
+        "end": 407.68
+    },
+    {
+        "text": "Der Schweller vorne rechts ist durchgerostet.",
+        "start": 407.76,
+        "end": 411.16
+    },
+    {
+        "text": "Und der Kotflügel auch. Das ist diese Stelle.",
+        "start": 411.24,
+        "end": 414.52
+    },
+    {
+        "text": "Na ja, gut ist es nicht, aber das Auto ist alt.",
+        "start": 414.68,
+        "end": 418.199
+    },
+    {
+        "text": "Da muss ein bisschen was gemacht werden.",
+        "start": 418.28,
+        "end": 420.88
+    },
+    {
+        "text": "Dann passt es wieder. Natürlich ist es mir lieber, wenn die Leute die Plakette bekommen.",
+        "start": 420.96,
+        "end": 427.52
+    },
+    {
+        "text": "Aber es gehört dazu. Es ist mein Beruf, zu \"meckern\".",
+        "start": 427.6,
+        "end": 431.6
+    },
+    {
+        "text": "N/A Meistens kochen wir was, was schnell geht. Heute: Käsespätzle.",
+        "start": 434,
+        "end": 441.639
+    },
+    {
+        "text": "Und Spätzlepfanne für die, die keine Käsespätzle wollen.",
+        "start": 441.8,
+        "end": 446.36
+    },
+    {
+        "text": "N/A Wir haben am Nachmittag das Gleiche wie am Vormittag.",
+        "start": 449,
+        "end": 453.6
+    },
+    {
+        "text": "Je nachdem, was terminmäßig ansteht. Ich denke schon: Das war ein erfolgreicher Tag.",
+        "start": 453.68,
+        "end": 465
+    },
+    {
+        "text": "N/A Alle sind zufrieden gegangen, auch wenn sie keinen TÜV bekommen haben.",
+        "start": 465,
+        "end": 471.64
+    },
+    {
+        "text": "Ich gehöre zu den Besserverdienern in Deutschland.",
+        "start": 478.6,
+        "end": 481
+    },
+    {
+        "text": "N/A Das ist meine Wohnung. Ca. 100 qm.",
+        "start": 481,
+        "end": 485.92
+    },
+    {
+        "text": "Für eine alleine ... ein bisschen zu groß.",
+        "start": 486,
+        "end": 490.2
+    },
+    {
+        "text": "Aber eigentlich ganz schön. Meine Leidenschaft kommt auch ein bisschen in meiner Deko wieder.",
+        "start": 490.36,
+        "end": 497.4
+    },
+    {
+        "text": "Die Uhr z.B. ist eine alte Kupplungsscheibe.",
+        "start": 497.48,
+        "end": 501.44
+    },
+    {
+        "text": "Mit 16 hab ich mein erstes Auto gekauft.",
+        "start": 502.2,
+        "end": 505.2
+    },
+    {
+        "text": "Da steckt man schon viel Herz rein.",
+        "start": 507.08,
+        "end": 509
+    },
+    {
+        "text": "N/A Nicht nur, weil's das erste Auto ist.",
+        "start": 509,
+        "end": 512.44
+    },
+    {
+        "text": "Es war damals auch mein Traumauto.",
+        "start": 512.52,
+        "end": 515.12
+    },
+    {
+        "text": "Das sind meine zwei Tiefgaragenstelllätze. Mein Sommerauto, mein Moped und mein Motorrad.",
+        "start": 515.2,
+        "end": 521.56
+    },
+    {
+        "text": "Diese Saison möchte ich mehr fahren. Deshalb der neue Auspuff.",
+        "start": 521.72,
+        "end": 525.639
+    },
+    {
+        "text": "Nicht, dass sie lauter wird, aber weil's nicht schön ist.",
+        "start": 525.72,
+        "end": 528.959
+    },
+    {
+        "text": "Das ist ein großes Motorrad, es hört sich aber an wie ein Staubsauger.",
+        "start": 529.04,
+        "end": 533
+    },
+    {
+        "text": "Ich find's cool, wenn ich Sachen selber machen kann.",
+        "start": 533.08,
+        "end": 536.52
+    },
+    {
+        "text": "Ich weiß dann auch, was ordentlich gemacht wurde oder nicht.",
+        "start": 536.68,
+        "end": 540.88
+    },
+    {
+        "text": "Das ist immer wieder eine Herausforderung,",
+        "start": 541.6,
+        "end": 544.68
+    },
+    {
+        "text": "zu schauen, was ich tun muss, damit es ist, wie ich's möchte.",
+        "start": 544.76,
+        "end": 549.56
+    },
+    {
+        "text": "Laut Anleitung ziehen die hier nur die Kabel ab.",
+        "start": 551.04,
+        "end": 554.079
+    },
+    {
+        "text": "Dann kommt der Neue dran. Ja, das klingt besser.",
+        "start": 557.84,
+        "end": 561.76
+    },
+    {
+        "text": "Für mich lohnt es sich auf jeden Fall, beim TÜV zu arbeiten.",
+        "start": 563.8,
+        "end": 567.2
+    },
+    {
+        "text": "Ein bisschen Hobby und Beruf vereint und ich krieg Geld dafür.",
+        "start": 567.36,
+        "end": 572.04
+    },
+    {
+        "text": "Das war's von mir. Ich hoffe, es hat euch gefallen.",
+        "start": 578.4,
+        "end": 581.8
+    },
+    {
+        "text": "Hier hätten wir ein Video von einem Kfz-Meister.",
+        "start": 581.88,
+        "end": 585.08
+    },
+    {
+        "text": "Und hier auch noch weitere Videos.",
+        "start": 585.16,
+        "end": 587.44
+    }
+]

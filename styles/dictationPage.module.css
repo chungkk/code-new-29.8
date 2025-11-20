@@ -298,18 +298,25 @@
 /* Controls Section */
 .controlsWrapper {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.controlBar {
+.controlRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.controlBar:not(:last-child) {
-  border-bottom: none;
+.controlRow:last-child {
+  justify-content: center;
+}
+
+.controlStartButton {
+  padding: 8px 24px;
+  font-size: 14px;
 }
 
 .controlGroup {
@@ -2500,14 +2507,7 @@
     border-radius: 0;
   }
 
-  .controlBar {
-    flex-wrap: wrap;
-  }
 
-  .playControls {
-    justify-content: center;
-    width: 100%;
-  }
 
   .sentenceTextLarge {
     font-size: 18px;

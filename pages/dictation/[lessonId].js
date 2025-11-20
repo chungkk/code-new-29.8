@@ -63,6 +63,9 @@ const DictationPageContent = () => {
     const saved = localStorage.getItem('autoJumpToIncomplete');
     return saved !== null ? saved === 'true' : true;
   });
+  
+  // Auto-stop video at end of sentence (similar to shadowing mode)
+  const [autoStop, setAutoStop] = useState(true);
 
   // Save autoJumpToIncomplete to localStorage when it changes
   useEffect(() => {
@@ -830,7 +833,8 @@ const DictationPageContent = () => {
           const currentTime = player.getCurrentTime();
           setCurrentTime(currentTime);
 
-          if (segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
+          // Auto-stop when segment ends (only if autoStop is enabled)
+          if (autoStop && segmentPlayEndTime !== null && currentTime >= segmentPlayEndTime - 0.02) {
             if (player.pauseVideo) player.pauseVideo();
             setIsPlaying(false);
             setSegmentPlayEndTime(null);
@@ -841,7 +845,8 @@ const DictationPageContent = () => {
         if (audio && !audio.paused) {
           setCurrentTime(audio.currentTime);
 
-          if (segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
+          // Auto-stop when segment ends (only if autoStop is enabled)
+          if (autoStop && segmentPlayEndTime !== null && audio.currentTime >= segmentPlayEndTime - 0.02) {
             audio.pause();
             setIsPlaying(false);
             setSegmentPlayEndTime(null);
@@ -863,7 +868,7 @@ const DictationPageContent = () => {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isPlaying, segmentPlayEndTime, isYouTube]);
+  }, [isPlaying, segmentPlayEndTime, isYouTube, autoStop]);
 
   // Audio event listeners
   useEffect(() => {
@@ -1576,7 +1581,18 @@ const DictationPageContent = () => {
   }, [lessonId, transcriptData, currentSentenceIndex]);
 
   // Handle word click for popup (for completed words)
-  const handleWordClickForPopup = useCallback(async (word, event) => {
+  const handleWordClickForPopup = useCallback(async (word, eventOrElement) => {
+    // Handle both event object and element reference
+    let element = eventOrElement;
+    if (eventOrElement && eventOrElement.target) {
+      // It's an event object
+      element = eventOrElement.target;
+    } else if (!eventOrElement || !(eventOrElement instanceof Element)) {
+      // Invalid input
+      console.error('Invalid event/element in handleWordClickForPopup');
+      return;
+    }
+
     // Pause main audio nếu đang phát
     if (typeof window !== 'undefined' && window.mainAudioRef?.current) {
       const audio = window.mainAudioRef.current;
@@ -1599,7 +1615,7 @@ const DictationPageContent = () => {
     // Speak the word
     speakText(cleanedWord);
 
-    const rect = event.target.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
     const isMobileView = window.innerWidth <= 768;
 
     if (isMobileView) {
@@ -1702,7 +1718,7 @@ const DictationPageContent = () => {
         top = window.innerHeight - popupHeight - 20;
       }
 
-      setClickedWordElement(event.target);
+      setClickedWordElement(element);
       setSelectedWord(cleanedWord);
       setPopupPosition({ top, left });
       setPopupArrowPosition(arrowPos);
@@ -2616,7 +2632,7 @@ const DictationPageContent = () => {
           // If entire sentence is completed, show all words
           if (isCompleted) {
             return `<span class="word-container completed">
-              <span class="correct-word completed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
+              <span class="correct-word completed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', this)">${pureWord}</span>
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
@@ -2624,7 +2640,7 @@ const DictationPageContent = () => {
           // If this specific word is completed, show it
           if (isWordCompleted) {
             return `<span class="word-container">
-              <span class="correct-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
+              <span class="correct-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', this)">${pureWord}</span>
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
@@ -2667,7 +2683,7 @@ const DictationPageContent = () => {
           } else {
             // Show the word (not hidden)
             return `<span class="word-container">
-              <span class="correct-word revealed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', event)">${pureWord}</span>
+              <span class="correct-word revealed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', this)">${pureWord}</span>
               <span class="word-punctuation">${nonAlphaNumeric}</span>
             </span>`;
           }
@@ -2982,32 +2998,20 @@ const DictationPageContent = () => {
               {/* Desktop Controls - Hidden on mobile */}
               {!isMobile && (
                 <div className={styles.controlsWrapper}>
-                  <div className={styles.controlBar}>
-                    <div className={styles.playControls}>
-                      <button className={styles.playButton} onClick={() => handleSeek('backward')} title="Zurück (←)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-                        </svg>
-                      </button>
-                      
-                      <button className={styles.playButton} onClick={handlePlayPause} title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}>
-                        {isPlaying ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        )}
-                      </button>
-                      
-                      <button className={styles.playButton} onClick={() => handleSeek('forward')} title="Vorwärts (→)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
-                        </svg>
-                      </button>
-                    </div>
+                  <div className={styles.controlRow}>
+                    <label className={styles.toggleLabel}>
+                      <input
+                        type="checkbox"
+                        checked={autoStop}
+                        onChange={(e) => setAutoStop(e.target.checked)}
+                        className={styles.toggleInput}
+                      />
+                      <span className={styles.toggleSlider}></span>
+                      <span className={styles.toggleText}>Auto Stop</span>
+                    </label>
+                    <button className={`${styles.startButton} ${styles.controlStartButton}`} onClick={handlePlayPause}>
+                      ▶ Start
+                    </button>
                   </div>
                 </div>
               )}
