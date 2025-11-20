@@ -2,18 +2,36 @@ import React from 'react';
 import styles from '../styles/ModeSelectionPopup.module.css';
 
 const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
+  const formatStudyTime = (seconds) => {
+    if (!seconds || seconds === 0) return '0s';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
   const modes = [
     {
       id: 'dictation',
       name: 'Dictation',
       icon: '✍️',
       description: 'Listen and type what you hear to improve your listening comprehension and spelling.',
+      studyTime: lesson.dictationStudyTime || 0
     },
     {
       id: 'shadowing',
       name: 'Shadowing',
       icon: '🗣️',
       description: 'Listen and repeat after the speaker to improve your pronunciation and speaking fluency.',
+      studyTime: lesson.shadowingStudyTime || 0
     },
   ];
 
@@ -38,10 +56,6 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
 
         <div className={styles.lessonInfo}>
           <div className={styles.lessonTitle}>{lesson.title}</div>
-          <div className={styles.lessonMeta}>
-            <span>⏱ {Math.floor((lesson.duration || 0) / 60)} min</span>
-            <span>📊 {lesson.difficulty || 'Beginner'}</span>
-          </div>
         </div>
 
         <div className={styles.modesContainer}>
@@ -56,6 +70,10 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
                 <div className={styles.modeName}>{mode.name}</div>
               </div>
               <div className={styles.modeDescription}>{mode.description}</div>
+              <div className={styles.modeStudyTime}>
+                <span className={styles.studyTimeIcon}>⏱️</span>
+                <span className={styles.studyTimeText}>Đã học: {formatStudyTime(mode.studyTime)}</span>
+              </div>
             </div>
           ))}
         </div>

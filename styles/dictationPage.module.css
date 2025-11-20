@@ -256,6 +256,28 @@
   line-height: 1.4;
 }
 
+.studyTimerMobile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.studyTimerMobile .timerIcon {
+  font-size: 14px;
+}
+
+.studyTimerMobile .timerText {
+  font-size: 14px;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 /* Video Overlay for timer and YouTube link */
 .videoOverlay {
   position: absolute;

@@ -65,8 +65,42 @@ const HomePage = () => {
     }
   };
 
-  const handleLessonClick = (lesson) => {
-    setSelectedLesson(lesson);
+  const handleLessonClick = async (lesson) => {
+    // Fetch study time for both modes
+    const token = localStorage.getItem('token');
+    let shadowingStudyTime = 0;
+    let dictationStudyTime = 0;
+    
+    if (token && user) {
+      try {
+        const [shadowingRes, dictationRes] = await Promise.all([
+          fetch(`/api/progress?lessonId=${lesson.id}&mode=shadowing`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`/api/progress?lessonId=${lesson.id}&mode=dictation`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+        
+        if (shadowingRes.ok) {
+          const shadowingData = await shadowingRes.json();
+          shadowingStudyTime = shadowingData.studyTime || 0;
+        }
+        
+        if (dictationRes.ok) {
+          const dictationData = await dictationRes.json();
+          dictationStudyTime = dictationData.studyTime || 0;
+        }
+      } catch (error) {
+        console.error('Error fetching study time:', error);
+      }
+    }
+    
+    setSelectedLesson({
+      ...lesson,
+      shadowingStudyTime,
+      dictationStudyTime
+    });
     setShowPopup(true);
   };
 

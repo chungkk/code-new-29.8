@@ -9,6 +9,7 @@ import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
 import StreakNotification from '../../components/StreakNotification';
+import ProgressIndicator from '../../components/ProgressIndicator';
 import { useLessonData } from '../../lib/hooks/useLessonData';
 import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
@@ -110,9 +111,6 @@ const DictationPageContent = () => {
   const [lastClickTime, setLastClickTime] = useState(0);
   const [lastClickedInput, setLastClickedInput] = useState(null);
   const [processedText, setProcessedText] = useState('');
-  
-  // Track last 's' keystroke time for timeout logic
-  const lastSKeystrokeTime = useRef({});
 
   // Track if we've already jumped to first incomplete sentence
   const hasJumpedToIncomplete = useRef(false);
@@ -1408,48 +1406,6 @@ const DictationPageContent = () => {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Character replacement for German umlauts
-  const replaceCharacters = useCallback((input) => {
-    const currentTime = Date.now();
-    const inputId = input.getAttribute('data-word-id') || input;
-    
-    // Special handling for "ss" with timeout
-    if (input.value.endsWith("ss")) {
-      const lastSTime = lastSKeystrokeTime.current[inputId];
-      const timeDiff = lastSTime ? currentTime - lastSTime : Infinity;
-      
-      // If less than 3 seconds, convert to ß
-      if (timeDiff < 3000) {
-        input.value = input.value.slice(0, -2) + "ß";
-        delete lastSKeystrokeTime.current[inputId];
-        return;
-      }
-      // If more than 3 seconds, keep "ss"
-      else {
-        delete lastSKeystrokeTime.current[inputId];
-        return;
-      }
-    }
-    
-    // Track when user types 's'
-    if (input.value.endsWith("s")) {
-      lastSKeystrokeTime.current[inputId] = currentTime;
-    }
-    
-    const transformations = [
-      { find: "ae", replace: "ä" },
-      { find: "oe", replace: "ö" },
-      { find: "ue", replace: "ü" },
-    ];
-
-    for (const transformation of transformations) {
-      if (input.value.endsWith(transformation.find)) {
-        input.value = input.value.slice(0, -transformation.find.length) + transformation.replace;
-        break;
-      }
-    }
-  }, []);
-
   // Save progress to database
   const saveProgress = useCallback(async (updatedCompletedSentences, updatedCompletedWords) => {
     if (!lessonId) return;
@@ -2057,8 +2013,6 @@ const DictationPageContent = () => {
   const checkWord = useCallback((input, correctWord, wordIndex) => {
     const sanitizedCorrectWord = correctWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
     
-    replaceCharacters(input);
-    
     if (input.value.toLowerCase() === sanitizedCorrectWord.toLowerCase()) {
       // Haptic feedback for correct word
       hapticEvents.wordCorrect();
@@ -2170,7 +2124,7 @@ const DictationPageContent = () => {
         console.log('⚠️ Length mismatch, waiting for full word length');
       }
     }
-  }, [replaceCharacters, saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints, consecutiveSentences, user]);
+  }, [saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints, consecutiveSentences, user]);
 
   /**
    * Seeded random number generator for deterministic word selection
@@ -2968,6 +2922,10 @@ const DictationPageContent = () => {
               {/* Video Title - Always visible */}
               <div className={styles.videoTitleBox}>
                 <h3>{lesson.displayTitle || lesson.title}</h3>
+                <div className={styles.studyTimerMobile}>
+                  <span className={styles.timerIcon}>⏱️</span>
+                  <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
+                </div>
               </div>
 
               {/* Desktop Controls - Hidden on mobile */}
@@ -3379,16 +3337,18 @@ const DictationPageContent = () => {
               <h3 className={styles.transcriptTitle}>
                 Transcript
               </h3>
-              <div className={styles.transcriptProgress}>
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{ width: `${progressPercentage}%` }}
-                    data-progress={progressPercentage}
-                  />
-                </div>
-                <span className={styles.progressText}>{progressPercentage}%</span>
-              </div>
+              <ProgressIndicator
+                completedSentences={completedSentences}
+                totalSentences={transcriptData.length}
+                completedWords={completedWords}
+                totalWords={transcriptData.reduce((sum, sentence) => {
+                  const words = sentence.text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1);
+                  return sum + words.length;
+                }, 0)}
+                difficultyLevel={difficultyLevel}
+                hidePercentage={hidePercentage}
+                studyTime={studyTime}
+              />
             </div>
             
              <div className={styles.transcriptSection} ref={transcriptSectionRef}>

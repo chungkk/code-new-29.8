@@ -82,10 +82,10 @@ const LessonCard = ({ lesson, onClick }) => {
           </div>
         </div>
 
-        {lesson.duration && (
+        {lesson.videoDuration && (
           <div className={styles.duration}>
             <span>⏱</span>
-            <span>{formatDuration(lesson.duration)}</span>
+            <span>{formatDuration(lesson.videoDuration)}</span>
           </div>
         )}
 
