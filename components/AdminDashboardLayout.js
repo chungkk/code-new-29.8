@@ -34,6 +34,7 @@ const AdminDashboardLayout = ({ children }) => {
       label: 'Content',
       items: [
         { href: '/admin/dashboard/lesson/new', label: 'Neue Lektion', icon: '➕' },
+        { href: '/admin/dashboard/pages', label: 'Seiteninhalte', icon: '📄' },
       ]
     },
     {
