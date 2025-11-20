@@ -624,6 +624,11 @@
   color: var(--text-primary);
 }
 
+/* Mobile Controls Bar - Only visible on mobile */
+.mobileControlsBar {
+  display: none;
+}
+
 /* Responsive Design */
 @media (min-width: 769px) {
   .videoWrapper {
@@ -765,6 +770,66 @@
    .transcriptHeader {
       display: none;
     }
+    
+    /* Mobile Controls Bar - Visible on mobile */
+    .mobileControlsBar {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: var(--bg-hover);
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .mobileControlsBar::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .mobileControlButton {
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mobileControlButton:active {
+      transform: scale(0.95);
+    }
+    
+    .mobileControlButtonActive {
+      background: linear-gradient(135deg, #4a90e2 0%, #5a9ff5 100%);
+      border-color: #4a90e2;
+      color: white;
+      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+    }
+    
+    .mobileControlButtonActive svg {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(0.95);
+      }
+    }
 
     .transcriptNumber {
       display: none;
@@ -824,17 +889,132 @@
   right: 0;
   display: flex;
   justify-content: center;
-  padding: 16px;
-  background: var(--bg-secondary);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--border-color);
   z-index: 1000;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.navButton {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #4a90e2;
+  transform: scale(1.05);
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.navButton:disabled:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-color);
+  transform: scale(1);
+}
+
+.navButton svg {
+  transition: transform 0.2s ease;
+}
+
+.navButton:hover:not(:disabled) svg {
+  transform: translateX(0);
+}
+
+.navButton:first-of-type:hover:not(:disabled) svg {
+  transform: translateX(-2px);
+}
+
+.navButton:last-of-type:hover:not(:disabled) svg {
+  transform: translateX(2px);
 }
 
 .startButtonContainer .startButton {
-  width: 100%;
-  max-width: 300px;
+  flex: 1;
+  max-width: 240px;
   text-align: center;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.startButtonContainer .startButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.startButtonContainer .startButton:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.startButtonContainer .startButton svg {
+  transition: transform 0.3s ease;
+}
+
+.startButtonPlaying {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+.startButtonPlaying svg {
+  animation: pausePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pausePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.startButtonContainer .startButton:hover svg {
+  transform: scale(1.15);
+}
+
+.startButtonContainer .startButton:active {
+  transform: scale(0.95);
 }
 
 @media (min-width: 769px) {

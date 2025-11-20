@@ -41,7 +41,7 @@
   flex-direction: column;
   height: 550px;
   min-height: 300px;
-  gap: var(--spacing-md);
+  gap: 0;
 }
 
 /* Left Section - Video and Controls */
@@ -905,8 +905,9 @@
 /* Dictation Input Area */
 .dictationContainer {
   background: var(--bg-secondary);
-  border-radius: var(--border-radius);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
   border: 1px solid var(--border-color);
+  border-top: none;
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
@@ -1994,17 +1995,17 @@
     right: 0;
     z-index: 100;
     background: transparent;
-    padding: 0;
-    height: 35vh; /* Match video height exactly */
+    padding: 0 8px; /* Add horizontal padding like shadowing */
+    height: auto; /* Let video aspect-ratio determine height */
   }
   
   .middleSection {
     position: fixed;
-    top: calc(35vh + 64px); /* Below video + header */
+    top: calc(64px + 56.25vw + 4px); /* Below video (16:9 aspect) + header + small gap */
     bottom: calc(76px + env(safe-area-inset-bottom, 0px)); /* Above bottom controls */
-    left: 0;
-    right: 0;
-    padding: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 0;
     overflow: hidden;
     z-index: 50;
   }
@@ -2138,6 +2139,7 @@
 
   .dictationSlide {
     flex: 0 0 94%;
+    padding: 6px;
   }
 
   .dictationSlide .dictationInputArea {
@@ -2147,12 +2149,12 @@
     -webkit-overflow-scrolling: touch;
     font-size: 10px;
     line-height: 1.3;
-    padding: 8px 4px 4px 4px;
+    padding: 4px 2px 2px 2px;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 3px 4px;
-    row-gap: 4px;
+    gap: 2px 3px;
+    row-gap: 3px;
   }
 
   /* Override word-input sizing in slides */
@@ -2223,7 +2225,7 @@
 
   .dictationActions {
     flex-shrink: 0;
-    padding-top: 4px;
+    padding-top: 2px;
     margin-top: auto;
     gap: 4px;
   }
@@ -2231,11 +2233,11 @@
   /* Mobile slide buttons */
   .dictationSlide .showAllWordsButton,
   .dictationSlide .nextButton {
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: 8px;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-weight: 600;
-    height: 28px;
+    height: 24px;
   }
 
   .dictationSlide .showAllWordsButton {
@@ -2615,13 +2617,16 @@
   
   .leftSection {
     top: 64px;
-    height: 32vh; /* Match smaller video height */
+    height: auto; /* Let video aspect-ratio determine height */
+    padding: 0 8px; /* Add horizontal padding like shadowing */
   }
 
   .middleSection {
-    top: calc(32vh + 64px); /* Smaller video on small screens */
+    top: calc(64px + 56.25vw + 4px); /* Smaller video on small screens with 16:9 aspect + small gap */
     bottom: calc(74px + env(safe-area-inset-bottom, 0px));
-    padding: 6px;
+    left: 8px;
+    right: 8px;
+    padding: 0;
   }
 
   .sentenceTextLarge {
@@ -2689,7 +2694,7 @@
   .dictationContainer {
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 6px;
+    padding: 4px;
     background: var(--bg-secondary);
     height: 100%;
     display: flex;
@@ -2697,8 +2702,8 @@
   }
 
   .dictationInputArea {
-    padding: 6px;
-    padding-bottom: 6px;
+    padding: 4px;
+    padding-bottom: 4px;
     gap: 2px;
     flex: 1;
   }
