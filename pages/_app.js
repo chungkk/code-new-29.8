@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { SessionProvider } from 'next-auth/react';
@@ -13,6 +13,8 @@ import '../lib/i18n';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import OfflineIndicator from '../components/OfflineIndicator';
+import { registerServiceWorker } from '../lib/serviceWorker';
 
 function Layout({ children }) {
   const router = useRouter();
@@ -29,6 +31,21 @@ function Layout({ children }) {
 }
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+  // Register Service Worker for offline mode
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      registerServiceWorker()
+        .then(registration => {
+          if (registration) {
+            console.log('✅ Service Worker registered for offline mode');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+    }
+  }, []);
+
   return (
     <SessionProvider session={session}>
       <LanguageProvider>
@@ -40,6 +57,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                 <meta name="description" content="Learn German with Shadowing and Dictation methods" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
+                <link rel="manifest" href="/manifest.json" />
               </Head>
 
               <div className="App">
@@ -47,6 +65,10 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                   <Component {...pageProps} />
                 </Layout>
               </div>
+              
+              {/* Offline Indicator */}
+              <OfflineIndicator />
+              
               <ToastContainer
                 position="top-right"
                 autoClose={3000}

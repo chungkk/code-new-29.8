@@ -15,6 +15,7 @@ import { useAuth } from '../../context/AuthContext';
 import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
 import { translationCache } from '../../lib/translationCache';
+import { hapticEvents } from '../../lib/haptics';
 import styles from '../../styles/dictationPage.module.css';
 
 
@@ -891,6 +892,9 @@ const DictationPageContent = () => {
    }, [transcriptData, currentSentenceIndex, isYouTube]);
 
   const handlePlayPause = useCallback(() => {
+    // Haptic feedback for play/pause
+    hapticEvents.audioPlay();
+    
     if (isYouTube) {
       const player = youtubePlayerRef.current;
       if (!player) return;
@@ -1212,11 +1216,19 @@ const DictationPageContent = () => {
 
     if (isLeftSwipe) {
       e.preventDefault();
+      
+      // Haptic feedback for swipe
+      hapticEvents.slideSwipe();
+      
       setSwipeDirection('left');
       goToNextSentence();
       setTimeout(() => setSwipeDirection(null), 300);
     } else if (isRightSwipe) {
       e.preventDefault();
+      
+      // Haptic feedback for swipe
+      hapticEvents.slideSwipe();
+      
       setSwipeDirection('right');
       goToPreviousSentence();
       setTimeout(() => setSwipeDirection(null), 300);
@@ -1872,6 +1884,10 @@ const DictationPageContent = () => {
               }
             } else {
               console.log('🎉 All sentences completed!');
+              
+              // Haptic feedback for lesson completion
+              hapticEvents.lessonComplete();
+              
               // Show celebration toast
               toast.success('🎉 All sentences completed! Great job!');
             }
@@ -1985,6 +2001,9 @@ const DictationPageContent = () => {
     replaceCharacters(input);
     
     if (input.value.toLowerCase() === sanitizedCorrectWord.toLowerCase()) {
+      // Haptic feedback for correct word
+      hapticEvents.wordCorrect();
+      
       saveWord(correctWord);
       
       // Save this word completion to database
@@ -2042,6 +2061,10 @@ const DictationPageContent = () => {
         const wordKey = `${currentSentenceIndex}-${wordIndex}`;
         if (!wordPointsProcessed[currentSentenceIndex]?.[wordIndex]) {
           console.log('✓ Word not yet processed! Proceeding with penalty and streak reset...');
+          
+          // Haptic feedback for incorrect word
+          hapticEvents.wordIncorrect();
+          
           updatePoints(-0.5, `Incorrect word attempt: ${input.value}`, input);
           setWordPointsProcessed(prev => ({
             ...prev,
@@ -2194,6 +2217,9 @@ const DictationPageContent = () => {
 
   // Show hint for a word - now opens suggestion popup instead of revealing directly
   const showHint = useCallback((button, correctWord, wordIndex) => {
+    // Haptic feedback for hint button
+    hapticEvents.wordHintUsed();
+    
     // If user is not logged in, reveal the word directly
     if (!user) {
       const container = button.parentElement;
@@ -2912,11 +2938,17 @@ const DictationPageContent = () => {
           <div className={styles.middleSection}>
             {/* Dictation Header */}
             <div className={styles.dictationHeader}>
-              <h3 className={styles.transcriptTitle}>
+              <h3 className={styles.dictationHeaderTitle}>
                 {isMobile 
                   ? (autoJumpToIncomplete && mobileVisibleIndices.length > 0 && mobileVisibleIndices.length < transcriptData.length
-                      ? `#${currentSentenceIndex + 1} (${mobileVisibleIndices.length} left)`
-                      : `#${currentSentenceIndex + 1}`)
+                      ? (
+                          <>
+                            <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>
+                            <span className={styles.sentenceDivider}>/</span>
+                            <span className={styles.sentenceRemaining}>{mobileVisibleIndices.length}</span>
+                          </>
+                        )
+                      : <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>)
                   : 'Dictation'}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2974,6 +3006,9 @@ const DictationPageContent = () => {
                           key={`dot-${originalIndex}`}
                           className={`${styles.progressDot} ${isActive ? styles.progressDotActive : ''} ${isCompleted ? styles.progressDotCompleted : ''}`}
                           onClick={() => {
+                            // Haptic feedback for dot click
+                            hapticEvents.dotClick();
+                            
                             setCurrentSentenceIndex(originalIndex);
                             const sentence = transcriptData[originalIndex];
                             if (sentence) {

@@ -2110,21 +2110,26 @@
     display: none; /* Hide transcript on mobile */
   }
   
-  /* Show dictation header on mobile with Apple liquid glass style */
+  /* Show dictation header on mobile with Apple liquid glass style - COMPACT */
   .dictationHeader {
     display: flex;
-    padding: 12px var(--spacing-md);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px;
+    min-height: 36px;
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.18);
     border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-    justify-content: center;
     box-shadow:
       0 4px 24px rgba(0, 0, 0, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
     position: relative;
     overflow: hidden;
+    gap: 6px;
+    will-change: transform;
   }
 
   .dictationHeader::before {
@@ -2140,10 +2145,12 @@
       rgba(255, 255, 255, 0.3) 50%,
       transparent
     );
+    pointer-events: none;
   }
 
   .dictationHeaderTitle {
-    font-size: 22px;
+    flex: 1 1 auto;
+    font-size: 15px;
     font-weight: 600;
     background: linear-gradient(
       135deg,
@@ -2153,40 +2160,87 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-align: center;
-    letter-spacing: 0.5px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-align: left;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  
+  /* Sentence Number Components - Clear & Readable */
+  .sentenceNumber {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+  }
+  
+  .sentenceDivider {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 1px;
+  }
+  
+  .sentenceRemaining {
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fbbf24;
+    letter-spacing: 0.2px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background-color: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.3);
   }
 
-  /* Mobile hide level dropdown - compact styling */
+  /* Mobile hide level dropdown - compact & optimized */
   .hideLevelDropdown {
-    font-size: 11px;
-    padding: 4px 8px;
+    font-size: 10px;
+    padding: 3px 6px;
     border-radius: 6px;
     background: rgba(102, 126, 234, 0.2);
     backdrop-filter: blur(10px) saturate(180%);
     -webkit-backdrop-filter: blur(10px) saturate(180%);
     border: 1px solid rgba(102, 126, 234, 0.4);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 55px;
+    height: 26px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .hideLevelDropdown:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.6);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
   }
 
-  /* Mobile auto-jump toggle - compact size */
+  /* Mobile auto-jump toggle - compact & optimized */
   .autoJumpToggle {
-    width: 44px !important;
-    height: 24px !important;
-    border-radius: 16px !important;
+    width: 36px !important;
+    height: 20px !important;
+    border-radius: 12px !important;
+    flex-shrink: 0;
   }
 
   .autoJumpToggle::before {
-    width: 20px !important;
-    height: 20px !important;
+    width: 16px !important;
+    height: 16px !important;
     top: 2px !important;
     left: 2px !important;
   }
 
   .autoJumpToggle[data-active="true"]::before {
-    left: 22px !important;
+    left: 18px !important;
   }
 
   .autoJumpToggle[data-active="false"]::before {
@@ -2194,16 +2248,16 @@
   }
 
   .autoJumpToggle svg {
-    width: 12px !important;
-    height: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
   }
 
   .autoJumpToggle[data-active="true"] svg {
-    left: 28px !important;
+    left: 23px !important;
   }
 
   .autoJumpToggle[data-active="false"] svg {
-    left: 8px !important;
+    left: 6px !important;
   }
 
   /* Hide video title on mobile to save space */
@@ -2723,6 +2777,68 @@
     left: 8px;
     right: 8px;
     padding: 0;
+  }
+  
+  /* Optimize header for very small screens */
+  .dictationHeader {
+    padding: 4px 8px;
+    min-height: 34px;
+    gap: 4px;
+  }
+  
+  .dictationHeaderTitle {
+    font-size: 14px;
+    letter-spacing: 0.1px;
+  }
+  
+  .sentenceNumber {
+    font-size: 15px;
+    color: #ffffff;
+  }
+  
+  .sentenceDivider {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .sentenceRemaining {
+    font-size: 12px;
+    padding: 1px 5px;
+    color: #fbbf24;
+  }
+  
+  .hideLevelDropdown {
+    font-size: 9px;
+    padding: 2px 5px;
+    min-width: 50px;
+    height: 24px;
+  }
+  
+  .autoJumpToggle {
+    width: 34px !important;
+    height: 18px !important;
+  }
+  
+  .autoJumpToggle::before {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .autoJumpToggle[data-active="true"]::before {
+    left: 18px !important;
+  }
+  
+  .autoJumpToggle svg {
+    width: 9px !important;
+    height: 9px !important;
+  }
+  
+  .autoJumpToggle[data-active="true"] svg {
+    left: 22px !important;
+  }
+  
+  .autoJumpToggle[data-active="false"] svg {
+    left: 5px !important;
   }
 
   .sentenceTextLarge {
