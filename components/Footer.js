@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import styles from '../styles/Footer.module.css';
@@ -6,6 +6,39 @@ import styles from '../styles/Footer.module.css';
 const Footer = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const [socialLinks, setSocialLinks] = useState({
+    facebookUrl: '',
+    twitterUrl: '',
+    instagramUrl: '',
+    youtubeUrl: '',
+    tiktokUrl: '',
+    linkedinUrl: '',
+    githubUrl: ''
+  });
+
+  useEffect(() => {
+    fetchSocialLinks();
+  }, []);
+
+  const fetchSocialLinks = async () => {
+    try {
+      const res = await fetch('/api/settings/public');
+      if (res.ok) {
+        const data = await res.json();
+        setSocialLinks({
+          facebookUrl: data.facebookUrl || '',
+          twitterUrl: data.twitterUrl || '',
+          instagramUrl: data.instagramUrl || '',
+          youtubeUrl: data.youtubeUrl || '',
+          tiktokUrl: data.tiktokUrl || '',
+          linkedinUrl: data.linkedinUrl || '',
+          githubUrl: data.githubUrl || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching social links:', error);
+    }
+  };
 
   return (
     <footer className={styles.footer}>
@@ -63,21 +96,83 @@ const Footer = () => {
         </div>
 
         <div className={styles.socialLinks}>
-          <a href="#" className={styles.socialLink} aria-label="Facebook">
-            <span>f</span>
-          </a>
-          <a href="#" className={styles.socialLink} aria-label="TikTok">
-            <span>🎵</span>
-          </a>
-          <a href="#" className={styles.socialLink} aria-label="LinkedIn">
-            <span>in</span>
-          </a>
-          <a href="#" className={styles.socialLink} aria-label="GitHub">
-            <span>G</span>
-          </a>
-          <a href="#" className={styles.socialLink} aria-label="YouTube">
-            <span>▶</span>
-          </a>
+          {socialLinks.facebookUrl && (
+            <a 
+              href={socialLinks.facebookUrl} 
+              className={styles.socialLink} 
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>📘</span>
+            </a>
+          )}
+          {socialLinks.twitterUrl && (
+            <a 
+              href={socialLinks.twitterUrl} 
+              className={styles.socialLink} 
+              aria-label="Twitter/X"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>🐦</span>
+            </a>
+          )}
+          {socialLinks.instagramUrl && (
+            <a 
+              href={socialLinks.instagramUrl} 
+              className={styles.socialLink} 
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>📷</span>
+            </a>
+          )}
+          {socialLinks.youtubeUrl && (
+            <a 
+              href={socialLinks.youtubeUrl} 
+              className={styles.socialLink} 
+              aria-label="YouTube"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>▶️</span>
+            </a>
+          )}
+          {socialLinks.tiktokUrl && (
+            <a 
+              href={socialLinks.tiktokUrl} 
+              className={styles.socialLink} 
+              aria-label="TikTok"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>🎵</span>
+            </a>
+          )}
+          {socialLinks.linkedinUrl && (
+            <a 
+              href={socialLinks.linkedinUrl} 
+              className={styles.socialLink} 
+              aria-label="LinkedIn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>💼</span>
+            </a>
+          )}
+          {socialLinks.githubUrl && (
+            <a 
+              href={socialLinks.githubUrl} 
+              className={styles.socialLink} 
+              aria-label="GitHub"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>💻</span>
+            </a>
+          )}
         </div>
 
         <div className={styles.madeWith}>

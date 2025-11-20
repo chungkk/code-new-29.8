@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
+import ShareButtons from '../components/ShareButtons';
 import styles from '../styles/StaticPage.module.css';
 
 export default function PrivacyPage() {
@@ -57,9 +58,15 @@ export default function PrivacyPage() {
           {loading ? (
             <div className={styles.loading}>Laden...</div>
           ) : pageData ? (
-            <div className={styles.pageContent}>
-              {renderContent(pageData.content)}
-            </div>
+            <>
+              <div className={styles.pageContent}>
+                {renderContent(pageData.content)}
+              </div>
+              <ShareButtons 
+                title={pageData.title}
+                description={pageData.metaDescription}
+              />
+            </>
           ) : (
             <div className={styles.error}>Seite nicht gefunden</div>
           )}

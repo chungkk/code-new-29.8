@@ -125,6 +125,22 @@ const systemSettingsSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  youtubeUrl: {
+    type: String,
+    default: ''
+  },
+  tiktokUrl: {
+    type: String,
+    default: ''
+  },
+  linkedinUrl: {
+    type: String,
+    default: ''
+  },
+  githubUrl: {
+    type: String,
+    default: ''
+  },
   
   // Appearance / Design Settings
   primaryColor: {

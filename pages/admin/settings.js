@@ -908,47 +908,113 @@ function AdminSettingsPage() {
           {activeTab === 'social' && (
             <div className={styles.settingsSection}>
               <h2 className={styles.sectionTitle}>🌐 Social Media Links</h2>
-              
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  Facebook URL
-                  <span className={styles.formHint}>Ihr Facebook-Profil oder -Seite</span>
-                </label>
-                <input
-                  type="url"
-                  value={settings.facebookUrl || ''}
-                  onChange={(e) => updateSetting('facebookUrl', e.target.value)}
-                  className={styles.formInput}
-                  placeholder="https://facebook.com/..."
-                />
+              <p className={styles.sectionDescription}>
+                Fügen Sie Links zu Ihren Social-Media-Profilen hinzu. Diese werden im Footer angezeigt.
+              </p>
+
+              <div className={styles.socialMediaGrid}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>📘</span> Facebook URL
+                    <span className={styles.formHint}>Ihr Facebook-Profil oder -Seite</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.facebookUrl || ''}
+                    onChange={(e) => updateSetting('facebookUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://facebook.com/papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>🐦</span> Twitter/X URL
+                    <span className={styles.formHint}>Ihr Twitter/X-Profil</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.twitterUrl || ''}
+                    onChange={(e) => updateSetting('twitterUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://twitter.com/papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>📷</span> Instagram URL
+                    <span className={styles.formHint}>Ihr Instagram-Profil</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.instagramUrl || ''}
+                    onChange={(e) => updateSetting('instagramUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://instagram.com/papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>▶️</span> YouTube URL
+                    <span className={styles.formHint}>Ihr YouTube-Kanal</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.youtubeUrl || ''}
+                    onChange={(e) => updateSetting('youtubeUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://youtube.com/@papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>🎵</span> TikTok URL
+                    <span className={styles.formHint}>Ihr TikTok-Profil</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.tiktokUrl || ''}
+                    onChange={(e) => updateSetting('tiktokUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://tiktok.com/@papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>💼</span> LinkedIn URL
+                    <span className={styles.formHint}>Ihr LinkedIn-Profil oder Unternehmensseite</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.linkedinUrl || ''}
+                    onChange={(e) => updateSetting('linkedinUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://linkedin.com/company/papageil"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>
+                    <span className={styles.socialIcon}>💻</span> GitHub URL
+                    <span className={styles.formHint}>Ihr GitHub-Profil oder Organisation</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.githubUrl || ''}
+                    onChange={(e) => updateSetting('githubUrl', e.target.value)}
+                    className={styles.formInput}
+                    placeholder="https://github.com/papageil"
+                  />
+                </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  Twitter URL
-                  <span className={styles.formHint}>Ihr Twitter/X-Profil</span>
-                </label>
-                <input
-                  type="url"
-                  value={settings.twitterUrl || ''}
-                  onChange={(e) => updateSetting('twitterUrl', e.target.value)}
-                  className={styles.formInput}
-                  placeholder="https://twitter.com/..."
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  Instagram URL
-                  <span className={styles.formHint}>Ihr Instagram-Profil</span>
-                </label>
-                <input
-                  type="url"
-                  value={settings.instagramUrl || ''}
-                  onChange={(e) => updateSetting('instagramUrl', e.target.value)}
-                  className={styles.formInput}
-                  placeholder="https://instagram.com/..."
-                />
+              <div className={styles.infoBox}>
+                💡 <strong>Tipp:</strong> Lassen Sie Felder leer, wenn Sie bestimmte Social-Media-Plattformen nicht verwenden. 
+                Diese werden dann im Footer nicht angezeigt.
               </div>
             </div>
           )}

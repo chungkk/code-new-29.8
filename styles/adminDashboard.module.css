@@ -1715,3 +1715,44 @@
     width: 100%;
   }
 }
+
+/* Social Media Grid */
+.socialMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.socialIcon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.sectionDescription {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.infoBox {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 16px;
+  color: #1e40af;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 24px;
+}
+
+.infoBox strong {
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .socialMediaGrid {
+    grid-template-columns: 1fr;
+  }
+}
