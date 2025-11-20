@@ -174,6 +174,31 @@ const ShadowingPageContent = () => {
   // Study timer - starts when user plays video for the first time
   // Stops on inactivity (3 min), pause > 30s, or page unload
   useEffect(() => {
+    // Helper function to save study time immediately
+    const saveStudyTimeNow = async () => {
+      if (!user || !lessonId || !progressLoaded) return;
+      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            lessonId,
+            mode: 'shadowing',
+            studyTime: validatedStudyTime
+          })
+        });
+        if (DEBUG_TIMER) console.log('Study time saved (timer stop):', validatedStudyTime);
+      } catch (error) {
+        console.error('Error saving study time:', error);
+      }
+    };
+
     // Start timer when user plays video for the first time
     if (isPlaying && !hasStartedTimerRef.current) {
       if (DEBUG_TIMER) console.log('Starting timer (first play)...');
@@ -215,6 +240,8 @@ const ShadowingPageContent = () => {
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
         }
+        // Save immediately when timer stops due to pause
+        saveStudyTimeNow();
       }, 30000); // 30 seconds
       return;
     }
@@ -245,7 +272,7 @@ const ShadowingPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying]);
+  }, [isPlaying, user, lessonId, studyTime]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -266,6 +293,31 @@ const ShadowingPageContent = () => {
   useEffect(() => {
     if (!isTimerRunning) return;
 
+    // Helper function to save study time immediately
+    const saveStudyTimeNow = async () => {
+      if (!user || !lessonId || !progressLoaded) return;
+      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            lessonId,
+            mode: 'shadowing',
+            studyTime: validatedStudyTime
+          })
+        });
+        if (DEBUG_TIMER) console.log('Study time saved (inactivity stop):', validatedStudyTime);
+      } catch (error) {
+        console.error('Error saving study time:', error);
+      }
+    };
+
     // Clear existing timeout
     if (inactivityTimeoutRef.current) {
       clearTimeout(inactivityTimeoutRef.current);
@@ -279,6 +331,8 @@ const ShadowingPageContent = () => {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
       }
+      // Save immediately when timer stops due to inactivity
+      saveStudyTimeNow();
     }, 3 * 60 * 1000);
 
     return () => {
@@ -286,7 +340,7 @@ const ShadowingPageContent = () => {
         clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [lastActivityTime, isTimerRunning]);
+  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime]);
 
   // Track user activity to reset inactivity timer
   useEffect(() => {
@@ -310,10 +364,11 @@ const ShadowingPageContent = () => {
     };
   }, []);
 
-  // Save study time periodically (every 30 seconds) and on unmount
+  // Save study time periodically (every 3 seconds) and on unmount
   useEffect(() => {
     const saveStudyTime = async () => {
-      if (!user || !lessonId || studyTime === 0) return;
+      // Only save if progress has been loaded to avoid overwriting with initial 0 value
+      if (!user || !lessonId || !progressLoaded) return;
 
       // Validate before saving
       const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
@@ -340,8 +395,8 @@ const ShadowingPageContent = () => {
       }
     };
 
-    // Save every 30 seconds
-    const interval = setInterval(saveStudyTime, 30000);
+    // Save every 3 seconds
+    const interval = setInterval(saveStudyTime, 3000);
 
     // Save on beforeunload
     const handleBeforeUnload = () => {
@@ -355,7 +410,7 @@ const ShadowingPageContent = () => {
       // Save final time when component unmounts
       saveStudyTime();
     };
-  }, [user, lessonId, studyTime]);
+  }, [user, lessonId, studyTime, progressLoaded]);
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
