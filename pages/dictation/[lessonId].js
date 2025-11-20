@@ -1821,8 +1821,8 @@ const DictationPageContent = () => {
       let completedWordsCount = 0;
       
       if (sentenceContainer) {
-        // Count all correct-word spans (completed words)
-        const correctWordSpans = sentenceContainer.querySelectorAll('.correct-word');
+        // Count only user-completed words, EXCLUDE revealed-word and completed-word (those are already visible)
+        const correctWordSpans = sentenceContainer.querySelectorAll('.correct-word:not(.revealed-word):not(.completed-word)');
         completedWordsCount = correctWordSpans.length;
       } else {
         // Fallback to state if DOM element not found (shouldn't happen)
@@ -3155,39 +3155,62 @@ const DictationPageContent = () => {
                                       ...wordsToComplete
                                     };
                                     
-                                    // Mark sentence as completed immediately (no need to check)
-                                    if (!completedSentences.includes(currentSentenceIndex)) {
-                                      const updatedCompleted = [...completedSentences, currentSentenceIndex];
-                                      setCompletedSentences(updatedCompleted);
-                                      saveProgress(updatedCompleted, updatedWords);
-                                      console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All (mobile)!`);
-                                      
-                                      // Auto-jump to next incomplete sentence if enabled
-                                      if (autoJumpToIncomplete) {
-                                        setTimeout(() => {
-                                          // Find next incomplete sentence
-                                          let nextIncompleteIndex = -1;
-                                          for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-                                            const sentenceIdx = sortedTranscriptIndices[i];
-                                            if (!updatedCompleted.includes(sentenceIdx)) {
-                                              nextIncompleteIndex = sentenceIdx;
-                                              console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All (mobile)`);
-                                              break;
-                                            }
+                                    // Only mark as completed if we actually revealed words AND they meet the threshold
+                                    if (Object.keys(wordsToComplete).length > 0) {
+                                      // Calculate total words that needed to be filled
+                                      const sentence = transcriptData[currentSentenceIndex];
+                                      if (sentence) {
+                                        const words = sentence.text.split(/\s+/);
+                                        const validWordIndices = [];
+                                        words.forEach((word, idx) => {
+                                          const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                                          if (pureWord.length >= 1) {
+                                            validWordIndices.push(idx);
                                           }
+                                        });
+                                        
+                                        const totalValidWords = validWordIndices.length;
+                                        const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
+                                        const totalCompletedWords = Object.keys(updatedWords[currentSentenceIndex]).length;
+                                        
+                                        // Mark as completed only if total completed words >= required threshold
+                                        if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(currentSentenceIndex)) {
+                                          const updatedCompleted = [...completedSentences, currentSentenceIndex];
+                                          setCompletedSentences(updatedCompleted);
+                                          saveProgress(updatedCompleted, updatedWords);
+                                          console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All (mobile)!`);
                                           
-                                          // Navigate to next incomplete sentence if found
-                                          if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
-                                            setCurrentSentenceIndex(nextIncompleteIndex);
-                                            const item = transcriptData[nextIncompleteIndex];
-                                            if (item) {
-                                              handleSentenceClick(item.start, item.end);
-                                            }
-                                          } else {
-                                            console.log('🎉 All sentences completed!');
-                                            toast.success('🎉 All sentences completed! Great job!');
+                                          // Auto-jump to next incomplete sentence if enabled
+                                          if (autoJumpToIncomplete) {
+                                            setTimeout(() => {
+                                              // Find next incomplete sentence
+                                              let nextIncompleteIndex = -1;
+                                              for (let i = 0; i < sortedTranscriptIndices.length; i++) {
+                                                const sentenceIdx = sortedTranscriptIndices[i];
+                                                if (!updatedCompleted.includes(sentenceIdx)) {
+                                                  nextIncompleteIndex = sentenceIdx;
+                                                  console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All (mobile)`);
+                                                  break;
+                                                }
+                                              }
+                                              
+                                              // Navigate to next incomplete sentence if found
+                                              if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
+                                                setCurrentSentenceIndex(nextIncompleteIndex);
+                                                const item = transcriptData[nextIncompleteIndex];
+                                                if (item) {
+                                                  handleSentenceClick(item.start, item.end);
+                                                }
+                                              } else {
+                                                console.log('🎉 All sentences completed!');
+                                                toast.success('🎉 All sentences completed! Great job!');
+                                              }
+                                            }, 400);
                                           }
-                                        }, 400);
+                                        } else {
+                                          // Just save progress without marking as complete
+                                          saveProgress(completedSentences, updatedWords);
+                                        }
                                       }
                                     } else {
                                       saveProgress(completedSentences, updatedWords);
@@ -3270,39 +3293,62 @@ const DictationPageContent = () => {
                             ...wordsToComplete
                           };
                           
-                          // Mark sentence as completed immediately (no need to check)
-                          if (!completedSentences.includes(currentSentenceIndex)) {
-                            const updatedCompleted = [...completedSentences, currentSentenceIndex];
-                            setCompletedSentences(updatedCompleted);
-                            saveProgress(updatedCompleted, updatedWords);
-                            console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
-                            
-                            // Auto-jump to next incomplete sentence if enabled
-                            if (autoJumpToIncomplete) {
-                              setTimeout(() => {
-                                // Find next incomplete sentence
-                                let nextIncompleteIndex = -1;
-                                for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-                                  const sentenceIdx = sortedTranscriptIndices[i];
-                                  if (!updatedCompleted.includes(sentenceIdx)) {
-                                    nextIncompleteIndex = sentenceIdx;
-                                    console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All`);
-                                    break;
-                                  }
+                          // Only mark as completed if we actually revealed words AND they meet the threshold
+                          if (Object.keys(wordsToComplete).length > 0) {
+                            // Calculate total words that needed to be filled
+                            const sentence = transcriptData[currentSentenceIndex];
+                            if (sentence) {
+                              const words = sentence.text.split(/\s+/);
+                              const validWordIndices = [];
+                              words.forEach((word, idx) => {
+                                const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                                if (pureWord.length >= 1) {
+                                  validWordIndices.push(idx);
                                 }
+                              });
+                              
+                              const totalValidWords = validWordIndices.length;
+                              const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
+                              const totalCompletedWords = Object.keys(updatedWords[currentSentenceIndex]).length;
+                              
+                              // Mark as completed only if total completed words >= required threshold
+                              if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(currentSentenceIndex)) {
+                                const updatedCompleted = [...completedSentences, currentSentenceIndex];
+                                setCompletedSentences(updatedCompleted);
+                                saveProgress(updatedCompleted, updatedWords);
+                                console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
                                 
-                                // Navigate to next incomplete sentence if found
-                                if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
-                                  setCurrentSentenceIndex(nextIncompleteIndex);
-                                  const item = transcriptData[nextIncompleteIndex];
-                                  if (item) {
-                                    handleSentenceClick(item.start, item.end);
-                                  }
-                                } else {
-                                  console.log('🎉 All sentences completed!');
-                                  toast.success('🎉 All sentences completed! Great job!');
+                                // Auto-jump to next incomplete sentence if enabled
+                                if (autoJumpToIncomplete) {
+                                  setTimeout(() => {
+                                    // Find next incomplete sentence
+                                    let nextIncompleteIndex = -1;
+                                    for (let i = 0; i < sortedTranscriptIndices.length; i++) {
+                                      const sentenceIdx = sortedTranscriptIndices[i];
+                                      if (!updatedCompleted.includes(sentenceIdx)) {
+                                        nextIncompleteIndex = sentenceIdx;
+                                        console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All`);
+                                        break;
+                                      }
+                                    }
+                                    
+                                    // Navigate to next incomplete sentence if found
+                                    if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
+                                      setCurrentSentenceIndex(nextIncompleteIndex);
+                                      const item = transcriptData[nextIncompleteIndex];
+                                      if (item) {
+                                        handleSentenceClick(item.start, item.end);
+                                      }
+                                    } else {
+                                      console.log('🎉 All sentences completed!');
+                                      toast.success('🎉 All sentences completed! Great job!');
+                                    }
+                                  }, 400);
                                 }
-                              }, 400);
+                              } else {
+                                // Just save progress without marking as complete
+                                saveProgress(completedSentences, updatedWords);
+                              }
                             }
                           } else {
                             saveProgress(completedSentences, updatedWords);
