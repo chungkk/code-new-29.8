@@ -11,7 +11,7 @@ import styles from '../../styles/dashboard.module.css';
 
 function SettingsPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, updateDifficultyLevel } = useAuth();
   const { theme, themeOptions, setTheme, currentTheme } = useTheme();
 
   // Password change form state
@@ -88,6 +88,20 @@ function SettingsPage() {
     } catch (error) {
       console.error('Update error:', error);
       toast.error(t('settings.updateError'));
+    }
+  };
+
+  const handleDifficultyLevelUpdate = async (newLevel) => {
+    try {
+      const result = await updateDifficultyLevel(newLevel);
+      if (result.success) {
+        toast.success('Difficulty level updated successfully! 🎯');
+      } else {
+        toast.error('Failed to update difficulty level');
+      }
+    } catch (error) {
+      console.error('Difficulty level update error:', error);
+      toast.error('An error occurred');
     }
   };
 
@@ -219,28 +233,71 @@ function SettingsPage() {
               </div>
             </div>
 
-            {/* Level Setting Card */}
+            {/* Learning Level & Difficulty Setting Card (Combined) */}
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
-                <div className={styles.settingCardIcon}>📊</div>
-                <h3 className={styles.settingCardTitle}>{t('settings.level.title')}</h3>
+                <div className={styles.settingCardIcon}>🎯</div>
+                <h3 className={styles.settingCardTitle}>Learning Level & Difficulty</h3>
               </div>
               <div className={styles.settingCardBody}>
-                <p className={styles.settingDescription}>
-                  {t('settings.level.description')}
-                </p>
-                <select
-                  value={user?.level || 'beginner'}
-                  onChange={(e) => handleProfileUpdate('level', e.target.value)}
-                  className={styles.settingSelect}
-                >
-                  <option value="beginner">🌱 {t('settings.level.beginner')}</option>
-                  <option value="experienced">🚀 {t('settings.level.experienced')}</option>
-                  <option value="all">🎯 {t('settings.level.all')}</option>
-                </select>
-                <p className={styles.settingHint}>
-                  {t('settings.level.hint')}
-                </p>
+                {/* German Level Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label className={styles.settingLabel}>
+                    <strong>📊 {t('settings.level.title')}</strong>
+                  </label>
+                  <p className={styles.settingDescription} style={{ fontSize: '13px', marginTop: '6px', marginBottom: '10px' }}>
+                    {t('settings.level.description')}
+                  </p>
+                  <select
+                    value={user?.level || 'beginner'}
+                    onChange={(e) => handleProfileUpdate('level', e.target.value)}
+                    className={styles.settingSelect}
+                  >
+                    <option value="beginner">🌱 {t('settings.level.beginner')}</option>
+                    <option value="experienced">🚀 {t('settings.level.experienced')}</option>
+                    <option value="all">🎯 {t('settings.level.all')}</option>
+                  </select>
+                  <p className={styles.settingHint} style={{ fontSize: '12px', marginTop: '6px' }}>
+                    {t('settings.level.hint')}
+                  </p>
+                </div>
+
+                {/* Divider */}
+                <div style={{ borderTop: '1px solid var(--border-color, #e0e0e0)', margin: '16px 0' }}></div>
+
+                {/* Dictation Difficulty Section */}
+                <div>
+                  <label className={styles.settingLabel}>
+                    <strong>🔥 Dictation Difficulty (CEFR Level)</strong>
+                  </label>
+                  <p className={styles.settingDescription} style={{ fontSize: '13px', marginTop: '6px', marginBottom: '10px' }}>
+                    Choose how many words are hidden during dictation exercises
+                  </p>
+                  <select
+                    value={user?.preferredDifficultyLevel || 'b1'}
+                    onChange={(e) => handleDifficultyLevelUpdate(e.target.value)}
+                    className={styles.settingSelect}
+                  >
+                    <option value="a1">A1 (10% hidden)</option>
+                    <option value="a2">A2 (30% hidden)</option>
+                    <option value="b1">B1 (30% hidden)</option>
+                    <option value="b2">B2 (60% hidden)</option>
+                    <option value="c1">C1 (100% hidden)</option>
+                    <option value="c2">C2 (100% hidden)</option>
+                  </select>
+                  <p className={styles.settingHint} style={{ fontSize: '12px', marginTop: '6px' }}>
+                    Current: <strong>{
+                      user?.preferredDifficultyLevel === 'a1' ? 'A1 (10%)' :
+                      user?.preferredDifficultyLevel === 'a2' ? 'A2 (30%)' :
+                      user?.preferredDifficultyLevel === 'b1' ? 'B1 (30%)' :
+                      user?.preferredDifficultyLevel === 'b2' ? 'B2 (60%)' :
+                      user?.preferredDifficultyLevel === 'c1' ? 'C1 (100%)' :
+                      user?.preferredDifficultyLevel === 'c2' ? 'C2 (100%)' :
+                      'B1 (30%)'
+                    }</strong>
+                    {' '}<small>• Applies to all dictation lessons</small>
+                  </p>
+                </div>
               </div>
             </div>
 

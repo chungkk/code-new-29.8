@@ -18,6 +18,23 @@ import { translationCache } from '../../lib/translationCache';
 import { hapticEvents } from '../../lib/haptics';
 import styles from '../../styles/dictationPage.module.css';
 
+// Map difficulty level to hidePercentage (outside component to avoid re-creation)
+// A1=10%, A2/B1=30%, B2=60%, C1/C2=100%
+const DIFFICULTY_TO_PERCENTAGE = {
+  'a1': 10,
+  'a2': 30,
+  'b1': 30,
+  'b2': 60,
+  'c1': 100,
+  'c2': 100
+};
+
+const PERCENTAGE_TO_DIFFICULTY = {
+  10: 'a1',
+  30: 'b1',  // Default to B1 for 30%
+  60: 'b2',
+  100: 'c1'  // Default to C1 for 100%
+};
 
 const DictationPageContent = () => {
   const router = useRouter();
@@ -35,7 +52,8 @@ const DictationPageContent = () => {
   const [isUserSeeking, setIsUserSeeking] = useState(false);
   const [userSeekTimeout, setUserSeekTimeout] = useState(null);
   const [isTextHidden, setIsTextHidden] = useState(true);
-  const [hidePercentage, setHidePercentage] = useState(30); // 30%, 60%, or 100% - default to Easy mode
+  const [hidePercentage, setHidePercentage] = useState(30); // Will be loaded from user profile
+  const [difficultyLevel, setDifficultyLevel] = useState('b1'); // a1, a2, b1, b2, c1, c2
   
   // Auto-jump to incomplete sentence setting
   const [autoJumpToIncomplete, setAutoJumpToIncomplete] = useState(() => {
@@ -54,6 +72,37 @@ const DictationPageContent = () => {
 
   // Use SWR hook for combined lesson + progress data
   const { lesson, progress: loadedProgress, studyTime: loadedStudyTime, isLoading: loading } = useLessonData(lessonId, 'dictation');
+
+  // Get user and auth functions early to avoid TDZ errors
+  const { user, updateDifficultyLevel } = useAuth();
+
+  // Load user's preferred difficulty level
+  useEffect(() => {
+    if (user && user.preferredDifficultyLevel) {
+      const level = user.preferredDifficultyLevel;
+      setDifficultyLevel(level);
+      setHidePercentage(DIFFICULTY_TO_PERCENTAGE[level] || 30);
+      console.log('✅ Loaded difficulty level from user:', level, '→', DIFFICULTY_TO_PERCENTAGE[level] + '%');
+    }
+  }, [user]);
+
+  // Handle difficulty level change
+  const handleDifficultyChange = useCallback(async (newLevel) => {
+    const newPercentage = DIFFICULTY_TO_PERCENTAGE[newLevel] || 30;
+    
+    setHidePercentage(newPercentage);
+    setDifficultyLevel(newLevel);
+    
+    // Save to database
+    if (user) {
+      const result = await updateDifficultyLevel(newLevel);
+      if (result.success) {
+        console.log('✅ Difficulty level saved:', newLevel, '→', newPercentage + '%');
+      } else {
+        console.error('❌ Failed to save difficulty level:', result.error);
+      }
+    }
+  }, [user, updateDifficultyLevel]);
   
   // Dictation specific states (from ckk)
   const [savedWords, setSavedWords] = useState([]);
@@ -134,8 +183,6 @@ const DictationPageContent = () => {
   const hasStartedTimerRef = useRef(false); // Track if timer has been started
   const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
   const DEBUG_TIMER = false; // Set to true to enable timer logs
-
-  const { user } = useAuth();
 
   const audioRef = useRef(null);
   const youtubePlayerRef = useRef(null);
@@ -1812,14 +1859,26 @@ const DictationPageContent = () => {
       const totalValidWords = validWordIndices.length;
       const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
 
-      // Count how many words are completed for this sentence
-      const completedWordsCount = Object.keys(completedWords[currentSentenceIndex] || {}).length;
+      // Count completed words from DOM (not state) to avoid timing issues
+      // This ensures we get the most up-to-date count including just-completed words
+      const sentenceContainer = document.querySelector(`[data-sentence-index="${currentSentenceIndex}"]`);
+      let completedWordsCount = 0;
+      
+      if (sentenceContainer) {
+        // Count all correct-word spans (completed words)
+        const correctWordSpans = sentenceContainer.querySelectorAll('.correct-word');
+        completedWordsCount = correctWordSpans.length;
+      } else {
+        // Fallback to state if DOM element not found (shouldn't happen)
+        completedWordsCount = Object.keys(completedWords[currentSentenceIndex] || {}).length;
+      }
 
       console.log(`Checking sentence ${currentSentenceIndex}:`, {
         totalValidWords,
         wordsToHideCount,
         completedWordsCount,
-        completedWords: completedWords[currentSentenceIndex]
+        completedWords: completedWords[currentSentenceIndex],
+        fromDOM: sentenceContainer ? 'yes' : 'no (fallback to state)'
       });
 
       if (completedWordsCount >= wordsToHideCount && wordsToHideCount > 0) {
@@ -2583,11 +2642,11 @@ const DictationPageContent = () => {
                  name="word-${wordIndex}"
                  data-word-id="word-${wordIndex}"
                  data-word-length="${pureWord.length}"
-                 oninput="window.checkWord(this, '${pureWord}', ${wordIndex})"
-                 onclick="window.handleInputClick(this, '${pureWord}')"
-                 onkeydown="window.disableArrowKeys(event)"
-                 onfocus="window.handleInputFocus(this, '${pureWord}')"
-                 onblur="window.handleInputBlur(this, '${pureWord}')"
+                 oninput="window.checkWord?.(this, '${pureWord}', ${wordIndex})"
+                 onclick="window.handleInputClick?.(this, '${pureWord}')"
+                 onkeydown="window.disableArrowKeys?.(event)"
+                 onfocus="window.handleInputFocus?.(this, '${pureWord}')"
+                 onblur="window.handleInputBlur?.(this, '${pureWord}')"
                  maxlength="${pureWord.length}"
                  size="${dynamicSize}"
                  placeholder="${'*'.repeat(pureWord.length)}"
@@ -2615,19 +2674,31 @@ const DictationPageContent = () => {
 
   // Initialize dictation for current sentence
   useEffect(() => {
-    if (transcriptData.length > 0 && transcriptData[currentSentenceIndex] && progressLoaded) {
-      const text = transcriptData[currentSentenceIndex].text;
-      const isCompleted = completedSentences.includes(currentSentenceIndex);
-      const sentenceWordsCompleted = completedWords[currentSentenceIndex] || {};
+    console.log('🔍 Dictation render check:', {
+      transcriptDataLength: transcriptData.length,
+      currentSentenceIndex,
+      hasSentence: !!transcriptData[currentSentenceIndex],
+      progressLoaded,
+      sentenceText: transcriptData[currentSentenceIndex]?.text?.substring(0, 50)
+    });
 
-      console.log('Rendering sentence', currentSentenceIndex, ':', {
+    // Render dictation content if transcript is loaded (even if progress is still loading)
+    if (transcriptData.length > 0 && transcriptData[currentSentenceIndex]) {
+      const text = transcriptData[currentSentenceIndex].text;
+      const isCompleted = progressLoaded && completedSentences.includes(currentSentenceIndex);
+      const sentenceWordsCompleted = progressLoaded ? (completedWords[currentSentenceIndex] || {}) : {};
+
+      console.log('✅ Rendering sentence', currentSentenceIndex, ':', {
         isCompleted,
         sentenceWordsCompleted,
         allCompletedWords: completedWords,
-        hidePercentage
+        hidePercentage,
+        textLength: text.length,
+        progressLoaded
       });
 
       const processed = processLevelUp(text, isCompleted, sentenceWordsCompleted, hidePercentage);
+      console.log('📝 Processed HTML length:', processed.length);
       setProcessedText(processed);
       
       // Detect sentence length and add appropriate class + set word-length CSS variables
@@ -2955,14 +3026,17 @@ const DictationPageContent = () => {
                 {/* Hide Level Selector */}
                 <div className={styles.hideLevelSelector}>
                   <select
-                    value={hidePercentage}
-                    onChange={(e) => setHidePercentage(Number(e.target.value))}
+                    value={difficultyLevel}
+                    onChange={(e) => handleDifficultyChange(e.target.value)}
                     className={styles.hideLevelDropdown}
                     title="Wählen Sie den Schwierigkeitsgrad"
                   >
-                    <option value={30}>Easy (30%)</option>
-                    <option value={60}>Medium (60%)</option>
-                    <option value={100}>Hard (100%)</option>
+                    <option value="a1">A1 (10%)</option>
+                    <option value="a2">A2 (30%)</option>
+                    <option value="b1">B1 (30%)</option>
+                    <option value="b2">B2 (60%)</option>
+                    <option value="c1">C1 (100%)</option>
+                    <option value="c2">C2 (100%)</option>
                   </select>
                 </div>
                 {/* Auto-Jump Toggle Button - Show on both desktop and mobile */}
@@ -2994,7 +3068,22 @@ const DictationPageContent = () => {
 
             <div className={styles.dictationContainer}>
               {/* Mobile: Horizontal Scrollable Slides with Lazy Loading */}
-              {isMobile ? (
+              {transcriptData.length === 0 ? (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  padding: '20px',
+                  textAlign: 'center',
+                  color: 'var(--text-secondary)'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '24px', marginBottom: '10px' }}>⏳</div>
+                    <div>Loading dictation...</div>
+                  </div>
+                </div>
+              ) : isMobile ? (
                 <div className={styles.dictationSlidesWrapper}>
                   {/* Progress Dots Indicator */}
                   <div className={styles.progressDotsContainer}>
@@ -3071,6 +3160,7 @@ const DictationPageContent = () => {
                           )}
                           <div
                             className={`${styles.dictationInputArea} ${swipeDirection && isActive ? styles[`swipe-${swipeDirection}`] : ''}`}
+                            data-sentence-index={originalIndex}
                             dangerouslySetInnerHTML={{ __html: sentenceProcessedText }}
                             onTouchStart={isActive ? handleTouchStart : undefined}
                             onTouchMove={isActive ? handleTouchMove : undefined}
@@ -3188,6 +3278,7 @@ const DictationPageContent = () => {
                 <>
                   <div
                     className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
+                    data-sentence-index={currentSentenceIndex}
                     dangerouslySetInnerHTML={{ __html: processedText }}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}

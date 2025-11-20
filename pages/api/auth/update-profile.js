@@ -21,9 +21,9 @@ export default async function handler(req, res) {
 
     await connectDB();
 
-    const { nativeLanguage, level } = req.body;
+    const { nativeLanguage, level, preferredDifficultyLevel } = req.body;
 
-    if (!nativeLanguage && !level) {
+    if (!nativeLanguage && !level && !preferredDifficultyLevel) {
       return res.status(400).json({ message: 'Ít nhất một trường cần được cập nhật' });
     }
 
@@ -47,6 +47,15 @@ export default async function handler(req, res) {
       updateData.level = level;
     }
 
+    // Validate preferredDifficultyLevel if provided
+    if (preferredDifficultyLevel) {
+      const validDifficultyLevels = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
+      if (!validDifficultyLevels.includes(preferredDifficultyLevel)) {
+        return res.status(400).json({ message: 'Độ khó không hợp lệ' });
+      }
+      updateData.preferredDifficultyLevel = preferredDifficultyLevel;
+    }
+
     const user = await User.findByIdAndUpdate(
       decoded.userId,
       updateData,
@@ -64,7 +73,8 @@ export default async function handler(req, res) {
         email: user.email,
         role: user.role,
         nativeLanguage: user.nativeLanguage,
-        level: user.level
+        level: user.level,
+        preferredDifficultyLevel: user.preferredDifficultyLevel
       }
     });
   } catch (error) {

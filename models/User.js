@@ -45,6 +45,11 @@ const UserSchema = new mongoose.Schema({
      default: 'beginner',
      enum: ['beginner', 'experienced', 'all']
    },
+   preferredDifficultyLevel: {
+     type: String,
+     default: 'b1',
+     enum: ['a1', 'a2', 'b1', 'b2', 'c1', 'c2']
+   },
    streak: {
      currentStreak: {
        type: Number,

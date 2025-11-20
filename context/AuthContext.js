@@ -24,7 +24,8 @@ export function AuthProvider({ children }) {
           id: session.user.id,
           name: session.user.name,
           email: session.user.email,
-          role: session.user.role
+          role: session.user.role,
+          preferredDifficultyLevel: session.user.preferredDifficultyLevel || 'b1'
         });
         // Lưu custom token để tương thích với hệ thống JWT hiện tại
         if (session.customToken && typeof window !== 'undefined') {
@@ -115,7 +116,8 @@ export function AuthProvider({ children }) {
           name: decoded.name,
           role: decoded.role,
           nativeLanguage: decoded.nativeLanguage,
-          level: decoded.level
+          level: decoded.level,
+          preferredDifficultyLevel: decoded.preferredDifficultyLevel || 'b1'
         });
         console.log('✅ Sử dụng thông tin từ token cache');
       }
@@ -254,6 +256,41 @@ export function AuthProvider({ children }) {
     setUserPoints(newPoints);
   };
 
+  const updateDifficultyLevel = async (difficultyLevel) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const res = await fetch('/api/auth/update-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ preferredDifficultyLevel: difficultyLevel })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Update failed');
+      }
+
+      // Update user state with new difficulty level
+      setUser(prevUser => ({
+        ...prevUser,
+        preferredDifficultyLevel: difficultyLevel
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Update difficulty level error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const logout = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
@@ -278,7 +315,8 @@ export function AuthProvider({ children }) {
       refreshToken, 
       loginWithGoogle, 
       fetchUserPoints,
-      updateUserPoints 
+      updateUserPoints,
+      updateDifficultyLevel
     }}>
       {children}
     </AuthContext.Provider>

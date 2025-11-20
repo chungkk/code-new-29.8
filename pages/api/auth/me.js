@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         role: user.role,
         nativeLanguage: user.nativeLanguage,
         level: user.level,
+        preferredDifficultyLevel: user.preferredDifficultyLevel || 'b1',
         points: user.points || 0,
         streak: user.streak || {
           currentStreak: 0,
