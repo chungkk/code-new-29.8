@@ -175,6 +175,15 @@ function LessonFormPage() {
       if (data.videoDuration) {
         setFormData(prev => ({ ...prev, videoDuration: data.videoDuration }));
       }
+      if (data.videoTitle) {
+        const newId = generateIdFromTitle(data.videoTitle);
+        setFormData(prev => ({ 
+          ...prev, 
+          title: data.videoTitle,
+          description: data.videoTitle,
+          id: newId
+        }));
+      }
       toast.success(data.message || `SRT erfolgreich von YouTube geladen!`);
     } catch (error) {
       console.error('YouTube SRT error:', error);

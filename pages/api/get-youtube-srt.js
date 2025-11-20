@@ -87,11 +87,15 @@ export default async function handler(req, res) {
     // Get video duration in seconds
     const videoDuration = info.basic_info?.duration || 0;
 
+    // Get video title
+    const videoTitle = info.basic_info?.title || '';
+
     return res.status(200).json({
       success: true,
       srt: srt,
       itemCount: itemCount,
       videoDuration: videoDuration,
+      videoTitle: videoTitle,
       message: 'SRT đã được tải thành công từ YouTube!'
     });
 
