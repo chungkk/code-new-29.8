@@ -2977,10 +2977,6 @@ const DictationPageContent = () => {
               {/* Video Title - Always visible */}
               <div className={styles.videoTitleBox}>
                 <h3>{lesson.displayTitle || lesson.title}</h3>
-                <div className={styles.studyTimerMobile}>
-                  <span className={styles.timerIcon}>⏱️</span>
-                  <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
-                </div>
               </div>
 
               {/* Desktop Controls - Hidden on mobile */}

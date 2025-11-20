@@ -26,7 +26,7 @@ function LessonFormPage() {
     videoDuration: 0
   });
 
-  const [audioSource, setAudioSource] = useState('file');
+  const [audioSource, setAudioSource] = useState('youtube');
   const [audioFile, setAudioFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -372,81 +372,50 @@ function LessonFormPage() {
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Basic Information */}
-          <div className={styles.formSection}>
-            <h2 className={styles.sectionTitle}>📝 Grundinformationen</h2>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Titel (Title) *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => {
-                    const newTitle = e.target.value;
-                    const newId = isNewLesson ? generateIdFromTitle(newTitle) : formData.id;
-                    setFormData({ ...formData, title: newTitle, id: newId });
-                  }}
-                  className={`${styles.input} ${errors.title ? styles.error : ''}`}
-                  placeholder="Interner Titel"
-                />
-                {errors.title && <span className={styles.errorText}>{errors.title}</span>}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Niveau (Level) *
-                </label>
-                <select
-                  value={formData.level}
-                  onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                  className={`${styles.select} ${errors.level ? styles.error : ''}`}
-                >
-                  <option value="A1">A1</option>
-                  <option value="A2">A2</option>
-                  <option value="B1">B1</option>
-                  <option value="B2">B2</option>
-                  <option value="C1">C1</option>
-                  <option value="C2">C2</option>
-                </select>
-                {errors.level && <span className={styles.errorText}>{errors.level}</span>}
-              </div>
+          {/* Submit Buttons at Top */}
+          {isNewLesson && (
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                onClick={() => router.push('/admin/dashboard')}
+                className={styles.cancelButton}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                disabled={uploading}
+                className={styles.submitButton}
+              >
+                {uploading ? '⏳ Speichert...' : '➕ Lektion erstellen'}
+              </button>
             </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                Beschreibung (Description) *
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className={`${styles.textarea} ${errors.description ? styles.error : ''}`}
-                placeholder="Kurze Beschreibung der Lektion"
-                rows={3}
-              />
-              {errors.description && <span className={styles.errorText}>{errors.description}</span>}
-            </div>
-
-            {!isNewLesson && (
-              <div className={styles.formGroup}>
-                <label className={styles.label}>ID (nicht änderbar)</label>
-                <input
-                  type="text"
-                  value={formData.id}
-                  disabled
-                  className={styles.input}
-                />
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Audio & SRT (only for new lessons) */}
           {isNewLesson && (
             <>
               <div className={styles.formSection}>
                 <h2 className={styles.sectionTitle}>🎵 Audio/Video Quelle *</h2>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Niveau (Level) *
+                  </label>
+                  <select
+                    value={formData.level}
+                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                    className={`${styles.select} ${errors.level ? styles.error : ''}`}
+                  >
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                  </select>
+                  {errors.level && <span className={styles.errorText}>{errors.level}</span>}
+                </div>
 
                 <div className={styles.radioGroup}>
                   <label className={styles.radioLabel}>
@@ -523,6 +492,30 @@ function LessonFormPage() {
                 )}
 
                 {errors.audio && <span className={styles.errorText}>{errors.audio}</span>}
+
+                <div className={styles.srtActions}>
+                  {audioSource === 'youtube' && (
+                    <button
+                      type="button"
+                      onClick={handleGetYouTubeSRT}
+                      disabled={fetchingYouTubeSRT || !youtubeUrl.trim()}
+                      className={styles.actionButton}
+                    >
+                      {fetchingYouTubeSRT ? '⏳ Lade...' : '📺 SRT von YouTube laden'}
+                    </button>
+                  )}
+
+                  {audioSource !== 'youtube' && (
+                    <button
+                      type="button"
+                      onClick={handleTranscribe}
+                      disabled={transcribing || (!audioFile && !audioUrl.trim())}
+                      className={styles.actionButton}
+                    >
+                      {transcribing ? '⏳ Generiere...' : '🎙️ SRT aus Audio generieren'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {audioSource !== 'youtube' && (
@@ -557,30 +550,6 @@ function LessonFormPage() {
               <div className={styles.formSection}>
                 <h2 className={styles.sectionTitle}>📝 Untertitel (SRT) *</h2>
 
-                <div className={styles.srtActions}>
-                  {audioSource === 'youtube' && (
-                    <button
-                      type="button"
-                      onClick={handleGetYouTubeSRT}
-                      disabled={fetchingYouTubeSRT || !youtubeUrl.trim()}
-                      className={styles.actionButton}
-                    >
-                      {fetchingYouTubeSRT ? '⏳ Lade...' : '📺 SRT von YouTube laden'}
-                    </button>
-                  )}
-
-                  {audioSource !== 'youtube' && (
-                    <button
-                      type="button"
-                      onClick={handleTranscribe}
-                      disabled={transcribing || (!audioFile && !audioUrl.trim())}
-                      className={styles.actionButton}
-                    >
-                      {transcribing ? '⏳ Generiere...' : '🎙️ SRT aus Audio generieren'}
-                    </button>
-                  )}
-                </div>
-
                 <textarea
                   value={srtText}
                   onChange={(e) => setSrtText(e.target.value)}
@@ -599,29 +568,101 @@ mit dem Top Thema"
             </>
           )}
 
-          {!isNewLesson && (
-            <div className={styles.warningBox}>
-              <strong>Hinweis:</strong> Audio und JSON können nicht bearbeitet werden. Nur Lektionsinformationen können aktualisiert werden.
-            </div>
-          )}
+          {/* Basic Information */}
+          <div className={styles.formSection}>
+            <h2 className={styles.sectionTitle}>📝 Grundinformationen</h2>
 
-          {/* Submit Button */}
-          <div className={styles.formActions}>
-            <button
-              type="button"
-              onClick={() => router.push('/admin/dashboard')}
-              className={styles.cancelButton}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              disabled={uploading}
-              className={styles.submitButton}
-            >
-              {uploading ? '⏳ Speichert...' : (isNewLesson ? '➕ Lektion erstellen' : '✏️ Aktualisieren')}
-            </button>
+            {!isNewLesson && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Niveau (Level) *
+                </label>
+                <select
+                  value={formData.level}
+                  onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                  className={`${styles.select} ${errors.level ? styles.error : ''}`}
+                >
+                  <option value="A1">A1</option>
+                  <option value="A2">A2</option>
+                  <option value="B1">B1</option>
+                  <option value="B2">B2</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
+                </select>
+                {errors.level && <span className={styles.errorText}>{errors.level}</span>}
+              </div>
+            )}
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Titel (Title) *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => {
+                  const newTitle = e.target.value;
+                  const newId = isNewLesson ? generateIdFromTitle(newTitle) : formData.id;
+                  setFormData({ ...formData, title: newTitle, id: newId });
+                }}
+                className={`${styles.input} ${errors.title ? styles.error : ''}`}
+                placeholder="Interner Titel"
+              />
+              {errors.title && <span className={styles.errorText}>{errors.title}</span>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Beschreibung (Description) *
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className={`${styles.textarea} ${errors.description ? styles.error : ''}`}
+                placeholder="Kurze Beschreibung der Lektion"
+                rows={3}
+              />
+              {errors.description && <span className={styles.errorText}>{errors.description}</span>}
+            </div>
+
+            {!isNewLesson && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>ID (nicht änderbar)</label>
+                <input
+                  type="text"
+                  value={formData.id}
+                  disabled
+                  className={styles.input}
+                />
+              </div>
+            )}
           </div>
+
+          {!isNewLesson && (
+            <>
+              <div className={styles.warningBox}>
+                <strong>Hinweis:</strong> Audio und JSON können nicht bearbeitet werden. Nur Lektionsinformationen können aktualisiert werden.
+              </div>
+
+              {/* Submit Buttons for Edit */}
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin/dashboard')}
+                  className={styles.cancelButton}
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className={styles.submitButton}
+                >
+                  {uploading ? '⏳ Speichert...' : '✏️ Aktualisieren'}
+                </button>
+              </div>
+            </>
+          )}
         </form>
       </AdminDashboardLayout>
     </>
