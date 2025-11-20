@@ -236,8 +236,8 @@ const HomePage = () => {
           })}
         </div>
 
-        {/* Self-create lesson form */}
-        <div style={{
+        {/* Self-create lesson form - Temporarily hidden */}
+        {/* <div style={{
           marginBottom: '20px',
           padding: '14px 16px',
           background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
@@ -286,7 +286,7 @@ const HomePage = () => {
               {createError}
             </p>
           )}
-        </div>
+        </div> */}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', fontSize: '18px', color: '#666' }}>
