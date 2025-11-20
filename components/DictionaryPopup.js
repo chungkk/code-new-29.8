@@ -159,18 +159,22 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.wordTitle}>{word}</div>
-            {wordData?.translation && (
+            {isLoading ? (
+              <div className={styles.loadingText}>
+                {t('dictionaryPopup.searching') || 'Đang tra từ...'}
+              </div>
+            ) : wordData?.translation ? (
               <div className={styles.wordTranslation}>
                 {wordData.translation}
               </div>
-            )}
+            ) : null}
           </div>
           <div className={styles.headerButtons}>
-            {user && (
+            {user && !isLoading && wordData && (
               <button
                 onClick={handleSaveWord}
                 className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
-                disabled={isSaving || isLoading}
+                disabled={isSaving}
                 title={isSaved ? t('dictionaryPopup.alreadySaved') : t('dictionaryPopup.saveToTreasure')}
               >
                 {isSaving ? '💫' : isSaved ? '🎉 ' + t('dictionaryPopup.saved') : '⭐ ' + t('dictionaryPopup.save')}
@@ -183,7 +187,14 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
         </div>
 
         <div className={styles.content}>
-          {!isLoading && wordData ? (
+          {isLoading ? (
+            <div className={styles.loadingState}>
+              <div className={styles.loadingSpinner}></div>
+              <div className={styles.loadingMessage}>
+                {t('dictionaryPopup.loading') || 'Đang tải nội dung...'}
+              </div>
+            </div>
+          ) : wordData ? (
             <>
               {/* Explanation */}
               {wordData?.explanation && (
@@ -210,7 +221,11 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
             </div>
           )}
             </>
-          ) : null}
+          ) : (
+            <div className={styles.noData}>
+              {t('dictionaryPopup.noData') || 'Không tìm thấy dữ liệu'}
+            </div>
+          )}
         </div>
       </div>
     </div>

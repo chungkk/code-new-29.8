@@ -1,5 +1,56 @@
+import connectDB from '../../lib/mongodb';
+import mongoose from 'mongoose';
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+
+const DEFAULT_CACHE_VERSION = 'v1'; // Default version
+const DEFAULT_CACHE_EXPIRY_DAYS = 7; // Default expiry days
+
+// Define Mongoose schema for dictionary cache
+const DictionaryCacheSchema = new mongoose.Schema({
+  cacheKey: { type: String, required: true, unique: true, index: true },
+  word: { type: String, required: true },
+  targetLang: { type: String, required: true },
+  version: { type: String, required: true, default: 'v1' },
+  data: { type: Object, required: true },
+  hits: { type: Number, default: 0 }, // Track cache hits for analytics
+  createdAt: { type: Date, default: Date.now, index: true }
+});
+
+// Get or create the model
+const DictionaryCache = mongoose.models.DictionaryCache ||
+  mongoose.model('DictionaryCache', DictionaryCacheSchema);
+
+// Cache Settings Schema
+const CacheSettingsSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: { type: mongoose.Schema.Types.Mixed, required: true },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const CacheSettings = mongoose.models.CacheSettings ||
+  mongoose.model('CacheSettings', CacheSettingsSchema);
+
+// Get cache settings from database
+async function getCacheSettings() {
+  try {
+    await connectDB();
+    const expiryDaysSetting = await CacheSettings.findOne({ key: 'CACHE_EXPIRY_DAYS' });
+    const versionSetting = await CacheSettings.findOne({ key: 'CACHE_VERSION' });
+
+    return {
+      expiryDays: expiryDaysSetting?.value || DEFAULT_CACHE_EXPIRY_DAYS,
+      version: versionSetting?.value || DEFAULT_CACHE_VERSION
+    };
+  } catch (error) {
+    console.error('Error fetching cache settings:', error);
+    return {
+      expiryDays: DEFAULT_CACHE_EXPIRY_DAYS,
+      version: DEFAULT_CACHE_VERSION
+    };
+  }
+}
 
 const LANGUAGE_NAMES = {
   vi: 'tiếng Việt',
@@ -91,6 +142,94 @@ Anforderungen:
   return JSON.parse(content);
 }
 
+// Get cached dictionary data from MongoDB using Mongoose
+async function getCachedDictionary(word, targetLang) {
+  try {
+    await connectDB();
+    const settings = await getCacheSettings();
+
+    const cacheKey = `${word}_${targetLang}_${settings.version}`.toLowerCase();
+    const cached = await DictionaryCache.findOne({ cacheKey, version: settings.version });
+
+    if (cached) {
+      const expiryDate = new Date(cached.createdAt);
+      expiryDate.setDate(expiryDate.getDate() + settings.expiryDays);
+
+      if (new Date() < expiryDate) {
+        // Increment hit counter for analytics
+        await DictionaryCache.updateOne(
+          { cacheKey },
+          { $inc: { hits: 1 } }
+        );
+
+        console.log(`✅ Cache hit for "${word}" (hits: ${cached.hits + 1})`);
+        return cached.data;
+      }
+      // Cache expired, delete it
+      await DictionaryCache.deleteOne({ cacheKey });
+    }
+
+    console.log(`❌ Cache miss for "${word}"`);
+    return null;
+  } catch (error) {
+    console.error('Cache read error:', error);
+    return null;
+  }
+}
+
+// Save dictionary data to MongoDB cache using Mongoose
+async function saveToCacheDictionary(word, data, targetLang) {
+  try {
+    await connectDB();
+    const settings = await getCacheSettings();
+
+    const cacheKey = `${word}_${targetLang}_${settings.version}`.toLowerCase();
+
+    await DictionaryCache.updateOne(
+      { cacheKey },
+      {
+        cacheKey,
+        word,
+        targetLang,
+        version: settings.version,
+        data,
+        hits: 0,
+        createdAt: new Date()
+      },
+      { upsert: true }
+    );
+
+    console.log(`💾 Cached "${word}" (version: ${settings.version})`);
+  } catch (error) {
+    console.error('Cache write error:', error);
+  }
+}
+
+// Clean up old cache entries (older than CACHE_EXPIRY_DAYS or old versions)
+async function cleanupOldCache() {
+  try {
+    await connectDB();
+    const settings = await getCacheSettings();
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - settings.expiryDays);
+
+    // Delete entries that are either old OR from previous versions
+    const result = await DictionaryCache.deleteMany({
+      $or: [
+        { createdAt: { $lt: cutoffDate } },
+        { version: { $ne: settings.version } }
+      ]
+    });
+
+    if (result.deletedCount > 0) {
+      console.log(`🧹 Cleaned up ${result.deletedCount} old cache entries`);
+    }
+  } catch (error) {
+    console.error('Cache cleanup error:', error);
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
@@ -102,7 +241,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, message: 'Word is required' });
   }
 
+  // Cleanup old cache occasionally (10% chance per request)
+  if (Math.random() < 0.1) {
+    cleanupOldCache().catch(err => console.error('Background cleanup failed:', err));
+  }
+
   try {
+    // Check cache first
+    const cachedData = await getCachedDictionary(word, targetLang || 'vi');
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        data: cachedData,
+        fromCache: true
+      });
+    }
+
     // Step 1: Get translation
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host;
@@ -154,9 +308,13 @@ export default async function handler(req, res) {
       wordType: aiData.wordType
     };
 
+    // Save to cache for future requests
+    await saveToCacheDictionary(word, dictionaryData, targetLang || 'vi');
+
     return res.status(200).json({
       success: true,
-      data: dictionaryData
+      data: dictionaryData,
+      fromCache: false
     });
 
   } catch (error) {

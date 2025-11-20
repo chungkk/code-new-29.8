@@ -40,6 +40,7 @@ const AdminDashboardLayout = ({ children }) => {
       label: 'Settings',
       items: [
         { href: '/admin/settings', label: 'Einstellungen', icon: '⚙️' },
+        { href: '/admin/cache', label: 'Cache', icon: '💾' },
       ]
     }
   ];

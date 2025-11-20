@@ -986,11 +986,7 @@ const ShadowingPageContent = () => {
     // Speak the word (always, for both guests and users)
     speakText(cleanedWord);
 
-    // Only show translation popup/tooltip for logged-in users
-    if (!user) {
-      return;
-    }
-
+    // Show translation popup/tooltip for both guests and users
     const isMobileView = window.innerWidth <= 768;
     const element = event.target;
 
@@ -1032,26 +1028,14 @@ const ShadowingPageContent = () => {
       }
       setTooltipTranslation(translation || 'Übersetzung nicht verfügbar');
     } else {
-      // Desktop: show loading indicator first
-      const rect = element.getBoundingClientRect();
-      setLoadingPosition({
-        top: rect.top - 40,
-        left: rect.left + rect.width / 2
-      });
-      setShowWordLoading(true);
-      setShowVocabPopup(false);
+      // Desktop: show popup immediately with loading state
+      const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
 
       setClickedWordElement(element);
       setSelectedWord(cleanedWord);
-
-      // Wait a moment, then show popup
-      setTimeout(() => {
-        setShowWordLoading(false);
-        const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
-        setPopupPosition({ top, left });
-        setPopupArrowPosition(arrowPos);
-        setShowVocabPopup(true);
-      }, 400);
+      setPopupPosition({ top, left });
+      setPopupArrowPosition(arrowPos);
+      setShowVocabPopup(true);
     }
   }, [isYouTube, user, calculatePopupPosition]);
 
@@ -1412,10 +1396,32 @@ const ShadowingPageContent = () => {
                  {/* Video Section */}
                  <div className={styles.videoSection}>
                    <div className={styles.videoHeader}>
-                     <h3 className={styles.transcriptTitle}>Video</h3>
-                     <div className={styles.studyTimer}>
-                       <span className={styles.timerIcon}>⏱️</span>
-                       <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                       <h3 className={styles.transcriptTitle}>Video</h3>
+                       <div className={styles.studyTimer}>
+                         <span className={styles.timerIcon}>⏱️</span>
+                         <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
+                       </div>
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                       <label className={styles.toggleLabel}>
+                         <input
+                           type="checkbox"
+                           checked={autoStop}
+                           onChange={(e) => setAutoStop(e.target.checked)}
+                           className={styles.toggleInput}
+                         />
+                         <span className={styles.toggleSlider}></span>
+                         <span className={styles.toggleText}>Auto Stop</span>
+                       </label>
+                       <button className={styles.speedButton} onClick={() => {
+                         const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+                         const currentIndex = speeds.indexOf(playbackSpeed);
+                         const nextIndex = (currentIndex + 1) % speeds.length;
+                         setPlaybackSpeed(speeds[nextIndex]);
+                       }}>
+                         ⚡ {playbackSpeed}x
+                       </button>
                      </div>
                    </div>
                    {/* Video Player */}
@@ -1448,12 +1454,12 @@ const ShadowingPageContent = () => {
                            return (
                              <span
                                key={idx}
-                               className={isMobile ? styles.word : ''}
-                               onClick={isMobile ? (e) => {
+                               className={styles.word}
+                               onClick={(e) => {
                                  e.stopPropagation();
                                  handleWordClickForPopup(word, e);
-                               } : undefined}
-                               style={{ marginRight: '6px' }}
+                               }}
+                               style={{ marginRight: '6px', cursor: 'pointer' }}
                              >
                                {word}
                              </span>
@@ -1469,42 +1475,6 @@ const ShadowingPageContent = () => {
                      )}
                    </div>
                  )}
-
-
-
-                    {/* Controls */}
-                    <div className={styles.controlsWrapper}>
-                       <div className={styles.controlRow}>
-                         <label className={styles.toggleLabel}>
-                          <input
-                            type="checkbox"
-                            checked={autoStop}
-                            onChange={(e) => setAutoStop(e.target.checked)}
-                            className={styles.toggleInput}
-                          />
-                          <span className={styles.toggleSlider}></span>
-                          <span className={styles.toggleText}>Auto Stop</span>
-                        </label>
-                        <button className={`${styles.startButton} ${styles.controlStartButton}`} onClick={handlePlayPause}>
-                          ▶ Start
-                        </button>
-                        <div className={styles.controlGroup}>
-                          <button className={styles.iconButton} title="Settings">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                              <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-                            </svg>
-                          </button>
-                          <button className={styles.speedButton} onClick={() => {
-                            const speeds = [0.5, 0.75, 1, 1.25, 1.5];
-                            const currentIndex = speeds.indexOf(playbackSpeed);
-                            const nextIndex = (currentIndex + 1) % speeds.length;
-                            setPlaybackSpeed(speeds[nextIndex]);
-                          }}>
-                            ⚡ {playbackSpeed}x
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                </div>
 
                {/* Right Section: Transcript */}
