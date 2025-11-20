@@ -19,9 +19,9 @@
 /* Main Container */
 .mainContainer {
   display: grid;
-  grid-template-columns: minmax(0, 650px) 1fr;
-  gap: 18px;
-  padding: 24px;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 14px;
+  padding: 19px;
 }
 
 /* Left Section */
@@ -29,6 +29,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 /* Video Container */
@@ -120,15 +121,21 @@
 .word {
   display: inline-block;
   margin: 0 6px;
-  cursor: pointer;
   transition: color 0.2s, text-decoration 0.2s;
   text-decoration: underline;
   text-decoration-color: transparent;
 }
 
-.word:hover {
-  color: #4a90e2;
-  text-decoration-color: #4a90e2;
+/* Enable hover and cursor on mobile only */
+@media (max-width: 768px) {
+  .word {
+    cursor: pointer;
+  }
+  
+  .word:hover {
+    color: #4a90e2;
+    text-decoration-color: #4a90e2;
+  }
 }
 
 .currentSentenceIPA {
@@ -355,8 +362,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  min-height: 56px;
+  padding: 14px 20px;
+  height: 45px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-hover);
 }
@@ -393,14 +400,15 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 320px;
 }
 
 .transcriptHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  min-height: 56px;
+  padding: 14px 20px;
+  height: 45px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-hover);
 }
@@ -503,16 +511,21 @@
 }
 
 .transcriptList::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .transcriptList::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 999px;
 }
 
+.transcriptList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
 .transcriptList::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
 }
 
 /* Transcript Item */
@@ -520,7 +533,7 @@
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid transparent;
   border-radius: 12px;
-  padding: 4px;
+  padding: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -586,6 +599,8 @@
   color: var(--text-primary);
   font-weight: 500;
   margin-bottom: 6px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .clickableWord {
@@ -594,10 +609,13 @@
   border-radius: 4px;
 }
 
-.clickableWord:hover {
-  background: rgba(74, 144, 226, 0.2);
-  color: #7dd3fc;
-  text-decoration: underline;
+/* Enable hover effect for mobile only */
+@media (max-width: 768px) {
+  .clickableWord:hover {
+    background: rgba(74, 144, 226, 0.2);
+    color: #7dd3fc;
+    text-decoration: underline;
+  }
 }
 
 .transcriptIPA {
@@ -638,7 +656,7 @@
 
 @media (max-width: 1200px) {
   .mainContainer {
-    grid-template-columns: 1fr 520px;
+    grid-template-columns: 1.5fr 1fr;
   }
 }
 

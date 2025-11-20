@@ -143,19 +143,23 @@ async function networkFirstStrategy(request) {
     // Try network first
     const networkResponse = await fetch(request);
     
-    // Cache successful responses
-    if (networkResponse && networkResponse.status === 200) {
+    // Only cache GET requests with successful responses
+    if (request.method === 'GET' && networkResponse && networkResponse.status === 200) {
       cache.put(request, networkResponse.clone());
     }
     
     return networkResponse;
   } catch (error) {
-    // Network failed, try cache
+    // Network failed, try cache (only for GET requests)
     console.log('[SW] Network failed, trying cache:', request.url);
-    const cachedResponse = await cache.match(request);
     
-    if (cachedResponse) {
-      return cachedResponse;
+    // Only try cache for GET requests
+    if (request.method === 'GET') {
+      const cachedResponse = await cache.match(request);
+      
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
     
     // If HTML page, return offline fallback

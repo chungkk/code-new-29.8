@@ -141,6 +141,10 @@ const DictationPageContent = () => {
   const [popupArrowPosition, setPopupArrowPosition] = useState('right');
   const [clickedWordElement, setClickedWordElement] = useState(null);
   
+  // Loading indicator states
+  const [showWordLoading, setShowWordLoading] = useState(false);
+  const [loadingPosition, setLoadingPosition] = useState({ top: 0, left: 0 });
+  
   // Mobile tooltip states
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipWord, setTooltipWord] = useState('');
@@ -1718,11 +1722,25 @@ const DictationPageContent = () => {
         top = window.innerHeight - popupHeight - 20;
       }
 
+      // Show loading indicator first
+      const loadingRect = element.getBoundingClientRect();
+      setLoadingPosition({
+        top: loadingRect.top - 40,
+        left: loadingRect.left + loadingRect.width / 2
+      });
+      setShowWordLoading(true);
+      setShowVocabPopup(false);
+
       setClickedWordElement(element);
       setSelectedWord(cleanedWord);
-      setPopupPosition({ top, left });
-      setPopupArrowPosition(arrowPos);
-      setShowVocabPopup(true);
+
+      // Wait a moment, then show popup
+      setTimeout(() => {
+        setShowWordLoading(false);
+        setPopupPosition({ top, left });
+        setPopupArrowPosition(arrowPos);
+        setShowVocabPopup(true);
+      }, 400);
     }
   }, [isYouTube, user]);
 
@@ -3544,6 +3562,49 @@ const DictationPageContent = () => {
             setTooltipTranslation('');
           }}
         />
+      )}
+
+      {/* Loading indicator for word lookup */}
+      {showWordLoading && (
+        <>
+          <style>{`
+            @keyframes wordLoadingSpin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+          <div
+            style={{
+              position: 'fixed',
+              top: `${loadingPosition.top}px`,
+              left: `${loadingPosition.left}px`,
+              transform: 'translateX(-50%)',
+              zIndex: 10000,
+              background: 'rgba(0, 0, 0, 0.85)',
+              color: 'white',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+            }}
+          >
+            <div
+              style={{
+                width: '12px',
+                height: '12px',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderTopColor: 'white',
+                borderRadius: '50%',
+                animation: 'wordLoadingSpin 0.6s linear infinite'
+              }}
+            />
+            Loading...
+          </div>
+        </>
       )}
 
       {/* Desktop Dictionary Popup */}

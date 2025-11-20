@@ -183,41 +183,34 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
         </div>
 
         <div className={styles.content}>
-          {isLoading ? (
-            <div className={styles.loading}>
-              <div className={styles.spinnerContainer}>
-                <div className={styles.spinner}></div>
-              </div>
-              <div className={styles.loadingText}>{t('dictionaryPopup.loading')}</div>
-            </div>
-          ) : (
+          {!isLoading && wordData ? (
             <>
               {/* Explanation */}
               {wordData?.explanation && (
-                <div className={styles.section}>
-                  <h4 className={styles.sectionTitle}>{t('dictionaryPopup.explanation')}</h4>
-                  <div className={styles.sectionContent}>
-                    {wordData.explanation}
-                  </div>
-                </div>
-              )}
-
-              {/* Examples */}
-              {wordData?.examples && wordData.examples.length > 0 && (
-                <div className={styles.section}>
-                  <h4 className={styles.sectionTitle}>{t('dictionaryPopup.examples')}</h4>
-                  <div className={styles.examples}>
-                    {wordData.examples.map((example, index) => (
-                      <div key={index} className={styles.example}>
-                        <div className={styles.exampleGerman}>{example.de}</div>
-                        <div className={styles.exampleTranslation}>{example.translation}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+            <div className={styles.section}>
+              <h4 className={styles.sectionTitle}>{t('dictionaryPopup.explanation')}</h4>
+              <div className={styles.sectionContent}>
+                {wordData.explanation}
+              </div>
+            </div>
           )}
+
+          {/* Examples */}
+          {wordData?.examples && wordData.examples.length > 0 && (
+            <div className={styles.section}>
+              <h4 className={styles.sectionTitle}>{t('dictionaryPopup.examples')}</h4>
+              <div className={styles.examples}>
+                {wordData.examples.map((example, index) => (
+                  <div key={index} className={styles.example}>
+                    <div className={styles.exampleGerman}>{example.de}</div>
+                    <div className={styles.exampleTranslation}>{example.translation}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+            </>
+          ) : null}
         </div>
       </div>
     </div>

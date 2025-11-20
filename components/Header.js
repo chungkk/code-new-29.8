@@ -193,36 +193,15 @@ const Header = () => {
             {currentTheme?.emoji || '🌅'}
           </button>
 
-          <div className={styles.languageMenuContainer} ref={languageMenuRef}>
-            <button
+          <div className={styles.languageMenuContainer}>
+            <div
               className={styles.languageSelector}
-              onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
-              aria-label="Language selector"
-              aria-expanded={languageMenuOpen}
+              style={{ cursor: 'default' }}
+              aria-label="Language"
             >
-              <span>{currentLanguageInfo.flag}</span>
-              <span>{currentLanguageInfo.nativeName}</span>
-              <span>▼</span>
-            </button>
-
-            {languageMenuOpen && (
-              <div className={styles.languageDropdown}>
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    className={`${styles.languageOption} ${currentLanguage === lang.code ? styles.active : ''}`}
-                    onClick={() => {
-                      changeLanguage(lang.code);
-                      setLanguageMenuOpen(false);
-                    }}
-                  >
-                    <span>{lang.flag}</span>
-                    <span>{lang.nativeName}</span>
-                    {currentLanguage === lang.code && <span className={styles.checkmark}>✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
+              <span>🇩🇪</span>
+              <span>Deutsch</span>
+            </div>
           </div>
 
           {user && (

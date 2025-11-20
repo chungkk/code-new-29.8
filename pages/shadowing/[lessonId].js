@@ -48,11 +48,16 @@ const ShadowingPageContent = () => {
   const [popupArrowPosition, setPopupArrowPosition] = useState('right');
   const [clickedWordElement, setClickedWordElement] = useState(null);
   
+  // Loading indicator states
+  const [showWordLoading, setShowWordLoading] = useState(false);
+  const [loadingPosition, setLoadingPosition] = useState({ top: 0, left: 0 });
+  
   // Mobile tooltip states
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipWord, setTooltipWord] = useState('');
   const [tooltipTranslation, setTooltipTranslation] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [isMobile, setIsMobile] = useState(false);
 
   // Progress loading state
   const [progressLoaded, setProgressLoaded] = useState(false);
@@ -287,6 +292,18 @@ const ShadowingPageContent = () => {
         pauseTimeoutRef.current = null;
       }
     };
+  }, []);
+
+  // Check if mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Inactivity detection - stop timer after 3 minutes of no activity
@@ -991,7 +1008,18 @@ const ShadowingPageContent = () => {
       let translation = translationCache.get(cleanedWord, 'de', 'vi');
       if (!translation) {
         try {
-          const response = await fetch(`/api/translate?text=${encodeURIComponent(cleanedWord)}&sourceLang=de&targetLang=vi`);
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: cleanedWord,
+              context: '',
+              sourceLang: 'de',
+              targetLang: 'vi'
+            })
+          });
           if (response.ok) {
             const data = await response.json();
             translation = data.translation;
@@ -1004,14 +1032,26 @@ const ShadowingPageContent = () => {
       }
       setTooltipTranslation(translation || 'Übersetzung nicht verfügbar');
     } else {
-      // Desktop: show full popup
-      const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
+      // Desktop: show loading indicator first
+      const rect = element.getBoundingClientRect();
+      setLoadingPosition({
+        top: rect.top - 40,
+        left: rect.left + rect.width / 2
+      });
+      setShowWordLoading(true);
+      setShowVocabPopup(false);
 
       setClickedWordElement(element);
       setSelectedWord(cleanedWord);
-      setPopupPosition({ top, left });
-      setPopupArrowPosition(arrowPos);
-      setShowVocabPopup(true);
+
+      // Wait a moment, then show popup
+      setTimeout(() => {
+        setShowWordLoading(false);
+        const { top, left, arrowPos } = calculatePopupPosition(element, isMobileView);
+        setPopupPosition({ top, left });
+        setPopupArrowPosition(arrowPos);
+        setShowVocabPopup(true);
+      }, 400);
     }
   }, [isYouTube, user, calculatePopupPosition]);
 
@@ -1408,17 +1448,18 @@ const ShadowingPageContent = () => {
                            return (
                              <span
                                key={idx}
-                               className={styles.word}
-                               onClick={(e) => {
+                               className={isMobile ? styles.word : ''}
+                               onClick={isMobile ? (e) => {
                                  e.stopPropagation();
                                  handleWordClickForPopup(word, e);
-                               }}
+                               } : undefined}
+                               style={{ marginRight: '6px' }}
                              >
                                {word}
                              </span>
                            );
                          }
-                         return <span key={idx}>{word}</span>;
+                         return <span key={idx} style={{ marginRight: '6px' }}>{word}</span>;
                        })}
                      </div>
                      {showIPA && transcriptData[currentSentenceIndex].ipa && (
@@ -1568,17 +1609,18 @@ const ShadowingPageContent = () => {
                              return (
                                <span
                                  key={idx}
-                                 className={styles.word}
-                                 onClick={(e) => {
+                                 className={isMobile ? styles.word : ''}
+                                 onClick={isMobile ? (e) => {
                                    e.stopPropagation();
                                    handleWordClickForPopup(word, e);
-                                 }}
+                                 } : undefined}
+                                 style={{ marginRight: '6px' }}
                                >
-                                 {word}{' '}
+                                 {word}
                                </span>
                              );
                            }
-                           return <span key={idx}>{word} </span>;
+                           return <span key={idx} style={{ marginRight: '6px' }}>{word}</span>;
                          })}
                        </div>
 
@@ -1651,6 +1693,49 @@ const ShadowingPageContent = () => {
              classNames={footerClassNames}
            />
          </div> */}
+
+         {/* Loading indicator for word lookup */}
+         {showWordLoading && (
+           <>
+             <style>{`
+               @keyframes wordLoadingSpin {
+                 from { transform: rotate(0deg); }
+                 to { transform: rotate(360deg); }
+               }
+             `}</style>
+             <div
+               style={{
+                 position: 'fixed',
+                 top: `${loadingPosition.top}px`,
+                 left: `${loadingPosition.left}px`,
+                 transform: 'translateX(-50%)',
+                 zIndex: 10000,
+                 background: 'rgba(0, 0, 0, 0.85)',
+                 color: 'white',
+                 padding: '6px 12px',
+                 borderRadius: '6px',
+                 fontSize: '12px',
+                 fontWeight: '500',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '6px',
+                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+               }}
+             >
+               <div
+                 style={{
+                   width: '12px',
+                   height: '12px',
+                   border: '2px solid rgba(255, 255, 255, 0.3)',
+                   borderTopColor: 'white',
+                   borderRadius: '50%',
+                   animation: 'wordLoadingSpin 0.6s linear infinite'
+                 }}
+               />
+               Loading...
+             </div>
+           </>
+         )}
 
          {/* Dictionary Popup (desktop only) */}
          {showVocabPopup && (
