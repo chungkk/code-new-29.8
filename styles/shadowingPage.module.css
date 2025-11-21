@@ -44,7 +44,7 @@
 .videoWrapper {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  padding-top: 50.625%; /* 16:9 aspect ratio reduced by 10% (56.25% * 0.9) */
   background: #000;
 }
 
@@ -362,7 +362,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 20px;
-  height: 45px;
+  height: 50px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-hover);
   gap: 12px;
@@ -408,9 +408,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 20px;
-  height: 45px;
+  height: 50px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-hover);
+  gap: 12px;
 }
 
 .transcriptTabs {
@@ -658,7 +659,7 @@
 /* Responsive Design */
 @media (min-width: 769px) {
   .videoWrapper {
-    padding-top: 56.25%; /* 16:9 aspect ratio */
+    padding-top: 50.625%; /* 16:9 aspect ratio reduced by 10% (56.25% * 0.9) */
   }
 }
 

@@ -64,7 +64,7 @@ const ProgressIndicator = ({
   const colorScheme = difficultyColors[difficultyLevel] || difficultyColors['b1'];
 
   // SVG Circle calculations - Smaller size for compact display
-  const size = 54;
+  const size = 48;
   const strokeWidth = 5;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
