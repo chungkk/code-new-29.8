@@ -715,12 +715,15 @@
 
   .mainContainer {
     padding: 0;
-    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     gap: 0;
-    height: 100%;
+    position: fixed;
+    top: 64px;
+    bottom: 72px;
+    left: 0;
+    right: 0;
   }
 
   .leftSection {
@@ -733,7 +736,6 @@
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-    margin-bottom: 72px;
   }
 
   .currentSentenceText {
