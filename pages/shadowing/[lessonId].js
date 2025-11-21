@@ -1770,7 +1770,7 @@ const ShadowingPageContent = () => {
                    {transcriptData.map((segment, index) => {
                      const sentenceState = recordingStates[index] || {};
                      const isActive = currentSentenceIndex === index;
-                     const canRecord = isActive && isPlaying; // Only allow recording when sentence is active AND playing
+                     const canRecord = isActive; // Allow recording when sentence is active (clicked)
                      
                      return (
                        <div
@@ -1778,39 +1778,47 @@ const ShadowingPageContent = () => {
                          ref={isActive ? activeTranscriptItemRef : null}
                          className={`${styles.transcriptItem} ${isActive ? styles.transcriptItemActive : ''}`}
                        >
-                         {/* Recording controls - only show when sentence is playing */}
-                         {canRecord && (
-                           <div 
-                             className={styles.recordingControlsInTranscript}
-                             onClick={(e) => e.stopPropagation()}
-                           >
-                             {/* Show score badge if has comparison result */}
-                             {sentenceState.comparisonResult && (
-                               <div 
-                                 className={`${styles.scoreBadge} ${sentenceState.comparisonResult.isPassed ? styles.scoreBadgePassed : styles.scoreBadgeFailed}`}
-                                 title={sentenceState.comparisonResult.feedback}
-                               >
-                                 {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
-                               </div>
-                             )}
+                         {/* Recording controls - always show on hover/active, but only functional when playing */}
+                         <div 
+                           className={styles.recordingControlsInTranscript}
+                           onClick={(e) => e.stopPropagation()}
+                         >
+                           {/* Show score badge if has comparison result */}
+                           {sentenceState.comparisonResult && (
+                             <div 
+                               className={`${styles.scoreBadge} ${sentenceState.comparisonResult.isPassed ? styles.scoreBadgePassed : styles.scoreBadgeFailed}`}
+                               title={sentenceState.comparisonResult.feedback}
+                             >
+                               {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
+                             </div>
+                           )}
 
+                           {/* Show recorder when can record, or placeholder icon when cannot */}
+                           {canRecord ? (
                              <ShadowingVoiceRecorder
                                onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
                                onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
                                language="de-DE"
                              />
+                           ) : (
+                             <div 
+                               className={styles.micPlaceholder}
+                               title="Phát câu này để bắt đầu ghi âm"
+                             >
+                               🎤
+                             </div>
+                           )}
 
-                             {sentenceState.recordedBlob && (
-                               <button
-                                 className={`${styles.playbackButtonIcon} ${sentenceState.isPlaying ? styles.playingIcon : ''}`}
-                                 onClick={() => playRecordedAudio(index)}
-                                 title={sentenceState.isPlaying ? 'Dừng phát' : 'Nghe lại bản ghi'}
-                               >
-                                 {sentenceState.isPlaying ? '⏸️' : '🔊'}
-                               </button>
-                             )}
-                           </div>
-                         )}
+                           {sentenceState.recordedBlob && (
+                             <button
+                               className={`${styles.playbackButtonIcon} ${sentenceState.isPlaying ? styles.playingIcon : ''}`}
+                               onClick={() => playRecordedAudio(index)}
+                               title={sentenceState.isPlaying ? 'Dừng phát' : 'Nghe lại bản ghi'}
+                             >
+                               {sentenceState.isPlaying ? '⏸️' : '🔊'}
+                             </button>
+                           )}
+                         </div>
 
                          <div onClick={() => handleSentenceClick(segment.start, segment.end)}>
                            <div className={styles.transcriptItemHeader}>
