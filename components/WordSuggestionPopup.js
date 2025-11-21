@@ -84,14 +84,21 @@ const WordSuggestionPopup = ({
     setIsCorrect(correct);
     setShowResult(true);
 
-    // Show result for 1.5 seconds before calling callbacks
-    setTimeout(() => {
-      if (correct) {
-        onCorrectAnswer(correctWord, wordIndex);
-      } else {
-        onWrongAnswer(correctWord, wordIndex, option);
-      }
-    }, 1500);
+    if (correct) {
+      // Correct answer: fill word into input IMMEDIATELY, then show animation
+      onCorrectAnswer(correctWord, wordIndex);
+    } else {
+      // Wrong answer: show shake animation, call callback, but DON'T close popup
+      // Call onWrongAnswer immediately to deduct points and reset streak
+      onWrongAnswer(correctWord, wordIndex, option);
+      
+      // After 2s, reset to normal state to allow re-selection
+      setTimeout(() => {
+        setShowResult(false);
+        setSelectedOption(null);
+        setIsCorrect(false);
+      }, 2000);
+    }
   };
 
   const handleOverlayClick = (e) => {

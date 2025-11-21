@@ -2518,13 +2518,12 @@ const DictationPageContent = () => {
 
   // Handle wrong answer from suggestion popup
   const handleWrongSuggestion = useCallback((correctWord, wordIndex, selectedWord) => {
-    // Close popup after showing feedback
-    setShowSuggestionPopup(false);
+    // DON'T close popup - let user try again
+    // The popup will reset to normal state after shake animation (2s)
 
     // Show points animation for wrong suggestion
-    const wrongButton = document.querySelector('.popup .optionButton.wrong') ||
-                       document.querySelector('.popup .optionButtonMobile.wrong') ||
-                       document.querySelector('.popupMobile .optionButtonMobile.wrong');
+    const wrongButton = document.querySelector('.optionButton.wrongShake') ||
+                       document.querySelector('.optionButtonMobile.wrongShake');
     if (wrongButton) {
       showPointsAnimation(-0.5, wrongButton);
     }
