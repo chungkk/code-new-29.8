@@ -393,7 +393,7 @@ const DictationPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, user, lessonId, studyTime, isTimerRunning, lastPauseTime, progressLoaded]);
+  }, [isPlaying, user, lessonId, isTimerRunning, lastPauseTime, progressLoaded]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -461,7 +461,7 @@ const DictationPageContent = () => {
         clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime, progressLoaded]);
+  }, [lastActivityTime, isTimerRunning, user, lessonId, progressLoaded]);
 
   // Track user activity to reset inactivity timer
   useEffect(() => {

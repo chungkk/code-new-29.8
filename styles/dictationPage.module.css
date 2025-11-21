@@ -2629,6 +2629,8 @@
     width: auto !important;
     max-width: min(calc(var(--word-length, 10) * 1ch + 30px), 85vw, 400px);
     box-sizing: border-box;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .dictationInputArea :global(.correct-word),
@@ -2644,6 +2646,8 @@
     overflow-wrap: break-word;
     white-space: normal;
     box-sizing: border-box;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .dictationInputArea :global(.hint-btn) {
