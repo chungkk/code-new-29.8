@@ -277,7 +277,7 @@ const ShadowingPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, user, lessonId, studyTime]);
+  }, [isPlaying, user, lessonId, studyTime, isTimerRunning, lastPauseTime, progressLoaded]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -357,7 +357,7 @@ const ShadowingPageContent = () => {
         clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime]);
+  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime, progressLoaded]);
 
   // Track user activity to reset inactivity timer
   useEffect(() => {
@@ -1053,7 +1053,7 @@ const ShadowingPageContent = () => {
       setPopupArrowPosition(arrowPos);
       setShowVocabPopup(true);
     }
-  }, [isYouTube, user, calculatePopupPosition]);
+  }, [isYouTube, calculatePopupPosition]);
 
   // Save vocabulary to database
   const saveVocabulary = useCallback(async ({ word, translation, notes }) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import ProtectedPage from '../../components/ProtectedPage';
 import AdminDashboardLayout from '../../components/AdminDashboardLayout';
 import { toast } from 'react-toastify';
@@ -459,7 +460,7 @@ function AdminSettingsPage() {
                 />
                 {settings.logoUrl && (
                   <div className={styles.imagePreview}>
-                    <img src={settings.logoUrl} alt="Logo preview" style={{ maxHeight: '60px' }} />
+                    <Image src={settings.logoUrl} alt="Logo preview" width={120} height={60} style={{ objectFit: 'contain' }} />
                   </div>
                 )}
               </div>

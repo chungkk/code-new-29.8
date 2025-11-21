@@ -393,7 +393,7 @@ const DictationPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, user, lessonId, studyTime]);
+  }, [isPlaying, user, lessonId, studyTime, isTimerRunning, lastPauseTime, progressLoaded]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -461,7 +461,7 @@ const DictationPageContent = () => {
         clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime]);
+  }, [lastActivityTime, isTimerRunning, user, lessonId, studyTime, progressLoaded]);
 
   // Track user activity to reset inactivity timer
   useEffect(() => {
@@ -2003,7 +2003,7 @@ const DictationPageContent = () => {
         
       }
     }, 50); // Reduced to 50ms for faster detection
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, streakUpdatedToday, markTodayActivity, incrementStreak, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete]);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, incrementStreak, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
