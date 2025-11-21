@@ -21,6 +21,9 @@ export default function Document() {
         {/* Resource hints for better performance */}
         <link rel="prefetch" href="/api/dictionary" />
         <link rel="prefetch" href="/api/translate" />
+
+        {/* Permissions Policy for microphone access */}
+        <meta httpEquiv="Permissions-Policy" content="microphone=(self)" />
       </Head>
       <body>
         <Main />
