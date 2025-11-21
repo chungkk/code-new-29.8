@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminDashboardLayout from '../../components/AdminDashboardLayout';
 import styles from '../../styles/AdminCache.module.css';
 
@@ -18,35 +18,14 @@ const AdminCacheDashboard = () => {
   const [expiryDays, setExpiryDays] = useState(7);
   const [savingSettings, setSavingSettings] = useState(false);
 
-  useEffect(() => {
-    // Check if token exists in localStorage
-    const savedToken = localStorage.getItem('admin_token');
-    if (savedToken) {
-      setAdminToken(savedToken);
-      setIsAuthenticated(true);
-      fetchStats(savedToken);
-      fetchSettings(savedToken);
-    }
-  }, []);
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (adminToken.trim()) {
-      localStorage.setItem('admin_token', adminToken);
-      setIsAuthenticated(true);
-      fetchStats(adminToken);
-      fetchSettings(adminToken);
-    }
-  };
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('admin_token');
     setAdminToken('');
     setIsAuthenticated(false);
     setStats(null);
-  };
+  }, []);
 
-  const fetchStats = async (token) => {
+  const fetchStats = useCallback(async (token) => {
     setLoading(true);
     setError(null);
 
@@ -74,9 +53,9 @@ const AdminCacheDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleLogout]);
 
-  const fetchSettings = async (token) => {
+  const fetchSettings = useCallback(async (token) => {
     try {
       const response = await fetch('/api/admin/cache/settings', {
         headers: {
@@ -91,6 +70,27 @@ const AdminCacheDashboard = () => {
       }
     } catch (err) {
       console.error('Failed to fetch settings:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check if token exists in localStorage
+    const savedToken = localStorage.getItem('admin_token');
+    if (savedToken) {
+      setAdminToken(savedToken);
+      setIsAuthenticated(true);
+      fetchStats(savedToken);
+      fetchSettings(savedToken);
+    }
+  }, [fetchStats, fetchSettings]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (adminToken.trim()) {
+      localStorage.setItem('admin_token', adminToken);
+      setIsAuthenticated(true);
+      fetchStats(adminToken);
+      fetchSettings(adminToken);
     }
   };
 
