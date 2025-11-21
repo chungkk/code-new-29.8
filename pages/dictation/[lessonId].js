@@ -2879,15 +2879,7 @@ const DictationPageContent = () => {
             <div className={styles.dictationHeader}>
               <h3 className={styles.dictationHeaderTitle}>
                 {isMobile 
-                  ? (autoJumpToIncomplete && mobileVisibleIndices.length > 0 && mobileVisibleIndices.length < transcriptData.length
-                      ? (
-                          <>
-                            <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>
-                            <span className={styles.sentenceDivider}>/</span>
-                            <span className={styles.sentenceRemaining}>{mobileVisibleIndices.length}</span>
-                          </>
-                        )
-                      : <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>)
+                  ? <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>
                   : t('lesson.ui.dictation')}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

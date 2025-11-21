@@ -169,7 +169,11 @@
 
   .footerSection:first-child {
     grid-column: 1 / -1;
-    padding-left: 50px;
+    padding-left: 0;
+  }
+
+  .footerDescription {
+    padding-right: 0;
   }
 
   .footerBottom {
@@ -189,23 +193,51 @@
   }
 
   .footerContent {
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-md);
   }
 
   .footerSection:first-child {
-    padding-left: 45px;
+    padding-left: 0;
+  }
+
+  .footerSection {
+    gap: var(--spacing-sm);
+  }
+
+  .footerDescription {
+    padding-right: 0;
+    margin-bottom: var(--spacing-sm);
   }
 
   .footerSectionTitle {
     font-size: 15px;
+    margin-bottom: var(--spacing-xs);
   }
 
   .footerLink {
     font-size: 13px;
   }
 
+  .footerLinks {
+    gap: var(--spacing-xs);
+  }
+
   .appStoreBtn {
     padding: 8px 12px;
     font-size: 13px;
+  }
+
+  .copyright {
+    font-size: 12px;
+  }
+
+  .madeWith {
+    font-size: 12px;
+  }
+
+  .socialLink {
+    width: 32px;
+    height: 32px;
   }
 }
