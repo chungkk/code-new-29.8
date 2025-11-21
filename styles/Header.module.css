@@ -306,7 +306,35 @@
   z-index: 10;
 }
 
+.streakMinus {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff5353;
+  text-shadow: 0 0 8px rgba(255, 53, 53, 0.8);
+  pointer-events: none;
+  animation: streakMinusFloat 1.5s ease-out forwards;
+  z-index: 10;
+}
+
 @keyframes streakPlusOneFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.8);
+  }
+}
+
+@keyframes streakMinusFloat {
   0% {
     opacity: 1;
     transform: translateY(0) scale(1);

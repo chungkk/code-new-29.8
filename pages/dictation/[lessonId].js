@@ -8,7 +8,6 @@ import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
-import StreakNotification from '../../components/StreakNotification';
 import ProgressIndicator from '../../components/ProgressIndicator';
 import { useLessonData } from '../../lib/hooks/useLessonData';
 import { youtubeAPI } from '../../lib/youtubeApi';
@@ -164,8 +163,7 @@ const DictationPageContent = () => {
   const [suggestionContext, setSuggestionContext] = useState('');
   const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0 });
   
-  // Streak notification state
-  const [showStreakNotification, setShowStreakNotification] = useState(false);
+  // Streak tracking state (notification is now in Header)
   const [streakUpdatedToday, setStreakUpdatedToday] = useState(() => {
     // Check localStorage if streak was already updated today
     if (typeof window === 'undefined') return false;
@@ -1866,8 +1864,10 @@ const DictationPageContent = () => {
         const data = await response.json();
         console.log('Streak incremented:', data);
         
-        // Show streak notification
-        setShowStreakNotification(true);
+        // Show streak notification with +1 in Header
+        if (typeof window !== 'undefined' && window.showStreakNotification) {
+          window.showStreakNotification(1);
+        }
         
         // Track number of increments today
         setStreakIncrements(prev => prev + 1);
@@ -2197,6 +2197,14 @@ const DictationPageContent = () => {
               [wordIndex]: 'incorrect'
             }
           }));
+
+          // Show negative streak notification in Header before resetting
+          if (consecutiveSentences > 0) {
+            console.log(`💔 Showing streak reset notification: -${consecutiveSentences}`);
+            if (typeof window !== 'undefined' && window.showStreakNotification) {
+              window.showStreakNotification(-consecutiveSentences);
+            }
+          }
 
           // Reset consecutive sentence counter when user makes a mistake
           console.log('❌ Mistake made! Resetting consecutive counter from', consecutiveSentences, 'to 0');
@@ -2555,6 +2563,14 @@ const DictationPageContent = () => {
 
     // Update points
     updatePoints(-0.5, `Wrong suggestion selected: ${selectedWord}, correct: ${correctWord}`);
+
+    // Show negative streak notification in Header before resetting
+    if (consecutiveSentences > 0) {
+      console.log(`💔 Showing streak reset notification: -${consecutiveSentences}`);
+      if (typeof window !== 'undefined' && window.showStreakNotification) {
+        window.showStreakNotification(-consecutiveSentences);
+      }
+    }
 
     // Reset streak when wrong word is selected
     console.log('❌ Wrong word selected from suggestion! Resetting streak...');
@@ -3730,12 +3746,6 @@ const DictationPageContent = () => {
           onComplete={() => {}}
         />
       ))}
-
-      {/* Streak notification */}
-      <StreakNotification 
-        show={showStreakNotification}
-        onComplete={() => setShowStreakNotification(false)}
-      />
     </div>
   );
 };

@@ -20,6 +20,8 @@ const Header = () => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [showStreakPlusOne, setShowStreakPlusOne] = useState(false);
+  const [showStreakMinus, setShowStreakMinus] = useState(false);
+  const [streakMinusValue, setStreakMinusValue] = useState(0);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
   const notificationMenuRef = useRef(null);
@@ -62,6 +64,24 @@ const Header = () => {
     }, 1500);
   }, []);
 
+  // Show streak notification (for both positive and negative values)
+  const showStreakNotif = useCallback((value) => {
+    if (value > 0) {
+      // Positive: show +1 animation
+      setShowStreakPlusOne(true);
+      setTimeout(() => {
+        setShowStreakPlusOne(false);
+      }, 1500);
+    } else if (value < 0) {
+      // Negative: show minus animation
+      setStreakMinusValue(value);
+      setShowStreakMinus(true);
+      setTimeout(() => {
+        setShowStreakMinus(false);
+      }, 1500);
+    }
+  }, []);
+
   // Fetch user points and streak on mount and when user changes
   useEffect(() => {
     if (user) {
@@ -73,6 +93,7 @@ const Header = () => {
         window.refreshUserPoints = fetchUserPoints;
         window.refreshStreakData = fetchStreakData;
         window.showStreakAnimation = showStreakAnimation;
+        window.showStreakNotification = showStreakNotif;
       }
     }
 
@@ -81,9 +102,10 @@ const Header = () => {
         window.refreshUserPoints = null;
         window.refreshStreakData = null;
         window.showStreakAnimation = null;
+        window.showStreakNotification = null;
       }
     };
-  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation]);
+  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation, showStreakNotif]);
 
   // Listen for points and streak update events from other pages
   useEffect(() => {
@@ -235,6 +257,10 @@ const Header = () => {
 
                 {showStreakPlusOne && (
                   <div className={styles.streakPlusOne}>+1</div>
+                )}
+
+                {showStreakMinus && (
+                  <div className={styles.streakMinus}>{streakMinusValue}</div>
                 )}
 
                 {streakPopupOpen && (
