@@ -19,6 +19,7 @@ const Header = () => {
   const [streakPopupOpen, setStreakPopupOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [showStreakPlusOne, setShowStreakPlusOne] = useState(false);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
   const notificationMenuRef = useRef(null);
@@ -53,6 +54,14 @@ const Header = () => {
     }
   }, [user]);
 
+  // Show +1 animation
+  const showStreakAnimation = useCallback(() => {
+    setShowStreakPlusOne(true);
+    setTimeout(() => {
+      setShowStreakPlusOne(false);
+    }, 1500);
+  }, []);
+
   // Fetch user points and streak on mount and when user changes
   useEffect(() => {
     if (user) {
@@ -63,6 +72,7 @@ const Header = () => {
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = fetchUserPoints;
         window.refreshStreakData = fetchStreakData;
+        window.showStreakAnimation = showStreakAnimation;
       }
     }
 
@@ -70,9 +80,10 @@ const Header = () => {
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = null;
         window.refreshStreakData = null;
+        window.showStreakAnimation = null;
       }
     };
-  }, [user, fetchUserPoints, fetchStreakData]);
+  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation]);
 
   // Listen for points and streak update events from other pages
   useEffect(() => {
@@ -221,6 +232,10 @@ const Header = () => {
                   <span className={styles.streakIcon}>🔥</span>
                   <span className={styles.streakValue}>{currentStreak}</span>
                 </button>
+
+                {showStreakPlusOne && (
+                  <div className={styles.streakPlusOne}>+1</div>
+                )}
 
                 {streakPopupOpen && (
                   <StreakPopup onClose={() => setStreakPopupOpen(false)} />

@@ -1833,6 +1833,10 @@ const DictationPageContent = () => {
         }
         
         // Trigger streak refresh in Header
+        if (typeof window !== 'undefined' && window.refreshStreakData) {
+          window.refreshStreakData();
+        }
+        // Also dispatch event for StreakPopup component
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('streakUpdated'));
         }
@@ -1869,6 +1873,14 @@ const DictationPageContent = () => {
         setStreakIncrements(prev => prev + 1);
         
         // Trigger streak refresh in Header
+        if (typeof window !== 'undefined' && window.refreshStreakData) {
+          window.refreshStreakData();
+        }
+        // Show +1 animation in Header
+        if (typeof window !== 'undefined' && window.showStreakAnimation) {
+          window.showStreakAnimation();
+        }
+        // Also dispatch event for StreakPopup component
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('streakUpdated'));
         }
@@ -1944,6 +1956,10 @@ const DictationPageContent = () => {
         if (newConsecutive === 1) {
           console.log('First sentence - no streak yet (streak = 0)');
           // Just trigger Header refresh to mark today as active
+          if (typeof window !== 'undefined' && window.refreshStreakData) {
+            window.refreshStreakData();
+          }
+          // Also dispatch event for StreakPopup component
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('streakUpdated'));
           }
@@ -1954,6 +1970,11 @@ const DictationPageContent = () => {
           const streakCount = newConsecutive - 1; // Streak = consecutive - 1
           console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
           incrementStreak();
+        } else if (newConsecutive === 1) {
+          // For first sentence, also show animation (but no increment)
+          if (typeof window !== 'undefined' && window.showStreakAnimation) {
+            window.showStreakAnimation();
+          }
         }
 
         // Auto-navigate to next incomplete sentence after a short delay (if enabled)
@@ -2202,6 +2223,10 @@ const DictationPageContent = () => {
             }).then(() => {
               console.log('Streak reset to 0 in database');
               // Trigger streak refresh in Header
+              if (typeof window !== 'undefined' && window.refreshStreakData) {
+                window.refreshStreakData();
+              }
+              // Also dispatch event for StreakPopup component
               if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('streakUpdated'));
               }
@@ -2555,6 +2580,10 @@ const DictationPageContent = () => {
       }).then(() => {
         console.log('Streak reset to 0 in database (wrong suggestion)');
         // Trigger streak refresh in Header
+        if (typeof window !== 'undefined' && window.refreshStreakData) {
+          window.refreshStreakData();
+        }
+        // Also dispatch event for StreakPopup component
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('streakUpdated'));
         }
@@ -3253,6 +3282,34 @@ const DictationPageContent = () => {
                                           saveProgress(updatedCompleted, updatedWords);
                                           console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All (mobile)!`);
                                           
+                                          // Streak logic: increment consecutive sentences
+                                          const newConsecutive = consecutiveSentences + 1;
+                                          setConsecutiveSentences(newConsecutive);
+                                          console.log(`Consecutive sentences: ${newConsecutive} (via Show All)`);
+
+                                          // Sentence 1: Just mark today, no streak yet
+                                          if (newConsecutive === 1) {
+                                            console.log('First sentence - no streak yet (streak = 0)');
+                                            if (typeof window !== 'undefined' && window.refreshStreakData) {
+                                              window.refreshStreakData();
+                                            }
+                                            if (typeof window !== 'undefined') {
+                                              window.dispatchEvent(new CustomEvent('streakUpdated'));
+                                            }
+                                          }
+
+                                          // Sentence 2+: Increment streak and show notification
+                                          if (newConsecutive >= 2) {
+                                            const streakCount = newConsecutive - 1;
+                                            console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
+                                            incrementStreak();
+                                          } else if (newConsecutive === 1) {
+                                            // For first sentence, also show animation (but no increment)
+                                            if (typeof window !== 'undefined' && window.showStreakAnimation) {
+                                              window.showStreakAnimation();
+                                            }
+                                          }
+                                          
                                           // Auto-jump to next incomplete sentence if enabled
                                           if (autoJumpToIncomplete) {
                                             setTimeout(() => {
@@ -3390,6 +3447,34 @@ const DictationPageContent = () => {
                                 setCompletedSentences(updatedCompleted);
                                 saveProgress(updatedCompleted, updatedWords);
                                 console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
+                                
+                                // Streak logic: increment consecutive sentences
+                                const newConsecutive = consecutiveSentences + 1;
+                                setConsecutiveSentences(newConsecutive);
+                                console.log(`Consecutive sentences: ${newConsecutive} (via Show All)`);
+
+                                // Sentence 1: Just mark today, no streak yet
+                                if (newConsecutive === 1) {
+                                  console.log('First sentence - no streak yet (streak = 0)');
+                                  if (typeof window !== 'undefined' && window.refreshStreakData) {
+                                    window.refreshStreakData();
+                                  }
+                                  if (typeof window !== 'undefined') {
+                                    window.dispatchEvent(new CustomEvent('streakUpdated'));
+                                  }
+                                }
+
+                                // Sentence 2+: Increment streak and show notification
+                                if (newConsecutive >= 2) {
+                                  const streakCount = newConsecutive - 1;
+                                  console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
+                                  incrementStreak();
+                                } else if (newConsecutive === 1) {
+                                  // For first sentence, also show animation (but no increment)
+                                  if (typeof window !== 'undefined' && window.showStreakAnimation) {
+                                    window.showStreakAnimation();
+                                  }
+                                }
                                 
                                 // Auto-jump to next incomplete sentence if enabled
                                 if (autoJumpToIncomplete) {
