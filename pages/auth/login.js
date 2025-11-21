@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
+import { navigateWithLocale } from '../../lib/navigation';
 import AuthForm from '../../components/AuthForm';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
 import styles from '../../styles/auth.module.css';
@@ -15,7 +16,7 @@ export default function Login() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard');
+      navigateWithLocale(router, '/dashboard');
     }
   }, [user, loading, router]);
 

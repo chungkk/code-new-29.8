@@ -9,6 +9,7 @@ import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
 import ModeSelectionPopup from '../../components/ModeSelectionPopup';
 import { speakText } from '../../lib/textToSpeech';
+import { navigateWithLocale } from '../../lib/navigation';
 import { toast } from 'react-toastify';
 import styles from '../../styles/shadowingPage.module.css';
 
@@ -1202,7 +1203,7 @@ const SelfLessonPageContent = () => {
      }
     }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, isTextHidden]);
  
-   const handleBackToHome = () => router.push('/');
+   const handleBackToHome = () => navigateWithLocale(router, '/');
  
    const handleModeSelect = (lesson, mode) => {
      router.push(`/${mode}/${lesson.id}`);

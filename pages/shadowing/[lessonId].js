@@ -1290,7 +1290,7 @@ const ShadowingPageContent = () => {
   };
 
   const handleBackToHome = () => {
-    router.push('/');
+    navigateWithLocale(router, '/');
   };
 
   if (loading) {

@@ -2,6 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
+import { navigateWithLocale } from '../lib/navigation';
 import styles from '../styles/Offline.module.css';
 
 /**
@@ -20,7 +21,7 @@ const OfflinePage = () => {
     if (window.history.length > 1) {
       router.back();
     } else {
-      router.push('/');
+      navigateWithLocale(router, '/');
     }
   };
   

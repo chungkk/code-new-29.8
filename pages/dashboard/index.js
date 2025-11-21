@@ -329,13 +329,13 @@ function DashboardIndex() {
                         {/* Action Buttons */}
                         <div className={styles.cardActions}>
                           <button
-                            onClick={() => router.push(`/shadowing/${lesson.id}`)}
+                            onClick={() => navigateWithLocale(router, `/shadowing/${lesson.id}`)}
                             className={`${styles.actionBtn} ${styles.shadowing}`}
                           >
                             🎤 Shadowing
                           </button>
                           <button
-                            onClick={() => router.push(`/dictation/${lesson.id}`)}
+                            onClick={() => navigateWithLocale(router, `/dictation/${lesson.id}`)}
                             className={`${styles.actionBtn} ${styles.dictation}`}
                           >
                             ✍️ Dictation

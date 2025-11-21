@@ -17,6 +17,7 @@ import { speakText } from '../../lib/textToSpeech';
 import { toast } from 'react-toastify';
 import { translationCache } from '../../lib/translationCache';
 import { hapticEvents } from '../../lib/haptics';
+import { navigateWithLocale } from '../../lib/navigation';
 import styles from '../../styles/dictationPage.module.css';
 
 // Map difficulty level to hidePercentage (outside component to avoid re-creation)
@@ -2850,7 +2851,7 @@ const DictationPageContent = () => {
     }
   }, [currentSentenceIndex, transcriptData, processLevelUp, checkWord, handleInputClick, handleInputFocus, handleInputBlur, saveWord, showHint, handleWordClickForPopup, completedSentences, completedWords, progressLoaded, hidePercentage, showPointsAnimation]);
 
-  const handleBackToHome = () => router.push('/');
+  const handleBackToHome = () => navigateWithLocale(router, '/');
 
   // Calculate accurate progress based on words completed (not just sentences)
   const progressPercentage = useMemo(() => {

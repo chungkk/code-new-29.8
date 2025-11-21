@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import { navigateWithLocale } from '../lib/navigation';
 import styles from '../styles/authForm.module.css';
 
 const AuthForm = ({ mode = 'login' }) => {
@@ -43,7 +44,7 @@ const AuthForm = ({ mode = 'login' }) => {
       }
 
       if (result.success) {
-        router.push('/dashboard');
+        navigateWithLocale(router, '/dashboard');
       } else {
         setError(result.error);
       }

@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
+import { navigateWithLocale } from '../lib/navigation';
 import StreakPopup from './StreakPopup';
 import NotificationDropdown from './NotificationDropdown';
 import styles from '../styles/Header.module.css';
@@ -426,20 +427,20 @@ const Header = () => {
             <>
               <div className={styles.authButtonsDesktop}>
                 <button
-                  onClick={() => router.push('/auth/login')}
+                  onClick={() => navigateWithLocale(router, '/auth/login')}
                   className={styles.loginBtn}
                 >
                   {t('header.auth.login')}
                 </button>
                 <button
-                  onClick={() => router.push('/auth/register')}
+                  onClick={() => navigateWithLocale(router, '/auth/register')}
                   className={styles.signupBtn}
                 >
                   {t('header.auth.register')}
                 </button>
               </div>
               <button
-                onClick={() => router.push('/auth/login')}
+                onClick={() => navigateWithLocale(router, '/auth/login')}
                 className={styles.authBtnMobile}
               >
                 {t('header.auth.login')}

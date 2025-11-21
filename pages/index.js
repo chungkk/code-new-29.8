@@ -6,6 +6,7 @@ import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
 import { useAuth } from '../context/AuthContext';
 import { useLessons, prefetchLessons } from '../lib/hooks/useLessons';
+import { navigateWithLocale } from '../lib/navigation';
 
 const HomePage = () => {
   const { t } = useTranslation();
@@ -113,7 +114,7 @@ const HomePage = () => {
     }).catch(err => console.error('Error incrementing view count:', err));
     
     // Navigate to the specific lesson and mode
-    router.push(`/${mode}/${lesson.id}`);
+    navigateWithLocale(router, `/${mode}/${lesson.id}`);
   };
 
   const handleClosePopup = () => {
@@ -148,7 +149,7 @@ const HomePage = () => {
         const data = await res.json();
         // Store lesson data in localStorage for temporary use
         localStorage.setItem(`self-lesson-${data.lesson.id}`, JSON.stringify(data.lesson));
-        router.push(`/self-lesson/${data.lesson.id}`);
+        navigateWithLocale(router, `/self-lesson/${data.lesson.id}`);
       } else {
         const error = await res.json();
         setCreateError(error.message || t('homePage.createLesson.error'));
