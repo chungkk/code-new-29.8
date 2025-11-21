@@ -714,12 +714,13 @@
   }
 
   .mainContainer {
-    padding: 8px 8px 80px 8px;
+    padding: 0;
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    gap: 12px;
+    gap: 0;
+    height: 100%;
   }
 
   .leftSection {
@@ -732,6 +733,7 @@
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    margin-bottom: 72px;
   }
 
   .currentSentenceText {
@@ -779,11 +781,28 @@
      max-height: none;
      overflow-y: auto;
      overflow-x: hidden;
+     padding: 12px 8px;
+   }
+
+   .videoSection {
+     border-radius: 0;
+     box-shadow: none;
+     border: none;
+   }
+
+   .videoContainer {
+     border-radius: 0;
+     border: none;
    }
 
    .videoHeader {
       display: none;
     }
+
+   .transcriptSection {
+     border-radius: 0;
+     box-shadow: none;
+   }
 
    .transcriptHeader {
       display: none;
@@ -793,7 +812,7 @@
     .mobileControlsBar {
       display: flex;
       gap: 8px;
-      padding: 12px;
+      padding: 12px 8px;
       background: var(--bg-hover);
       border-bottom: 1px solid var(--border-color);
       overflow-x: auto;
