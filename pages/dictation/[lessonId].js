@@ -2103,6 +2103,14 @@ const DictationPageContent = () => {
             if (window.refreshUserPoints) {
               window.refreshUserPoints();
             }
+            // Show +1 animation in header for positive points
+            if (pointsChange > 0 && window.showPointsPlusOne) {
+              window.showPointsPlusOne();
+            }
+            // Show -0.5 animation in header for negative points
+            if (pointsChange < 0 && window.showPointsMinus) {
+              window.showPointsMinus();
+            }
             // Also emit custom event for Header to listen
             window.dispatchEvent(new CustomEvent('pointsUpdated', { detail: { pointsChange, reason } }));
           }

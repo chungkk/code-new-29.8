@@ -23,6 +23,8 @@ const Header = () => {
   const [showStreakPlusOne, setShowStreakPlusOne] = useState(false);
   const [showStreakMinus, setShowStreakMinus] = useState(false);
   const [streakMinusValue, setStreakMinusValue] = useState(0);
+  const [showPointsPlusOne, setShowPointsPlusOne] = useState(false);
+  const [showPointsMinus, setShowPointsMinus] = useState(false);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
   const notificationMenuRef = useRef(null);
@@ -83,6 +85,22 @@ const Header = () => {
     }
   }, []);
 
+  // Show points +1 animation
+  const showPointsAnimation = useCallback(() => {
+    setShowPointsPlusOne(true);
+    setTimeout(() => {
+      setShowPointsPlusOne(false);
+    }, 1500);
+  }, []);
+
+  // Show points -0.5 animation
+  const showPointsMinusAnimation = useCallback(() => {
+    setShowPointsMinus(true);
+    setTimeout(() => {
+      setShowPointsMinus(false);
+    }, 1500);
+  }, []);
+
   // Fetch user points and streak on mount and when user changes
   useEffect(() => {
     if (user) {
@@ -95,6 +113,8 @@ const Header = () => {
         window.refreshStreakData = fetchStreakData;
         window.showStreakAnimation = showStreakAnimation;
         window.showStreakNotification = showStreakNotif;
+        window.showPointsPlusOne = showPointsAnimation;
+        window.showPointsMinus = showPointsMinusAnimation;
       }
     }
 
@@ -104,9 +124,11 @@ const Header = () => {
         window.refreshStreakData = null;
         window.showStreakAnimation = null;
         window.showStreakNotification = null;
+        window.showPointsPlusOne = null;
+        window.showPointsMinus = null;
       }
     };
-  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation, showStreakNotif]);
+  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation, showStreakNotif, showPointsAnimation, showPointsMinusAnimation]);
 
   // Listen for points and streak update events from other pages
   useEffect(() => {
@@ -266,9 +288,19 @@ const Header = () => {
 
           {user && (
             <>
-              <div className={styles.pointsBadge} title={t('header.points')}>
-                <span className={styles.pointsIcon}>⭐</span>
-                <span className={styles.pointsValue}>{userPoints || 0}</span>
+              <div className={styles.pointsContainer}>
+                <div className={styles.pointsBadge} title={t('header.points')}>
+                  <span className={styles.pointsIcon}>⭐</span>
+                  <span className={styles.pointsValue}>{userPoints || 0}</span>
+                </div>
+
+                {showPointsPlusOne && (
+                  <div className={styles.pointsPlusOne}>+1</div>
+                )}
+
+                {showPointsMinus && (
+                  <div className={styles.pointsMinus}>-0.5</div>
+                )}
               </div>
 
               <div className={styles.streakContainer}>
