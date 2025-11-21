@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from 'next-auth/react';
 
@@ -10,6 +10,34 @@ export function AuthProvider({ children }) {
   const [userPoints, setUserPoints] = useState(0);
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  // Define fetchUserPoints first so it can be used in useEffect
+  const fetchUserPoints = useCallback(async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        console.log('❌ No token found, skipping points fetch');
+        return;
+      }
+
+      console.log('🔄 Fetching user points...');
+      const res = await fetch('/api/user/points', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log('✅ Points fetched:', data.points);
+        setUserPoints(data.points || 0);
+      } else {
+        console.error('❌ Failed to fetch points:', res.status);
+      }
+    } catch (error) {
+      console.error('Error fetching user points:', error);
+    }
+  }, []); // Empty deps - setUserPoints is stable
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,7 +69,7 @@ export function AuthProvider({ children }) {
     };
 
     checkAuth();
-  }, [session, status]);
+  }, [session, status, fetchUserPoints]);
 
   const checkUser = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -229,26 +257,6 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Google login error:', error);
       return { success: false, error: 'Google login failed' };
-    }
-  };
-
-  const fetchUserPoints = async () => {
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      if (!token) return;
-
-      const res = await fetch('/api/user/points', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setUserPoints(data.points || 0);
-      }
-    } catch (error) {
-      console.error('Error fetching user points:', error);
     }
   };
 

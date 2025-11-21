@@ -138,20 +138,42 @@
 
 /* Mobile styles */
 @media (max-width: 768px) {
-  .recordButton {
-    padding: 14px 24px;
-    font-size: 15px;
-    min-width: 160px;
+  .container {
+    display: inline-flex;
   }
 
-  .micIcon, .stopIcon, .spinner {
-    font-size: 20px;
+  .recordButton {
+    width: 24px;
+    height: 24px;
+    border-width: 1.5px;
+    font-size: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .recordButton:hover:not(:disabled) {
+    transform: scale(1.1);
+  }
+
+  .recordButton.recording {
+    transform: scale(1.05);
+  }
+
+  .micIcon, .stopIcon {
+    font-size: 11px;
+  }
+
+  .spinner {
+    font-size: 11px;
   }
 
   .interimText {
     font-size: 13px;
     padding: 10px 14px;
     max-width: 250px;
+  }
+
+  .error {
+    display: none; /* Hide error messages on mobile inline */
   }
 }
 

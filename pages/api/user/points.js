@@ -28,10 +28,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         points: user.points || 0,
-        monthlyPoints: user.monthlyPoints || 0,
-        currentStreak: user.streak?.currentStreak || 0,
-        maxStreak: user.streak?.maxStreak || 0,
-        maxStreakThisMonth: user.streak?.maxStreakThisMonth || 0
+        monthlyPoints: user.monthlyPoints || 0
       });
     }
 
@@ -43,29 +40,33 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'pointsChange phải là số' });
       }
 
-      // Use helper function to update points and streaks
-      const updatedUser = await updateUserPointsAndStreak(user, {
-        points: pointsChange,
-        completedToday: completedToday
-      });
+      try {
+        // Use helper function to update points and streaks
+        const updatedUser = await updateUserPointsAndStreak(user, {
+          points: pointsChange,
+          completedToday: completedToday
+        });
 
-      await updatedUser.save();
+        await updatedUser.save();
 
-      console.log(`Points updated for user ${user.email}: ${pointsChange} (reason: ${reason || 'N/A'})`);
-      console.log(`  Total: ${updatedUser.points}, Monthly: ${updatedUser.monthlyPoints}`);
-      console.log(`  Current Streak: ${updatedUser.streak.currentStreak}, Max: ${updatedUser.streak.maxStreak}, Max This Month: ${updatedUser.streak.maxStreakThisMonth}`);
+        console.log(`✅ Points updated for user ${user.email}: ${pointsChange > 0 ? '+' : ''}${pointsChange} (reason: ${reason || 'N/A'})`);
+        console.log(`  Total: ${updatedUser.points}, Monthly: ${updatedUser.monthlyPoints}`);
 
-      return res.status(200).json({
-        success: true,
-        points: updatedUser.points,
-        monthlyPoints: updatedUser.monthlyPoints,
-        pointsChange,
-        streak: {
-          currentStreak: updatedUser.streak.currentStreak,
-          maxStreak: updatedUser.streak.maxStreak,
-          maxStreakThisMonth: updatedUser.streak.maxStreakThisMonth
-        }
-      });
+        return res.status(200).json({
+          success: true,
+          points: updatedUser.points,
+          monthlyPoints: updatedUser.monthlyPoints,
+          pointsChange,
+          reason
+        });
+      } catch (saveError) {
+        console.error('❌ Error saving user points:', saveError);
+        return res.status(500).json({ 
+          message: 'Lỗi khi lưu điểm', 
+          error: saveError.message,
+          stack: process.env.NODE_ENV === 'development' ? saveError.stack : undefined
+        });
+      }
     }
 
     return res.status(405).json({ message: 'Method not allowed' });

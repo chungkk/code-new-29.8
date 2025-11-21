@@ -1778,7 +1778,7 @@ const ShadowingPageContent = () => {
                          ref={isActive ? activeTranscriptItemRef : null}
                          className={`${styles.transcriptItem} ${isActive ? styles.transcriptItemActive : ''}`}
                        >
-                         {/* Recording controls - always show on hover/active, but only functional when playing */}
+                         {/* Recording controls - desktop: top-right corner, mobile: inline with text */}
                          <div 
                            className={styles.recordingControlsInTranscript}
                            onClick={(e) => e.stopPropagation()}
@@ -1826,6 +1826,31 @@ const ShadowingPageContent = () => {
                            </div>
 
                            <div className={styles.transcriptText}>
+                         {/* Mobile: Show mic controls inline at the beginning - only when active */}
+                         {isMobile && isActive && (
+                           <span 
+                             className={styles.mobileInlineMicControls}
+                             onClick={(e) => e.stopPropagation()}
+                           >
+                             {canRecord ? (
+                               <ShadowingVoiceRecorder
+                                 onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
+                                 onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
+                                 language="de-DE"
+                               />
+                             ) : (
+                               <span className={styles.micPlaceholderInline}>🎤</span>
+                             )}
+                           </span>
+                         )}
+                         {/* Mobile: Show percentage always if available, even when not active */}
+                         {isMobile && sentenceState.comparisonResult && (
+                           <span 
+                             className={`${styles.inlineScorePercent} ${sentenceState.comparisonResult.isPassed ? styles.inlineScorePercentPassed : styles.inlineScorePercentFailed}`}
+                           >
+                             {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
+                           </span>
+                         )}
                          {segment.text.split(/\s+/).map((word, idx) => {
                            const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
                            if (cleanWord.length > 0) {

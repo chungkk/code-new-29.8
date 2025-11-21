@@ -1956,7 +1956,7 @@ const DictationPageContent = () => {
       
         if (response.ok) {
           const data = await response.json();
-          console.log(`Points updated: ${pointsChange > 0 ? '+' : ''}${pointsChange} (${reason})`);
+          console.log(`✅ Points updated: ${pointsChange > 0 ? '+' : ''}${pointsChange} (${reason})`, data);
 
           // Show animation
           if (element) {
@@ -1965,20 +1965,30 @@ const DictationPageContent = () => {
 
           // Trigger points refresh in AuthContext (if available)
           if (typeof window !== 'undefined') {
-            if (window.refreshUserPoints) {
-              window.refreshUserPoints();
-            }
             // Show +1 animation in header for positive points
             if (pointsChange > 0 && window.showPointsPlusOne) {
+              console.log('🎉 Calling showPointsPlusOne');
               window.showPointsPlusOne();
             }
             // Show -0.5 animation in header for negative points
             if (pointsChange < 0 && window.showPointsMinus) {
+              console.log('⚠️ Calling showPointsMinus');
               window.showPointsMinus();
             }
+            
+            // Wait a bit to ensure the update is committed to DB before fetching
+            setTimeout(() => {
+              if (window.refreshUserPoints) {
+                console.log('🔄 Refreshing user points after update');
+                window.refreshUserPoints();
+              }
+            }, 100);
+            
             // Also emit custom event for Header to listen
             window.dispatchEvent(new CustomEvent('pointsUpdated', { detail: { pointsChange, reason } }));
           }
+        } else {
+          console.error('❌ Failed to update points:', response.status, response.statusText);
         }
     } catch (error) {
       console.error('Error updating points:', error);

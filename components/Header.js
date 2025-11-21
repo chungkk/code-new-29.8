@@ -28,8 +28,14 @@ const Header = () => {
   const { currentLanguage, changeLanguage, languages, currentLanguageInfo } = useLanguage();
   const { unreadCount, fetchUnreadCount } = useNotifications();
 
+  // Debug: Log userPoints whenever it changes
+  useEffect(() => {
+    console.log('📊 Header userPoints changed:', userPoints);
+  }, [userPoints]);
+
   // Show points +1 animation
   const showPointsAnimation = useCallback(() => {
+    console.log('🎉 showPointsAnimation called!');
     setShowPointsPlusOne(true);
     setTimeout(() => {
       setShowPointsPlusOne(false);
@@ -38,6 +44,7 @@ const Header = () => {
 
   // Show points -0.5 animation
   const showPointsMinusAnimation = useCallback(() => {
+    console.log('⚠️ showPointsMinusAnimation called!');
     setShowPointsMinus(true);
     setTimeout(() => {
       setShowPointsMinus(false);
@@ -48,13 +55,15 @@ const Header = () => {
   useEffect(() => {
     if (user) {
       fetchUserPoints();
+    }
+  }, [user, fetchUserPoints]);
 
-      // Expose refresh functions globally for dictation page
-      if (typeof window !== 'undefined') {
-        window.refreshUserPoints = fetchUserPoints;
-        window.showPointsPlusOne = showPointsAnimation;
-        window.showPointsMinus = showPointsMinusAnimation;
-      }
+  // Expose animation functions globally (separate effect to avoid re-assignment issues)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.refreshUserPoints = fetchUserPoints;
+      window.showPointsPlusOne = showPointsAnimation;
+      window.showPointsMinus = showPointsMinusAnimation;
     }
 
     return () => {
@@ -64,7 +73,7 @@ const Header = () => {
         window.showPointsMinus = null;
       }
     };
-  }, [user, fetchUserPoints, showPointsAnimation, showPointsMinusAnimation]);
+  }, [fetchUserPoints, showPointsAnimation, showPointsMinusAnimation]);
 
   // Listen for points update events from other pages
   useEffect(() => {
