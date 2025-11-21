@@ -40,7 +40,7 @@
 }
 
 [data-theme="dark"] .overlay {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
 }
 
 @keyframes fadeIn {
@@ -75,7 +75,9 @@
 }
 
 [data-theme="dark"] .popupContainer {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: rgba(37, 23, 65, 0.98);
+  border-color: rgba(147, 51, 234, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(139, 92, 246, 0.3);
 }
 
 /* Arrow pointing to the word - Simplified with CSS variables */
