@@ -78,7 +78,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4a90e2 0%, #7b68ee 60%);
+  background: var(--accent-gradient);
   color: white;
 }
 
@@ -133,8 +133,8 @@
 }
 
 .word:hover {
-  color: #4a90e2;
-  text-decoration-color: #4a90e2;
+  color: var(--accent-green);
+  text-decoration-color: var(--accent-green);
 }
 
 .currentSentenceIPA {
@@ -288,7 +288,7 @@
 
 /* Start Button */
 .startButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   color: white;
   padding: 12px 48px;
   border-radius: 8px;

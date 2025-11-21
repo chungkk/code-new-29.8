@@ -87,7 +87,7 @@
 }
 
 .breadcrumb a {
-  color: var(--accent-blue);
+  color: var(--accent-green);
   text-decoration: none;
   transition: opacity 0.2s;
 }
@@ -137,7 +137,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   color: white;
 }
 
@@ -404,7 +404,7 @@
 
 .controlButton:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
 }
 
 .controlButton svg {
@@ -413,8 +413,8 @@
 }
 
 .controlButtonActive {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
+  background: var(--accent-green);
+  border-color: var(--accent-green);
   color: white;
 }
 
@@ -443,7 +443,7 @@
 
 .playButton:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
   transform: scale(1.05);
 }
 
@@ -498,8 +498,8 @@
 }
 
 .sentenceTextLarge span:hover {
-  color: var(--accent-blue);
-  text-decoration-color: var(--accent-blue);
+  color: var(--accent-green);
+  text-decoration-color: var(--accent-green);
 }
 
 .sentenceIPADisplay {
@@ -544,7 +544,7 @@
 
 .recordBtn:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
 }
 
 .recordBtn.recording {
@@ -570,7 +570,7 @@
 
 .playbackBtn:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
 }
 
 /* Transcript Panel - Right Side */
@@ -1717,7 +1717,7 @@
 }
 
 .dictationInputArea :global(.hint-btn) {
-  background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   border: 2px solid rgba(255, 255, 255, 0.15);
   color: white;
   width: 20px;
@@ -1740,17 +1740,17 @@
 .dictationInputArea :global(.hint-btn):hover {
   transform: scale(1.1);
   box-shadow:
-    0 6px 16px rgba(102, 126, 234, 0.6),
-    0 0 20px rgba(102, 126, 234, 0.4),
+    0 6px 16px rgba(74, 155, 111, 0.5),
+    0 0 20px rgba(74, 155, 111, 0.3),
     inset 0 1px 3px rgba(255, 255, 255, 0.3);
-  background: linear-gradient(145deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(145deg, #4a9b6f 0%, #d44638 100%);
   border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dictationInputArea :global(.hint-btn):active {
   transform: scale(1.0);
   box-shadow:
-    0 3px 10px rgba(102, 126, 234, 0.5),
+    0 3px 10px rgba(74, 155, 111, 0.4),
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
@@ -1761,12 +1761,12 @@
 }
 
 .dictationInputArea :global(.word-input) {
-  background: linear-gradient(145deg, rgba(102, 126, 234, 0.08) 0%, rgba(30, 33, 57, 0.95) 100%);
-  border: 2px solid rgba(102, 126, 234, 0.25);
+  background: linear-gradient(145deg, rgba(212, 70, 56, 0.06) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 2px solid rgba(212, 70, 56, 0.25);
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 16px;
-  color: #e0e7ff;
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -1775,9 +1775,9 @@
   width: auto !important;
   max-width: min(25ch, calc(100% - 40px));
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.25),
-    0 2px 8px rgba(102, 126, 234, 0.15),
-    0 0 0 1px rgba(102, 126, 234, 0.1);
+    inset 0 2px 4px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(212, 70, 56, 0.15),
+    0 0 0 1px rgba(212, 70, 56, 0.1);
   text-align: center;
   height: 32px;
   min-height: 32px;
@@ -1797,7 +1797,7 @@
   inset: 0;
   border-radius: 8px;
   padding: 2px;
-  background: linear-gradient(145deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.2));
+  background: linear-gradient(145deg, rgba(212, 70, 56, 0.3), rgba(74, 155, 111, 0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -1805,7 +1805,18 @@
   transition: opacity 0.25s ease;
 }
 
-.dictationInputArea :global(.word-input):hover {
+/* Dark mode specific styles for word-input */
+[data-theme="dark"] .dictationInputArea :global(.word-input) {
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.08) 0%, rgba(30, 33, 57, 0.95) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.25);
+  color: #e0e7ff;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(102, 126, 234, 0.15),
+    0 0 0 1px rgba(102, 126, 234, 0.1);
+}
+
+[data-theme="dark"] .dictationInputArea :global(.word-input):hover {
   border-color: rgba(102, 126, 234, 0.5);
   background: linear-gradient(145deg, rgba(102, 126, 234, 0.12) 0%, rgba(30, 33, 57, 1) 100%);
   box-shadow:
@@ -1814,25 +1825,71 @@
     0 0 0 1px rgba(102, 126, 234, 0.2);
 }
 
+[data-theme="dark"] .dictationInputArea :global(.word-input):focus {
+  border-color: rgba(102, 126, 234, 0.8);
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.18) 0%, rgba(26, 29, 53, 1) 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.15),
+    0 0 0 3px rgba(102, 126, 234, 0.25),
+    0 6px 20px rgba(102, 126, 234, 0.4),
+    0 0 30px rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .dictationInputArea :global(.word-input)::before {
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.3));
+}
+
+[data-theme="dark"] .dictationInputArea :global(.word-input):focus::before {
+  background: linear-gradient(145deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.4));
+}
+
+[data-theme="dark"] .dictationInputArea :global(.hint-btn) {
+  background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-theme="dark"] .dictationInputArea :global(.hint-btn):hover {
+  background: linear-gradient(145deg, #764ba2 0%, #667eea 100%);
+  box-shadow:
+    0 6px 16px rgba(102, 126, 234, 0.6),
+    0 0 20px rgba(102, 126, 234, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .dictationInputArea :global(.hint-btn):active {
+  box-shadow:
+    0 3px 10px rgba(102, 126, 234, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.dictationInputArea :global(.word-input):hover {
+  border-color: rgba(74, 155, 111, 0.5);
+  background: linear-gradient(145deg, rgba(74, 155, 111, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(74, 155, 111, 0.25),
+    0 0 0 1px rgba(74, 155, 111, 0.2);
+}
+
 .dictationInputArea :global(.word-input):hover::before {
   opacity: 1;
 }
 
 .dictationInputArea :global(.word-input):focus {
   outline: none;
-  border-color: rgba(102, 126, 234, 0.8);
-  background: linear-gradient(145deg, rgba(102, 126, 234, 0.18) 0%, rgba(26, 29, 53, 1) 100%);
+  border-color: rgba(74, 155, 111, 0.8);
+  background: linear-gradient(145deg, rgba(74, 155, 111, 0.15) 0%, rgba(255, 255, 255, 1) 100%);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.15),
-    0 0 0 3px rgba(102, 126, 234, 0.25),
-    0 6px 20px rgba(102, 126, 234, 0.4),
-    0 0 30px rgba(102, 126, 234, 0.2);
-  color: #ffffff;
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(74, 155, 111, 0.2),
+    0 6px 20px rgba(74, 155, 111, 0.3),
+    0 0 30px rgba(74, 155, 111, 0.15);
+  color: var(--text-primary);
 }
 
 .dictationInputArea :global(.word-input):focus::before {
   opacity: 1;
-  background: linear-gradient(145deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.4));
+  background: linear-gradient(145deg, rgba(74, 155, 111, 0.3), rgba(212, 70, 56, 0.2));
 }
 
 .dictationInputArea :global(.correct-word) {

@@ -91,12 +91,12 @@
 
 .navLink:hover {
   background: var(--bg-hover);
-  color: var(--accent-blue);
+  color: var(--accent-green);
 }
 
 .navLink.active {
-  background: rgba(102, 126, 234, 0.15);
-  color: var(--accent-blue);
+  background: rgba(74, 155, 111, 0.15);
+  color: var(--accent-green);
 }
 
 .rightSection {
@@ -127,7 +127,7 @@
 
 .loginBtn {
   background: transparent;
-  border: 2px solid rgba(102, 126, 234, 0.3);
+  border: 2px solid rgba(74, 155, 111, 0.35);
   color: var(--text-primary);
   padding: 8px 18px;
   border-radius: 10px;
@@ -138,14 +138,14 @@
 }
 
 .loginBtn:hover {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  border-color: var(--accent-green);
+  background: rgba(74, 155, 111, 0.12);
+  color: var(--accent-green);
   transform: translateY(-2px);
 }
 
 .signupBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   border: none;
   color: white;
   padding: 8px 18px;
@@ -154,12 +154,12 @@
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(212, 70, 56, 0.3);
 }
 
 .signupBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(212, 70, 56, 0.4);
 }
 
 .themeToggle {
@@ -178,7 +178,7 @@
 
 .themeToggle:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
 }
 
 .languageMenuContainer {
@@ -201,7 +201,7 @@
 
 .languageSelector:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
 }
 
 .languageDropdown {
@@ -241,14 +241,14 @@
 
 .languageOption.active,
 .languageItem.active {
-  background: rgba(102, 126, 234, 0.1);
-  color: var(--accent-blue);
+  background: rgba(74, 155, 111, 0.15);
+  color: var(--accent-green);
 }
 
 .languageOption .checkmark,
 .languageItem .checkmark {
   margin-left: auto;
-  color: var(--accent-blue);
+  color: var(--accent-green);
   font-weight: bold;
 }
 
@@ -425,7 +425,7 @@
 }
 
 .userAvatarBtn:hover .userAvatar {
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
   transform: scale(1.05);
 }
 
@@ -537,7 +537,7 @@
 
 .userDropdownItem:hover {
   background: var(--bg-hover);
-  color: var(--accent-blue);
+  color: var(--accent-green);
 }
 
 .dropdownIcon {
@@ -551,12 +551,12 @@
 }
 
 .adminItem {
-  color: var(--accent-blue);
+  color: var(--accent-red);
 }
 
 .adminItem:hover {
-  background: rgba(102, 126, 234, 0.15);
-  color: var(--accent-blue);
+  background: rgba(212, 70, 56, 0.15);
+  color: var(--accent-red);
 }
 
 .adminItem .dropdownIcon {
@@ -601,7 +601,7 @@
 
 .authBtnMobile {
   display: none;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   border: none;
   color: white;
   padding: 8px 18px;
@@ -610,12 +610,12 @@
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(212, 70, 56, 0.3);
 }
 
 .authBtnMobile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(212, 70, 56, 0.4);
 }
 
 /* Tablet and Mobile Styles */

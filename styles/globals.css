@@ -2,31 +2,36 @@
 
 :root {
   /* Colors - Light Theme (Default) */
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #fafbfc;
-  --bg-card: #ffffff;
-  --bg-hover: rgba(0, 0, 0, 0.06);
+  /* Milk White Base */
+  --bg-primary: #fef9f3;
+  --bg-secondary: #fff8f0;
+  --bg-card: #fffbf7;
+  --bg-hover: rgba(212, 70, 56, 0.08);
   --bg-elevated: #ffffff;
 
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --text-muted: #718096;
+  /* Text colors with good contrast */
+  --text-primary: #2d1810;
+  --text-secondary: #5c4033;
+  --text-muted: #8b7266;
 
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Paprika Red & Cucumber Green Accents */
+  --accent-blue: #4a9b6f;
+  --accent-purple: #d44638;
+  --accent-gradient: linear-gradient(135deg, #d44638 0%, #4a9b6f 100%);
+  --accent-red: #d44638;
+  --accent-green: #4a9b6f;
 
-  --border-color: rgba(0, 0, 0, 0.16);
-  --border-light: rgba(0, 0, 0, 0.08);
+  --border-color: rgba(212, 70, 56, 0.2);
+  --border-light: rgba(212, 70, 56, 0.1);
   --border-radius: 12px;
   --border-radius-small: 8px;
 
-  /* Light theme shadows - softer and more subtle */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.10), 0 10px 10px rgba(0, 0, 0, 0.04);
-  --shadow-hover: 0 12px 24px rgba(102, 126, 234, 0.15), 0 4px 8px rgba(0, 0, 0, 0.08);
+  /* Light theme shadows - warm tones */
+  --shadow-sm: 0 1px 3px rgba(212, 70, 56, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(212, 70, 56, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(212, 70, 56, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(212, 70, 56, 0.18), 0 10px 10px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 12px 24px rgba(212, 70, 56, 0.25), 0 4px 8px rgba(74, 155, 111, 0.15);
 
   /* Difficulty colors */
   --difficulty-a1: #4CAF50;
@@ -133,8 +138,8 @@ body {
 }
 
 .difficulty-toggle__option {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.02) 100%);
-  border: 2px solid rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, rgba(74, 155, 111, 0.1) 0%, rgba(74, 155, 111, 0.03) 100%);
+  border: 2px solid rgba(74, 155, 111, 0.35);
   border-radius: 10px;
   padding: 14px 18px;
   cursor: pointer;
@@ -153,18 +158,18 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgba(74, 155, 111, 0.2) 0%, transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .difficulty-toggle__option:nth-child(2) {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.08) 0%, rgba(255, 152, 0, 0.02) 100%);
-  border-color: rgba(255, 152, 0, 0.3);
+  background: linear-gradient(135deg, rgba(212, 70, 56, 0.1) 0%, rgba(212, 70, 56, 0.03) 100%);
+  border-color: rgba(212, 70, 56, 0.35);
 }
 
 .difficulty-toggle__option:nth-child(2)::before {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgba(212, 70, 56, 0.2) 0%, transparent 100%);
 }
 
 .difficulty-toggle__option:hover::before {
@@ -173,33 +178,33 @@ body {
 
 .difficulty-toggle__option:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(212, 70, 56, 0.2);
 }
 
 .difficulty-toggle__option.active {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(76, 175, 80, 0.1) 100%);
-  border-color: rgba(76, 175, 80, 0.8);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, rgba(74, 155, 111, 0.25) 0%, rgba(74, 155, 111, 0.12) 100%);
+  border-color: rgba(74, 155, 111, 0.85);
+  box-shadow: 0 4px 16px rgba(74, 155, 111, 0.35);
 }
 
 .difficulty-toggle__option.active:nth-child(2) {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(255, 152, 0, 0.1) 100%);
-  border-color: rgba(255, 152, 0, 0.8);
-  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
+  background: linear-gradient(135deg, rgba(212, 70, 56, 0.25) 0%, rgba(212, 70, 56, 0.12) 100%);
+  border-color: rgba(212, 70, 56, 0.85);
+  box-shadow: 0 4px 16px rgba(212, 70, 56, 0.35);
 }
 
 .difficulty-toggle__title {
   display: block;
   font-size: 15px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #3d8159;
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .difficulty-toggle__option:nth-child(2) .difficulty-toggle__title {
-  color: #FF9800;
+  color: #c23d30;
 }
 
 .difficulty-toggle__description {
@@ -250,8 +255,8 @@ body {
 }
 
 .topic-tag:hover {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(74, 155, 111, 0.1);
+  border-color: var(--accent-green);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -309,8 +314,8 @@ body {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  background: rgba(74, 155, 111, 0.1);
+  border-color: var(--accent-green);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -336,7 +341,7 @@ button {
 }
 
 button:focus-visible {
-  outline: 2px solid var(--accent-blue);
+  outline: 2px solid var(--accent-green);
   outline-offset: 2px;
 }
 
@@ -346,7 +351,7 @@ button:focus-visible {
   width: 20px;
   height: 20px;
   border: 3px solid var(--bg-hover);
-  border-top-color: var(--accent-blue);
+  border-top-color: var(--accent-red);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

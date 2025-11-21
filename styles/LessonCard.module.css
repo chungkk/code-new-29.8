@@ -26,7 +26,7 @@
 .lessonCard:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-red);
 }
 
 [data-theme="dark"] .lessonCard:hover {
@@ -35,7 +35,7 @@
 }
 
 [data-theme="light"] .lessonCard:hover {
-  border-color: var(--accent-blue);
+  border-color: var(--accent-red);
   box-shadow: var(--shadow-hover);
 }
 
@@ -204,7 +204,7 @@
 
 .actionBtn:hover {
   background: var(--bg-hover);
-  border-color: var(--accent-blue);
+  border-color: var(--accent-green);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
