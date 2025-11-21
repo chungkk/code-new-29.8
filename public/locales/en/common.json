@@ -176,5 +176,361 @@
     "hoursAgo": "{{count}} hours ago",
     "daysAgo": "{{count}} days ago",
     "weeksAgo": "{{count}} weeks ago"
+  },
+  "audioControls": {
+    "replay": "Replay",
+    "play": "Play",
+    "pause": "Pause"
+  },
+  "footerControls": {
+    "sentenceProgress": "Sentence {{current}} of {{total}}",
+    "completed": "{{count}} completed",
+    "back": "Back",
+    "next": "Next",
+    "completeLesson": "Complete Lesson"
+  },
+  "lessonCard": {
+    "dictation": "Dictation",
+    "shadowing": "Shadowing",
+    "youtube": "Youtube"
+  },
+  "progressIndicator": {
+    "title": "Progress Details",
+    "sentencesCompleted": "Sentences Completed",
+    "wordsAccuracy": "Words Accuracy",
+    "timeSpent": "Time Spent",
+    "levelInfo": "Level {{level}}: {{percent}}% words hidden",
+    "milestone": "Milestone reached: {{percent}}%!"
+  },
+  "streakPopup": {
+    "label": "sentence streak",
+    "days": {
+      "mo": "MO",
+      "tu": "TU",
+      "we": "WE",
+      "th": "TH",
+      "fr": "FR",
+      "sa": "SA",
+      "su": "SU"
+    }
+  },
+  "modeSelection": {
+    "title": "Choose Learning Mode",
+    "studied": "Studied: {{time}}",
+    "close": "Close"
+  },
+  "homePage": {
+    "createLesson": {
+      "loginRequired": "You must be logged in to create a lesson",
+      "error": "Error creating lesson",
+      "connectionError": "Connection error",
+      "placeholder": "Paste YouTube link here...",
+      "button": "Create Lesson",
+      "creating": "Creating..."
+    },
+    "filters": {
+      "all": "All Levels",
+      "beginner": {
+        "title": "For Beginners",
+        "description": "Focus on basic pronunciation and listening to simple words and sentences"
+      },
+      "experienced": {
+        "title": "For Experienced Learners",
+        "description": "Enhance skills with natural speaking speed and more complex topics"
+      }
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{current}} / {{total}}"
+    },
+    "loading": "Loading lessons...",
+    "noLessons": "No lessons found",
+    "faq": {
+      "shadowing": {
+        "question": "What is the Shadowing method?",
+        "answer": "Shadowing is a language learning technique where you speak simultaneously with a native speaker to improve pronunciation, rhythm, and intonation."
+      },
+      "levels": {
+        "question": "What language levels is PapaGeil suitable for?",
+        "answer": "PapaGeil offers lessons for all levels from A1 (Beginner) to C2 (Advanced) according to the Common European Framework of Reference."
+      },
+      "youtube": {
+        "question": "Can I use my own YouTube videos?",
+        "answer": "Yes! You can paste any YouTube link and we'll automatically create an interactive lesson with subtitles for you."
+      },
+      "dictation": {
+        "question": "How does the Dictation method work?",
+        "answer": "In the Dictation method, you listen to audio and write down what you hear. This improves your listening comprehension and spelling."
+      },
+      "free": {
+        "question": "Is PapaGeil free?",
+        "answer": "PapaGeil offers many free lessons. Premium features like unlimited self-created lessons are available for registered users."
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Your Learning Progress",
+    "loading": "Loading...",
+    "stats": {
+      "totalPoints": "Total Points",
+      "totalLessons": "Total Lessons",
+      "lessonsStarted": "Lessons Started",
+      "lessonsCompleted": "Lessons Completed",
+      "inProgress": "In Progress",
+      "maxStreak": "Max Streak"
+    },
+    "tabs": {
+      "dictation": "Dictation",
+      "shadowing": "Shadowing"
+    },
+    "progress": {
+      "title": "Lesson Progress",
+      "all": "All Learned",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "overall": "Overall Progress",
+      "noDescription": "No description"
+    },
+    "empty": {
+      "noLessons": "No learned lessons yet. Start learning now!",
+      "noCompleted": "No completed lessons yet",
+      "noInProgress": "No lessons in progress",
+      "noRanking": "No ranking history available yet."
+    },
+    "actions": {
+      "continueLearning": "Continue Learning",
+      "viewLesson": "View Lesson"
+    }
+  },
+  "vocabulary": {
+    "title": "My Vocabulary",
+    "subtitle": "Your saved vocabulary",
+    "loading": "Loading...",
+    "empty": "Your vocabulary is empty",
+    "startAdding": "Start adding words!",
+    "deleteConfirm": "Delete this word?",
+    "errors": {
+      "loading": "Error loading vocabulary",
+      "deleting": "Error deleting word",
+      "notAuthenticated": "Not authenticated. Please log in again.",
+      "general": "An error occurred"
+    },
+    "success": {
+      "deleted": "Word deleted successfully!"
+    },
+    "speak": "Speak",
+    "delete": "Delete",
+    "notes": "Notes",
+    "translation": "Translation"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "See the most active learners",
+    "loading": "Loading...",
+    "loadingBoard": "Loading leaderboard...",
+    "rank": "Rank",
+    "name": "Name",
+    "points": "Points",
+    "pts": "pts",
+    "yourRank": "Your Rank",
+    "topLearners": "Top Learners",
+    "allTime": "All-Time Ranking",
+    "monthly": "Monthly",
+    "maxStreak": "Max Streak",
+    "notRanked": "Not ranked yet",
+    "emptyState": "No ranking data for this month yet.",
+    "startLearning": "Complete lessons to start earning points!"
+  },
+  "common": {
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  },
+  "404": {
+    "title": "Page Not Found",
+    "subtitle": "Sorry, the page you're looking for doesn't exist or has been moved.",
+    "description": "Return to the homepage to continue learning German.",
+    "goHome": "Go to Homepage",
+    "goBack": "Go Back",
+    "suggestions": "You might be looking for:",
+    "links": {
+      "dashboard": "Dashboard",
+      "login": "Login"
+    }
+  },
+  "offline": {
+    "title": "You're Offline",
+    "subtitle": "This page is not available offline.",
+    "description": "Please check your internet connection and try again.",
+    "tips": {
+      "title": "💡 Tips for offline learning:",
+      "cached": "Previously visited lessons are cached automatically",
+      "sync": "Your progress will sync when you're back online",
+      "vocabulary": "Vocabulary saved offline will be synced later"
+    },
+    "retry": "Retry",
+    "goBack": "Go Back"
+  },
+  "staticPages": {
+    "loading": "Loading...",
+    "notFound": "Page not found",
+    "about": "About Us",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms of Service"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Sign in to continue learning",
+      "loadingText": "⏳ Loading...",
+      "divider": "or",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register now"
+    },
+    "register": {
+      "title": "Free Registration",
+      "subtitle": "Start your German learning journey",
+      "createAccount": "Create Account",
+      "illustrationTitle": "🦜 PapaGeil",
+      "illustrationSubtitle": "Learn German through Shadowing Method",
+      "features": {
+        "lessons": "Interactive Lessons",
+        "vocabulary": "Vocabulary Tracking",
+        "audio": "Audio Support"
+      },
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in now"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "your.email@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter password",
+      "forgotPassword": "Forgot password?",
+      "togglePassword": "Toggle password visibility",
+      "loading": "Loading...",
+      "loginButton": "Sign In",
+      "registerButton": "Register",
+      "errors": {
+        "passwordMismatch": "Passwords do not match"
+      }
+    }
+  },
+  "vocabularySave": {
+    "warning": "Please enter the word meaning",
+    "success": "Word saved successfully!",
+    "error": "Error: {{message}}",
+    "generalError": "An error occurred",
+    "buttonTitle": "Save word",
+    "popupTitle": "Save Vocabulary",
+    "labels": {
+      "word": "Word:",
+      "context": "Context:",
+      "meaning": "Meaning (Vietnamese): *"
+    },
+    "placeholder": "Enter word meaning...",
+    "loadingDetails": "⏳ Loading dictionary details...",
+    "buttons": {
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "loadingInfo": "Loading information..."
+    }
+  },
+  "lesson": {
+    "vocabulary": {
+      "loginRequired": "Please sign in to save vocabulary",
+      "success": "Vocabulary saved successfully!",
+      "error": "Error saving",
+      "generalError": "An error occurred"
+    },
+    "completion": {
+      "allCompleted": "🎉 All sentences completed! Great job!"
+    },
+    "notFound": {
+      "title": "❌ Lesson not found",
+      "description": "Lesson with ID <strong>{{lessonId}}</strong> does not exist.",
+      "backButton": "← Back to Home"
+    },
+    "ui": {
+      "video": "Video",
+      "dictation": "Dictation",
+      "shadowing": "Shadowing",
+      "autoStop": "Auto Stop",
+      "start": "▶ Start",
+      "showHint": "Show hints",
+      "difficultySelector": "Select difficulty level",
+    "levelAndDifficulty": "Learning Level & Difficulty",
+    "dictationDifficulty": "🔥 Dictation Difficulty (CEFR Level)",
+    "dictationDifficultyDesc": "Choose how many words are hidden during dictation exercises",
+    "currentLevel": "Current:",
+    "appliesTo": "Applies to all dictation lessons"
+    }
+  },
+  "googleSignIn": {
+    "loading": "Signing in...",
+    "buttonText": "Sign in with Google"
+  },
+  "emptyState": {
+    "noItems": "No items found",
+    "noItemsDescription": "There are no items to display at this time.",
+    "noLessons": "No lessons found",
+    "noLessonsDescription": "We couldn't find any lessons matching your criteria. Try adjusting your filters.",
+    "viewAllLessons": "View all lessons",
+    "noVocabulary": "No vocabulary saved",
+    "noVocabularyDescription": "You haven't saved any vocabulary words yet. Start learning and save words to build your collection.",
+    "browseLessons": "Browse lessons"
+  },
+  "protectedPage": {
+    "loading": "Loading..."
+  },
+  "offlineIndicator": {
+    "syncing": "Syncing data...",
+    "backOnline": "Back online",
+    "offlineMode": "Offline mode - Progress will sync when online"
+  },
+  "shareButtons": {
+    "title": "Share:",
+    "facebook": "Share on Facebook",
+    "twitter": "Share on Twitter",
+    "linkedin": "Share on LinkedIn",
+    "whatsapp": "Share on WhatsApp",
+    "telegram": "Share on Telegram",
+    "email": "Share via Email",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied!",
+    "moreOptions": "More options"
+  },
+  "userProfile": {
+    "privacyLabel": "Profile Privacy",
+    "privacyStatus": "Public",
+    "premiumStatus": "Premium Status",
+    "premiumInactive": "Inactive",
+    "totalPremiumMonths": "Total Premium months",
+    "notPremium": "Not a Premium member",
+    "unlockPro": "Unlock PRO",
+    "maxStreak": "Max streak:",
+    "dictation": "Dictation",
+    "shadowing": "Shadowing",
+    "totalLessons": "Total lessons"
   }
 }

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO from '../components/SEO';
 
 export default function Custom404() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   return (
@@ -57,7 +59,7 @@ export default function Custom404() {
             color: '#333',
             marginBottom: '15px'
           }}>
-            Seite nicht gefunden
+            {t('404.title')}
           </h1>
 
           {/* Description */}
@@ -67,9 +69,9 @@ export default function Custom404() {
             marginBottom: '40px',
             lineHeight: 1.6
           }}>
-            Entschuldigung, die gesuchte Seite existiert nicht oder wurde verschoben.
+            {t('404.subtitle')}
             <br />
-            Kehren Sie zur Startseite zurück, um weiter Deutsch zu lernen.
+            {t('404.description')}
           </p>
 
           {/* Action Buttons */}
@@ -102,7 +104,7 @@ export default function Custom404() {
                 e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
               }}
             >
-              🏠 Zur Startseite
+              🏠 {t('404.goHome')}
             </Link>
 
             <button
@@ -127,7 +129,7 @@ export default function Custom404() {
                 e.target.style.transform = 'translateY(0)';
               }}
             >
-              ← Zurück
+              ← {t('404.goBack')}
             </button>
           </div>
 
@@ -142,7 +144,7 @@ export default function Custom404() {
               color: '#999',
               marginBottom: '15px'
             }}>
-              Vielleicht suchen Sie nach:
+              {t('404.suggestions')}
             </p>
             <div style={{
               display: 'flex',
@@ -164,7 +166,7 @@ export default function Custom404() {
                 onMouseEnter={(e) => e.target.style.background = '#e8ecf4'}
                 onMouseLeave={(e) => e.target.style.background = '#f5f7fa'}
               >
-                Dashboard
+                {t('404.links.dashboard')}
               </Link>
               <Link
                 href="/auth/login"
@@ -180,7 +182,7 @@ export default function Custom404() {
                 onMouseEnter={(e) => e.target.style.background = '#e8ecf4'}
                 onMouseLeave={(e) => e.target.style.background = '#f5f7fa'}
               >
-                Anmelden
+                {t('404.links.login')}
               </Link>
             </div>
           </div>

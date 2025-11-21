@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
@@ -8,6 +9,7 @@ import GoogleSignInButton from '../../components/GoogleSignInButton';
 import styles from '../../styles/auth.module.css';
 
 export default function Login() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -21,7 +23,7 @@ export default function Login() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
-          <div className={styles.loadingText}>⏳ Lädt...</div>
+          <div className={styles.loadingText}>{t('auth.login.loadingText')}</div>
         </div>
       </div>
     );
@@ -56,7 +58,7 @@ export default function Login() {
             </div>
             <h1 className={styles.authTitle}>PapaGeil</h1>
             <p className={styles.authSubtitle}>
-              Melden Sie sich an, um weiterzulernen
+              {t('auth.login.subtitle')}
             </p>
           </div>
 
@@ -64,7 +66,7 @@ export default function Login() {
 
           <div className={styles.divider}>
             <div className={styles.dividerLine}></div>
-            <span className={styles.dividerText}>oder</span>
+            <span className={styles.dividerText}>{t('auth.login.divider')}</span>
             <div className={styles.dividerLine}></div>
           </div>
 
@@ -72,9 +74,9 @@ export default function Login() {
 
           <div className={styles.authFooter}>
             <p className={styles.footerText}>
-              Noch kein Konto?{' '}
+              {t('auth.login.noAccount')}{' '}
               <Link href="/auth/register" className={styles.footerLink}>
-                Jetzt registrieren
+                {t('auth.login.registerLink')}
               </Link>
             </p>
           </div>

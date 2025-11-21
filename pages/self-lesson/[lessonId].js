@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import Head from 'next/head';
 
 import AudioControls from '../../components/AudioControls';
@@ -13,6 +14,7 @@ import styles from '../../styles/shadowingPage.module.css';
 
 
 const SelfLessonPageContent = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { lessonId } = useRouter().query;
   
@@ -826,7 +828,7 @@ const SelfLessonPageContent = () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
-        toast.error('Bitte melden Sie sich an, um Vokabeln zu speichern');
+        toast.error(t('lesson.vocabulary.loginRequired'));
         return;
       }
 
@@ -847,14 +849,14 @@ const SelfLessonPageContent = () => {
       });
 
       if (response.ok) {
-        toast.success('Vokabel erfolgreich gespeichert!');
+        toast.success(t('lesson.vocabulary.success'));
       } else {
         const error = await response.json();
-        toast.error(error.message || 'Fehler beim Speichern');
+        toast.error(error.message || t('lesson.vocabulary.error'));
       }
     } catch (error) {
       console.error('Save vocabulary error:', error);
-      toast.error('Ein Fehler ist aufgetreten');
+      toast.error(t('lesson.vocabulary.generalError'));
     }
   }, [lessonId, transcriptData, currentSentenceIndex]);
 

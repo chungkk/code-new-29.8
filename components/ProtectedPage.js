@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedPage = ({ children, adminOnly = false, requireAdmin = false, requireAuth = true }) => {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -33,7 +35,7 @@ const ProtectedPage = ({ children, adminOnly = false, requireAdmin = false, requ
         gap: 'var(--spacing-md)',
       }}>
         <div className="loading-spinner" />
-        <div style={{ color: 'var(--text-secondary)' }}>Loading...</div>
+        <div style={{ color: 'var(--text-secondary)' }}>{t('protectedPage.loading')}</div>
       </div>
     );
   }

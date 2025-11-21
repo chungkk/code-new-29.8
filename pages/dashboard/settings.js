@@ -237,7 +237,7 @@ function SettingsPage() {
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>🎯</div>
-                <h3 className={styles.settingCardTitle}>Learning Level & Difficulty</h3>
+                <h3 className={styles.settingCardTitle}>{t('lesson.ui.levelAndDifficulty')}</h3>
               </div>
               <div className={styles.settingCardBody}>
                 {/* German Level Section */}
@@ -268,10 +268,10 @@ function SettingsPage() {
                 {/* Dictation Difficulty Section */}
                 <div>
                   <label className={styles.settingLabel}>
-                    <strong>🔥 Dictation Difficulty (CEFR Level)</strong>
+                    <strong>{t('lesson.ui.dictationDifficulty')}</strong>
                   </label>
                   <p className={styles.settingDescription} style={{ fontSize: '13px', marginTop: '6px', marginBottom: '10px' }}>
-                    Choose how many words are hidden during dictation exercises
+                    {t('lesson.ui.dictationDifficultyDesc')}
                   </p>
                   <select
                     value={user?.preferredDifficultyLevel || 'b1'}
@@ -286,7 +286,7 @@ function SettingsPage() {
                     <option value="c2">C2 (100% hidden)</option>
                   </select>
                   <p className={styles.settingHint} style={{ fontSize: '12px', marginTop: '6px' }}>
-                    Current: <strong>{
+                    {t('lesson.ui.currentLevel')} <strong>{
                       user?.preferredDifficultyLevel === 'a1' ? 'A1 (10%)' :
                       user?.preferredDifficultyLevel === 'a2' ? 'A2 (30%)' :
                       user?.preferredDifficultyLevel === 'b1' ? 'B1 (30%)' :
@@ -295,7 +295,7 @@ function SettingsPage() {
                       user?.preferredDifficultyLevel === 'c2' ? 'C2 (100%)' :
                       'B1 (30%)'
                     }</strong>
-                    {' '}<small>• Applies to all dictation lessons</small>
+                    {' '}<small>• {t('lesson.ui.appliesTo')}</small>
                   </p>
                 </div>
               </div>

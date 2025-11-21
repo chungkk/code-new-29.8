@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AudioControls = ({
   isPlaying,
@@ -11,6 +12,8 @@ const AudioControls = ({
   onPlaybackRateChange,
   showPlaybackRate = true,
 }) => {
+  const { t } = useTranslation();
+  
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '00:00';
     const mins = Math.floor(seconds / 60);
@@ -48,7 +51,7 @@ const AudioControls = ({
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          aria-label="Replay"
+          aria-label={t('audioControls.replay')}
         >
           ⏮
         </button>
@@ -68,7 +71,7 @@ const AudioControls = ({
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isPlaying ? t('audioControls.pause') : t('audioControls.play')}
         >
           {isPlaying ? '⏸' : '▶'}
         </button>

@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ModeSelectionPopup.module.css';
 
 const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
+  const { t } = useTranslation();
   const formatStudyTime = (seconds) => {
     if (!seconds || seconds === 0) return '0s';
     
@@ -21,16 +23,16 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
   const modes = [
     {
       id: 'dictation',
-      name: 'Dictation',
+      name: t('modeSelectionPopup.dictation.name'),
       icon: '✍️',
-      description: 'Listen and type what you hear to improve your listening comprehension and spelling.',
+      description: t('modeSelectionPopup.dictation.description'),
       studyTime: lesson.dictationStudyTime || 0
     },
     {
       id: 'shadowing',
-      name: 'Shadowing',
+      name: t('modeSelectionPopup.shadowing.name'),
       icon: '🗣️',
-      description: 'Listen and repeat after the speaker to improve your pronunciation and speaking fluency.',
+      description: t('modeSelectionPopup.shadowing.description'),
       studyTime: lesson.shadowingStudyTime || 0
     },
   ];
@@ -48,11 +50,11 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.popup}>
-        <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+        <button className={styles.closeBtn} onClick={onClose} aria-label={t('modeSelection.close')}>
           ✕
         </button>
 
-        <h2 className={styles.popupTitle}>Choose Learning Mode</h2>
+        <h2 className={styles.popupTitle}>{t('modeSelection.title')}</h2>
 
         <div className={styles.lessonInfo}>
           <div className={styles.lessonTitle}>{lesson.title}</div>
@@ -72,7 +74,7 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
               <div className={styles.modeDescription}>{mode.description}</div>
               <div className={styles.modeStudyTime}>
                 <span className={styles.studyTimeIcon}>⏱️</span>
-                <span className={styles.studyTimeText}>Đã học: {formatStudyTime(mode.studyTime)}</span>
+                <span className={styles.studyTimeText}>{t('modeSelection.studied', { time: formatStudyTime(mode.studyTime) })}</span>
               </div>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/Offline.module.css';
 
 /**
@@ -8,6 +9,7 @@ import styles from '../styles/Offline.module.css';
  * Shown when user navigates to uncached pages while offline
  */
 const OfflinePage = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   
   const handleRetry = () => {
@@ -49,22 +51,22 @@ const OfflinePage = () => {
           </div>
           
           {/* Title */}
-          <h1 className={styles.title}>You&apos;re Offline</h1>
+          <h1 className={styles.title}>{t('offline.title')}</h1>
           
           {/* Message */}
           <p className={styles.message}>
-            This page is not available offline.
+            {t('offline.subtitle')}
             <br />
-            Please check your internet connection and try again.
+            {t('offline.description')}
           </p>
           
           {/* Tips */}
           <div className={styles.tips}>
-            <h3>💡 Tips for offline learning:</h3>
+            <h3>{t('offline.tips.title')}</h3>
             <ul>
-              <li>Previously visited lessons are cached automatically</li>
-              <li>Your progress will sync when you&apos;re back online</li>
-              <li>Vocabulary saved offline will be synced later</li>
+              <li>{t('offline.tips.cached')}</li>
+              <li>{t('offline.tips.sync')}</li>
+              <li>{t('offline.tips.vocabulary')}</li>
             </ul>
           </div>
           
@@ -88,14 +90,14 @@ const OfflinePage = () => {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
                 />
               </svg>
-              Retry
+              {t('offline.retry')}
             </button>
             
             <button 
               onClick={handleGoBack}
               className={styles.secondaryButton}
             >
-              Go Back
+              {t('offline.goBack')}
             </button>
           </div>
         </div>

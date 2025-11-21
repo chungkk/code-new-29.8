@@ -1,15 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/StreakPopup.module.css';
 
 const StreakPopup = ({ onClose }) => {
+  const { t } = useTranslation();
   const [streakData, setStreakData] = useState({
     currentStreak: 0,
-    weeklyProgress: [false, false, false, false, false, false, false] // MO, TU, WE, TH, FR, SA, SU
+    weeklyProgress: [false, false, false, false, false, false, false]
   });
   const [loading, setLoading] = useState(true);
   const popupRef = useRef(null);
 
-  const dayLabels = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+  const dayLabels = [
+    t('streakPopup.days.mo'),
+    t('streakPopup.days.tu'),
+    t('streakPopup.days.we'),
+    t('streakPopup.days.th'),
+    t('streakPopup.days.fr'),
+    t('streakPopup.days.sa'),
+    t('streakPopup.days.su')
+  ];
 
   const handleClickOutside = (event) => {
     if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -76,7 +86,7 @@ const StreakPopup = ({ onClose }) => {
             <span className={styles.streakIcon}>🔥</span>
             <div className={styles.streakInfo}>
               <span className={styles.streakValue}>{streakData.currentStreak}</span>
-              <span className={styles.streakLabel}>sentence streak</span>
+              <span className={styles.streakLabel}>{t('streakPopup.label')}</span>
             </div>
           </div>
 

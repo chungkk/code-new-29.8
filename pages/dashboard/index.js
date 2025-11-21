@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import ProtectedPage from '../../components/ProtectedPage';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -11,6 +12,7 @@ import styles from '../../styles/dashboard.module.css';
 
 
 function DashboardIndex() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, userPoints } = useAuth();
   const [progress, setProgress] = useState([]);
@@ -143,8 +145,8 @@ function DashboardIndex() {
       <DashboardLayout>
         <div className={styles.container}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Dashboard</h1>
-            <p className={styles.subtitle}>Lädt...</p>
+            <h1 className={styles.title}>{t('dashboard.title')}</h1>
+            <p className={styles.subtitle}>{t('dashboard.loading')}</p>
           </div>
           <SkeletonGrid count={6} columns={3} />
         </div>
@@ -191,23 +193,23 @@ function DashboardIndex() {
             {/* Content Tabs */}
             <div className={styles.contentTabs}>
               <button className={`${styles.contentTab} ${styles.active}`}>
-                Dictation
+                {t('dashboard.tabs.dictation')}
               </button>
               <button className={styles.contentTab}>
-                Shadowing
+                {t('dashboard.tabs.shadowing')}
               </button>
             </div>
 
             {/* Ranking Section */}
             <div className={styles.rankingSection}>
               <div className={styles.rankingEmpty}>
-                No ranking history available yet.
+                {t('dashboard.empty.noRanking')}
               </div>
             </div>
 
             {/* Lesson Progress Section */}
             <div className={styles.lessonProgressSection}>
-              <h2 className={styles.lessonProgressTitle}>Lesson Progress</h2>
+              <h2 className={styles.lessonProgressTitle}>{t('dashboard.progress.title')}</h2>
 
               {/* Progress Tabs */}
               <div className={styles.progressTabs}>
@@ -216,21 +218,21 @@ function DashboardIndex() {
                   onClick={() => setActiveProgressTab('all')}
                 >
                   <span className={styles.tabIcon}>📚</span>
-                  All Learned
+                  {t('dashboard.progress.all')}
                 </button>
                 <button
                   className={`${styles.progressTab} ${styles.completed} ${activeProgressTab === 'completed' ? styles.active : ''}`}
                   onClick={() => setActiveProgressTab('completed')}
                 >
                   <span className={styles.tabIcon}>✓</span>
-                  Completed
+                  {t('dashboard.progress.completed')}
                 </button>
                 <button
                   className={`${styles.progressTab} ${styles.inProgress} ${activeProgressTab === 'inProgress' ? styles.active : ''}`}
                   onClick={() => setActiveProgressTab('inProgress')}
                 >
                   <span className={styles.tabIcon}>⏱</span>
-                  In Progress
+                  {t('dashboard.progress.inProgress')}
                 </button>
               </div>
 
@@ -239,10 +241,10 @@ function DashboardIndex() {
                 <div className={styles.emptyLessons}>
                   <p className={styles.emptyText}>
                     {activeProgressTab === 'all'
-                      ? 'No learned lessons yet. Start learning now!'
+                      ? t('dashboard.empty.noLessons')
                       : activeProgressTab === 'completed'
-                      ? 'No completed lessons yet'
-                      : 'No lessons in progress'}
+                      ? t('dashboard.empty.noCompleted')
+                      : t('dashboard.empty.noInProgress')}
                   </p>
                 </div>
               ) : (
@@ -275,7 +277,7 @@ function DashboardIndex() {
                             {lesson.displayTitle || lesson.title}
                           </h3>
                           <p className={styles.lessonDescription}>
-                            {lesson.description || 'Keine Beschreibung'}
+                            {lesson.description || t('dashboard.progress.noDescription')}
                           </p>
                           <span className={styles.levelBadge}>
                             {lesson.level || 'A1'}
@@ -285,7 +287,7 @@ function DashboardIndex() {
                         {/* Progress Section - Detailed */}
                         <div className={styles.progressSection}>
                           <div className={styles.progressInfo}>
-                            <span className={styles.progressLabel}>Overall Progress</span>
+                            <span className={styles.progressLabel}>{t('dashboard.progress.overall')}</span>
                             <span className={styles.progressPercent}>{progressPercent}%</span>
                           </div>
                           <div className={styles.progressBar}>

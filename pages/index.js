@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData, generateCourseStructuredData, generateFAQStructuredData } from '../components/SEO';
 import LessonCard from '../components/LessonCard';
 import ModeSelectionPopup from '../components/ModeSelectionPopup';
@@ -7,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLessons, prefetchLessons } from '../lib/hooks/useLessons';
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -129,7 +131,7 @@ const HomePage = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setCreateError('Du musst angemeldet sein, um eine Lektion zu erstellen');
+        setCreateError(t('homePage.createLesson.loginRequired'));
         return;
       }
 
@@ -149,10 +151,10 @@ const HomePage = () => {
         router.push(`/self-lesson/${data.lesson.id}`);
       } else {
         const error = await res.json();
-        setCreateError(error.message || 'Lỗi tạo bài học');
+        setCreateError(error.message || t('homePage.createLesson.error'));
       }
     } catch (error) {
-      setCreateError('Verbindungsfehler');
+      setCreateError(t('homePage.createLesson.connectionError'));
     } finally {
       setIsCreating(false);
     }
@@ -166,37 +168,37 @@ const HomePage = () => {
   const difficultyOptions = [
     {
       value: 'beginner',
-      title: 'For Beginners',
-      description: 'Focus on basic pronunciation and listening to simple words and sentences'
+      title: t('homePage.filters.beginner.title'),
+      description: t('homePage.filters.beginner.description')
     },
     {
       value: 'experienced',
-      title: 'For Experienced Learners',
-      description: 'Enhance skills with natural speaking speed and more complex topics'
+      title: t('homePage.filters.experienced.title'),
+      description: t('homePage.filters.experienced.description')
     }
   ];
 
   // Generate structured data for the homepage
   const faqData = [
     {
-      question: "Was ist die Shadowing-Methode?",
-      answer: "Shadowing ist eine Sprach-Lerntechnik, bei der Sie gleichzeitig mit einem Muttersprachler sprechen, um Aussprache, Rhythmus und Intonation zu verbessern."
+      question: t('homePage.faq.shadowing.question'),
+      answer: t('homePage.faq.shadowing.answer')
     },
     {
-      question: "Für welche Sprachniveaus ist PapaGeil geeignet?",
-      answer: "PapaGeil bietet Lektionen für alle Niveaus von A1 (Anfänger) bis C2 (Fortgeschrittene) nach dem Gemeinsamen Europäischen Referenzrahmen."
+      question: t('homePage.faq.levels.question'),
+      answer: t('homePage.faq.levels.answer')
     },
     {
-      question: "Kann ich meine eigenen YouTube-Videos verwenden?",
-      answer: "Ja! Sie können jeden YouTube-Link einfügen und wir erstellen automatisch eine interaktive Lektion mit Untertiteln für Sie."
+      question: t('homePage.faq.youtube.question'),
+      answer: t('homePage.faq.youtube.answer')
     },
     {
-      question: "Wie funktioniert die Diktat-Methode?",
-      answer: "Bei der Diktat-Methode hören Sie sich Audio an und schreiben das Gehörte auf. Dies verbessert Ihr Hörverstehen und Ihre Rechtschreibung."
+      question: t('homePage.faq.dictation.question'),
+      answer: t('homePage.faq.dictation.answer')
     },
     {
-      question: "Ist PapaGeil kostenlos?",
-      answer: "PapaGeil bietet viele kostenlose Lektionen. Premium-Funktionen wie unbegrenzte selbsterstellte Lektionen sind für registrierte Nutzer verfügbar."
+      question: t('homePage.faq.free.question'),
+      answer: t('homePage.faq.free.answer')
     }
   ];
 
@@ -250,7 +252,7 @@ const HomePage = () => {
             >
             <input
               type="url"
-              placeholder="Füge hier den YouTube-Link ein..."
+              placeholder={t('homePage.createLesson.placeholder')}
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
               style={{
@@ -278,7 +280,7 @@ const HomePage = () => {
                 fontWeight: 'bold'
               }}
             >
-              {isCreating ? 'Erstelle...' : 'Lektion erstellen'}
+              {isCreating ? t('homePage.createLesson.creating') : t('homePage.createLesson.button')}
             </button>
           </form>
           {createError && (
@@ -290,7 +292,7 @@ const HomePage = () => {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', fontSize: '18px', color: '#666' }}>
-            <div style={{ marginBottom: '10px' }}>⏳ Lade Lektionen...</div>
+            <div style={{ marginBottom: '10px' }}>⏳ {t('homePage.loading')}</div>
           </div>
         ) : (
           <div className="lesson-cards-container">
@@ -311,17 +313,17 @@ const HomePage = () => {
               disabled={currentPage === 1}
               className="pagination-btn"
             >
-              ‹ Zurück
+              ‹ {t('homePage.pagination.previous')}
             </button>
             <span className="pagination-info">
-              Seite {currentPage} / {totalPages}
+              {t('homePage.pagination.page', { current: currentPage, total: totalPages })}
             </span>
             <button
               onClick={nextPage}
               disabled={currentPage === totalPages}
               className="pagination-btn"
             >
-              Weiter ›
+              {t('homePage.pagination.next')} ›
             </button>
           </div>
         )}

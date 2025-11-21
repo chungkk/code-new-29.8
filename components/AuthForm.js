@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import styles from '../styles/authForm.module.css';
 
 const AuthForm = ({ mode = 'login' }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -35,7 +37,7 @@ const AuthForm = ({ mode = 'login' }) => {
         result = await login(formData.email, formData.password);
       } else {
         if (formData.password !== formData.confirmPassword) {
-          throw new Error('Passwords do not match');
+          throw new Error(t('auth.form.errors.passwordMismatch'));
         }
         result = await register(formData.name, formData.email, formData.password);
       }
@@ -59,13 +61,13 @@ const AuthForm = ({ mode = 'login' }) => {
       {!isLogin && (
         <div className={styles.formField}>
           <label className={styles.formLabel} htmlFor="name">
-            Name
+            {t('auth.form.name')}
           </label>
           <input
             id="name"
             type="text"
             name="name"
-            placeholder="Geben Sie Ihren Namen ein"
+            placeholder={t('auth.form.namePlaceholder')}
             value={formData.name}
             onChange={handleChange}
             required={!isLogin}
@@ -77,13 +79,13 @@ const AuthForm = ({ mode = 'login' }) => {
 
       <div className={styles.formField}>
         <label className={styles.formLabel} htmlFor="email">
-          E-Mail
+          {t('auth.form.email')}
         </label>
         <input
           id="email"
           type="email"
           name="email"
-          placeholder="ihre.email@beispiel.de"
+          placeholder={t('auth.form.emailPlaceholder')}
           value={formData.email}
           onChange={handleChange}
           required
@@ -95,14 +97,14 @@ const AuthForm = ({ mode = 'login' }) => {
 
       <div className={styles.formField}>
         <label className={styles.formLabel} htmlFor="password">
-          Passwort
+          {t('auth.form.password')}
         </label>
         <div className={styles.passwordContainer}>
           <input
             id="password"
             type={showPassword ? 'text' : 'password'}
             name="password"
-            placeholder="Geben Sie Ihr Passwort ein"
+            placeholder={t('auth.form.passwordPlaceholder')}
             value={formData.password}
             onChange={handleChange}
             required
@@ -115,7 +117,7 @@ const AuthForm = ({ mode = 'login' }) => {
             className={styles.passwordToggle}
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
-            aria-label="Toggle password visibility"
+            aria-label={t('auth.form.togglePassword')}
           >
             {showPassword ? '👁️' : '👁️‍🗨️'}
           </button>
@@ -123,7 +125,7 @@ const AuthForm = ({ mode = 'login' }) => {
         {isLogin && (
           <div className={styles.forgotPassword}>
             <a href="#" className={styles.forgotPasswordLink} onClick={(e) => e.preventDefault()}>
-              Passwort vergessen?
+              {t('auth.form.forgotPassword')}
             </a>
           </div>
         )}
@@ -132,14 +134,14 @@ const AuthForm = ({ mode = 'login' }) => {
       {!isLogin && (
         <div className={styles.formField}>
           <label className={styles.formLabel} htmlFor="confirmPassword">
-            Passwort bestätigen
+            {t('auth.form.confirmPassword')}
           </label>
           <div className={styles.passwordContainer}>
             <input
               id="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
-              placeholder="Passwort erneut eingeben"
+              placeholder={t('auth.form.confirmPasswordPlaceholder')}
               value={formData.confirmPassword}
               onChange={handleChange}
               required={!isLogin}
@@ -152,7 +154,7 @@ const AuthForm = ({ mode = 'login' }) => {
               className={styles.passwordToggle}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               tabIndex={-1}
-              aria-label="Toggle password visibility"
+              aria-label={t('auth.form.togglePassword')}
             >
               {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
             </button>
@@ -172,7 +174,7 @@ const AuthForm = ({ mode = 'login' }) => {
         className={styles.submitButton}
       >
         {loading && <span className={styles.loadingSpinner} />}
-        {loading ? 'Lädt...' : isLogin ? 'Anmelden' : 'Registrieren'}
+        {loading ? t('auth.form.loading') : isLogin ? t('auth.form.loginButton') : t('auth.form.registerButton')}
       </button>
     </form>
   );

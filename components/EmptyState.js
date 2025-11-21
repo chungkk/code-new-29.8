@@ -1,14 +1,18 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 const EmptyState = ({
   icon = '📭',
-  title = 'No items found',
-  description = 'There are no items to display at this time.',
+  title,
+  description,
   actionLabel,
   actionHref,
   onAction,
 }) => {
+  const { t } = useTranslation();
+  const displayTitle = title || t('emptyState.noItems');
+  const displayDescription = description || t('emptyState.noItemsDescription');
   return (
     <div
       style={{
@@ -30,7 +34,7 @@ const EmptyState = ({
           marginBottom: 'var(--spacing-sm)',
         }}
       >
-        {title}
+        {displayTitle}
       </h3>
 
       <p
@@ -41,7 +45,7 @@ const EmptyState = ({
           marginBottom: actionLabel ? 'var(--spacing-lg)' : 0,
         }}
       >
-        {description}
+        {displayDescription}
       </p>
 
       {actionLabel && (
@@ -85,24 +89,30 @@ const EmptyState = ({
   );
 };
 
-export const NoLessonsFound = () => (
-  <EmptyState
-    icon="🔍"
-    title="No lessons found"
-    description="We couldn't find any lessons matching your criteria. Try adjusting your filters."
-    actionLabel="View all lessons"
-    actionHref="/"
-  />
-);
+export const NoLessonsFound = () => {
+  const { t } = useTranslation();
+  return (
+    <EmptyState
+      icon="🔍"
+      title={t('emptyState.noLessons')}
+      description={t('emptyState.noLessonsDescription')}
+      actionLabel={t('emptyState.viewAllLessons')}
+      actionHref="/"
+    />
+  );
+};
 
-export const NoVocabularyFound = () => (
-  <EmptyState
-    icon="📚"
-    title="No vocabulary saved"
-    description="You haven't saved any vocabulary words yet. Start learning and save words to build your collection."
-    actionLabel="Browse lessons"
-    actionHref="/"
-  />
-);
+export const NoVocabularyFound = () => {
+  const { t } = useTranslation();
+  return (
+    <EmptyState
+      icon="📚"
+      title={t('emptyState.noVocabulary')}
+      description={t('emptyState.noVocabularyDescription')}
+      actionLabel={t('emptyState.browseLessons')}
+      actionHref="/"
+    />
+  );
+};
 
 export default EmptyState;

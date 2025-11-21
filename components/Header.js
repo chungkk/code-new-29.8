@@ -190,6 +190,10 @@ const Header = () => {
     setUserMenuOpen(!userMenuOpen);
   };
 
+  const toggleLanguageMenu = () => {
+    setLanguageMenuOpen(!languageMenuOpen);
+  };
+
   const handleLogout = async () => {
     setUserMenuOpen(false);
     await logout();
@@ -226,15 +230,37 @@ const Header = () => {
             {currentTheme?.emoji || '🌅'}
           </button>
 
-          <div className={styles.languageMenuContainer}>
-            <div
+          <div className={styles.languageMenuContainer} ref={languageMenuRef}>
+            <button
               className={styles.languageSelector}
-              style={{ cursor: 'default' }}
+              onClick={toggleLanguageMenu}
               aria-label="Language"
+              aria-expanded={languageMenuOpen}
             >
-              <span>🇩🇪</span>
-              <span>Deutsch</span>
-            </div>
+              <span>{currentLanguageInfo.flag}</span>
+              <span>{currentLanguageInfo.nativeName}</span>
+            </button>
+
+            {languageMenuOpen && (
+              <div className={styles.languageDropdown}>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`${styles.languageItem} ${
+                      lang.code === currentLanguage ? styles.active : ''
+                    }`}
+                    onClick={() => {
+                      changeLanguage(lang.code);
+                      setLanguageMenuOpen(false);
+                    }}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.nativeName}</span>
+                    {lang.code === currentLanguage && <span className={styles.checkmark}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {user && (

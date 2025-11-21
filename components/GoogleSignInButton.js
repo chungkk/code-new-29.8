@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/googleButton.module.css';
 
 const GoogleSignInButton = ({ onClick, loading = false }) => {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -22,7 +24,7 @@ const GoogleSignInButton = ({ onClick, loading = false }) => {
         </span>
       )}
       <span className={styles.buttonText}>
-        {loading ? 'Wird angemeldet...' : 'Mit Google anmelden'}
+        {loading ? t('googleSignIn.loading') : t('googleSignIn.buttonText')}
       </span>
     </button>
   );

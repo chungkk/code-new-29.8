@@ -176,5 +176,361 @@
     "hoursAgo": "{{count}} giờ trước",
     "daysAgo": "{{count}} ngày trước",
     "weeksAgo": "{{count}} tuần trước"
+  },
+  "audioControls": {
+    "replay": "Phát lại",
+    "play": "Phát",
+    "pause": "Tạm dừng"
+  },
+  "footerControls": {
+    "sentenceProgress": "Câu {{current}} trên {{total}}",
+    "completed": "{{count}} hoàn thành",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "completeLesson": "Hoàn thành bài học"
+  },
+  "lessonCard": {
+    "dictation": "Chính tả",
+    "shadowing": "Shadowing",
+    "youtube": "Youtube"
+  },
+  "progressIndicator": {
+    "title": "Chi tiết tiến độ",
+    "sentencesCompleted": "Câu đã hoàn thành",
+    "wordsAccuracy": "Độ chính xác từ",
+    "timeSpent": "Thời gian học",
+    "levelInfo": "Cấp độ {{level}}: ẩn {{percent}}% từ",
+    "milestone": "Đạt mốc: {{percent}}%!"
+  },
+  "streakPopup": {
+    "label": "chuỗi câu",
+    "days": {
+      "mo": "T2",
+      "tu": "T3",
+      "we": "T4",
+      "th": "T5",
+      "fr": "T6",
+      "sa": "T7",
+      "su": "CN"
+    }
+  },
+  "modeSelection": {
+    "title": "Chọn chế độ học",
+    "studied": "Đã học: {{time}}",
+    "close": "Đóng"
+  },
+  "homePage": {
+    "createLesson": {
+      "loginRequired": "Bạn phải đăng nhập để tạo bài học",
+      "error": "Lỗi khi tạo bài học",
+      "connectionError": "Lỗi kết nối",
+      "placeholder": "Dán link YouTube vào đây...",
+      "button": "Tạo bài học",
+      "creating": "Đang tạo..."
+    },
+    "filters": {
+      "all": "Tất cả cấp độ",
+      "beginner": {
+        "title": "Dành cho người mới",
+        "description": "Tập trung vào phát âm cơ bản và nghe các từ và câu đơn giản"
+      },
+      "experienced": {
+        "title": "Dành cho người có kinh nghiệm",
+        "description": "Nâng cao kỹ năng với tốc độ nói tự nhiên và chủ đề phức tạp hơn"
+      }
+    },
+    "pagination": {
+      "previous": "Trước",
+      "next": "Tiếp",
+      "page": "Trang {{current}} / {{total}}"
+    },
+    "loading": "Đang tải bài học...",
+    "noLessons": "Không tìm thấy bài học",
+    "faq": {
+      "shadowing": {
+        "question": "Phương pháp Shadowing là gì?",
+        "answer": "Shadowing là kỹ thuật học ngôn ngữ mà bạn nói cùng lúc với người bản ngữ để cải thiện phát âm, nhịp điệu và ngữ điệu."
+      },
+      "levels": {
+        "question": "PapaGeil phù hợp với cấp độ nào?",
+        "answer": "PapaGeil cung cấp bài học cho tất cả cấp độ từ A1 (Người mới) đến C2 (Nâng cao) theo Khung tham chiếu châu Âu chung."
+      },
+      "youtube": {
+        "question": "Tôi có thể sử dụng video YouTube của riêng mình không?",
+        "answer": "Có! Bạn có thể dán bất kỳ link YouTube nào và chúng tôi sẽ tự động tạo bài học tương tác với phụ đề cho bạn."
+      },
+      "dictation": {
+        "question": "Phương pháp Chính tả hoạt động như thế nào?",
+        "answer": "Trong phương pháp Chính tả, bạn nghe audio và viết lại những gì bạn nghe. Điều này cải thiện khả năng nghe hiểu và chính tả của bạn."
+      },
+      "free": {
+        "question": "PapaGeil có miễn phí không?",
+        "answer": "PapaGeil cung cấp nhiều bài học miễn phí. Các tính năng cao cấp như bài học tự tạo không giới hạn có sẵn cho người dùng đã đăng ký."
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Trang chủ",
+    "subtitle": "Tiến độ học tập của bạn",
+    "loading": "Đang tải...",
+    "stats": {
+      "totalPoints": "Tổng điểm",
+      "totalLessons": "Tổng số bài",
+      "lessonsStarted": "Bài đã bắt đầu",
+      "lessonsCompleted": "Bài đã hoàn thành",
+      "inProgress": "Đang học",
+      "maxStreak": "Chuỗi tối đa"
+    },
+    "tabs": {
+      "dictation": "Chính tả",
+      "shadowing": "Shadowing"
+    },
+    "progress": {
+      "title": "Tiến độ bài học",
+      "all": "Tất cả đã học",
+      "completed": "Đã hoàn thành",
+      "inProgress": "Đang học",
+      "overall": "Tiến độ tổng",
+      "noDescription": "Không có mô tả"
+    },
+    "empty": {
+      "noLessons": "Chưa có bài học nào. Bắt đầu học ngay!",
+      "noCompleted": "Chưa hoàn thành bài nào",
+      "noInProgress": "Không có bài đang học",
+      "noRanking": "Chưa có lịch sử xếp hạng."
+    },
+    "actions": {
+      "continueLearning": "Tiếp tục học",
+      "viewLesson": "Xem bài học"
+    }
+  },
+  "vocabulary": {
+    "title": "Từ vựng của tôi",
+    "subtitle": "Từ vựng đã lưu",
+    "loading": "Đang tải...",
+    "empty": "Từ vựng của bạn đang trống",
+    "startAdding": "Bắt đầu thêm từ!",
+    "deleteConfirm": "Xóa từ này?",
+    "errors": {
+      "loading": "Lỗi khi tải từ vựng",
+      "deleting": "Lỗi khi xóa từ",
+      "notAuthenticated": "Chưa xác thực. Vui lòng đăng nhập lại.",
+      "general": "Đã xảy ra lỗi"
+    },
+    "success": {
+      "deleted": "Đã xóa từ thành công!"
+    },
+    "speak": "Phát âm",
+    "delete": "Xóa",
+    "notes": "Ghi chú",
+    "translation": "Dịch"
+  },
+  "leaderboard": {
+    "title": "Bảng xếp hạng",
+    "subtitle": "Xem những học viên tích cực nhất",
+    "loading": "Đang tải...",
+    "loadingBoard": "Đang tải bảng xếp hạng...",
+    "rank": "Hạng",
+    "name": "Tên",
+    "points": "Điểm",
+    "pts": "đ",
+    "yourRank": "Hạng của bạn",
+    "topLearners": "Top học viên",
+    "allTime": "Xếp hạng tổng",
+    "monthly": "Tháng này",
+    "maxStreak": "Chuỗi tối đa",
+    "notRanked": "Chưa có xếp hạng",
+    "emptyState": "Chưa có dữ liệu xếp hạng cho tháng này.",
+    "startLearning": "Hãy hoàn thành bài học để bắt đầu tích điểm!"
+  },
+  "common": {
+    "close": "Đóng",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "sort": "Sắp xếp"
+  },
+  "404": {
+    "title": "Không tìm thấy trang",
+    "subtitle": "Xin lỗi, trang bạn đang tìm không tồn tại hoặc đã được di chuyển.",
+    "description": "Quay về trang chủ để tiếp tục học tiếng Đức.",
+    "goHome": "Về trang chủ",
+    "goBack": "Quay lại",
+    "suggestions": "Có thể bạn đang tìm:",
+    "links": {
+      "dashboard": "Trang chủ",
+      "login": "Đăng nhập"
+    }
+  },
+  "offline": {
+    "title": "Bạn đang offline",
+    "subtitle": "Trang này không có sẵn khi offline.",
+    "description": "Vui lòng kiểm tra kết nối internet và thử lại.",
+    "tips": {
+      "title": "💡 Mẹo học offline:",
+      "cached": "Các bài học đã xem trước được lưu cache tự động",
+      "sync": "Tiến độ của bạn sẽ đồng bộ khi bạn trực tuyến trở lại",
+      "vocabulary": "Từ vựng lưu offline sẽ được đồng bộ sau"
+    },
+    "retry": "Thử lại",
+    "goBack": "Quay lại"
+  },
+  "staticPages": {
+    "loading": "Đang tải...",
+    "notFound": "Không tìm thấy trang",
+    "about": "Về chúng tôi",
+    "contact": "Liên hệ",
+    "privacy": "Bảo mật",
+    "terms": "Điều khoản"
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "subtitle": "Đăng nhập để tiếp tục học",
+      "loadingText": "⏳ Đang tải...",
+      "divider": "hoặc",
+      "noAccount": "Chưa có tài khoản?",
+      "registerLink": "Đăng ký ngay"
+    },
+    "register": {
+      "title": "Đăng ký miễn phí",
+      "subtitle": "Bắt đầu hành trình học tiếng Đức",
+      "createAccount": "Tạo tài khoản",
+      "illustrationTitle": "🦜 PapaGeil",
+      "illustrationSubtitle": "Học tiếng Đức bằng phương pháp Shadowing",
+      "features": {
+        "lessons": "Bài học tương tác",
+        "vocabulary": "Theo dõi từ vựng",
+        "audio": "Hỗ trợ âm thanh"
+      },
+      "hasAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập ngay"
+    },
+    "form": {
+      "name": "Tên",
+      "namePlaceholder": "Nhập tên của bạn",
+      "email": "Email",
+      "emailPlaceholder": "email.cua.ban@example.com",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "togglePassword": "Hiện/ẩn mật khẩu",
+      "loading": "Đang tải...",
+      "loginButton": "Đăng nhập",
+      "registerButton": "Đăng ký",
+      "errors": {
+        "passwordMismatch": "Mật khẩu không khớp"
+      }
+    }
+  },
+  "vocabularySave": {
+    "warning": "Vui lòng nhập nghĩa của từ",
+    "success": "Đã lưu từ vựng!",
+    "error": "Lỗi: {{message}}",
+    "generalError": "Có lỗi xảy ra",
+    "buttonTitle": "Lưu từ vựng",
+    "popupTitle": "Lưu Từ Vựng",
+    "labels": {
+      "word": "Từ:",
+      "context": "Ngữ cảnh:",
+      "meaning": "Nghĩa (tiếng Việt): *"
+    },
+    "placeholder": "Nhập nghĩa của từ...",
+    "loadingDetails": "⏳ Đang tải thông tin chi tiết từ điển...",
+    "buttons": {
+      "saving": "Đang lưu...",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "loadingInfo": "Đang tải thông tin..."
+    }
+  },
+  "lesson": {
+    "vocabulary": {
+      "loginRequired": "Bạn cần đăng nhập để lưu từ vựng",
+      "success": "Đã lưu từ vựng thành công!",
+      "error": "Lỗi khi lưu",
+      "generalError": "Có lỗi xảy ra"
+    },
+    "completion": {
+      "allCompleted": "🎉 Đã hoàn thành tất cả câu! Bạn làm rất tốt!"
+    },
+    "notFound": {
+      "title": "❌ Không tìm thấy bài học",
+      "description": "Bài học có ID <strong>{{lessonId}}</strong> không tồn tại.",
+      "backButton": "← Về trang chủ"
+    },
+    "ui": {
+      "video": "Video",
+      "dictation": "Nghe chép",
+      "shadowing": "Shadowing",
+      "autoStop": "Tự động dừng",
+      "start": "▶ Bắt đầu",
+      "showHint": "Hiện gợi ý",
+      "difficultySelector": "Chọn độ khó",
+    "levelAndDifficulty": "Cấp độ học & Độ khó",
+    "dictationDifficulty": "🔥 Độ khó nghe chép (Cấp độ CEFR)",
+    "dictationDifficultyDesc": "Chọn số lượng từ bị ẩn trong bài tập nghe chép",
+    "currentLevel": "Hiện tại:",
+    "appliesTo": "Áp dụng cho tất cả bài nghe chép"
+    }
+  },
+  "googleSignIn": {
+    "loading": "Đang đăng nhập...",
+    "buttonText": "Đăng nhập với Google"
+  },
+  "emptyState": {
+    "noItems": "Không tìm thấy mục nào",
+    "noItemsDescription": "Hiện tại không có mục nào để hiển thị.",
+    "noLessons": "Không tìm thấy bài học",
+    "noLessonsDescription": "Chúng tôi không thể tìm thấy bài học nào phù hợp với tiêu chí của bạn. Thử điều chỉnh bộ lọc.",
+    "viewAllLessons": "Xem tất cả bài học",
+    "noVocabulary": "Chưa có từ vựng được lưu",
+    "noVocabularyDescription": "Bạn chưa lưu từ vựng nào. Bắt đầu học và lưu từ để xây dựng bộ sưu tập của bạn.",
+    "browseLessons": "Duyệt bài học"
+  },
+  "protectedPage": {
+    "loading": "Đang tải..."
+  },
+  "offlineIndicator": {
+    "syncing": "Đang đồng bộ dữ liệu...",
+    "backOnline": "Đã trực tuyến trở lại",
+    "offlineMode": "Chế độ offline - Tiến độ sẽ đồng bộ khi trực tuyến"
+  },
+  "shareButtons": {
+    "title": "Chia sẻ:",
+    "facebook": "Chia sẻ trên Facebook",
+    "twitter": "Chia sẻ trên Twitter",
+    "linkedin": "Chia sẻ trên LinkedIn",
+    "whatsapp": "Chia sẻ trên WhatsApp",
+    "telegram": "Chia sẻ trên Telegram",
+    "email": "Chia sẻ qua Email",
+    "copyLink": "Sao chép liên kết",
+    "linkCopied": "Đã sao chép liên kết!",
+    "moreOptions": "Tùy chọn khác"
+  },
+  "userProfile": {
+    "privacyLabel": "Quyền riêng tư hồ sơ",
+    "privacyStatus": "Công khai",
+    "premiumStatus": "Trạng thái Premium",
+    "premiumInactive": "Không hoạt động",
+    "totalPremiumMonths": "Tổng tháng Premium",
+    "notPremium": "Chưa là thành viên Premium",
+    "unlockPro": "Mở khóa PRO",
+    "maxStreak": "Chuỗi tối đa:",
+    "dictation": "Nghe chép",
+    "shadowing": "Shadowing",
+    "totalLessons": "Tổng số bài học"
   }
 }

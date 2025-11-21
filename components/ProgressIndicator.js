@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/progressIndicator.module.css';
 
 const ProgressIndicator = ({ 
@@ -10,6 +11,7 @@ const ProgressIndicator = ({
   hidePercentage = 30,
   studyTime = 0
 }) => {
+  const { t } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
 
   // Calculate metrics
@@ -133,7 +135,7 @@ const ProgressIndicator = ({
       {showTooltip && (
         <div className={styles.tooltip}>
           <div className={styles.tooltipHeader}>
-            <span className={styles.tooltipTitle}>Progress Details</span>
+            <span className={styles.tooltipTitle}>{t('progressIndicator.title')}</span>
             <span 
               className={styles.tooltipBadge}
               style={{ 
@@ -150,7 +152,7 @@ const ProgressIndicator = ({
             <div className={styles.tooltipRow}>
               <div className={styles.tooltipLabel}>
                 <span className={styles.tooltipIcon}>📝</span>
-                Sentences Completed
+                {t('progressIndicator.sentencesCompleted')}
               </div>
               <div className={styles.tooltipValue}>
                 <span className={styles.tooltipNumber}>{metrics.sentenceCount}</span>
@@ -164,7 +166,7 @@ const ProgressIndicator = ({
             <div className={styles.tooltipRow}>
               <div className={styles.tooltipLabel}>
                 <span className={styles.tooltipIcon}>✏️</span>
-                Words Accuracy
+                {t('progressIndicator.wordsAccuracy')}
               </div>
               <div className={styles.tooltipValue}>
                 <span className={styles.tooltipNumber}>{metrics.correctWordsCount}</span>
@@ -178,7 +180,7 @@ const ProgressIndicator = ({
             <div className={styles.tooltipRow}>
               <div className={styles.tooltipLabel}>
                 <span className={styles.tooltipIcon}>⏱️</span>
-                Time Spent
+                {t('progressIndicator.timeSpent')}
               </div>
               <div className={styles.tooltipValue}>
                 <span className={styles.tooltipNumber}>{metrics.timeFormatted}</span>
@@ -190,7 +192,7 @@ const ProgressIndicator = ({
             <div className={styles.tooltipInfo}>
               <span className={styles.tooltipInfoIcon}>ℹ️</span>
               <span className={styles.tooltipInfoText}>
-                Level {difficultyLevel.toUpperCase()}: {hidePercentage}% words hidden
+                {t('progressIndicator.levelInfo', { level: difficultyLevel.toUpperCase(), percent: hidePercentage })}
               </span>
             </div>
           </div>
@@ -201,7 +203,7 @@ const ProgressIndicator = ({
               className={styles.tooltipCelebration}
               style={{ background: colorScheme.secondary, color: colorScheme.primary }}
             >
-              🎉 Milestone reached: {metrics.overallPercent}%!
+              🎉 {t('progressIndicator.milestone', { percent: metrics.overallPercent })}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
@@ -7,6 +8,7 @@ import AuthForm from '../../components/AuthForm';
 import styles from '../../styles/auth.module.css';
 
 export default function Register() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -20,7 +22,7 @@ export default function Register() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
-          <div className={styles.loadingText}>⏳ Lädt...</div>
+          <div className={styles.loadingText}>{t('auth.login.loadingText')}</div>
         </div>
       </div>
     );
@@ -54,23 +56,23 @@ export default function Register() {
             <div className={styles.illustrationContent}>
               <div className={styles.illustrationIcon}>🎓</div>
               <h2 className={styles.illustrationTitle}>
-                🦜 PapaGeil
+                {t('auth.register.illustrationTitle')}
               </h2>
               <p className={styles.illustrationSubtitle}>
-                Lernen Sie Deutsch durch Shadowing-Methode
+                {t('auth.register.illustrationSubtitle')}
               </p>
               <div className={styles.featuresList}>
                 <div className={styles.featureItem}>
                   <span className={styles.featureIcon}>🎯</span>
-                  <span>Interaktive Lektionen</span>
+                  <span>{t('auth.register.features.lessons')}</span>
                 </div>
                 <div className={styles.featureItem}>
                   <span className={styles.featureIcon}>📚</span>
-                  <span>Vokabel-Tracking</span>
+                  <span>{t('auth.register.features.vocabulary')}</span>
                 </div>
                 <div className={styles.featureItem}>
                   <span className={styles.featureIcon}>🎵</span>
-                  <span>Audio-Unterstützung</span>
+                  <span>{t('auth.register.features.audio')}</span>
                 </div>
               </div>
             </div>
@@ -79,9 +81,9 @@ export default function Register() {
           {/* Right Side - Form */}
           <div className={styles.registerRightSide}>
             <div className={styles.authHeader}>
-              <h1 className={styles.authTitle}>Konto erstellen</h1>
+              <h1 className={styles.authTitle}>{t('auth.register.createAccount')}</h1>
               <p className={styles.authSubtitle}>
-                Beginnen Sie Ihre Deutsch-Lernreise
+                {t('auth.register.subtitle')}
               </p>
             </div>
 
@@ -89,9 +91,9 @@ export default function Register() {
 
             <div className={styles.authFooter}>
               <p className={styles.footerText}>
-                Bereits ein Konto?{' '}
+                {t('auth.register.hasAccount')}{' '}
                 <Link href="/auth/login" className={styles.footerLink}>
-                  Jetzt anmelden
+                  {t('auth.register.loginLink')}
                 </Link>
               </p>
             </div>

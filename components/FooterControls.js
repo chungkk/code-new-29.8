@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const FooterControls = ({
   currentIndex,
@@ -9,6 +10,7 @@ const FooterControls = ({
   showComplete = false,
   completedCount = 0,
 }) => {
+  const { t } = useTranslation();
   const progress = totalSentences > 0 ? ((currentIndex + 1) / totalSentences) * 100 : 0;
 
   return (
@@ -35,11 +37,11 @@ const FooterControls = ({
             marginBottom: 'var(--spacing-sm)',
           }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-              Sentence {currentIndex + 1} of {totalSentences}
+              {t('footerControls.sentenceProgress', { current: currentIndex + 1, total: totalSentences })}
             </span>
             {completedCount > 0 && (
               <span style={{ color: 'var(--accent-blue)', fontSize: '14px' }}>
-                ✓ {completedCount} abgeschlossen
+                ✓ {t('footerControls.completed', { count: completedCount })}
               </span>
             )}
           </div>
@@ -84,7 +86,7 @@ const FooterControls = ({
             }}
           >
             <span>←</span>
-            <span>Zurück</span>
+            <span>{t('footerControls.back')}</span>
           </button>
 
           <div style={{ flex: 1 }} />
@@ -106,7 +108,7 @@ const FooterControls = ({
                 gap: '8px',
               }}
             >
-               <span>Lektion abschließen</span>
+               <span>{t('footerControls.completeLesson')}</span>
               <span>✓</span>
             </button>
           ) : (
@@ -128,7 +130,7 @@ const FooterControls = ({
                 gap: '8px',
               }}
             >
-               <span>Weiter</span>
+               <span>{t('footerControls.next')}</span>
               <span>→</span>
             </button>
           )}

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from '../styles/ShareButtons.module.css';
 
 const ShareButtons = ({ url, title, description }) => {
+  const { t } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
 
   // Get current URL if not provided
@@ -72,14 +74,14 @@ const ShareButtons = ({ url, title, description }) => {
 
   return (
     <div className={styles.shareButtons}>
-      <div className={styles.shareTitle}>Teilen:</div>
+      <div className={styles.shareTitle}>{t('shareButtons.title')}</div>
       
       <div className={styles.buttonGroup}>
         <button
           onClick={() => handleShare('facebook')}
           className={`${styles.shareButton} ${styles.facebook}`}
-          aria-label="Auf Facebook teilen"
-          title="Auf Facebook teilen"
+          aria-label={t('shareButtons.facebook')}
+          title={t('shareButtons.facebook')}
         >
           <span>📘</span>
         </button>
@@ -87,8 +89,8 @@ const ShareButtons = ({ url, title, description }) => {
         <button
           onClick={() => handleShare('twitter')}
           className={`${styles.shareButton} ${styles.twitter}`}
-          aria-label="Auf Twitter teilen"
-          title="Auf Twitter teilen"
+          aria-label={t('shareButtons.twitter')}
+          title={t('shareButtons.twitter')}
         >
           <span>🐦</span>
         </button>
@@ -96,8 +98,8 @@ const ShareButtons = ({ url, title, description }) => {
         <button
           onClick={() => handleShare('linkedin')}
           className={`${styles.shareButton} ${styles.linkedin}`}
-          aria-label="Auf LinkedIn teilen"
-          title="Auf LinkedIn teilen"
+          aria-label={t('shareButtons.linkedin')}
+          title={t('shareButtons.linkedin')}
         >
           <span>💼</span>
         </button>
@@ -105,8 +107,8 @@ const ShareButtons = ({ url, title, description }) => {
         <button
           onClick={() => handleShare('whatsapp')}
           className={`${styles.shareButton} ${styles.whatsapp}`}
-          aria-label="Auf WhatsApp teilen"
-          title="Auf WhatsApp teilen"
+          aria-label={t('shareButtons.whatsapp')}
+          title={t('shareButtons.whatsapp')}
         >
           <span>💬</span>
         </button>
@@ -114,8 +116,8 @@ const ShareButtons = ({ url, title, description }) => {
         <button
           onClick={() => handleShare('telegram')}
           className={`${styles.shareButton} ${styles.telegram}`}
-          aria-label="Auf Telegram teilen"
-          title="Auf Telegram teilen"
+          aria-label={t('shareButtons.telegram')}
+          title={t('shareButtons.telegram')}
         >
           <span>✈️</span>
         </button>
@@ -123,8 +125,8 @@ const ShareButtons = ({ url, title, description }) => {
         <button
           onClick={() => handleShare('email')}
           className={`${styles.shareButton} ${styles.email}`}
-          aria-label="Per E-Mail teilen"
-          title="Per E-Mail teilen"
+          aria-label={t('shareButtons.email')}
+          title={t('shareButtons.email')}
         >
           <span>📧</span>
         </button>
@@ -133,13 +135,13 @@ const ShareButtons = ({ url, title, description }) => {
           <button
             onClick={handleCopyLink}
             className={`${styles.shareButton} ${styles.copy}`}
-            aria-label="Link kopieren"
-            title="Link kopieren"
+            aria-label={t('shareButtons.copyLink')}
+            title={t('shareButtons.copyLink')}
           >
             <span>🔗</span>
           </button>
           {showTooltip && (
-            <div className={styles.tooltip}>Link kopiert!</div>
+            <div className={styles.tooltip}>{t('shareButtons.linkCopied')}</div>
           )}
         </div>
 
@@ -148,8 +150,8 @@ const ShareButtons = ({ url, title, description }) => {
           <button
             onClick={handleNativeShare}
             className={`${styles.shareButton} ${styles.more}`}
-            aria-label="Mehr Optionen"
-            title="Mehr Optionen"
+            aria-label={t('shareButtons.moreOptions')}
+            title={t('shareButtons.moreOptions')}
           >
             <span>⋯</span>
           </button>

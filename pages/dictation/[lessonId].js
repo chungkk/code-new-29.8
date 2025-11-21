@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
@@ -40,6 +41,7 @@ const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
 const DEBUG_TIMER = false; // Set to true to enable timer logs
 
 const DictationPageContent = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { lessonId } = useRouter().query;
   
@@ -1551,7 +1553,7 @@ const DictationPageContent = () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
-        toast.error('Bitte melden Sie sich an, um Vokabeln zu speichern');
+        toast.error(t('lesson.vocabulary.loginRequired'));
         return;
       }
 
@@ -1572,14 +1574,14 @@ const DictationPageContent = () => {
       });
 
       if (response.ok) {
-        toast.success('Vokabel erfolgreich gespeichert!');
+        toast.success(t('lesson.vocabulary.success'));
       } else {
         const error = await response.json();
-        toast.error(error.message || 'Fehler beim Speichern');
+        toast.error(error.message || t('lesson.vocabulary.error'));
       }
     } catch (error) {
       console.error('Save vocabulary error:', error);
-      toast.error('Ein Fehler ist aufgetreten');
+      toast.error(t('lesson.vocabulary.generalError'));
     }
   }, [lessonId, transcriptData, currentSentenceIndex]);
 
@@ -2015,7 +2017,7 @@ const DictationPageContent = () => {
               hapticEvents.lessonComplete();
               
               // Show celebration toast
-              toast.success('🎉 All sentences completed! Great job!');
+              toast.success(t('lesson.completion.allCompleted'));
             }
           }, 400); // Increased to 400ms to let user see completion + smooth scroll
         } else {
@@ -2719,7 +2721,7 @@ const DictationPageContent = () => {
               <button
                 class="hint-btn"
                 onclick="window.showHint(this, '${pureWord}', ${wordIndex})"
-                title="Hinweise anzeigen"
+                title="${t('lesson.ui.showHint')}"
                 type="button"
               >
               </button>
@@ -3021,7 +3023,7 @@ const DictationPageContent = () => {
           <div className={styles.leftSection}>
             {/* Video Header */}
             <div className={styles.videoHeader}>
-              <h3 className={styles.transcriptTitle}>Video</h3>
+              <h3 className={styles.transcriptTitle}>{t('lesson.ui.video')}</h3>
               <div className={styles.studyTimer}>
                 <span className={styles.timerIcon}>⏱️</span>
                 <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
@@ -3070,10 +3072,10 @@ const DictationPageContent = () => {
                         className={styles.toggleInput}
                       />
                       <span className={styles.toggleSlider}></span>
-                      <span className={styles.toggleText}>Auto Stop</span>
+                      <span className={styles.toggleText}>{t('lesson.ui.autoStop')}</span>
                     </label>
                     <button className={`${styles.startButton} ${styles.controlStartButton}`} onClick={handlePlayPause}>
-                      ▶ Start
+                      {t('lesson.ui.start')}
                     </button>
                   </div>
                 </div>
@@ -3096,7 +3098,7 @@ const DictationPageContent = () => {
                           </>
                         )
                       : <span className={styles.sentenceNumber}>#{currentSentenceIndex + 1}</span>)
-                  : 'Dictation'}
+                  : t('lesson.ui.dictation')}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {/* Hide Level Selector */}
@@ -3105,7 +3107,7 @@ const DictationPageContent = () => {
                     value={difficultyLevel}
                     onChange={(e) => handleDifficultyChange(e.target.value)}
                     className={styles.hideLevelDropdown}
-                    title="Wählen Sie den Schwierigkeitsgrad"
+                    title={t('lesson.ui.difficultySelector')}
                   >
                     <option value="a1">A1 (10%)</option>
                     <option value="a2">A2 (30%)</option>
@@ -3349,7 +3351,7 @@ const DictationPageContent = () => {
                                                 }
                                               } else {
                                                 console.log('🎉 All sentences completed!');
-                                                toast.success('🎉 All sentences completed! Great job!');
+                                                toast.success(t('lesson.completion.allCompleted'));
                                               }
                                             }, 400);
                                           }
@@ -3515,7 +3517,7 @@ const DictationPageContent = () => {
                                       }
                                     } else {
                                       console.log('🎉 All sentences completed!');
-                                      toast.success('🎉 All sentences completed! Great job!');
+                                      toast.success(t('lesson.completion.allCompleted'));
                                     }
                                   }, 400);
                                 }

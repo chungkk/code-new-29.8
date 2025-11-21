@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
 
 export default function VocabularySaveButton({ word, context, lessonId }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [showPopup, setShowPopup] = useState(false);
   const [translation, setTranslation] = useState('');
@@ -14,7 +16,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
   const handleSave = async () => {
     if (!translation.trim()) {
-      toast.warning('Vui lòng nhập nghĩa của từ');
+      toast.warning(t('vocabularySave.warning'));
       return;
     }
 
@@ -83,15 +85,15 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
       });
 
       if (res.ok) {
-        toast.success('Đã lưu từ vựng!');
+        toast.success(t('vocabularySave.success'));
         setShowPopup(false);
         setTranslation('');
       } else {
         const data = await res.json();
-        toast.error('Lỗi: ' + data.message);
+        toast.error(t('vocabularySave.error', { message: data.message }));
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra');
+      toast.error(t('vocabularySave.generalError'));
     } finally {
       setSaving(false);
     }
@@ -111,7 +113,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
           fontSize: '12px',
           marginLeft: '5px'
         }}
-        title="Lưu từ vựng"
+        title={t('vocabularySave.buttonTitle')}
       >
         💾
       </button>
@@ -137,12 +139,12 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
             width: '90%'
           }}>
             <h3 style={{ marginBottom: '15px' }}>
-              Lưu Từ Vựng
+              {t('vocabularySave.popupTitle')}
             </h3>
             
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Từ:
+                {t('vocabularySave.labels.word')}
               </label>
               <div style={{ 
                 padding: '10px',
@@ -159,7 +161,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
             {context && (
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Ngữ cảnh:
+                  {t('vocabularySave.labels.context')}
                 </label>
                 <div style={{ 
                   padding: '10px',
@@ -176,13 +178,13 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Nghĩa (tiếng Việt): *
+                {t('vocabularySave.labels.meaning')}
               </label>
               <input
                 type="text"
                 value={translation}
                 onChange={(e) => setTranslation(e.target.value)}
-                placeholder="Nhập nghĩa của từ..."
+                placeholder={t('vocabularySave.placeholder')}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -204,7 +206,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                 color: '#1976d2',
                 textAlign: 'center'
               }}>
-                ⏳ Đang tải thông tin chi tiết từ điển...
+                {t('vocabularySave.loadingDetails')}
               </div>
             )}
 
@@ -223,7 +225,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                   fontWeight: 'bold'
                 }}
               >
-                {saving ? (fetchingDetails ? 'Đang tải thông tin...' : 'Đang lưu...') : 'Lưu'}
+                {saving ? (fetchingDetails ? t('vocabularySave.buttons.loadingInfo') : t('vocabularySave.buttons.saving')) : t('vocabularySave.buttons.save')}
               </button>
               <button
                 onClick={() => {
@@ -243,7 +245,7 @@ export default function VocabularySaveButton({ word, context, lessonId }) {
                   opacity: saving ? 0.6 : 1
                 }}
               >
-                Hủy
+                {t('vocabularySave.buttons.cancel')}
               </button>
             </div>
           </div>

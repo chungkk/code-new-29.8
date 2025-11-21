@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import { fetchWithAuth } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
@@ -39,6 +40,7 @@ const fetcher = async (url) => {
 };
 
 export default function LeaderboardPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
@@ -70,7 +72,7 @@ export default function LeaderboardPage() {
 
   if (authLoading) {
     return (
-      <div className={styles.loading}>Đang tải...</div>
+      <div className={styles.loading}>{t('leaderboard.loading')}</div>
     );
   }
 
@@ -83,8 +85,8 @@ export default function LeaderboardPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Leaderboard</h1>
-        <p className={styles.subtitle}>See the most active learners</p>
+        <h1 className={styles.title}>{t('leaderboard.title')}</h1>
+        <p className={styles.subtitle}>{t('leaderboard.subtitle')}</p>
       </div>
 
         <div className={styles.mainCard}>
@@ -99,7 +101,7 @@ export default function LeaderboardPage() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
               </svg>
-              All-Time Ranking
+              {t('leaderboard.allTime')}
             </h2>
 
             {/* Current User Rank */}
@@ -111,19 +113,19 @@ export default function LeaderboardPage() {
                 </div>
                 <div className={styles.userDetails}>
                   <h3 className={styles.userName}>{user.name}</h3>
-                  <div className={styles.userLabel}>Your Rank</div>
+                  <div className={styles.userLabel}>{t('leaderboard.yourRank')}</div>
                   <div className={styles.userPoints}>
                     <span className={styles.pointBadge}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
                       </svg>
-                      {currentUserRank.totalPoints || 0} pts
+                      {currentUserRank.totalPoints || 0} {t('leaderboard.pts')}
                     </span>
                     <span className={styles.pointBadge}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
                       </svg>
-                      Max Streak: {currentUserRank.maxStreak || 0}
+                      {t('leaderboard.maxStreak')}: {currentUserRank.maxStreak || 0}
                     </span>
                   </div>
                 </div>
@@ -133,12 +135,12 @@ export default function LeaderboardPage() {
 
             {/* Top 3 Users */}
             {isLoading ? (
-              <div className={styles.loading}>Đang tải bảng xếp hạng...</div>
+              <div className={styles.loading}>{t('leaderboard.loadingBoard')}</div>
             ) : leaderboardData.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>Chưa có dữ liệu xếp hạng cho tháng này.</p>
+                <p>{t('leaderboard.emptyState')}</p>
                 <p style={{ fontSize: '0.875rem', color: '#7B9CD8', marginTop: '0.5rem' }}>
-                  Hãy hoàn thành bài học để bắt đầu tích điểm!
+                  {t('leaderboard.startLearning')}
                 </p>
               </div>
             ) : topThree.length > 0 ? (
@@ -167,13 +169,13 @@ export default function LeaderboardPage() {
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
                           </svg>
-                          {userData.totalPoints || 0} pts
+                          {userData.totalPoints || 0} {t('leaderboard.pts')}
                         </span>
                         <span className={styles.pointBadge}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
                           </svg>
-                          Max Streak: {userData.maxStreak || 0}
+                          {t('leaderboard.maxStreak')}: {userData.maxStreak || 0}
                         </span>
                       </div>
                     </div>
@@ -203,13 +205,13 @@ export default function LeaderboardPage() {
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
                           </svg>
-                          {userData.totalPoints || 0} pts
+                          {userData.totalPoints || 0} {t('leaderboard.pts')}
                         </span>
                         <span className={styles.pointBadge}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
                           </svg>
-                          Max Streak: {userData.maxStreak || 0}
+                          {t('leaderboard.maxStreak')}: {userData.maxStreak || 0}
                         </span>
                       </div>
                     </div>

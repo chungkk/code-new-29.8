@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import ShareButtons from '../components/ShareButtons';
 import styles from '../styles/StaticPage.module.css';
 
 export default function AboutPage() {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export default function AboutPage() {
       <div className={styles.container}>
         <div className={styles.content}>
           {loading ? (
-            <div className={styles.loading}>Laden...</div>
+            <div className={styles.loading}>{t('staticPages.loading')}</div>
           ) : pageData ? (
             <>
               <div className={styles.pageContent}>
@@ -68,7 +70,7 @@ export default function AboutPage() {
               />
             </>
           ) : (
-            <div className={styles.error}>Seite nicht gefunden</div>
+            <div className={styles.error}>{t('staticPages.notFound')}</div>
           )}
         </div>
       </div>

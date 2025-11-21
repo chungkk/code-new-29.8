@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 
 const LanguageContext = createContext();
@@ -25,26 +26,22 @@ export const LANGUAGE_OPTIONS = [
 ];
 
 export function LanguageProvider({ children }) {
+  const router = useRouter();
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState('de');
 
+  // Sync with Next.js router locale
   useEffect(() => {
-    // Load saved language from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('appLanguage') || 'de';
-      if (savedLanguage !== currentLanguage) {
-        setCurrentLanguage(savedLanguage);
-        i18n.changeLanguage(savedLanguage);
-      }
+    const locale = router.locale || 'de';
+    if (locale !== currentLanguage) {
+      setCurrentLanguage(locale);
+      i18n.changeLanguage(locale);
     }
-  }, []);
+  }, [router.locale, i18n]);
 
   const changeLanguage = (languageCode) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('appLanguage', languageCode);
-    }
-    setCurrentLanguage(languageCode);
-    i18n.changeLanguage(languageCode);
+    // Push to new locale URL
+    router.push(router.asPath, router.asPath, { locale: languageCode });
   };
 
   const getCurrentLanguageInfo = () => {

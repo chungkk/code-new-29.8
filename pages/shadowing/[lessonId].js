@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
@@ -19,6 +20,7 @@ const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
 const DEBUG_TIMER = false; // Set to true to enable timer logs
 
 const ShadowingPageContent = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { lessonId } = useRouter().query;
   
@@ -1060,7 +1062,7 @@ const ShadowingPageContent = () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
-        toast.error('Bitte melden Sie sich an, um Vokabeln zu speichern');
+        toast.error(t('lesson.vocabulary.loginRequired'));
         return;
       }
 
@@ -1081,16 +1083,16 @@ const ShadowingPageContent = () => {
       });
 
       if (response.ok) {
-        toast.success('Vokabel erfolgreich gespeichert!');
+        toast.success(t('lesson.vocabulary.success'));
       } else {
         const error = await response.json();
-        toast.error(error.message || 'Fehler beim Speichern');
+        toast.error(error.message || t('lesson.vocabulary.error'));
       }
     } catch (error) {
       console.error('Save vocabulary error:', error);
-      toast.error('Ein Fehler ist aufgetreten');
+      toast.error(t('lesson.vocabulary.generalError'));
     }
-  }, [lessonId, transcriptData, currentSentenceIndex]);
+  }, [lessonId, transcriptData, currentSentenceIndex, t]);
 
   const handleSeek = useCallback((direction) => {
     if (isYouTube) {
@@ -1305,8 +1307,8 @@ const ShadowingPageContent = () => {
     return (
       <div className={styles.centeredState}>
         <div style={{ textAlign: 'center' }}>
-          <h1>❌ Lektion nicht gefunden</h1>
-           <p style={{ marginTop: '20px' }}>Lektion mit ID <strong>{lessonId}</strong> existiert nicht.</p>
+          <h1>{t('lesson.notFound.title')}</h1>
+          <p style={{ marginTop: '20px' }} dangerouslySetInnerHTML={{ __html: t('lesson.notFound.description', { lessonId }) }} />
           <button 
             onClick={handleBackToHome}
             style={{ 
@@ -1320,7 +1322,7 @@ const ShadowingPageContent = () => {
               cursor: 'pointer'
             }}
           >
-            ← Zur Startseite
+            {t('lesson.notFound.backButton')}
           </button>
         </div>
       </div>
@@ -1413,7 +1415,7 @@ const ShadowingPageContent = () => {
                  <div className={styles.videoSection}>
                    <div className={styles.videoHeader}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                       <h3 className={styles.transcriptTitle}>Video</h3>
+                       <h3 className={styles.transcriptTitle}>{t('lesson.ui.video')}</h3>
                        <div className={styles.studyTimer}>
                          <span className={styles.timerIcon}>⏱️</span>
                          <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
@@ -1428,7 +1430,7 @@ const ShadowingPageContent = () => {
                            className={styles.toggleInput}
                          />
                          <span className={styles.toggleSlider}></span>
-                         <span className={styles.toggleText}>Auto Stop</span>
+                         <span className={styles.toggleText}>{t('lesson.ui.autoStop')}</span>
                        </label>
                        <button className={styles.speedButton} onClick={() => {
                          const speeds = [0.5, 0.75, 1, 1.25, 1.5];

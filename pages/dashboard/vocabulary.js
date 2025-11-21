@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
 import ProtectedPage from '../../components/ProtectedPage';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -9,6 +10,7 @@ import { speakText } from '../../lib/textToSpeech';
 import styles from '../../styles/vocabulary.module.css';
 
 function VocabularyPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [vocabulary, setVocabulary] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ function VocabularyPage() {
       setVocabulary(Array.isArray(vocabData) ? vocabData : []);
     } catch (error) {
       console.error('Error loading vocabulary:', error);
-      toast.error('Fehler beim Laden des Wortschatzes');
+      toast.error(t('vocabulary.errors.loading'));
     } finally {
       setLoading(false);
     }
@@ -35,12 +37,12 @@ function VocabularyPage() {
 
   const deleteVocabulary = async (id, e) => {
     e.stopPropagation();
-    if (!confirm('Dieses Wort löschen?')) return;
+    if (!confirm(t('vocabulary.deleteConfirm'))) return;
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('Nicht authentifiziert. Bitte melden Sie sich erneut an.');
+        toast.error(t('vocabulary.errors.notAuthenticated'));
         return;
       }
 
@@ -53,17 +55,17 @@ function VocabularyPage() {
 
       if (res.ok) {
         setVocabulary(vocabulary.filter(v => v._id !== id));
-        toast.success('Wort erfolgreich gelöscht!');
+        toast.success(t('vocabulary.success.deleted'));
         if (selectedWord?._id === id) {
           setSelectedWord(null);
         }
       } else {
         const errorData = await res.json();
-        toast.error(errorData.message || 'Fehler beim Löschen des Wortes');
+        toast.error(errorData.message || t('vocabulary.errors.deleting'));
       }
     } catch (error) {
       console.error('Error deleting vocabulary:', error);
-      toast.error('Ein Fehler ist aufgetreten beim Löschen');
+      toast.error(t('vocabulary.errors.general'));
     }
   };
 
@@ -155,7 +157,7 @@ function VocabularyPage() {
               <button
                 className={styles.deleteBtn}
                 onClick={(e) => deleteVocabulary(vocab._id, e)}
-                title="Löschen"
+                title={t('vocabulary.delete')}
               >
                 🗑️
               </button>
@@ -301,14 +303,14 @@ function VocabularyPage() {
           {loading ? (
             <div className={styles.loadingState}>
               <div className={styles.spinner}></div>
-              <p>Lädt Wortschatz...</p>
+              <p>{t('vocabulary.loading')}</p>
             </div>
           ) : vocabulary.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>📝</div>
-              <h3 className={styles.emptyTitle}>Noch kein Wortschatz vorhanden</h3>
+              <h3 className={styles.emptyTitle}>{t('vocabulary.empty')}</h3>
               <p className={styles.emptyText}>
-                Speichern Sie Wortschatz beim Lernen für spätere Wiederholung
+                {t('vocabulary.startAdding')}
               </p>
             </div>
           ) : (
