@@ -295,30 +295,6 @@
   pointer-events: auto;
 }
 
-/* Controls Section */
-.controlsWrapper {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.controlRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.controlRow:last-child {
-  justify-content: center;
-}
-
-.controlStartButton {
-  padding: 8px 24px;
-  font-size: 14px;
-}
-
 .controlGroup {
   display: flex;
   align-items: center;
@@ -2546,10 +2522,6 @@
   }
 
   .videoHeader {
-    display: none;
-  }
-
-  .controlsWrapper {
     display: none;
   }
 

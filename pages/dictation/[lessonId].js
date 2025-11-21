@@ -2823,6 +2823,18 @@ const DictationPageContent = () => {
             {/* Video Header */}
             <div className={styles.videoHeader}>
               <h3 className={styles.transcriptTitle}>{t('lesson.ui.video')}</h3>
+              {!isMobile && (
+                <label className={styles.toggleLabel}>
+                  <input
+                    type="checkbox"
+                    checked={autoStop}
+                    onChange={(e) => setAutoStop(e.target.checked)}
+                    className={styles.toggleInput}
+                  />
+                  <span className={styles.toggleSlider}></span>
+                  <span className={styles.toggleText}>{t('lesson.ui.autoStop')}</span>
+                </label>
+              )}
               <div className={styles.studyTimer}>
                 <span className={styles.timerIcon}>⏱️</span>
                 <span className={styles.timerText}>{formatStudyTime(studyTime)}</span>
@@ -2858,27 +2870,6 @@ const DictationPageContent = () => {
               <div className={styles.videoTitleBox}>
                 <h3>{lesson.displayTitle || lesson.title}</h3>
               </div>
-
-              {/* Desktop Controls - Hidden on mobile */}
-              {!isMobile && (
-                <div className={styles.controlsWrapper}>
-                  <div className={styles.controlRow}>
-                    <label className={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={autoStop}
-                        onChange={(e) => setAutoStop(e.target.checked)}
-                        className={styles.toggleInput}
-                      />
-                      <span className={styles.toggleSlider}></span>
-                      <span className={styles.toggleText}>{t('lesson.ui.autoStop')}</span>
-                    </label>
-                    <button className={`${styles.startButton} ${styles.controlStartButton}`} onClick={handlePlayPause}>
-                      {t('lesson.ui.start')}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
