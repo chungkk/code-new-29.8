@@ -1498,7 +1498,7 @@ const ShadowingPageContent = () => {
                {/* Right Section: Transcript */}
                <div className={styles.transcriptSection}>
                  <div className={styles.transcriptHeader}>
-                   <h3 className={styles.transcriptTitle}>Transcript</h3>
+                   <h3 className={styles.transcriptTitle}>{t('lesson.ui.transcript')}</h3>
                    <div className={styles.transcriptHeaderControls}>
                      <button
                        className={`${styles.headerControlButton} ${showIPA ? styles.headerControlButtonActive : ''}`}

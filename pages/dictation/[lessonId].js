@@ -3369,7 +3369,7 @@ const DictationPageContent = () => {
                                   });
                                 }}
                               >
-                                Show all
+                                {t('lesson.ui.showAll')}
                               </button>
                               
                               <button 
@@ -3535,7 +3535,7 @@ const DictationPageContent = () => {
                         });
                       }}
                     >
-                      Show all words
+                      {t('lesson.ui.showAll')}
                     </button>
                     
                     <button 

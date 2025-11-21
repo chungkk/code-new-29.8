@@ -488,7 +488,8 @@
     "autoJumpOff": "Auto-Sprung: AUS (Klicken zum Aktivieren)",
     "next": "Weiter",
     "previous": "Zurück",
-    "showAll": "Alle anzeigen"
+    "showAll": "Alle anzeigen",
+    "transcript": "Transkript"
     }
   },
   "googleSignIn": {

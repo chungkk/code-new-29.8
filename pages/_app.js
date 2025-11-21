@@ -14,6 +14,7 @@ import '../lib/i18n';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import OfflineIndicator from '../components/OfflineIndicator';
+import FixedSocialShare from '../components/FixedSocialShare';
 import { registerServiceWorker } from '../lib/serviceWorker';
 
 function Layout({ children }) {
@@ -65,6 +66,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                   <Component {...pageProps} />
                 </Layout>
               </div>
+              
+              {/* Fixed Social Share Button */}
+              <FixedSocialShare />
               
               {/* Offline Indicator */}
               <OfflineIndicator />

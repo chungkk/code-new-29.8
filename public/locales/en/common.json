@@ -488,7 +488,8 @@
     "autoJumpOff": "Auto-jump: OFF (Click to enable)",
     "next": "Next",
     "previous": "Previous",
-    "showAll": "Show All"
+    "showAll": "Show All",
+    "transcript": "Transcript"
     }
   },
   "googleSignIn": {
