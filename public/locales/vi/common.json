@@ -483,7 +483,12 @@
     "dictationDifficulty": "🔥 Độ khó nghe chép (Cấp độ CEFR)",
     "dictationDifficultyDesc": "Chọn số lượng từ bị ẩn trong bài tập nghe chép",
     "currentLevel": "Hiện tại:",
-    "appliesTo": "Áp dụng cho tất cả bài nghe chép"
+    "appliesTo": "Áp dụng cho tất cả bài nghe chép",
+    "autoJumpOn": "Tự động nhảy: BẬT (Click để tắt)",
+    "autoJumpOff": "Tự động nhảy: TẮT (Click để bật)",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "showAll": "Hiện tất cả"
     }
   },
   "googleSignIn": {

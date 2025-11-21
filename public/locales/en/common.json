@@ -483,7 +483,12 @@
     "dictationDifficulty": "🔥 Dictation Difficulty (CEFR Level)",
     "dictationDifficultyDesc": "Choose how many words are hidden during dictation exercises",
     "currentLevel": "Current:",
-    "appliesTo": "Applies to all dictation lessons"
+    "appliesTo": "Applies to all dictation lessons",
+    "autoJumpOn": "Auto-jump: ON (Click to disable)",
+    "autoJumpOff": "Auto-jump: OFF (Click to enable)",
+    "next": "Next",
+    "previous": "Previous",
+    "showAll": "Show All"
     }
   },
   "googleSignIn": {

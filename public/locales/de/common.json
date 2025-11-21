@@ -483,7 +483,12 @@
     "dictationDifficulty": "🔥 Diktat-Schwierigkeit (CEFR-Stufe)",
     "dictationDifficultyDesc": "Wählen Sie, wie viele Wörter bei Diktat-Übungen ausgeblendet werden",
     "currentLevel": "Aktuell:",
-    "appliesTo": "Gilt für alle Diktat-Lektionen"
+    "appliesTo": "Gilt für alle Diktat-Lektionen",
+    "autoJumpOn": "Auto-Sprung: AN (Klicken zum Deaktivieren)",
+    "autoJumpOff": "Auto-Sprung: AUS (Klicken zum Aktivieren)",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "showAll": "Alle anzeigen"
     }
   },
   "googleSignIn": {

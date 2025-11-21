@@ -3123,7 +3123,7 @@ const DictationPageContent = () => {
                   onClick={() => setAutoJumpToIncomplete(!autoJumpToIncomplete)}
                   className={styles.autoJumpToggle}
                   data-active={autoJumpToIncomplete}
-                  title={autoJumpToIncomplete ? 'Auto-jump: ON (Click to disable)' : 'Auto-jump: OFF (Click to enable)'}
+                  title={autoJumpToIncomplete ? t('lesson.ui.autoJumpOn') : t('lesson.ui.autoJumpOff')}
                 >
                   {autoJumpToIncomplete ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3380,7 +3380,7 @@ const DictationPageContent = () => {
                                 }}
                                 disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
                               >
-                                Next
+                                {t('lesson.ui.next')}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                   <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                                 </svg>
@@ -3543,7 +3543,7 @@ const DictationPageContent = () => {
                       onClick={goToNextSentence}
                       disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
                     >
-                      Next
+                      {t('lesson.ui.next')}
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                       </svg>
@@ -3636,7 +3636,7 @@ const DictationPageContent = () => {
             className={styles.mobileControlBtn}
             onClick={goToPreviousSentence}
             disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) === 0}
-            title="Previous"
+            title={t('lesson.ui.previous')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -3647,7 +3647,7 @@ const DictationPageContent = () => {
             className={styles.mobileControlBtn}
             onClick={goToNextSentence}
             disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
-            title="Next"
+            title={t('lesson.ui.next')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
