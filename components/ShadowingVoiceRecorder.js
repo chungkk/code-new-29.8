@@ -31,8 +31,23 @@ const ShadowingVoiceRecorder = ({
       setRecordedBlob(null);
       audioChunksRef.current = [];
 
-      // DON'T pause audio/video for shadowing - user needs to speak along with it
-      // (Removed auto-pause logic to allow shadowing practice)
+      // Pause audio/video when starting recording so user can speak clearly
+      if (typeof window !== 'undefined') {
+        // Pause YouTube player
+        if (window.mainYoutubePlayerRef?.current) {
+          const player = window.mainYoutubePlayerRef.current;
+          if (player.pauseVideo && player.getPlayerState && player.getPlayerState() === window.YT?.PlayerState?.PLAYING) {
+            player.pauseVideo();
+          }
+        }
+        // Pause audio player
+        if (window.mainAudioRef?.current) {
+          const audio = window.mainAudioRef.current;
+          if (!audio.paused) {
+            audio.pause();
+          }
+        }
+      }
 
       // Start audio recording
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
