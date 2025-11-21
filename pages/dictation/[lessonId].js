@@ -10,7 +10,6 @@ import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
 import ProgressIndicator from '../../components/ProgressIndicator';
-import VoiceInputButton from '../../components/VoiceInputButton';
 import { useLessonData } from '../../lib/hooks/useLessonData';
 import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
@@ -169,22 +168,6 @@ const DictationPageContent = () => {
   
   // Consecutive sentence completion counter
   const [consecutiveSentences, setConsecutiveSentences] = useState(0);
-
-  // Voice input states
-  const [focusedInput, setFocusedInput] = useState(null); // Track currently focused input
-  const [voiceMode, setVoiceMode] = useState(() => {
-    // Load from localStorage, default to 'web-speech'
-    if (typeof window === 'undefined') return 'web-speech';
-    const saved = localStorage.getItem('voiceRecognitionMode');
-    return saved || 'web-speech'; // 'web-speech' or 'whisper'
-  });
-
-  // Save voiceMode to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('voiceRecognitionMode', voiceMode);
-    }
-  }, [voiceMode]);
 
   // Study time tracking
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
@@ -2198,8 +2181,6 @@ const DictationPageContent = () => {
       input.style.removeProperty('background');
       input.style.removeProperty('border-color');
     }
-    // Track focused input for voice input
-    setFocusedInput({ element: input, correctWord });
   }, []);
 
   // Handle input blur - show placeholder if empty
@@ -2207,33 +2188,7 @@ const DictationPageContent = () => {
     if (input.value === '') {
       input.placeholder = '*'.repeat(correctWord.length);
     }
-    // Clear focused input
-    setFocusedInput(null);
   }, []);
-
-  // Handle voice transcript - fill the focused input
-  const handleVoiceTranscript = useCallback((transcript) => {
-    if (!focusedInput || !focusedInput.element) {
-      toast.warning('Vui lòng click vào một ô nhập liệu trước');
-      return;
-    }
-
-    const input = focusedInput.element;
-    const correctWord = focusedInput.correctWord;
-
-    // Set the transcript value
-    input.value = transcript.trim();
-
-    // Trigger the checkWord function
-    if (window.checkWord) {
-      // Extract wordIndex from input id
-      const wordIndexMatch = input.id.match(/word-(\d+)/);
-      if (wordIndexMatch) {
-        const wordIndex = parseInt(wordIndexMatch[1]);
-        window.checkWord(input, correctWord, wordIndex);
-      }
-    }
-  }, [focusedInput]);
 
   // Show hint for a word - now opens suggestion popup instead of revealing directly
   const showHint = useCallback((button, correctWord, wordIndex) => {
@@ -2963,16 +2918,6 @@ const DictationPageContent = () => {
                     </svg>
                   )}
                 </button>
-
-                {/* Voice Mode Toggle Button */}
-                <button
-                  onClick={() => setVoiceMode(voiceMode === 'web-speech' ? 'whisper' : 'web-speech')}
-                  className={styles.voiceModeToggle}
-                  data-mode={voiceMode}
-                  title={voiceMode === 'web-speech' ? 'Web Speech API (Free)' : 'Whisper API (High Quality)'}
-                >
-                  {voiceMode === 'web-speech' ? '🎤' : '🔮'}
-                </button>
               </div>
               {!isMobile && (
                 <div className={styles.sentenceCounter}>
@@ -3180,14 +3125,6 @@ const DictationPageContent = () => {
                                 {t('lesson.ui.showAll')}
                               </button>
 
-                              {/* Voice Input Button */}
-                              <VoiceInputButton
-                                onTranscript={handleVoiceTranscript}
-                                language="de-DE"
-                                mode={voiceMode}
-                                disabled={!focusedInput}
-                              />
-
                               <button
                                 className={styles.nextButton}
                                 onClick={(e) => {
@@ -3325,14 +3262,6 @@ const DictationPageContent = () => {
                     >
                       {t('lesson.ui.showAll')}
                     </button>
-
-                    {/* Voice Input Button */}
-                    <VoiceInputButton
-                      onTranscript={handleVoiceTranscript}
-                      language="de-DE"
-                      mode={voiceMode}
-                      disabled={!focusedInput}
-                    />
 
                     <button
                       className={styles.nextButton}
