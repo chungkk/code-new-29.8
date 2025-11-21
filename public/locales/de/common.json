@@ -131,8 +131,10 @@
     "saved": "Gespeichert!",
     "save": "Speichern",
     "loading": "Lädt...",
+    "searching": "Suchen...",
     "explanation": "Erklärung",
-    "examples": "Beispiele"
+    "examples": "Beispiele",
+    "noData": "Keine Daten gefunden"
   },
   "streakPopup": {
     "label": "Satzserie"

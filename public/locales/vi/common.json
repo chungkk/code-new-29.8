@@ -131,8 +131,10 @@
     "saved": "Đã lưu!",
     "save": "Lưu",
     "loading": "Đang tải...",
+    "searching": "Đang tra...",
     "explanation": "Giải thích",
-    "examples": "Ví dụ"
+    "examples": "Ví dụ",
+    "noData": "Không tìm thấy dữ liệu"
   },
   "streakPopup": {
     "label": "chuỗi câu"

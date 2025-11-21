@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../lib/api';
 import { toast } from 'react-toastify';
+import { DictionaryAnalytics } from '../lib/analytics';
+import { isFeatureEnabled, FEATURES } from '../lib/featureFlags';
 import styles from '../styles/DictionaryPopup.module.css';
 
 const DICTIONARY_CACHE_KEY = 'dictionary_cache';
@@ -45,6 +47,13 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
   const [isMobile, setIsMobile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [swipeDistance, setSwipeDistance] = useState(0);
+  const [useSkeletonLoading, setUseSkeletonLoading] = useState(true);
+  
+  const popupOpenTimeRef = useRef(Date.now());
 
   useEffect(() => {
     const checkMobile = () => {
@@ -57,6 +66,24 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // A/B Test: Skeleton vs Spinner (50/50 split)
+  useEffect(() => {
+    const useSkeleton = isFeatureEnabled(FEATURES.USE_SKELETON_LOADING, 50);
+    setUseSkeletonLoading(useSkeleton);
+  }, []);
+
+  // Track popup opened
+  useEffect(() => {
+    if (word) {
+      DictionaryAnalytics.popupOpened(word, {
+        lesson_id: lessonId,
+        has_context: !!context,
+        device_type: isMobile ? 'mobile' : 'desktop',
+        loading_variant: useSkeletonLoading ? 'skeleton' : 'spinner'
+      });
+    }
+  }, [word, lessonId, context, isMobile, useSkeletonLoading]);
+
   useEffect(() => {
     const fetchWordData = async () => {
       if (!word) return;
@@ -68,6 +95,7 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
       if (cached) {
         setWordData(cached);
         setIsLoading(false);
+        DictionaryAnalytics.cacheHit(word, true);
         return;
       }
 
@@ -89,9 +117,17 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
         if (data.success) {
           setWordData(data.data);
           dictionaryCache.set(word, data.data, targetLang);
+          
+          // Track cache status
+          if (data.fromCache) {
+            DictionaryAnalytics.cacheHit(word, false);
+          } else {
+            DictionaryAnalytics.cacheMiss(word);
+          }
         }
       } catch (error) {
         console.error('Dictionary fetch error:', error);
+        DictionaryAnalytics.error(word, 'fetch_failed', error.message);
       } finally {
         setIsLoading(false);
       }
@@ -102,8 +138,55 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
 
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
+      const timeSpent = Date.now() - popupOpenTimeRef.current;
+      DictionaryAnalytics.popupClosed(word, timeSpent, {
+        close_method: 'overlay_click',
+        device_type: isMobile ? 'mobile' : 'desktop'
+      });
       onClose();
     }
+  };
+
+  // Touch gesture handlers for swipe to close
+  const minSwipeDistance = 50; // minimum distance for swipe in pixels
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+    if (touchStart) {
+      const distance = e.targetTouches[0].clientY - touchStart;
+      // Only allow downward swipe
+      if (distance > 0) {
+        setSwipeDistance(distance);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchEnd - touchStart;
+    const isDownSwipe = distance > minSwipeDistance;
+    
+    if (isDownSwipe) {
+      const timeSpent = Date.now() - popupOpenTimeRef.current;
+      DictionaryAnalytics.swipedToClose(word, distance);
+      DictionaryAnalytics.popupClosed(word, timeSpent, {
+        close_method: 'swipe',
+        swipe_distance: distance,
+        device_type: 'mobile'
+      });
+      onClose();
+    }
+    
+    // Reset states
+    setSwipeDistance(0);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const handleSaveWord = async () => {
@@ -132,6 +215,19 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
       if (res.ok) {
         toast.success('🎉 ' + t('dictionaryPopup.addedSuccess'));
         setIsSaved(true);
+        setShowConfetti(true);
+        
+        // Track word saved
+        DictionaryAnalytics.wordSaved(word, wordData.translation, {
+          lesson_id: lessonId,
+          has_context: !!context,
+          device_type: isMobile ? 'mobile' : 'desktop'
+        });
+        
+        // Hide confetti after animation completes
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 1000);
       } else {
         const data = await res.json();
         toast.error('😅 ' + t('dictionaryPopup.addedError') + ' ' + data.message);
@@ -149,11 +245,18 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
       <div
         className={`${styles.popupContainer} ${isMobile ? styles.mobilePopup : ''}`}
         data-arrow-position={arrowPosition || 'right'}
+        onTouchStart={isMobile ? handleTouchStart : undefined}
+        onTouchMove={isMobile ? handleTouchMove : undefined}
+        onTouchEnd={isMobile ? handleTouchEnd : undefined}
         style={position ? {
           position: 'fixed',
           top: `${position.top}px`,
           left: `${position.left}px`,
-          transform: isMobile ? 'translate(-50%, 0)' : 'none',
+          transform: isMobile 
+            ? `translate(-50%, ${swipeDistance}px)` 
+            : 'none',
+          opacity: swipeDistance > 0 ? Math.max(0.3, 1 - swipeDistance / 200) : 1,
+          transition: swipeDistance > 0 ? 'none' : 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-out',
         } : {}}
       >
         <div className={styles.header}>
@@ -171,16 +274,37 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
           </div>
           <div className={styles.headerButtons}>
             {user && !isLoading && wordData && (
-              <button
-                onClick={handleSaveWord}
-                className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
-                disabled={isSaving}
-                title={isSaved ? t('dictionaryPopup.alreadySaved') : t('dictionaryPopup.saveToTreasure')}
-              >
-                {isSaving ? '💫' : isSaved ? '🎉 ' + t('dictionaryPopup.saved') : '⭐ ' + t('dictionaryPopup.save')}
-              </button>
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={handleSaveWord}
+                  className={`${styles.saveButton} ${isSaved ? styles.saved : ''}`}
+                  disabled={isSaving}
+                  title={isSaved ? t('dictionaryPopup.alreadySaved') : t('dictionaryPopup.saveToTreasure')}
+                >
+                  {isSaving ? '💫' : isSaved ? '🎉 ' + t('dictionaryPopup.saved') : '⭐ ' + t('dictionaryPopup.save')}
+                </button>
+                {showConfetti && (
+                  <div className={styles.confettiContainer}>
+                    <div className={styles.confetti} style={{ top: '10px', left: '50%' }}></div>
+                    <div className={styles.confetti} style={{ top: '10px', left: '60%' }}></div>
+                    <div className={styles.confetti} style={{ top: '10px', left: '40%' }}></div>
+                    <div className={styles.confetti} style={{ top: '10px', left: '55%' }}></div>
+                    <div className={styles.confetti} style={{ top: '10px', left: '45%' }}></div>
+                  </div>
+                )}
+              </div>
             )}
-            <button onClick={onClose} className={styles.closeButton}>
+            <button 
+              onClick={() => {
+                const timeSpent = Date.now() - popupOpenTimeRef.current;
+                DictionaryAnalytics.popupClosed(word, timeSpent, {
+                  close_method: 'close_button',
+                  device_type: isMobile ? 'mobile' : 'desktop'
+                });
+                onClose();
+              }} 
+              className={styles.closeButton}
+            >
               ✕
             </button>
           </div>
@@ -189,10 +313,24 @@ const DictionaryPopup = ({ word, onClose, position, arrowPosition, lessonId, con
         <div className={styles.content}>
           {isLoading ? (
             <div className={styles.loadingState}>
-              <div className={styles.loadingSpinner}></div>
-              <div className={styles.loadingMessage}>
-                {t('dictionaryPopup.loading') || 'Đang tải nội dung...'}
-              </div>
+              {useSkeletonLoading ? (
+                // A/B Test Variant: Skeleton Loading
+                <div className={styles.skeleton}>
+                  <div className={styles.skeletonLine}></div>
+                  <div className={styles.skeletonLine}></div>
+                  <div className={styles.skeletonLine}></div>
+                  <div className={styles.skeletonLine}></div>
+                  <div className={styles.skeletonLine}></div>
+                </div>
+              ) : (
+                // A/B Test Control: Spinner Loading
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' }}>
+                  <div className={styles.loadingSpinner}></div>
+                  <div className={styles.loadingMessage}>
+                    {t('dictionaryPopup.loading') || 'Đang tải nội dung...'}
+                  </div>
+                </div>
+              )}
             </div>
           ) : wordData ? (
             <>

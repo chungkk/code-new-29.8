@@ -131,8 +131,10 @@
     "saved": "Saved!",
     "save": "Save",
     "loading": "Loading...",
+    "searching": "Searching...",
     "explanation": "Explanation",
-    "examples": "Examples"
+    "examples": "Examples",
+    "noData": "No data found"
   },
   "streakPopup": {
     "label": "sentence streak"
