@@ -11,7 +11,6 @@
     "themeToggle": "Đổi giao diện",
     "language": "Tiếng Việt",
     "points": "Tổng số điểm của bạn",
-    "streak": "Xem chuỗi học tập của bạn",
     "notifications": "Thông báo",
     "userMenu": {
       "label": "Menu người dùng",
@@ -136,9 +135,6 @@
     "examples": "Ví dụ",
     "noData": "Không tìm thấy dữ liệu"
   },
-  "streakPopup": {
-    "label": "chuỗi câu"
-  },
   "modeSelectionPopup": {
     "title": "Chọn chế độ học",
     "dictation": {
@@ -201,18 +197,6 @@
     "timeSpent": "Thời gian học",
     "levelInfo": "Cấp độ {{level}}: ẩn {{percent}}% từ",
     "milestone": "Đạt mốc: {{percent}}%!"
-  },
-  "streakPopup": {
-    "label": "chuỗi câu",
-    "days": {
-      "mo": "T2",
-      "tu": "T3",
-      "we": "T4",
-      "th": "T5",
-      "fr": "T6",
-      "sa": "T7",
-      "su": "CN"
-    }
   },
   "modeSelection": {
     "title": "Chọn chế độ học",
@@ -278,8 +262,7 @@
       "totalLessons": "Tổng số bài",
       "lessonsStarted": "Bài đã bắt đầu",
       "lessonsCompleted": "Bài đã hoàn thành",
-      "inProgress": "Đang học",
-      "maxStreak": "Chuỗi tối đa"
+      "inProgress": "Đang học"
     },
     "tabs": {
       "dictation": "Chính tả",
@@ -338,7 +321,6 @@
     "topLearners": "Top học viên",
     "allTime": "Xếp hạng tổng",
     "monthly": "Tháng này",
-    "maxStreak": "Chuỗi tối đa",
     "notRanked": "Chưa có xếp hạng",
     "emptyState": "Chưa có dữ liệu xếp hạng cho tháng này.",
     "startLearning": "Hãy hoàn thành bài học để bắt đầu tích điểm!"
@@ -534,7 +516,6 @@
     "totalPremiumMonths": "Tổng tháng Premium",
     "notPremium": "Chưa là thành viên Premium",
     "unlockPro": "Mở khóa PRO",
-    "maxStreak": "Chuỗi tối đa:",
     "dictation": "Nghe chép",
     "shadowing": "Shadowing",
     "totalLessons": "Tổng số bài học"

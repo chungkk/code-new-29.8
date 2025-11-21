@@ -19,7 +19,6 @@ function DashboardIndex() {
   const [allLessons, setAllLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeProgressTab, setActiveProgressTab] = useState('all');
-  const [maxStreak, setMaxStreak] = useState(0);
 
   const loadData = useCallback(async () => {
     try {
@@ -31,17 +30,6 @@ function DashboardIndex() {
       const validProgress = Array.isArray(progressData) ? progressData : [];
       setProgress(validProgress);
       console.log('📊 Progress loaded:', validProgress.length, 'records');
-
-      // Load streak data
-      try {
-        const userRes = await fetchWithAuth('/api/auth/me');
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setMaxStreak(userData.user?.streak?.maxStreak || 0);
-        }
-      } catch (error) {
-        console.error('Error loading streak:', error);
-      }
 
       // Load ALL lessons (sorted by order)
       try {
@@ -185,7 +173,6 @@ function DashboardIndex() {
               }).length,
             }}
             userPoints={userPoints}
-            maxStreak={maxStreak}
           />
 
           {/* RIGHT COLUMN - Main Content */}

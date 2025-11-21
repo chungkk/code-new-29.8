@@ -353,104 +353,6 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.streakContainer {
-  position: relative;
-}
-
-.streakPlusOne {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #ff6b35;
-  text-shadow: 0 0 8px rgba(255, 107, 53, 0.8);
-  pointer-events: none;
-  animation: streakPlusOneFloat 1.5s ease-out forwards;
-  z-index: 10;
-}
-
-.streakMinus {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #ff5353;
-  text-shadow: 0 0 8px rgba(255, 53, 53, 0.8);
-  pointer-events: none;
-  animation: streakMinusFloat 1.5s ease-out forwards;
-  z-index: 10;
-}
-
-@keyframes streakPlusOneFloat {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(-5px) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.8);
-  }
-}
-
-@keyframes streakMinusFloat {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(-5px) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.8);
-  }
-}
-
-.streakBtn {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  min-width: 60px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  font-weight: 600;
-}
-
-.streakIcon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.streakValue {
-  font-size: 16px;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.streakBtn:hover {
-  background: var(--bg-hover);
-  transform: scale(1.05);
-}
-
-.streakBtn:active {
-  transform: scale(0.95);
-}
-
 .notificationContainer {
   position: relative;
 }
@@ -805,21 +707,6 @@
     font-size: 13px;
   }
 
-  .streakBtn {
-    min-width: 52px;
-    height: 32px;
-    padding: 0 10px;
-    gap: 3px;
-  }
-
-  .streakIcon {
-    font-size: 18px;
-  }
-
-  .streakValue {
-    font-size: 14px;
-  }
-
   .notificationBtn {
     width: 32px;
     height: 32px;
@@ -947,21 +834,6 @@
     font-size: 12px;
   }
 
-  .streakBtn {
-    min-width: 48px;
-    height: 28px;
-    padding: 0 8px;
-    gap: 2px;
-  }
-
-  .streakIcon {
-    font-size: 16px;
-  }
-
-  .streakValue {
-    font-size: 13px;
-  }
-
   .notificationBtn {
     width: 28px;
     height: 28px;
@@ -1066,20 +938,6 @@
 
   .pointsValue {
     font-size: 11px;
-  }
-
-  .streakBtn {
-    min-width: 44px;
-    height: 26px;
-    padding: 0 6px;
-  }
-
-  .streakIcon {
-    font-size: 14px;
-  }
-
-  .streakValue {
-    font-size: 12px;
   }
 
   .notificationBtn {

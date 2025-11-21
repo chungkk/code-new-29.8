@@ -166,20 +166,8 @@ const DictationPageContent = () => {
   const [suggestionContext, setSuggestionContext] = useState('');
   const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0 });
   
-  // Streak tracking state (notification is now in Header)
-  const [streakUpdatedToday, setStreakUpdatedToday] = useState(() => {
-    // Check localStorage if streak was already updated today
-    if (typeof window === 'undefined') return false;
-    const lastUpdate = localStorage.getItem('streakLastUpdate');
-    if (!lastUpdate) return false;
-    
-    const today = new Date().toDateString();
-    return lastUpdate === today;
-  });
-  
-  // Consecutive sentence completion counter for streak
+  // Consecutive sentence completion counter
   const [consecutiveSentences, setConsecutiveSentences] = useState(0);
-  const [streakIncrements, setStreakIncrements] = useState(0); // Track how many times we've +1 today
 
   // Study time tracking
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
@@ -1801,98 +1789,6 @@ const DictationPageContent = () => {
     });
   }, [currentSentenceIndex, completedSentences, saveProgress]);
 
-  // Mark today's activity (first sentence completion)
-  const markTodayActivity = useCallback(async () => {
-    if (!user) return;
-    
-    // Check if already marked today
-    if (streakUpdatedToday) {
-      console.log('Today already marked for streak');
-      return;
-    }
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('/api/user/streak', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Today marked for streak:', data);
-        
-        // Mark as updated for this session and save to localStorage
-        setStreakUpdatedToday(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('streakLastUpdate', new Date().toDateString());
-        }
-        
-        // Trigger streak refresh in Header
-        if (typeof window !== 'undefined' && window.refreshStreakData) {
-          window.refreshStreakData();
-        }
-        // Also dispatch event for StreakPopup component
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('streakUpdated'));
-        }
-      }
-    } catch (error) {
-      console.error('Error marking today activity:', error);
-    }
-  }, [user, streakUpdatedToday]);
-
-  // Increment streak (+1)
-  const incrementStreak = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('/api/user/streak', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Streak incremented:', data);
-        
-        // Show streak notification with +1 in Header
-        if (typeof window !== 'undefined' && window.showStreakNotification) {
-          window.showStreakNotification(1);
-        }
-        
-        // Track number of increments today
-        setStreakIncrements(prev => prev + 1);
-        
-        // Trigger streak refresh in Header
-        if (typeof window !== 'undefined' && window.refreshStreakData) {
-          window.refreshStreakData();
-        }
-        // Show +1 animation in Header
-        if (typeof window !== 'undefined' && window.showStreakAnimation) {
-          window.showStreakAnimation();
-        }
-        // Also dispatch event for StreakPopup component
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('streakUpdated'));
-        }
-      }
-    } catch (error) {
-      console.error('Error incrementing streak:', error);
-    }
-  }, [user]);
-
   // Check if current sentence is completed
   const checkSentenceCompletion = useCallback(() => {
     setTimeout(() => {
@@ -1948,37 +1844,6 @@ const DictationPageContent = () => {
         setCompletedSentences(updatedCompleted);
         saveProgress(updatedCompleted, completedWords);
         console.log(`✅ Sentence ${currentSentenceIndex} completed!`);
-        
-        // Streak logic: Start counting from 2nd sentence
-        const newConsecutive = consecutiveSentences + 1;
-        setConsecutiveSentences(newConsecutive);
-
-        console.log(`Consecutive sentences: ${newConsecutive}`);
-
-        // Sentence 1: Just mark today, no streak yet
-        if (newConsecutive === 1) {
-          console.log('First sentence - no streak yet (streak = 0)');
-          // Just trigger Header refresh to mark today as active
-          if (typeof window !== 'undefined' && window.refreshStreakData) {
-            window.refreshStreakData();
-          }
-          // Also dispatch event for StreakPopup component
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('streakUpdated'));
-          }
-        }
-
-        // Sentence 2+: Increment streak and show notification
-        if (newConsecutive >= 2) {
-          const streakCount = newConsecutive - 1; // Streak = consecutive - 1
-          console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
-          incrementStreak();
-        } else if (newConsecutive === 1) {
-          // For first sentence, also show animation (but no increment)
-          if (typeof window !== 'undefined' && window.showStreakAnimation) {
-            window.showStreakAnimation();
-          }
-        }
 
         // Auto-navigate to next incomplete sentence after a short delay (if enabled)
         if (autoJumpToIncomplete) {
@@ -2027,7 +1892,7 @@ const DictationPageContent = () => {
         
       }
     }, 50); // Reduced to 50ms for faster detection
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, consecutiveSentences, incrementStreak, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete]);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
@@ -2122,7 +1987,8 @@ const DictationPageContent = () => {
 
   // Update input background
   const updateInputBackground = useCallback((input, correctWord) => {
-    if (input.value.toLowerCase() === correctWord.substring(0, input.value.length).toLowerCase()) {
+    const trimmedValue = input.value.trim();
+    if (trimmedValue.toLowerCase() === correctWord.substring(0, trimmedValue.length).toLowerCase()) {
       input.style.setProperty('background', '#10b981', 'important');
       input.style.setProperty('border-color', '#10b981', 'important');
     } else {
@@ -2134,8 +2000,9 @@ const DictationPageContent = () => {
   // Check word function
   const checkWord = useCallback((input, correctWord, wordIndex) => {
     const sanitizedCorrectWord = correctWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+    const sanitizedInputValue = input.value.trim();
     
-    if (input.value.toLowerCase() === sanitizedCorrectWord.toLowerCase()) {
+    if (sanitizedInputValue.toLowerCase() === sanitizedCorrectWord.toLowerCase()) {
       // Haptic feedback for correct word
       hapticEvents.wordCorrect();
       
@@ -2181,16 +2048,16 @@ const DictationPageContent = () => {
       updateInputBackground(input, sanitizedCorrectWord);
 
       console.log('🔍 Word incorrect:', {
-        input: input.value,
+        input: sanitizedInputValue,
         correct: sanitizedCorrectWord,
-        inputLength: input.value.length,
+        inputLength: sanitizedInputValue.length,
         correctLength: sanitizedCorrectWord.length,
         wordIndex,
         alreadyProcessed: wordPointsProcessed[currentSentenceIndex]?.[wordIndex]
       });
 
       // Deduct points for incorrect attempt (-0.5 points, only once per word)
-      if (input.value.length === sanitizedCorrectWord.length) {
+      if (sanitizedInputValue.length === sanitizedCorrectWord.length) {
         console.log('✓ Length matches! Checking if word already processed...');
         // Only deduct when user has typed the full word length
         const wordKey = `${currentSentenceIndex}-${wordIndex}`;
@@ -2200,7 +2067,7 @@ const DictationPageContent = () => {
           // Haptic feedback for incorrect word
           hapticEvents.wordIncorrect();
           
-          updatePoints(-0.5, `Incorrect word attempt: ${input.value}`, input);
+          updatePoints(-0.5, `Incorrect word attempt: ${sanitizedInputValue}`, input);
           setWordPointsProcessed(prev => ({
             ...prev,
             [currentSentenceIndex]: {
@@ -2209,48 +2076,9 @@ const DictationPageContent = () => {
             }
           }));
 
-          // Show negative streak notification in Header before resetting
-          if (consecutiveSentences > 0) {
-            console.log(`💔 Showing streak reset notification: -${consecutiveSentences}`);
-            if (typeof window !== 'undefined' && window.showStreakNotification) {
-              window.showStreakNotification(-consecutiveSentences);
-            }
-          }
-
           // Reset consecutive sentence counter when user makes a mistake
           console.log('❌ Mistake made! Resetting consecutive counter from', consecutiveSentences, 'to 0');
           setConsecutiveSentences(0);
-
-          // Clear streak-related local storage
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('streakLastUpdate');
-          }
-          setStreakUpdatedToday(false);
-          setStreakIncrements(0);
-
-          // Always reset streak in database when user makes a mistake
-          // This ensures streak is reset even if consecutiveSentences is 0
-          const token = localStorage.getItem('token');
-          if (token && user) {
-            fetch('/api/user/streak', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ action: 'reset' })
-            }).then(() => {
-              console.log('Streak reset to 0 in database');
-              // Trigger streak refresh in Header
-              if (typeof window !== 'undefined' && window.refreshStreakData) {
-                window.refreshStreakData();
-              }
-              // Also dispatch event for StreakPopup component
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('streakUpdated'));
-              }
-            }).catch(err => console.error('Error resetting streak:', err));
-          }
         } else {
           console.log('⚠️ Word already processed, skipping penalty and streak reset');
         }
@@ -2575,47 +2403,9 @@ const DictationPageContent = () => {
     // Update points
     updatePoints(-0.5, `Wrong suggestion selected: ${selectedWord}, correct: ${correctWord}`);
 
-    // Show negative streak notification in Header before resetting
-    if (consecutiveSentences > 0) {
-      console.log(`💔 Showing streak reset notification: -${consecutiveSentences}`);
-      if (typeof window !== 'undefined' && window.showStreakNotification) {
-        window.showStreakNotification(-consecutiveSentences);
-      }
-    }
-
-    // Reset streak when wrong word is selected
-    console.log('❌ Wrong word selected from suggestion! Resetting streak...');
+    // Reset consecutive sentence counter when wrong word is selected
+    console.log('❌ Wrong word selected from suggestion! Resetting consecutive counter to 0');
     setConsecutiveSentences(0);
-
-    // Clear streak-related local storage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('streakLastUpdate');
-    }
-    setStreakUpdatedToday(false);
-    setStreakIncrements(0);
-
-    // Always reset streak in database when user makes a mistake
-    const token = localStorage.getItem('token');
-    if (token && user) {
-      fetch('/api/user/streak', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'reset' })
-      }).then(() => {
-        console.log('Streak reset to 0 in database (wrong suggestion)');
-        // Trigger streak refresh in Header
-        if (typeof window !== 'undefined' && window.refreshStreakData) {
-          window.refreshStreakData();
-        }
-        // Also dispatch event for StreakPopup component
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('streakUpdated'));
-        }
-      }).catch(err => console.error('Error resetting streak:', err));
-    }
   }, [showPointsAnimation, updatePoints, user]);
 
   /**
@@ -3308,35 +3098,7 @@ const DictationPageContent = () => {
                                           setCompletedSentences(updatedCompleted);
                                           saveProgress(updatedCompleted, updatedWords);
                                           console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All (mobile)!`);
-                                          
-                                          // Streak logic: increment consecutive sentences
-                                          const newConsecutive = consecutiveSentences + 1;
-                                          setConsecutiveSentences(newConsecutive);
-                                          console.log(`Consecutive sentences: ${newConsecutive} (via Show All)`);
 
-                                          // Sentence 1: Just mark today, no streak yet
-                                          if (newConsecutive === 1) {
-                                            console.log('First sentence - no streak yet (streak = 0)');
-                                            if (typeof window !== 'undefined' && window.refreshStreakData) {
-                                              window.refreshStreakData();
-                                            }
-                                            if (typeof window !== 'undefined') {
-                                              window.dispatchEvent(new CustomEvent('streakUpdated'));
-                                            }
-                                          }
-
-                                          // Sentence 2+: Increment streak and show notification
-                                          if (newConsecutive >= 2) {
-                                            const streakCount = newConsecutive - 1;
-                                            console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
-                                            incrementStreak();
-                                          } else if (newConsecutive === 1) {
-                                            // For first sentence, also show animation (but no increment)
-                                            if (typeof window !== 'undefined' && window.showStreakAnimation) {
-                                              window.showStreakAnimation();
-                                            }
-                                          }
-                                          
                                           // Auto-jump to next incomplete sentence if enabled
                                           if (autoJumpToIncomplete) {
                                             setTimeout(() => {
@@ -3474,35 +3236,7 @@ const DictationPageContent = () => {
                                 setCompletedSentences(updatedCompleted);
                                 saveProgress(updatedCompleted, updatedWords);
                                 console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
-                                
-                                // Streak logic: increment consecutive sentences
-                                const newConsecutive = consecutiveSentences + 1;
-                                setConsecutiveSentences(newConsecutive);
-                                console.log(`Consecutive sentences: ${newConsecutive} (via Show All)`);
 
-                                // Sentence 1: Just mark today, no streak yet
-                                if (newConsecutive === 1) {
-                                  console.log('First sentence - no streak yet (streak = 0)');
-                                  if (typeof window !== 'undefined' && window.refreshStreakData) {
-                                    window.refreshStreakData();
-                                  }
-                                  if (typeof window !== 'undefined') {
-                                    window.dispatchEvent(new CustomEvent('streakUpdated'));
-                                  }
-                                }
-
-                                // Sentence 2+: Increment streak and show notification
-                                if (newConsecutive >= 2) {
-                                  const streakCount = newConsecutive - 1;
-                                  console.log(`🔥 Sentence ${newConsecutive} completed! Streak will be ${streakCount}`);
-                                  incrementStreak();
-                                } else if (newConsecutive === 1) {
-                                  // For first sentence, also show animation (but no increment)
-                                  if (typeof window !== 'undefined' && window.showStreakAnimation) {
-                                    window.showStreakAnimation();
-                                  }
-                                }
-                                
                                 // Auto-jump to next incomplete sentence if enabled
                                 if (autoJumpToIncomplete) {
                                   setTimeout(() => {

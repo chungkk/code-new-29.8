@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import styles from '../styles/UserProfileSidebar.module.css';
 
-export default function UserProfileSidebar({ stats, userPoints = 0, maxStreak = 0 }) {
+export default function UserProfileSidebar({ stats, userPoints = 0 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dictation');
@@ -55,11 +55,6 @@ export default function UserProfileSidebar({ stats, userPoints = 0, maxStreak = 
           <div className={styles.streakItem}>
             <span className={styles.streakIcon}>⭐</span>
             <span className={styles.streakValue}>{userPoints}</span>
-          </div>
-          <div className={styles.streakItem}>
-            <span className={styles.streakIcon}>🔥</span>
-            <span className={styles.streakLabel}>{t('userProfile.maxStreak')}</span>
-            <span className={styles.streakValue}>{maxStreak}</span>
           </div>
         </div>
 

@@ -9,7 +9,7 @@ const NotificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['streak', 'points', 'login', 'checkin'],
+    enum: ['points', 'login', 'checkin'],
     required: true
   },
   message: {

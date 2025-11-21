@@ -8,7 +8,6 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
 import { navigateWithLocale } from '../lib/navigation';
-import StreakPopup from './StreakPopup';
 import NotificationDropdown from './NotificationDropdown';
 import styles from '../styles/Header.module.css';
 
@@ -17,12 +16,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
-  const [streakPopupOpen, setStreakPopupOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [showStreakPlusOne, setShowStreakPlusOne] = useState(false);
-  const [showStreakMinus, setShowStreakMinus] = useState(false);
-  const [streakMinusValue, setStreakMinusValue] = useState(0);
   const [showPointsPlusOne, setShowPointsPlusOne] = useState(false);
   const [showPointsMinus, setShowPointsMinus] = useState(false);
   const userMenuRef = useRef(null);
@@ -33,57 +27,6 @@ const Header = () => {
   const { theme, toggleTheme, currentTheme } = useTheme();
   const { currentLanguage, changeLanguage, languages, currentLanguageInfo } = useLanguage();
   const { unreadCount, fetchUnreadCount } = useNotifications();
-
-  // Fetch streak data
-  const fetchStreakData = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('/api/user/streak', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setCurrentStreak(data.currentStreak || 0);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching streak data:', error);
-    }
-  }, [user]);
-
-  // Show +1 animation
-  const showStreakAnimation = useCallback(() => {
-    setShowStreakPlusOne(true);
-    setTimeout(() => {
-      setShowStreakPlusOne(false);
-    }, 1500);
-  }, []);
-
-  // Show streak notification (for both positive and negative values)
-  const showStreakNotif = useCallback((value) => {
-    if (value > 0) {
-      // Positive: show +1 animation
-      setShowStreakPlusOne(true);
-      setTimeout(() => {
-        setShowStreakPlusOne(false);
-      }, 1500);
-    } else if (value < 0) {
-      // Negative: show minus animation
-      setStreakMinusValue(value);
-      setShowStreakMinus(true);
-      setTimeout(() => {
-        setShowStreakMinus(false);
-      }, 1500);
-    }
-  }, []);
 
   // Show points +1 animation
   const showPointsAnimation = useCallback(() => {
@@ -101,18 +44,14 @@ const Header = () => {
     }, 1500);
   }, []);
 
-  // Fetch user points and streak on mount and when user changes
+  // Fetch user points on mount and when user changes
   useEffect(() => {
     if (user) {
       fetchUserPoints();
-      fetchStreakData();
 
       // Expose refresh functions globally for dictation page
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = fetchUserPoints;
-        window.refreshStreakData = fetchStreakData;
-        window.showStreakAnimation = showStreakAnimation;
-        window.showStreakNotification = showStreakNotif;
         window.showPointsPlusOne = showPointsAnimation;
         window.showPointsMinus = showPointsMinusAnimation;
       }
@@ -121,16 +60,13 @@ const Header = () => {
     return () => {
       if (typeof window !== 'undefined') {
         window.refreshUserPoints = null;
-        window.refreshStreakData = null;
-        window.showStreakAnimation = null;
-        window.showStreakNotification = null;
         window.showPointsPlusOne = null;
         window.showPointsMinus = null;
       }
     };
-  }, [user, fetchUserPoints, fetchStreakData, showStreakAnimation, showStreakNotif, showPointsAnimation, showPointsMinusAnimation]);
+  }, [user, fetchUserPoints, showPointsAnimation, showPointsMinusAnimation]);
 
-  // Listen for points and streak update events from other pages
+  // Listen for points update events from other pages
   useEffect(() => {
     const handlePointsUpdate = () => {
       if (user) {
@@ -138,24 +74,16 @@ const Header = () => {
       }
     };
 
-    const handleStreakUpdate = () => {
-      if (user) {
-        fetchStreakData();
-      }
-    };
-
     if (typeof window !== 'undefined') {
       window.addEventListener('pointsUpdated', handlePointsUpdate);
-      window.addEventListener('streakUpdated', handleStreakUpdate);
     }
 
     return () => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('pointsUpdated', handlePointsUpdate);
-        window.removeEventListener('streakUpdated', handleStreakUpdate);
       }
     };
-  }, [user, fetchUserPoints, fetchStreakData]);
+  }, [user, fetchUserPoints]);
 
   // Tạo avatar mặc định từ initials
   const getDefaultAvatar = (name) => {
@@ -177,6 +105,7 @@ const Header = () => {
   const navLinks = [
     { href: '/', label: t('header.nav.topics') },
     { href: '/leaderboard', label: t('header.nav.leaderboard') },
+    { href: '/city-builder', label: '🏙️ Thành phố' },
   ];
 
   const isActive = (path) => {
@@ -300,30 +229,6 @@ const Header = () => {
 
                 {showPointsMinus && (
                   <div className={styles.pointsMinus}>-0.5</div>
-                )}
-              </div>
-
-              <div className={styles.streakContainer}>
-                <button
-                  className={styles.streakBtn}
-                  aria-label="Streak"
-                  onClick={() => setStreakPopupOpen(true)}
-                  title={t('header.streak')}
-                >
-                  <span className={styles.streakIcon}>🔥</span>
-                  <span className={styles.streakValue}>{currentStreak}</span>
-                </button>
-
-                {showStreakPlusOne && (
-                  <div className={styles.streakPlusOne}>+1</div>
-                )}
-
-                {showStreakMinus && (
-                  <div className={styles.streakMinus}>{streakMinusValue}</div>
-                )}
-
-                {streakPopupOpen && (
-                  <StreakPopup onClose={() => setStreakPopupOpen(false)} />
                 )}
               </div>
 

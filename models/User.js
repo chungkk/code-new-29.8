@@ -50,28 +50,6 @@ const UserSchema = new mongoose.Schema({
      default: 'b1',
      enum: ['a1', 'a2', 'b1', 'b2', 'c1', 'c2']
    },
-   streak: {
-     currentStreak: {
-       type: Number,
-       default: 0
-     },
-     maxStreak: {
-       type: Number,
-       default: 0
-     },
-     maxStreakThisMonth: {
-       type: Number,
-       default: 0
-     },
-     lastActivityDate: {
-       type: Date,
-       default: null
-     },
-     weeklyProgress: {
-       type: [Boolean],
-       default: [false, false, false, false, false, false, false]
-     }
-   },
    points: {
      type: Number,
      default: 0,
