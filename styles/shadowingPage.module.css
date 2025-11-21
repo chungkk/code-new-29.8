@@ -536,6 +536,7 @@
   padding: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
 .transcriptItem:hover {
@@ -555,10 +556,17 @@
   margin-bottom: 8px;
 }
 
+.transcriptNumberWithControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .transcriptNumber {
   font-size: 14px;
   font-weight: 700;
   color: #667eea;
+  min-width: 32px;
 }
 
 .transcriptActions {
@@ -1185,31 +1193,159 @@
   }
 }
 
+/* Score Badge */
+.scoreBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  cursor: help;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scoreBadgePassed {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(56, 142, 60, 0.15) 100%);
+  color: #4CAF50;
+  border: 2px solid rgba(76, 175, 80, 0.5);
+}
+
+.scoreBadgePassed:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(56, 142, 60, 0.25) 100%);
+  border-color: rgba(76, 175, 80, 0.8);
+  transform: scale(1.05);
+}
+
+.scoreBadgeFailed {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(245, 124, 0, 0.15) 100%);
+  color: #FF9800;
+  border: 2px solid rgba(255, 152, 0, 0.5);
+}
+
+.scoreBadgeFailed:hover {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(245, 124, 0, 0.25) 100%);
+  border-color: rgba(255, 152, 0, 0.8);
+  transform: scale(1.05);
+}
+
+/* Recording Controls in Transcript */
+.recordingControlsInTranscript {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Enable pointer events when visible */
+.recordingControlsInTranscript > * {
+  pointer-events: auto;
+}
+
+/* Show on hover */
+.transcriptItem:hover .recordingControlsInTranscript {
+  opacity: 1;
+}
+
+/* Show on active sentence (when clicked) */
+.transcriptItemActive .recordingControlsInTranscript {
+  opacity: 1;
+}
+
+/* Hide playback button unless hovering or has active playback */
+.playbackButtonIcon {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.transcriptItem:hover .playbackButtonIcon,
+.transcriptItemActive .playbackButtonIcon,
+.playbackButtonIcon.playingIcon {
+  opacity: 1;
+}
+
+/* Always show score badge if exists */
+.scoreBadge {
+  opacity: 1;
+}
+
 /* Recording Buttons Container */
 .recordingButtons {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 8px;
 }
 
-/* Playback Button */
+/* Playback Button Icon Only */
+.playbackButtonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(33, 150, 243, 0.5);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(21, 101, 192, 0.15) 100%);
+  color: #4a90e2;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.playbackButtonIcon:hover {
+  transform: scale(1.15) rotate(5deg);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.25) 0%, rgba(21, 101, 192, 0.25) 100%);
+  border-color: rgba(33, 150, 243, 0.8);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.playbackButtonIcon:active {
+  transform: scale(1.05) rotate(0deg);
+}
+
+.playbackButtonIcon.playingIcon {
+  border-color: rgba(255, 152, 0, 0.7);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(245, 124, 0, 0.2) 100%);
+  color: #FF9800;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+  }
+}
+
+/* Legacy playback button for other pages */
 .playbackButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px 24px;
-  border-radius: 12px;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   border: 2px solid rgba(33, 150, 243, 0.3);
   background: linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(21, 101, 192, 0.15) 100%);
   color: #2196F3;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 140px;
-  justify-content: center;
+  white-space: nowrap;
 }
 
 .playbackButton:hover {

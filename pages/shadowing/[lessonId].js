@@ -65,27 +65,10 @@ const ShadowingPageContent = () => {
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
-  // Voice recording states for shadowing practice
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedText, setRecordedText] = useState('');
-  const [recordedAudioBlob, setRecordedAudioBlob] = useState(null);
-  const [comparisonResult, setComparisonResult] = useState(null);
-  const [showComparisonResult, setShowComparisonResult] = useState(false);
-  const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  // Voice recording states for shadowing practice (per sentence)
+  const [recordingStates, setRecordingStates] = useState({}); // { sentenceIndex: { isRecording, recordedBlob, comparisonResult, isPlaying } }
+  const [sentenceProgressData, setSentenceProgressData] = useState({}); // Loaded from database
   const audioPlaybackRef = useRef(null);
-  const [voiceMode, setVoiceMode] = useState(() => {
-    // Load from localStorage, default to 'web-speech'
-    if (typeof window === 'undefined') return 'web-speech';
-    const saved = localStorage.getItem('shadowingVoiceMode');
-    return saved || 'web-speech';
-  });
-
-  // Save voiceMode to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('shadowingVoiceMode', voiceMode);
-    }
-  }, [voiceMode]);
 
   // Progress loading state
   const [progressLoaded, setProgressLoaded] = useState(false);
@@ -199,6 +182,46 @@ const ShadowingPageContent = () => {
       setProgressLoaded(true);
     }
   }, [loadedStudyTime]);
+
+  // Load sentence progress data
+  useEffect(() => {
+    if (!user || !lessonId) return;
+
+    const loadSentenceProgress = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`/api/shadowing-sentence-progress?lessonId=${lessonId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const { data } = await response.json();
+          setSentenceProgressData(data);
+          
+          // Update recording states with loaded data
+          const newStates = {};
+          Object.keys(data).forEach(index => {
+            newStates[index] = {
+              comparisonResult: {
+                overallSimilarity: data[index].accuracyPercent,
+                isPassed: data[index].accuracyPercent >= 80,
+                score: data[index].bestScore
+              }
+            };
+          });
+          setRecordingStates(prev => ({ ...prev, ...newStates }));
+        }
+      } catch (error) {
+        console.error('Error loading sentence progress:', error);
+      }
+    };
+
+    loadSentenceProgress();
+  }, [user, lessonId]);
 
 
 
@@ -1160,57 +1183,87 @@ const ShadowingPageContent = () => {
     }
   }, [user]);
 
-  // Handle voice transcript for shadowing practice
-  const handleVoiceTranscript = useCallback((transcript) => {
-    if (!transcriptData[currentSentenceIndex]) {
-      toast.warning('Không có câu nào được chọn');
+  // Save sentence progress to database
+  const saveSentenceProgress = useCallback(async (sentenceIndex, accuracyPercent, score) => {
+    if (!user || !lessonId) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      await fetch('/api/shadowing-sentence-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          lessonId,
+          sentenceIndex,
+          accuracyPercent: Math.round(accuracyPercent),
+          score
+        })
+      });
+    } catch (error) {
+      console.error('Error saving sentence progress:', error);
+    }
+  }, [user, lessonId]);
+
+  // Handle voice transcript for shadowing practice (per sentence)
+  const handleVoiceTranscript = useCallback((sentenceIndex, transcript) => {
+    if (!transcriptData[sentenceIndex]) {
       return;
     }
 
-    const originalText = transcriptData[currentSentenceIndex].text;
-    setRecordedText(transcript);
+    const originalText = transcriptData[sentenceIndex].text;
 
     // Compare the spoken text with original
     const result = compareTexts(originalText, transcript);
     const score = getSimilarityScore(result.overallSimilarity);
     const feedback = getSimilarityFeedback(result.overallSimilarity, 'vi');
 
-    setComparisonResult({
+    const comparisonResult = {
       ...result,
       score,
       feedback,
       originalText,
       spokenText: transcript
-    });
-    setShowComparisonResult(true);
+    };
+
+    // Update recording state for this sentence
+    setRecordingStates(prev => ({
+      ...prev,
+      [sentenceIndex]: {
+        ...prev[sentenceIndex],
+        comparisonResult,
+        showComparison: true
+      }
+    }));
 
     // Update points
     if (user) {
       updatePoints(score, `Shadowing practice: ${result.overallSimilarity.toFixed(1)}% accuracy`);
+      
+      // Save sentence progress to database
+      saveSentenceProgress(sentenceIndex, result.overallSimilarity, score);
     }
+  }, [transcriptData, user, updatePoints, saveSentenceProgress]);
 
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-      setShowComparisonResult(false);
-    }, 5000);
-
-    // Show toast feedback
-    if (result.isPassed) {
-      toast.success(`${feedback} (+${score} điểm)`);
-    } else {
-      toast.error(`${feedback} (${score} điểm)`);
-    }
-  }, [transcriptData, currentSentenceIndex, user, updatePoints]);
-
-  // Handle audio recorded
-  const handleAudioRecorded = useCallback((audioBlob) => {
-    setRecordedAudioBlob(audioBlob);
+  // Handle audio recorded (per sentence)
+  const handleAudioRecorded = useCallback((sentenceIndex, audioBlob) => {
+    setRecordingStates(prev => ({
+      ...prev,
+      [sentenceIndex]: {
+        ...prev[sentenceIndex],
+        recordedBlob: audioBlob
+      }
+    }));
   }, []);
 
-  // Play recorded audio
-  const playRecordedAudio = useCallback(() => {
-    if (!recordedAudioBlob) {
-      toast.warning('Chưa có bản ghi âm nào');
+  // Play recorded audio (per sentence)
+  const playRecordedAudio = useCallback((sentenceIndex) => {
+    const state = recordingStates[sentenceIndex];
+    if (!state?.recordedBlob) {
       return;
     }
 
@@ -1218,30 +1271,57 @@ const ShadowingPageContent = () => {
     if (audioPlaybackRef.current) {
       audioPlaybackRef.current.pause();
       audioPlaybackRef.current = null;
-      setIsPlayingRecording(false);
+      
+      // Update all playing states to false
+      setRecordingStates(prev => {
+        const newStates = { ...prev };
+        Object.keys(newStates).forEach(key => {
+          if (newStates[key].isPlaying) {
+            newStates[key] = { ...newStates[key], isPlaying: false };
+          }
+        });
+        return newStates;
+      });
       return;
     }
 
     // Create audio URL and play
-    const audioUrl = URL.createObjectURL(recordedAudioBlob);
+    const audioUrl = URL.createObjectURL(state.recordedBlob);
     const audio = new Audio(audioUrl);
     audioPlaybackRef.current = audio;
 
     audio.onended = () => {
-      setIsPlayingRecording(false);
+      setRecordingStates(prev => ({
+        ...prev,
+        [sentenceIndex]: {
+          ...prev[sentenceIndex],
+          isPlaying: false
+        }
+      }));
       URL.revokeObjectURL(audioUrl);
       audioPlaybackRef.current = null;
     };
 
     audio.onerror = () => {
-      toast.error('Không thể phát lại bản ghi');
-      setIsPlayingRecording(false);
+      setRecordingStates(prev => ({
+        ...prev,
+        [sentenceIndex]: {
+          ...prev[sentenceIndex],
+          isPlaying: false
+        }
+      }));
       audioPlaybackRef.current = null;
     };
 
     audio.play();
-    setIsPlayingRecording(true);
-  }, [recordedAudioBlob]);
+    setRecordingStates(prev => ({
+      ...prev,
+      [sentenceIndex]: {
+        ...prev[sentenceIndex],
+        isPlaying: true
+      }
+    }));
+  }, [recordingStates]);
 
   const handleSeek = useCallback((direction) => {
     if (isYouTube) {
@@ -1699,18 +1779,54 @@ const ShadowingPageContent = () => {
                  </div>
 
                  <div className={styles.transcriptList} ref={transcriptListRef}>
-                   {transcriptData.map((segment, index) => (
-                     <div
-                       key={index}
-                       ref={currentSentenceIndex === index ? activeTranscriptItemRef : null}
-                       className={`${styles.transcriptItem} ${currentSentenceIndex === index ? styles.transcriptItemActive : ''}`}
-                       onClick={() => handleSentenceClick(segment.start, segment.end)}
-                     >
-                       <div className={styles.transcriptItemHeader}>
-                         <span className={styles.transcriptNumber}>#{index + 1}</span>
-                       </div>
+                   {transcriptData.map((segment, index) => {
+                     const sentenceState = recordingStates[index] || {};
+                     const isActive = currentSentenceIndex === index;
+                     
+                     return (
+                       <div
+                         key={index}
+                         ref={isActive ? activeTranscriptItemRef : null}
+                         className={`${styles.transcriptItem} ${isActive ? styles.transcriptItemActive : ''}`}
+                       >
+                         {/* Recording controls - positioned on the right side */}
+                         <div 
+                           className={styles.recordingControlsInTranscript}
+                           onClick={(e) => e.stopPropagation()}
+                         >
+                           {/* Show score badge if has comparison result */}
+                           {sentenceState.comparisonResult && (
+                             <div 
+                               className={`${styles.scoreBadge} ${sentenceState.comparisonResult.isPassed ? styles.scoreBadgePassed : styles.scoreBadgeFailed}`}
+                               title={sentenceState.comparisonResult.feedback}
+                             >
+                               {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
+                             </div>
+                           )}
 
-                       <div className={styles.transcriptText}>
+                           <ShadowingVoiceRecorder
+                             onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
+                             onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
+                             language="de-DE"
+                           />
+
+                           {sentenceState.recordedBlob && (
+                             <button
+                               className={`${styles.playbackButtonIcon} ${sentenceState.isPlaying ? styles.playingIcon : ''}`}
+                               onClick={() => playRecordedAudio(index)}
+                               title={sentenceState.isPlaying ? 'Dừng phát' : 'Nghe lại bản ghi'}
+                             >
+                               {sentenceState.isPlaying ? '⏸️' : '🔊'}
+                             </button>
+                           )}
+                         </div>
+
+                         <div onClick={() => handleSentenceClick(segment.start, segment.end)}>
+                           <div className={styles.transcriptItemHeader}>
+                             <span className={styles.transcriptNumber}>#{index + 1}</span>
+                           </div>
+
+                           <div className={styles.transcriptText}>
                          {segment.text.split(/\s+/).map((word, idx) => {
                            const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
                            if (cleanWord.length > 0) {
@@ -1732,15 +1848,17 @@ const ShadowingPageContent = () => {
                          })}
                        </div>
 
-                       {showIPA && segment.ipa && (
-                         <div className={styles.transcriptIPA}>{segment.ipa}</div>
-                       )}
+                           {showIPA && segment.ipa && (
+                             <div className={styles.transcriptIPA}>{segment.ipa}</div>
+                           )}
 
-                       {showTranslation && segment.translation && (
-                         <div className={styles.transcriptTranslation}>{segment.translation}</div>
-                       )}
-                     </div>
-                   ))}
+                           {showTranslation && segment.translation && (
+                             <div className={styles.transcriptTranslation}>{segment.translation}</div>
+                           )}
+                         </div>
+                       </div>
+                     );
+                   })}
                  </div>
                </div>
               </div>
@@ -1791,65 +1909,7 @@ const ShadowingPageContent = () => {
                 </button>
               </div>
 
-              {/* Voice Recording Section */}
-              <div className={styles.voiceRecordingSection}>
-                <div className={styles.voiceRecordingHeader}>
-                  <h3>🎤 Luy ện nói</h3>
-                  <button
-                    onClick={() => setVoiceMode(voiceMode === 'web-speech' ? 'whisper' : 'web-speech')}
-                    className={styles.voiceModeToggle}
-                    title={voiceMode === 'web-speech' ? 'Web Speech API' : 'Whisper API'}
-                  >
-                    {voiceMode === 'web-speech' ? '🎤' : '🔮'}
-                  </button>
-                </div>
 
-                <div className={styles.voiceRecordingContent}>
-                  <div className={styles.recordingButtons}>
-                    <ShadowingVoiceRecorder
-                      onTranscript={handleVoiceTranscript}
-                      onAudioRecorded={handleAudioRecorded}
-                      language="de-DE"
-                      mode={voiceMode}
-                    />
-
-                    {recordedAudioBlob && (
-                      <button
-                        className={`${styles.playbackButton} ${isPlayingRecording ? styles.playing : ''}`}
-                        onClick={playRecordedAudio}
-                        title={isPlayingRecording ? 'Dừng phát' : 'Nghe lại'}
-                      >
-                        {isPlayingRecording ? (
-                          <>
-                            <span>⏸️</span>
-                            <span>Dừng</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>🔊</span>
-                            <span>Nghe lại</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {showComparisonResult && comparisonResult && (
-                    <div className={`${styles.comparisonResult} ${comparisonResult.isPassed ? styles.passed : styles.failed}`}>
-                      <div className={styles.comparisonScore}>
-                        <span className={styles.scoreValue}>{comparisonResult.overallSimilarity}%</span>
-                        <span className={styles.scoreLabel}>Độ chính xác</span>
-                      </div>
-                      <div className={styles.comparisonFeedback}>
-                        {comparisonResult.feedback}
-                      </div>
-                      <div className={styles.comparisonPoints}>
-                        {comparisonResult.score > 0 ? '+' : ''}{comparisonResult.score} điểm
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
         </div>
 
          {/* Footer Controls - Hidden in Parroto design */}

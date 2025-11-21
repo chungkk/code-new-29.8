@@ -7,12 +7,12 @@ const SentenceListItem = ({
   isCompleted,
   onClick,
   showTranslation = false,
+  recordingControls = null,
 }) => {
   if (!segment) return null;
 
   return (
     <div
-      onClick={onClick}
       style={{
         background: isActive ? 'var(--bg-hover)' : 'var(--bg-secondary)',
         border: `2px solid ${isActive ? 'var(--accent-blue)' : 'var(--border-color)'}`,
@@ -23,11 +23,14 @@ const SentenceListItem = ({
         position: 'relative',
       }}
     >
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 'var(--spacing-md)',
-      }}>
+      <div 
+        onClick={onClick}
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 'var(--spacing-md)',
+        }}
+      >
         <div style={{
           minWidth: '32px',
           height: '32px',
@@ -75,6 +78,20 @@ const SentenceListItem = ({
           )}
         </div>
       </div>
+
+      {/* Recording controls - only show when sentence is active */}
+      {isActive && recordingControls && (
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            marginTop: 'var(--spacing-md)',
+            paddingTop: 'var(--spacing-md)',
+            borderTop: '1px solid var(--border-color)',
+          }}
+        >
+          {recordingControls}
+        </div>
+      )}
     </div>
   );
 };

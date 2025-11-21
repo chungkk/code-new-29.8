@@ -1,22 +1,19 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { useSpeechRecognition } from '../lib/hooks/useSpeechRecognition';
 import styles from '../styles/ShadowingVoiceRecorder.module.css';
 
 /**
  * Voice Recorder Component for Shadowing Practice
- * Supports manual start/stop and audio playback
+ * Uses Whisper API for transcription
  *
  * @param {Object} props
  * @param {Function} props.onTranscript - Callback when transcription is complete
  * @param {Function} props.onAudioRecorded - Callback when audio is recorded (returns blob)
  * @param {string} props.language - Language code (de-DE, vi-VN, etc.)
- * @param {'web-speech'|'whisper'} props.mode - Recognition mode
  */
 const ShadowingVoiceRecorder = ({
   onTranscript,
   onAudioRecorded,
-  language = 'de-DE',
-  mode = 'web-speech'
+  language = 'de-DE'
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
@@ -27,29 +24,6 @@ const ShadowingVoiceRecorder = ({
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
-  // Web Speech API hook
-  const {
-    isListening,
-    transcript,
-    interimTranscript,
-    isSupported: isSpeechSupported,
-    error: speechError,
-    startListening,
-    stopListening,
-    resetTranscript
-  } = useSpeechRecognition({
-    language: language,
-    continuous: true, // Keep listening until manually stopped
-    interimResults: true,
-    onResult: (text, isFinal) => {
-      // Don't auto-stop, wait for user to click stop
-    },
-    onError: (err) => {
-      setError(err);
-      setIsRecording(false);
-    }
-  });
-
   // Start recording
   const startRecording = useCallback(async () => {
     try {
@@ -57,7 +31,25 @@ const ShadowingVoiceRecorder = ({
       setRecordedBlob(null);
       audioChunksRef.current = [];
 
-      // Start audio recording for both modes
+      // Pause main audio/video when starting recording
+      if (typeof window !== 'undefined') {
+        // Pause YouTube player
+        if (window.mainYoutubePlayerRef?.current) {
+          const player = window.mainYoutubePlayerRef.current;
+          if (player.pauseVideo) {
+            player.pauseVideo();
+          }
+        }
+        // Pause audio player
+        if (window.mainAudioRef?.current) {
+          const audio = window.mainAudioRef.current;
+          if (!audio.paused) {
+            audio.pause();
+          }
+        }
+      }
+
+      // Start audio recording
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
@@ -92,57 +84,33 @@ const ShadowingVoiceRecorder = ({
       };
 
       mediaRecorder.start();
-
-      // Start speech recognition based on mode
-      if (mode === 'web-speech') {
-        if (!isSpeechSupported) {
-          throw new Error('Trình duyệt không hỗ trợ nhận dạng giọng nói');
-        }
-        startListening();
-      }
-
       setIsRecording(true);
     } catch (err) {
       console.error('Error starting recording:', err);
       setError(err.message || 'Không thể truy cập microphone');
       setIsRecording(false);
     }
-  }, [mode, isSpeechSupported, startListening, onAudioRecorded]);
+  }, [onAudioRecorded]);
 
   // Stop recording
   const stopRecording = useCallback(async () => {
     setIsRecording(false);
-
-    // Stop Web Speech API
-    if (mode === 'web-speech') {
-      stopListening();
-
-      // Wait a bit for final transcript
-      setTimeout(() => {
-        if (transcript && onTranscript) {
-          onTranscript(transcript);
-        }
-        resetTranscript();
-      }, 500);
-    }
 
     // Stop media recorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
 
-    // For Whisper mode, process the recorded audio
-    if (mode === 'whisper') {
-      setIsProcessing(true);
+    // Process the recorded audio with Whisper
+    setIsProcessing(true);
 
-      // Wait for blob to be ready
-      setTimeout(async () => {
-        if (audioChunksRef.current.length > 0) {
-          await processWhisperAudio();
-        }
-      }, 100);
-    }
-  }, [mode, transcript, onTranscript, stopListening, resetTranscript]);
+    // Wait for blob to be ready
+    setTimeout(async () => {
+      if (audioChunksRef.current.length > 0) {
+        await processWhisperAudio();
+      }
+    }, 100);
+  }, []);
 
   // Process audio with Whisper API
   const processWhisperAudio = useCallback(async () => {
@@ -194,32 +162,19 @@ const ShadowingVoiceRecorder = ({
         onClick={handleButtonClick}
         disabled={isProcessing}
         type="button"
+        title={isProcessing ? 'Đang xử lý...' : isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
       >
         {isProcessing ? (
-          <>
-            <span className={styles.spinner}>⏳</span>
-            <span>Đang xử lý...</span>
-          </>
+          <span className={styles.spinner}>⏳</span>
         ) : isRecording ? (
           <>
             <span className={styles.stopIcon}>⏹️</span>
-            <span>Dừng</span>
             <span className={styles.pulse}></span>
           </>
         ) : (
-          <>
-            <span className={styles.micIcon}>🎤</span>
-            <span>Bắt đầu nói</span>
-          </>
+          <span className={styles.micIcon}>🎤</span>
         )}
       </button>
-
-      {/* Interim transcript display for Web Speech API */}
-      {mode === 'web-speech' && isRecording && interimTranscript && (
-        <div className={styles.interimText}>
-          {interimTranscript}
-        </div>
-      )}
 
       {/* Error display */}
       {error && (
