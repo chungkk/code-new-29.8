@@ -15,6 +15,8 @@ import { toast } from 'react-toastify';
 import { translationCache } from '../../lib/translationCache';
 import styles from '../../styles/shadowingPage.module.css';
 
+const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
+const DEBUG_TIMER = false; // Set to true to enable timer logs
 
 const ShadowingPageContent = () => {
   const router = useRouter();
@@ -71,8 +73,6 @@ const ShadowingPageContent = () => {
   const inactivityTimeoutRef = useRef(null);
   const pauseTimeoutRef = useRef(null);
   const hasStartedTimerRef = useRef(false); // Track if timer has been started
-  const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
-  const DEBUG_TIMER = false; // Set to true to enable timer logs
 
   const { user } = useAuth();
 
