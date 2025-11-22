@@ -2937,32 +2937,6 @@ const DictationPageContent = () => {
                 </div>
               ) : isMobile ? (
                 <div className={styles.dictationSlidesWrapper}>
-                  {/* Progress Dots Indicator */}
-                  <div className={styles.progressDotsContainer}>
-                    {mobileVisibleIndices.map((originalIndex, dotIndex) => {
-                      const isActive = originalIndex === currentSentenceIndex;
-                      const isCompleted = completedSentences.includes(originalIndex);
-                      return (
-                        <button
-                          key={`dot-${originalIndex}`}
-                          className={`${styles.progressDot} ${isActive ? styles.progressDotActive : ''} ${isCompleted ? styles.progressDotCompleted : ''}`}
-                          onClick={() => {
-                            // Haptic feedback for dot click
-                            hapticEvents.dotClick();
-                            
-                            setCurrentSentenceIndex(originalIndex);
-                            const sentence = transcriptData[originalIndex];
-                            if (sentence) {
-                              handleSentenceClick(sentence.start, sentence.end);
-                            }
-                          }}
-                          aria-label={`Go to sentence ${originalIndex + 1}`}
-                          title={`Sentence ${originalIndex + 1}${isCompleted ? ' (completed)' : ''}`}
-                        />
-                      );
-                    })}
-                  </div>
-
                   <div 
                     className={styles.dictationSlides}
                     ref={dictationSlidesRef}
