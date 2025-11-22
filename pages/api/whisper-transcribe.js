@@ -1,7 +1,6 @@
 import { OpenAI } from 'openai';
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
 
 export const config = {
   api: {
@@ -24,8 +23,9 @@ export default async function handler(req, res) {
 
   try {
     // Parse the form data
+    // Use /tmp for Vercel compatibility (serverless functions have read-only filesystem except /tmp)
     const form = formidable({
-      uploadDir: path.join(process.cwd(), 'public/temp'),
+      uploadDir: '/tmp',
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB limit for voice clips
     });
