@@ -230,7 +230,7 @@ const Header = () => {
             <>
               <div className={styles.pointsContainer}>
                 <div className={styles.pointsBadge} title={t('header.points')}>
-                  <span className={styles.pointsIcon}>⭐</span>
+                  <span className={styles.pointsIcon}>€</span>
                   <span className={styles.pointsValue}>{userPoints || 0}</span>
                 </div>
 

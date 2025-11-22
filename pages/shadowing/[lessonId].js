@@ -96,6 +96,22 @@ const ShadowingPageContent = () => {
   const activeTranscriptItemRef = useRef(null);
   const transcriptListRef = useRef(null);
 
+  // Migrate old progress: add totalSentences if missing
+  const hasMigratedRef = useRef(false);
+  useEffect(() => {
+    if (transcriptData.length > 0 && loadedProgress && user && !hasMigratedRef.current) {
+      // Check if progress exists but missing totalSentences
+      if (loadedProgress.currentSentenceIndex !== undefined && !loadedProgress.totalSentences) {
+        console.log('Migrating old progress: adding totalSentences');
+        hasMigratedRef.current = true;
+        saveProgress({
+          ...loadedProgress,
+          totalSentences: transcriptData.length
+        });
+      }
+    }
+  }, [transcriptData.length, loadedProgress, saveProgress, user]);
+
   // Leaderboard tracking
   const sessionStartTimeRef = useRef(Date.now());
   const completedSentencesRef = useRef(new Set());
@@ -228,11 +244,24 @@ const ShadowingPageContent = () => {
 
   // Study timer - starts when user plays video for the first time
   // Stops on inactivity (3 min), pause > 30s, or page unload
+  const studyTimeRefForTimer = useRef(studyTime);
+  useEffect(() => {
+    studyTimeRefForTimer.current = studyTime;
+  }, [studyTime]);
+
+  const lastPauseTimeRef = useRef(lastPauseTime);
+  const isTimerRunningRef = useRef(isTimerRunning);
+
+  useEffect(() => {
+    lastPauseTimeRef.current = lastPauseTime;
+    isTimerRunningRef.current = isTimerRunning;
+  }, [lastPauseTime, isTimerRunning]);
+
   useEffect(() => {
     // Helper function to save study time immediately
     const saveStudyTimeNow = async () => {
       if (!user || !lessonId || !progressLoaded) return;
-      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
+      const validatedStudyTime = Math.min(studyTimeRefForTimer.current, MAX_STUDY_TIME);
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -278,7 +307,7 @@ const ShadowingPageContent = () => {
     }
 
     // Handle pause: track pause time and set timeout to stop timer after 30s
-    if (!isPlaying && hasStartedTimerRef.current && isTimerRunning) {
+    if (!isPlaying && hasStartedTimerRef.current && isTimerRunningRef.current && lastPauseTimeRef.current === null) {
       const pauseTime = Date.now();
       setLastPauseTime(pauseTime);
 
@@ -302,7 +331,7 @@ const ShadowingPageContent = () => {
     }
 
     // Handle resume: clear pause timeout and restart timer if needed
-    if (isPlaying && lastPauseTime !== null && !isTimerRunning && hasStartedTimerRef.current) {
+    if (isPlaying && lastPauseTimeRef.current !== null && !isTimerRunningRef.current && hasStartedTimerRef.current) {
       if (DEBUG_TIMER) console.log('Resuming timer after pause');
       
       // Clear pause timeout
@@ -327,7 +356,7 @@ const ShadowingPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, user, lessonId, isTimerRunning, lastPauseTime, progressLoaded]);
+  }, [isPlaying, user, lessonId, progressLoaded]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -432,13 +461,18 @@ const ShadowingPageContent = () => {
   }, []);
 
   // Save study time periodically (every 3 seconds) and on unmount
+  const studyTimeRef = useRef(studyTime);
+  useEffect(() => {
+    studyTimeRef.current = studyTime;
+  }, [studyTime]);
+
   useEffect(() => {
     const saveStudyTime = async () => {
       // Only save if progress has been loaded to avoid overwriting with initial 0 value
       if (!user || !lessonId || !progressLoaded) return;
 
-      // Validate before saving
-      const validatedStudyTime = Math.min(studyTime, MAX_STUDY_TIME);
+      // Validate before saving - use ref to get current value
+      const validatedStudyTime = Math.min(studyTimeRef.current, MAX_STUDY_TIME);
 
       try {
         const token = localStorage.getItem('token');
@@ -477,7 +511,7 @@ const ShadowingPageContent = () => {
       // Save final time when component unmounts
       saveStudyTime();
     };
-  }, [user, lessonId, studyTime, progressLoaded]);
+  }, [user, lessonId, progressLoaded]);
 
   // Expose audioRef globally để components có thể pause khi phát từ
   useEffect(() => {
@@ -1400,6 +1434,7 @@ const ShadowingPageContent = () => {
 
           saveProgress({
             currentSentenceIndex,
+            totalSentences: transcriptData.length,
             lastPlayed: new Date()
           });
         } else {
@@ -1427,6 +1462,7 @@ const ShadowingPageContent = () => {
 
           saveProgress({
             currentSentenceIndex,
+            totalSentences: transcriptData.length,
             lastPlayed: new Date()
           });
         } else {

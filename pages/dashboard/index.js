@@ -8,6 +8,7 @@ import UserProfileSidebar from '../../components/UserProfileSidebar';
 import { useAuth } from '../../context/AuthContext';
 import { fetchWithAuth } from '../../lib/api';
 import { SkeletonGrid } from '../../components/SkeletonLoader';
+import { navigateWithLocale } from '../../lib/navigation';
 import styles from '../../styles/dashboard.module.css';
 
 
@@ -29,35 +30,28 @@ function DashboardIndex() {
       const progressData = await progressRes.json();
       const validProgress = Array.isArray(progressData) ? progressData : [];
       setProgress(validProgress);
-      console.log('📊 Progress loaded:', validProgress.length, 'records');
 
       // Load ALL lessons (sorted by order)
       try {
         const lessonsRes = await fetchWithAuth('/api/lessons');
-        console.log('📡 Lessons API response status:', lessonsRes.status);
-
         const lessonsData = await lessonsRes.json();
-        console.log('📦 Lessons raw data:', lessonsData);
 
         // Handle both old array format and new object format
         const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
-        console.log('📚 Lessons parsed:', lessons.length, 'lessons');
 
         if (lessons && lessons.length > 0) {
           // Sort by newest first (createdAt descending)
           const sortedLessons = [...lessons].sort((a, b) => {
             const dateA = new Date(a.createdAt || 0);
             const dateB = new Date(b.createdAt || 0);
-            return dateB - dateA; // Newest first
+            return dateB - dateA;
           });
           setAllLessons(sortedLessons);
-          console.log('✅ All lessons set:', sortedLessons.length);
         } else {
           setAllLessons([]);
-          console.log('⚠️ No lessons found in response');
         }
       } catch (lessonError) {
-        console.error('❌ Error loading lessons:', lessonError);
+        console.error('Error loading lessons:', lessonError);
         setAllLessons([]);
       }
     } catch (error) {
@@ -89,8 +83,8 @@ function DashboardIndex() {
     const dictationProgress = lessonProgress.find(p => p.mode === 'dictation');
 
     return {
-      shadowing: shadowingProgress?.completionPercent || 0,
-      dictation: dictationProgress?.completionPercent || 0,
+      shadowing: Math.round(shadowingProgress?.completionPercent || 0),
+      dictation: Math.round(dictationProgress?.completionPercent || 0),
       shadowingLastAccessed: shadowingProgress?.lastAccessed,
       dictationLastAccessed: dictationProgress?.lastAccessed,
       overall: calculateProgress(lessonId)
@@ -99,21 +93,12 @@ function DashboardIndex() {
 
   // Filter lessons based on active progress tab (memoized for performance)
   const filteredLessons = useMemo(() => {
-    console.log('🔍 Filtering lessons, tab:', activeProgressTab, 'Total lessons:', allLessons.length, 'Progress records:', progress.length);
-
-    if (allLessons.length === 0) {
-      console.log('⚠️ No lessons available yet');
+    if (allLessons.length === 0 || progress.length === 0) {
       return [];
     }
 
-    if (progress.length === 0) {
-      console.log('⚠️ No progress records yet');
-      return [];
-    }
-
-    const filtered = allLessons.filter(lesson => {
+    return allLessons.filter(lesson => {
       const prog = calculateProgress(lesson.id);
-      console.log(`  Checking ${lesson.displayTitle || lesson.title}: ${prog}%`);
 
       if (activeProgressTab === 'all') {
         return prog > 0;
@@ -123,9 +108,6 @@ function DashboardIndex() {
         return prog > 0 && prog < 100;
       }
     });
-
-    console.log('✅ Filtered result:', filtered.length, 'lessons for tab:', activeProgressTab);
-    return filtered;
   }, [allLessons, progress, activeProgressTab, calculateProgress]);
 
   if (loading) {
@@ -177,23 +159,6 @@ function DashboardIndex() {
 
           {/* RIGHT COLUMN - Main Content */}
           <div className={styles.mainContent}>
-            {/* Content Tabs */}
-            <div className={styles.contentTabs}>
-              <button className={`${styles.contentTab} ${styles.active}`}>
-                {t('dashboard.tabs.dictation')}
-              </button>
-              <button className={styles.contentTab}>
-                {t('dashboard.tabs.shadowing')}
-              </button>
-            </div>
-
-            {/* Ranking Section */}
-            <div className={styles.rankingSection}>
-              <div className={styles.rankingEmpty}>
-                {t('dashboard.empty.noRanking')}
-              </div>
-            </div>
-
             {/* Lesson Progress Section */}
             <div className={styles.lessonProgressSection}>
               <h2 className={styles.lessonProgressTitle}>{t('dashboard.progress.title')}</h2>
@@ -226,12 +191,23 @@ function DashboardIndex() {
               {/* Lessons List */}
               {filteredLessons.length === 0 ? (
                 <div className={styles.emptyLessons}>
+                  <div className={styles.emptyIcon}>
+                    {activeProgressTab === 'all' ? '📚' : 
+                     activeProgressTab === 'completed' ? '🎉' : '⏱️'}
+                  </div>
+                  <h3 className={styles.emptyTitle}>
+                    {activeProgressTab === 'all'
+                      ? 'No Lessons Started Yet'
+                      : activeProgressTab === 'completed'
+                      ? 'No Completed Lessons'
+                      : 'No Lessons In Progress'}
+                  </h3>
                   <p className={styles.emptyText}>
                     {activeProgressTab === 'all'
-                      ? t('dashboard.empty.noLessons')
+                      ? (t('dashboard.empty.noLessons') || 'Start a lesson from the home page to see your progress here!')
                       : activeProgressTab === 'completed'
-                      ? t('dashboard.empty.noCompleted')
-                      : t('dashboard.empty.noInProgress')}
+                      ? (t('dashboard.empty.noCompleted') || 'Complete your first lesson to see it here!')
+                      : (t('dashboard.empty.noInProgress') || 'Continue learning to track your progress!')}
                   </p>
                 </div>
               ) : (
@@ -241,41 +217,26 @@ function DashboardIndex() {
                     const progressDetails = getProgressDetails(lesson.id);
                     return (
                       <div key={lesson.id} className={styles.lessonCard}>
-                        {/* Status Badge */}
-                        {progressPercent === 100 && (
-                          <div className={`${styles.statusBadge} ${styles.completedBadge}`}>
-                            ✅
-                          </div>
-                        )}
-                        {progressPercent > 0 && progressPercent < 100 && (
-                          <div className={`${styles.statusBadge} ${styles.inProgressBadge}`}>
-                            📊
-                          </div>
-                        )}
-                        {progressPercent === 0 && (
-                          <div className={`${styles.statusBadge} ${styles.notStarted}`}>
-                            🆕
-                          </div>
-                        )}
-
                         {/* Card Header */}
                         <div className={styles.cardHeader}>
-                          <h3 className={styles.lessonTitle}>
-                            {lesson.displayTitle || lesson.title}
-                          </h3>
+                          <div className={styles.cardHeaderTop}>
+                            <h3 className={styles.lessonTitle}>
+                              {lesson.displayTitle || lesson.title}
+                            </h3>
+                            <span className={styles.levelBadge}>
+                              {lesson.level || 'A1'}
+                            </span>
+                          </div>
                           <p className={styles.lessonDescription}>
                             {lesson.description || t('dashboard.progress.noDescription')}
                           </p>
-                          <span className={styles.levelBadge}>
-                            {lesson.level || 'A1'}
-                          </span>
                         </div>
 
                         {/* Progress Section - Detailed */}
                         <div className={styles.progressSection}>
                           <div className={styles.progressInfo}>
                             <span className={styles.progressLabel}>{t('dashboard.progress.overall')}</span>
-                            <span className={styles.progressPercent}>{progressPercent}%</span>
+                            <span className={styles.progressPercent}>{Math.round(progressPercent)}%</span>
                           </div>
                           <div className={styles.progressBar}>
                             <div

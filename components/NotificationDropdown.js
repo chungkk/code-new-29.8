@@ -159,7 +159,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       case 'streak':
         return '🔥';
       case 'points':
-        return '⭐';
+        return '€';
       case 'login':
         return '👋';
       case 'checkin':
