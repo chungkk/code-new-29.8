@@ -252,7 +252,11 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = async () => {
     try {
-      await nextAuthSignIn('google', { callbackUrl: '/dashboard' });
+      // Use popup mode instead of redirect
+      await nextAuthSignIn('google', { 
+        callbackUrl: '/dashboard',
+        redirect: false
+      });
       return { success: true };
     } catch (error) {
       console.error('Google login error:', error);

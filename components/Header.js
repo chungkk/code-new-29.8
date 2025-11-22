@@ -9,6 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
 import { navigateWithLocale } from '../lib/navigation';
 import NotificationDropdown from './NotificationDropdown';
+import LoginModal from './LoginModal';
 import styles from '../styles/Header.module.css';
 
 const Header = () => {
@@ -19,6 +20,7 @@ const Header = () => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [showPointsPlusOne, setShowPointsPlusOne] = useState(false);
   const [showPointsMinus, setShowPointsMinus] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
   const notificationMenuRef = useRef(null);
@@ -371,28 +373,19 @@ const Header = () => {
 
           {!user && (
             <>
-              <div className={styles.authButtonsDesktop}>
-                <button
-                  onClick={() => navigateWithLocale(router, '/auth/login')}
-                  className={styles.loginBtn}
-                >
-                  {t('header.auth.login')}
-                </button>
-                <button
-                  onClick={() => navigateWithLocale(router, '/auth/register')}
-                  className={styles.signupBtn}
-                >
-                  {t('header.auth.register')}
-                </button>
-              </div>
               <button
-                onClick={() => navigateWithLocale(router, '/auth/login')}
-                className={styles.authBtnMobile}
+                onClick={() => setLoginModalOpen(true)}
+                className={styles.loginBtn}
               >
                 {t('header.auth.login')}
               </button>
             </>
           )}
+
+          <LoginModal 
+            isOpen={loginModalOpen} 
+            onClose={() => setLoginModalOpen(false)} 
+          />
 
 
         </div>

@@ -92,7 +92,11 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: '/auth/login',
+    // Don't set signIn page to allow direct Google OAuth redirect
+    // signIn: '/auth/login',
+    signOut: '/auth/login',
+    error: '/auth/callback',
+    newUser: '/auth/callback',
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
