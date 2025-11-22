@@ -167,14 +167,26 @@ const ShadowingVoiceRecorder = ({
         title={isProcessing ? 'Đang xử lý...' : isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
       >
         {isProcessing ? (
-          <span className={styles.spinner}>⏳</span>
+          <span className={styles.spinner}>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"/>
+            </svg>
+          </span>
         ) : isRecording ? (
-          <>
-            <span className={styles.stopIcon}>⏹️</span>
-            <span className={styles.pulse}></span>
-          </>
+          <span className={styles.stopIcon}>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="6" width="12" height="12" rx="2"/>
+            </svg>
+          </span>
         ) : (
-          <span className={styles.micIcon}>🎤</span>
+          <span className={styles.micIcon}>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <path d="M12 18v4"/>
+              <path d="M8 22h8"/>
+            </svg>
+          </span>
         )}
       </button>
 

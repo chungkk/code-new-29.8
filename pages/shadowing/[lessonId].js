@@ -1805,7 +1805,12 @@ const ShadowingPageContent = () => {
                                className={styles.micPlaceholder}
                                title="Phát câu này để bắt đầu ghi âm"
                              >
-                               🎤
+                               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                 <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                                 <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                                 <path d="M12 18v4"/>
+                                 <path d="M8 22h8"/>
+                               </svg>
                              </div>
                            )}
 
@@ -1815,7 +1820,18 @@ const ShadowingPageContent = () => {
                                onClick={() => playRecordedAudio(index)}
                                title={sentenceState.isPlaying ? 'Dừng phát' : 'Nghe lại bản ghi'}
                              >
-                               {sentenceState.isPlaying ? '⏸️' : '🔊'}
+                               {sentenceState.isPlaying ? (
+                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                   <rect x="6" y="4" width="4" height="16" rx="1"/>
+                                   <rect x="14" y="4" width="4" height="16" rx="1"/>
+                                 </svg>
+                               ) : (
+                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                   <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                   <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                 </svg>
+                               )}
                              </button>
                            )}
                          </div>
@@ -1839,7 +1855,14 @@ const ShadowingPageContent = () => {
                                  language="de-DE"
                                />
                              ) : (
-                               <span className={styles.micPlaceholderInline}>🎤</span>
+                               <span className={styles.micPlaceholderInline}>
+                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                   <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                                   <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                                   <path d="M12 18v4"/>
+                                   <path d="M8 22h8"/>
+                                 </svg>
+                               </span>
                              )}
                            </span>
                          )}
@@ -1920,7 +1943,12 @@ const ShadowingPageContent = () => {
                           className={styles.bottomMicDisabled}
                           title="Phát câu này để bắt đầu ghi âm"
                         >
-                          🎤
+                          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                            <path d="M12 18v4"/>
+                            <path d="M8 22h8"/>
+                          </svg>
                         </div>
                       )}
                     </div>

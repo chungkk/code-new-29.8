@@ -10,22 +10,36 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(244, 67, 54, 0.5);
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.15) 0%, rgba(211, 47, 47, 0.15) 100%);
-  font-size: 14px;
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   backdrop-filter: blur(10px);
-  color: #f44336;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.recordButton svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #ef4444;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.3s ease;
 }
 
 .recordButton:hover:not(:disabled) {
-  transform: scale(1.15) rotate(-5deg);
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.25) 0%, rgba(211, 47, 47, 0.25) 100%);
-  border-color: rgba(244, 67, 54, 0.8);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border-color: rgba(239, 68, 68, 0.9);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+}
+
+.recordButton:hover:not(:disabled) svg {
+  transform: scale(1.1);
+  stroke: #dc2626;
 }
 
 .recordButton:active:not(:disabled) {
@@ -38,11 +52,19 @@
 }
 
 .recordButton.recording {
-  border-color: rgba(244, 67, 54, 0.9);
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(211, 47, 47, 0.3) 100%);
-  color: #f44336;
+  border-color: rgba(239, 68, 68, 1);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%);
   animation: recordingPulse 1.5s ease-in-out infinite;
-  transform: scale(1.05);
+}
+
+.recordButton.recording svg {
+  stroke: #dc2626;
+  animation: recordingIconPulse 1.5s ease-in-out infinite;
+}
+
+.recordButton.recording .stopIcon svg {
+  fill: #dc2626;
+  stroke: none;
 }
 
 .recordButton.processing {
@@ -55,56 +77,50 @@
 .recordButtonLarge {
   width: 38px;
   height: 38px;
-  font-size: 16px;
-  border-width: 2px;
+  border-width: 2.5px;
 }
 
-.recordButtonLarge .micIcon,
-.recordButtonLarge .stopIcon,
-.recordButtonLarge .spinner {
-  font-size: 16px;
+.recordButtonLarge svg {
+  width: 20px;
+  height: 20px;
 }
 
 @keyframes recordingPulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.6);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(244, 67, 54, 0);
+    box-shadow: 0 0 0 14px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes recordingIconPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9);
   }
 }
 
 .micIcon, .stopIcon, .spinner {
-  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
 }
 
-.pulse {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid #f44336;
-  animation: pulse 1.5s ease-out infinite;
-  pointer-events: none;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.3);
-    opacity: 0;
-  }
-}
-
 .spinner {
   animation: spin 1s linear infinite;
+}
+
+.spinner svg {
+  width: 16px;
+  height: 16px;
+  fill: #3b82f6;
+  stroke: none;
 }
 
 @keyframes spin {
@@ -160,9 +176,13 @@
     width: 22px;
     height: 22px;
     border-width: 1.5px;
-    font-size: 11px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
     flex-shrink: 0;
+  }
+
+  .recordButton svg {
+    width: 12px;
+    height: 12px;
   }
 
   .recordButton:hover:not(:disabled) {
