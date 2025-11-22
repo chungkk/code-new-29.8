@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { navigateWithLocale } from '../../lib/navigation';
 import AuthForm from '../../components/AuthForm';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 import styles from '../../styles/auth.module.css';
 
 export default function Register() {
   const { t } = useTranslation();
-  const { user, loading } = useAuth();
+  const { user, loading, loginWithGoogle } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -89,6 +90,14 @@ export default function Register() {
             </div>
 
             <AuthForm mode="register" />
+
+            <div className={styles.divider}>
+              <div className={styles.dividerLine}></div>
+              <span className={styles.dividerText}>{t('auth.login.divider')}</span>
+              <div className={styles.dividerLine}></div>
+            </div>
+
+            <GoogleSignInButton onClick={loginWithGoogle} />
 
             <div className={styles.authFooter}>
               <p className={styles.footerText}>

@@ -11,7 +11,7 @@ import styles from '../../styles/auth.module.css';
 
 export default function Login() {
   const { t } = useTranslation();
-  const { user, loading } = useAuth();
+  const { user, loading, loginWithGoogle } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function Login() {
             <div className={styles.dividerLine}></div>
           </div>
 
-          <GoogleSignInButton />
+          <GoogleSignInButton onClick={loginWithGoogle} />
 
           <div className={styles.authFooter}>
             <p className={styles.footerText}>
