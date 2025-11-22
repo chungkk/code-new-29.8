@@ -1295,6 +1295,18 @@ const ShadowingPageContent = () => {
     }));
   }, []);
 
+  // Handle recording state change (for synchronization between buttons)
+  const handleRecordingStateChange = useCallback((sentenceIndex, state) => {
+    setRecordingStates(prev => ({
+      ...prev,
+      [sentenceIndex]: {
+        ...prev[sentenceIndex],
+        isRecording: state.isRecording,
+        isProcessing: state.isProcessing
+      }
+    }));
+  }, []);
+
   // Play recorded audio (per sentence)
   const playRecordedAudio = useCallback((sentenceIndex) => {
     const state = recordingStates[sentenceIndex];
@@ -1835,6 +1847,9 @@ const ShadowingPageContent = () => {
                                onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
                                onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
                                language="de-DE"
+                               externalIsRecording={sentenceState.isRecording}
+                               externalIsProcessing={sentenceState.isProcessing}
+                               onRecordingStateChange={(state) => handleRecordingStateChange(index, state)}
                              />
                            ) : (
                              <div
@@ -1889,6 +1904,9 @@ const ShadowingPageContent = () => {
                                  onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
                                  onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
                                  language="de-DE"
+                                 externalIsRecording={sentenceState.isRecording}
+                                 externalIsProcessing={sentenceState.isProcessing}
+                                 onRecordingStateChange={(state) => handleRecordingStateChange(index, state)}
                                />
                              ) : (
                                <span className={styles.micPlaceholderInline}>
@@ -1973,6 +1991,9 @@ const ShadowingPageContent = () => {
                           onAudioRecorded={(audioBlob) => handleAudioRecorded(currentSentenceIndex, audioBlob)}
                           language="de-DE"
                           size="large"
+                          externalIsRecording={recordingStates[currentSentenceIndex]?.isRecording}
+                          externalIsProcessing={recordingStates[currentSentenceIndex]?.isProcessing}
+                          onRecordingStateChange={(state) => handleRecordingStateChange(currentSentenceIndex, state)}
                         />
                       ) : (
                         <div

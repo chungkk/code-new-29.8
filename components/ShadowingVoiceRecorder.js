@@ -10,17 +10,43 @@ import styles from '../styles/ShadowingVoiceRecorder.module.css';
  * @param {Function} props.onAudioRecorded - Callback when audio is recorded (returns blob)
  * @param {string} props.language - Language code (de-DE, vi-VN, etc.)
  * @param {string} props.size - Size variant: 'small' (inline) or 'large' (bottom bar)
+ * @param {boolean} props.externalIsRecording - External recording state (for synchronization)
+ * @param {boolean} props.externalIsProcessing - External processing state (for synchronization)
+ * @param {Function} props.onRecordingStateChange - Callback when recording state changes
  */
 const ShadowingVoiceRecorder = ({
   onTranscript,
   onAudioRecorded,
   language = 'de-DE',
-  size = 'small'
+  size = 'small',
+  externalIsRecording,
+  externalIsProcessing,
+  onRecordingStateChange
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
+  const [internalIsRecording, setInternalIsRecording] = useState(false);
   const [error, setError] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [internalIsProcessing, setInternalIsProcessing] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
+
+  // Use external state if provided, otherwise use internal state
+  const isRecording = externalIsRecording !== undefined ? externalIsRecording : internalIsRecording;
+  const isProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
+
+  const updateRecordingState = useCallback((value) => {
+    setInternalIsRecording(value);
+    if (onRecordingStateChange) {
+      const currentProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
+      onRecordingStateChange({ isRecording: value, isProcessing: currentProcessing });
+    }
+  }, [onRecordingStateChange, externalIsProcessing, internalIsProcessing]);
+
+  const updateProcessingState = useCallback((value) => {
+    setInternalIsProcessing(value);
+    if (onRecordingStateChange) {
+      const currentRecording = externalIsRecording !== undefined ? externalIsRecording : internalIsRecording;
+      onRecordingStateChange({ isRecording: currentRecording, isProcessing: value });
+    }
+  }, [onRecordingStateChange, externalIsRecording, internalIsRecording]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -107,7 +133,7 @@ const ShadowingVoiceRecorder = ({
       };
 
       mediaRecorder.start();
-      setIsRecording(true);
+      updateRecordingState(true);
     } catch (err) {
       console.error('Error starting recording:', err);
 
@@ -127,9 +153,9 @@ const ShadowingVoiceRecorder = ({
       }
 
       setError(errorMessage);
-      setIsRecording(false);
+      updateRecordingState(false);
     }
-  }, [onAudioRecorded]);
+  }, [onAudioRecorded, updateRecordingState]);
 
   // Process audio with Whisper API
   const processWhisperAudio = useCallback(async () => {
@@ -161,13 +187,13 @@ const ShadowingVoiceRecorder = ({
       console.error('Error processing audio:', err);
       setError('Fehler bei der Audioverarbeitung');
     } finally {
-      setIsProcessing(false);
+      updateProcessingState(false);
     }
-  }, [language, onTranscript]);
+  }, [language, onTranscript, updateProcessingState]);
 
   // Stop recording
   const stopRecording = useCallback(async () => {
-    setIsRecording(false);
+    updateRecordingState(false);
 
     // Stop media recorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -175,7 +201,7 @@ const ShadowingVoiceRecorder = ({
     }
 
     // Process the recorded audio with Whisper
-    setIsProcessing(true);
+    updateProcessingState(true);
 
     // Wait for blob to be ready
     setTimeout(async () => {
@@ -183,7 +209,7 @@ const ShadowingVoiceRecorder = ({
         await processWhisperAudio();
       }
     }, 100);
-  }, [processWhisperAudio]);
+  }, [processWhisperAudio, updateRecordingState, updateProcessingState]);
 
   // Handle button click
   const handleButtonClick = useCallback(() => {
