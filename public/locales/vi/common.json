@@ -11,6 +11,7 @@
     "themeToggle": "Đổi giao diện",
     "language": "Tiếng Việt",
     "points": "Tổng số điểm của bạn",
+    "streak": "Xem chuỗi học tập của bạn",
     "notifications": "Thông báo",
     "userMenu": {
       "label": "Menu người dùng",
@@ -40,7 +41,7 @@
       "contact": "Liên hệ",
       "feedback": "Phản hồi",
       "shadowing": "Shadowing",
-      "dictation": "Chính tả",
+      "dictation": "Nghe chép",
       "vocabulary": "Từ vựng"
     },
     "copyright": "Tất cả quyền được bảo lưu.",
@@ -138,7 +139,7 @@
   "modeSelectionPopup": {
     "title": "Chọn chế độ học",
     "dictation": {
-      "name": "Chính tả",
+      "name": "Nghe chép",
       "description": "Nghe và gõ những gì bạn nghe được để cải thiện khả năng nghe hiểu và chính tả."
     },
     "shadowing": {
@@ -186,7 +187,7 @@
     "completeLesson": "Hoàn thành bài học"
   },
   "lessonCard": {
-    "dictation": "Chính tả",
+    "dictation": "Nghe chép",
     "shadowing": "Shadowing",
     "youtube": "Youtube"
   },
@@ -197,6 +198,18 @@
     "timeSpent": "Thời gian học",
     "levelInfo": "Cấp độ {{level}}: ẩn {{percent}}% từ",
     "milestone": "Đạt mốc: {{percent}}%!"
+  },
+  "streakPopup": {
+    "label": "Chuỗi câu",
+    "days": {
+      "mo": "T2",
+      "tu": "T3",
+      "we": "T4",
+      "th": "T5",
+      "fr": "T6",
+      "sa": "T7",
+      "su": "CN"
+    }
   },
   "modeSelection": {
     "title": "Chọn chế độ học",
@@ -262,10 +275,11 @@
       "totalLessons": "Tổng số bài",
       "lessonsStarted": "Bài đã bắt đầu",
       "lessonsCompleted": "Bài đã hoàn thành",
-      "inProgress": "Đang học"
+      "inProgress": "Đang học",
+      "maxStreak": "Chuỗi dài nhất"
     },
     "tabs": {
-      "dictation": "Chính tả",
+      "dictation": "Nghe chép",
       "shadowing": "Shadowing"
     },
     "progress": {
@@ -374,6 +388,50 @@
     "contact": "Liên hệ",
     "privacy": "Bảo mật",
     "terms": "Điều khoản"
+  },
+  "loginModal": {
+    "welcome": "Chào mừng trở lại!",
+    "subtitle": "Tiếp tục hành trình học tiếng Đức cùng PapaGeil",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "orContinueWith": "HOẶC TIẾP TỤC VỚI",
+    "enterEmail": "Nhập email của bạn",
+    "enterPassword": "Nhập mật khẩu",
+    "continueWithEmail": "Tiếp tục với Email",
+    "login": "Đăng nhập",
+    "processing": "Đang xử lý...",
+    "checking": "Đang kiểm tra...",
+    "changeEmail": "Đổi email khác",
+    "backToLogin": "← Quay lại đăng nhập",
+    "backButton": "← Quay lại",
+    "emailLoginTitle": "Đăng nhập bằng Email",
+    "noAccount": "Chưa có tài khoản?",
+    "registerNow": "Đăng ký ngay",
+    "createAccount": "Tạo tài khoản mới",
+    "createAccountSubtitle": "Bắt đầu hành trình học tiếng Đức cùng PapaGeil",
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "password": "Mật khẩu (tối thiểu 6 ký tự)",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "togglePassword": "Hiện/Ẩn mật khẩu",
+    "register": "Đăng ký",
+    "registering": "Đang đăng ký...",
+    "termsRegister": "Bằng cách đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi",
+    "termsLogin": "Bằng cách đăng nhập, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi",
+    "googleDisclaimer": "Nếu bạn gặp khó khăn khi đăng nhập bằng Google, hãy thử đăng nhập bằng Email",
+    "errors": {
+      "popupBlocked": "Popup bị chặn. Vui lòng cho phép popup cho trang này.",
+      "timeout": "Đã hết thời gian chờ. Vui lòng thử lại.",
+      "googleFailed": "Đăng nhập Google thất bại. Vui lòng thử lại.",
+      "checkEmailFailed": "Có lỗi xảy ra khi kiểm tra email. Vui lòng thử lại.",
+      "invalidResponse": "Phản hồi từ server không hợp lệ. Vui lòng thử lại.",
+      "emailRegisteredWithGoogle": "Email này đã được đăng ký bằng Google. Vui lòng sử dụng \"Tiếp tục với Google\"",
+      "generalError": "Có lỗi xảy ra. Vui lòng thử lại.",
+      "nameRequired": "Vui lòng nhập họ tên",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+      "passwordMismatch": "Mật khẩu xác nhận không khớp",
+      "registerSuccess": "Đăng ký thành công! Vui lòng đăng nhập.",
+      "registerFailed": "Đăng ký thất bại. Vui lòng thử lại."
+    }
   },
   "auth": {
     "login": {
@@ -516,6 +574,7 @@
     "totalPremiumMonths": "Tổng tháng Premium",
     "notPremium": "Chưa là thành viên Premium",
     "unlockPro": "Mở khóa PRO",
+    "maxStreak": "Chuỗi dài nhất:",
     "dictation": "Nghe chép",
     "shadowing": "Shadowing",
     "totalLessons": "Tổng số bài học"

@@ -38,7 +38,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       } else if (event.data.type === 'auth-failed') {
         console.log('❌ Received auth failed from popup');
         setLoading(false);
-        setError(t('auth.login.googleError') || 'Đăng nhập Google thất bại');
+        setError(t('loginModal.errors.googleFailed'));
       }
     };
 
@@ -83,7 +83,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       );
 
       if (!popup) {
-        setError('Popup bị chặn. Vui lòng cho phép popup cho trang này.');
+        setError(t('loginModal.errors.popupBlocked'));
         setLoading(false);
         return;
       }
@@ -132,13 +132,13 @@ const LoginModal = ({ isOpen, onClose }) => {
           popup.close();
           clearInterval(checkInterval);
           setLoading(false);
-          setError('Đã hết thời gian chờ. Vui lòng thử lại.');
+          setError(t('loginModal.errors.timeout'));
         }
       }, 300000);
 
     } catch (error) {
       console.error('Google login error:', error);
-      setError('Đăng nhập Google thất bại. Vui lòng thử lại.');
+      setError(t('loginModal.errors.googleFailed'));
       setLoading(false);
     }
   };
@@ -155,14 +155,14 @@ const LoginModal = ({ isOpen, onClose }) => {
       });
 
       if (!response.ok) {
-        setError('Có lỗi xảy ra khi kiểm tra email. Vui lòng thử lại.');
+        setError(t('loginModal.errors.checkEmailFailed'));
         setLoading(false);
         return;
       }
 
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        setError('Phản hồi từ server không hợp lệ. Vui lòng thử lại.');
+        setError(t('loginModal.errors.invalidResponse'));
         setLoading(false);
         return;
       }
@@ -174,7 +174,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         setEmailChecked(true);
 
         if (data.isGoogleUser) {
-          setError('Email này đã được đăng ký bằng Google. Vui lòng sử dụng "Tiếp tục với Google"');
+          setError(t('loginModal.errors.emailRegisteredWithGoogle'));
           setLoading(false);
         } else {
           setLoading(false);
@@ -186,7 +186,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       }
     } catch (err) {
       console.error('Email check error:', err);
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setError(t('loginModal.errors.generalError'));
       setLoading(false);
     }
   };
@@ -217,17 +217,17 @@ const LoginModal = ({ isOpen, onClose }) => {
 
     // Validate
     if (!name.trim()) {
-      setError('Vui lòng nhập họ tên');
+      setError(t('loginModal.errors.nameRequired'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      setError(t('loginModal.errors.passwordMinLength'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp');
+      setError(t('loginModal.errors.passwordMismatch'));
       return;
     }
 
@@ -246,7 +246,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        setError('Phản hồi từ server không hợp lệ. Vui lòng thử lại.');
+        setError(t('loginModal.errors.invalidResponse'));
         setLoading(false);
         return;
       }
@@ -260,7 +260,7 @@ const LoginModal = ({ isOpen, onClose }) => {
           onClose();
           navigateWithLocale(router, '/dashboard');
         } else {
-          setError('Đăng ký thành công! Vui lòng đăng nhập.');
+          setError(t('loginModal.errors.registerSuccess'));
           setIsRegistering(false);
           setEmailChecked(false);
           setEmailExists(false);
@@ -269,11 +269,11 @@ const LoginModal = ({ isOpen, onClose }) => {
           setName('');
         }
       } else {
-        setError(data.error || 'Đăng ký thất bại. Vui lòng thử lại.');
+        setError(data.error || t('loginModal.errors.registerFailed'));
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setError(t('loginModal.errors.generalError'));
     } finally {
       setLoading(false);
     }
@@ -290,10 +290,10 @@ const LoginModal = ({ isOpen, onClose }) => {
           <div className={styles.welcomeContent}>
             <div className={styles.parrotIcon}>🦜</div>
             <h2 className={styles.welcomeTitle}>
-              Chào mừng trở lại!
+              {t('loginModal.welcome')}
             </h2>
             <p className={styles.welcomeSubtitle}>
-              Tiếp tục hành trình học tiếng Anh cùng PapaGeil
+              {t('loginModal.subtitle')}
             </p>
             <div className={styles.mascot}>
               <div className={styles.mascotBubble}>Hi...</div>
@@ -317,23 +317,23 @@ const LoginModal = ({ isOpen, onClose }) => {
                     }}
                     disabled={loading}
                   >
-                    ← Quay lại đăng nhập
+                    {t('loginModal.backToLogin')}
                   </button>
 
                   <div className={styles.registerHeader}>
                     <div className={styles.registerIcon}>✨</div>
                     <h3 className={styles.registerTitle}>
-                      Tạo tài khoản mới
+                      {t('loginModal.createAccount')}
                     </h3>
                     <p className={styles.registerSubtitle}>
-                      Bắt đầu hành trình học tiếng Anh cùng PapaGeil
+                      {t('loginModal.createAccountSubtitle')}
                     </p>
                   </div>
 
                   <form onSubmit={handleRegister}>
                     <input
                       type="text"
-                      placeholder="Họ và tên"
+                      placeholder={t('loginModal.fullName')}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className={styles.input}
@@ -345,7 +345,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 
                     <input
                       type="email"
-                      placeholder="Email"
+                      placeholder={t('loginModal.email')}
                       value={email}
                       className={styles.input}
                       disabled
@@ -355,7 +355,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     <div className={styles.passwordContainer}>
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Mật khẩu (tối thiểu 6 ký tự)"
+                        placeholder={t('loginModal.password')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className={styles.input}
@@ -368,7 +368,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                         className={styles.passwordToggle}
                         onClick={() => setShowPassword(!showPassword)}
                         tabIndex={-1}
-                        aria-label="Hiện/Ẩn mật khẩu"
+                        aria-label={t('loginModal.togglePassword')}
                       >
                         {showPassword ? '👁️' : '👁️‍🗨️'}
                       </button>
@@ -377,7 +377,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     <div className={styles.passwordContainer}>
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder="Xác nhận mật khẩu"
+                        placeholder={t('loginModal.confirmPassword')}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className={styles.input}
@@ -390,7 +390,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                         className={styles.passwordToggle}
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         tabIndex={-1}
-                        aria-label="Hiện/Ẩn mật khẩu"
+                        aria-label={t('loginModal.togglePassword')}
                       >
                         {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                       </button>
@@ -407,12 +407,12 @@ const LoginModal = ({ isOpen, onClose }) => {
                       className={styles.submitButton}
                       disabled={loading || !name || !password || !confirmPassword}
                     >
-                      {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+                      {loading ? t('loginModal.registering') : t('loginModal.register')}
                     </button>
                   </form>
 
                   <p className={styles.terms} style={{ marginTop: '8px', fontSize: '12px' }}>
-                    Bằng cách đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi
+                    {t('loginModal.termsRegister')}
                   </p>
                 </>
               ) : (
@@ -429,17 +429,17 @@ const LoginModal = ({ isOpen, onClose }) => {
                   <path d="M9 3.57954C10.3214 3.57954 11.5077 4.03363 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01681 0.957275 4.95818L3.96409 7.28999C4.67182 5.16272 6.65591 3.57954 9 3.57954Z" fill="#EA4335"/>
                 </svg>
                 <span>
-                  {loading ? 'Đang xử lý...' : 'Tiếp tục với Google'}
+                  {loading ? t('loginModal.processing') : t('loginModal.continueWithGoogle')}
                 </span>
               </button>
 
               <div className={styles.divider}>
-                <span>HOẶC TIẾP TỤC VỚI</span>
+                <span>{t('loginModal.orContinueWith')}</span>
               </div>
 
               <input
                 type="email"
-                placeholder="Nhập email của bạn"
+                placeholder={t('loginModal.enterEmail')}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -457,7 +457,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   <div className={styles.passwordContainer}>
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Nhập mật khẩu"
+                      placeholder={t('loginModal.enterPassword')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className={styles.input}
@@ -471,7 +471,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                       className={styles.passwordToggle}
                       onClick={() => setShowPassword(!showPassword)}
                       tabIndex={-1}
-                      aria-label="Hiện/Ẩn mật khẩu"
+                      aria-label={t('loginModal.togglePassword')}
                     >
                       {showPassword ? '👁️' : '👁️‍🗨️'}
                     </button>
@@ -482,7 +482,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     className={styles.submitButton}
                     disabled={loading || !password}
                   >
-                    {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                    {loading ? t('loginModal.processing') : t('loginModal.login')}
                   </button>
 
                   <button
@@ -496,7 +496,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     }}
                     disabled={loading}
                   >
-                    Đổi email khác
+                    {t('loginModal.changeEmail')}
                   </button>
                 </form>
               ) : (
@@ -505,7 +505,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   onClick={handleCheckEmail}
                   disabled={!email || loading}
                 >
-                  {loading ? 'Đang kiểm tra...' : 'Tiếp tục với Email'}
+                  {loading ? t('loginModal.checking') : t('loginModal.continueWithEmail')}
                 </button>
               )}
 
@@ -516,11 +516,11 @@ const LoginModal = ({ isOpen, onClose }) => {
               )}
 
               <p className={styles.disclaimer}>
-                Nếu bạn gặp khó khăn khi đăng nhập bằng Google, hãy thử đăng nhập bằng Email
+                {t('loginModal.googleDisclaimer')}
               </p>
 
               <p className={styles.terms}>
-                Bằng cách đăng nhập, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi
+                {t('loginModal.termsLogin')}
               </p>
               </>
               )}
@@ -531,17 +531,17 @@ const LoginModal = ({ isOpen, onClose }) => {
                 className={styles.backButton}
                 onClick={() => setShowEmailForm(false)}
               >
-                ← Quay lại
+                {t('loginModal.backButton')}
               </button>
 
               <h3 className={styles.formTitle}>
-                Đăng nhập bằng Email
+                {t('loginModal.emailLoginTitle')}
               </h3>
 
               <form onSubmit={handleEmailLogin}>
                 <input
                   type="email"
-                  placeholder="Nhập email của bạn"
+                  placeholder={t('loginModal.enterEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={styles.input}
@@ -553,7 +553,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 <div className={styles.passwordContainer}>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Mật khẩu"
+                    placeholder={t('loginModal.enterPassword')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={styles.input}
@@ -566,7 +566,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
-                    aria-label="Hiện/Ẩn mật khẩu"
+                    aria-label={t('loginModal.togglePassword')}
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
@@ -583,14 +583,14 @@ const LoginModal = ({ isOpen, onClose }) => {
                   className={styles.submitButton}
                   disabled={loading}
                 >
-                  {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                  {loading ? t('loginModal.processing') : t('loginModal.login')}
                 </button>
               </form>
 
               <p className={styles.registerLink}>
-                Chưa có tài khoản?{' '}
+                {t('loginModal.noAccount')}{' '}
                 <Link href="/auth/register">
-                  Đăng ký ngay
+                  {t('loginModal.registerNow')}
                 </Link>
               </p>
             </div>
