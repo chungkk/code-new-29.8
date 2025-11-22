@@ -11,8 +11,14 @@ const LoginModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [emailChecked, setEmailChecked] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -92,6 +98,18 @@ const LoginModal = ({ isOpen, onClose }) => {
           setTimeout(async () => {
             try {
               const response = await fetch('/api/auth/session');
+
+              if (!response.ok) {
+                console.log('ℹ️ Login cancelled or incomplete');
+                return;
+              }
+
+              const contentType = response.headers.get('content-type');
+              if (!contentType || !contentType.includes('application/json')) {
+                console.log('ℹ️ Response is not JSON');
+                return;
+              }
+
               const session = await response.json();
 
               if (session && session.user) {
@@ -125,6 +143,54 @@ const LoginModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleCheckEmail = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        setError('Có lỗi xảy ra khi kiểm tra email. Vui lòng thử lại.');
+        setLoading(false);
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        setError('Phản hồi từ server không hợp lệ. Vui lòng thử lại.');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.exists) {
+        setEmailExists(true);
+        setEmailChecked(true);
+
+        if (data.isGoogleUser) {
+          setError('Email này đã được đăng ký bằng Google. Vui lòng sử dụng "Tiếp tục với Google"');
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
+      } else {
+        // Email chưa đăng ký -> Tự động chuyển sang form đăng ký
+        setIsRegistering(true);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Email check error:', err);
+      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setLoading(false);
+    }
+  };
+
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -140,6 +206,74 @@ const LoginModal = ({ isOpen, onClose }) => {
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    // Validate
+    if (!name.trim()) {
+      setError('Vui lòng nhập họ tên');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.toLowerCase(),
+          password,
+        }),
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        setError('Phản hồi từ server không hợp lệ. Vui lòng thử lại.');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Auto login after register
+        const loginResult = await login(email, password);
+        if (loginResult.success) {
+          onClose();
+          navigateWithLocale(router, '/dashboard');
+        } else {
+          setError('Đăng ký thành công! Vui lòng đăng nhập.');
+          setIsRegistering(false);
+          setEmailChecked(false);
+          setEmailExists(false);
+          setPassword('');
+          setConfirmPassword('');
+          setName('');
+        }
+      } else {
+        setError(data.error || 'Đăng ký thất bại. Vui lòng thử lại.');
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -170,6 +304,119 @@ const LoginModal = ({ isOpen, onClose }) => {
         <div className={styles.modalRight}>
           {!showEmailForm ? (
             <div className={styles.authOptions}>
+              {isRegistering ? (
+                <>
+                  <button
+                    className={styles.backButton}
+                    onClick={() => {
+                      setIsRegistering(false);
+                      setName('');
+                      setPassword('');
+                      setConfirmPassword('');
+                      setError('');
+                    }}
+                    disabled={loading}
+                  >
+                    ← Quay lại đăng nhập
+                  </button>
+
+                  <div className={styles.registerHeader}>
+                    <div className={styles.registerIcon}>✨</div>
+                    <h3 className={styles.registerTitle}>
+                      Tạo tài khoản mới
+                    </h3>
+                    <p className={styles.registerSubtitle}>
+                      Bắt đầu hành trình học tiếng Anh cùng PapaGeil
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleRegister}>
+                    <input
+                      type="text"
+                      placeholder="Họ và tên"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className={styles.input}
+                      required
+                      disabled={loading}
+                      autoComplete="name"
+                      autoFocus
+                    />
+
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      className={styles.input}
+                      disabled
+                      style={{ opacity: 0.7, cursor: 'not-allowed' }}
+                    />
+
+                    <div className={styles.passwordContainer}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Mật khẩu (tối thiểu 6 ký tự)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={styles.input}
+                        required
+                        disabled={loading}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                        aria-label="Hiện/Ẩn mật khẩu"
+                      >
+                        {showPassword ? '👁️' : '👁️‍🗨️'}
+                      </button>
+                    </div>
+
+                    <div className={styles.passwordContainer}>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Xác nhận mật khẩu"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={styles.input}
+                        required
+                        disabled={loading}
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        tabIndex={-1}
+                        aria-label="Hiện/Ẩn mật khẩu"
+                      >
+                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                      </button>
+                    </div>
+
+                    {error && (
+                      <div className={styles.errorMessage}>
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className={styles.submitButton}
+                      disabled={loading || !name || !password || !confirmPassword}
+                    >
+                      {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+                    </button>
+                  </form>
+
+                  <p className={styles.terms} style={{ marginTop: '8px', fontSize: '12px' }}>
+                    Bằng cách đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi
+                  </p>
+                </>
+              ) : (
+                <>
               <button
                 className={styles.googleButton}
                 onClick={handleGoogleLogin}
@@ -186,22 +433,87 @@ const LoginModal = ({ isOpen, onClose }) => {
                 </span>
               </button>
 
+              <div className={styles.divider}>
+                <span>HOẶC TIẾP TỤC VỚI</span>
+              </div>
+
+              <input
+                type="email"
+                placeholder="Nhập email của bạn"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailChecked(false);
+                  setEmailExists(false);
+                  setError('');
+                }}
+                className={styles.input}
+                disabled={loading || emailChecked}
+                autoComplete="email"
+              />
+
+              {emailChecked && emailExists ? (
+                <form onSubmit={handleEmailLogin}>
+                  <div className={styles.passwordContainer}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Nhập mật khẩu"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className={styles.input}
+                      required
+                      disabled={loading}
+                      autoComplete="current-password"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                      aria-label="Hiện/Ẩn mật khẩu"
+                    >
+                      {showPassword ? '👁️' : '👁️‍🗨️'}
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className={styles.submitButton}
+                    disabled={loading || !password}
+                  >
+                    {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.changeEmailButton}
+                    onClick={() => {
+                      setEmailChecked(false);
+                      setEmailExists(false);
+                      setPassword('');
+                      setError('');
+                    }}
+                    disabled={loading}
+                  >
+                    Đổi email khác
+                  </button>
+                </form>
+              ) : (
+                <button
+                  className={styles.emailButton}
+                  onClick={handleCheckEmail}
+                  disabled={!email || loading}
+                >
+                  {loading ? 'Đang kiểm tra...' : 'Tiếp tục với Email'}
+                </button>
+              )}
+
               {error && (
                 <div className={styles.errorMessage}>
                   {error}
                 </div>
               )}
-
-              <div className={styles.divider}>
-                <span>HOẶC TIẾP TỤC VỚI</span>
-              </div>
-
-              <button
-                className={styles.emailButton}
-                onClick={() => setShowEmailForm(true)}
-              >
-                Tiếp tục với Email
-              </button>
 
               <p className={styles.disclaimer}>
                 Nếu bạn gặp khó khăn khi đăng nhập bằng Google, hãy thử đăng nhập bằng Email
@@ -210,6 +522,8 @@ const LoginModal = ({ isOpen, onClose }) => {
               <p className={styles.terms}>
                 Bằng cách đăng nhập, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi
               </p>
+              </>
+              )}
             </div>
           ) : (
             <div className={styles.emailForm}>

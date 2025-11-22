@@ -8,43 +8,56 @@ export default async function handler(req, res) {
   }
 
   try {
-    await connectDB();
+    const { name, email, password, level = 'beginner' } = req.body;
 
-    const { name, email, password, nativeLanguage = 'vi', level = 'beginner' } = req.body;
-
+    // Validation
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Tên, email và mật khẩu là bắt buộc' });
+      return res.status(400).json({
+        error: 'Tên, email và mật khẩu là bắt buộc'
+      });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự' });
+      return res.status(400).json({
+        error: 'Mật khẩu phải có ít nhất 6 ký tự'
+      });
     }
 
+    await connectDB();
+
+    // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
+
     if (existingUser) {
-      return res.status(400).json({ message: 'Email đã được sử dụng' });
+      return res.status(400).json({
+        error: 'Email này đã được đăng ký'
+      });
     }
 
-    const user = new User({
+    // Create new user
+    const user = await User.create({
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: email.toLowerCase(),
       password,
-      nativeLanguage,
-      level
+      role: 'member',
+      nativeLanguage: 'vi',
+      level: level,
+      isGoogleUser: false
     });
 
-    await user.save();
-
+    // Generate JWT token
     const token = generateToken({
       userId: user._id,
       email: user.email,
       name: user.name,
       role: user.role,
       nativeLanguage: user.nativeLanguage,
-      level: user.level
+      level: user.level,
+      preferredDifficultyLevel: user.preferredDifficultyLevel
     });
 
-    res.status(201).json({
+    // Return user data and token
+    return res.status(201).json({
       token,
       user: {
         id: user._id,
@@ -52,11 +65,32 @@ export default async function handler(req, res) {
         email: user.email,
         role: user.role,
         nativeLanguage: user.nativeLanguage,
-        level: user.level
+        level: user.level,
+        preferredDifficultyLevel: user.preferredDifficultyLevel,
+        points: user.points || 0
       }
     });
+
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ message: 'Lỗi server' });
+    console.error('Registration error:', error);
+
+    // Handle MongoDB duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: 'Email này đã được đăng ký'
+      });
+    }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        error: messages.join(', ')
+      });
+    }
+
+    return res.status(500).json({
+      error: 'Lỗi server. Vui lòng thử lại.'
+    });
   }
 }
