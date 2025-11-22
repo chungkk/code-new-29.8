@@ -98,14 +98,6 @@ const DictationPageContent = () => {
   const [hidePercentage, setHidePercentage] = useState(30); // Will be loaded from user profile
   const [difficultyLevel, setDifficultyLevel] = useState('b1'); // a1, a2, b1, b2, c1, c2
   
-  // Auto-jump to incomplete sentence setting
-  const [autoJumpToIncomplete, setAutoJumpToIncomplete] = useState(() => {
-    // Load from localStorage, default to true
-    if (typeof window === 'undefined') return true;
-    const saved = localStorage.getItem('autoJumpToIncomplete');
-    return saved !== null ? saved === 'true' : true;
-  });
-  
   // Auto-stop video at end of sentence (similar to shadowing mode)
   const [autoStop, setAutoStop] = useState(true);
 
@@ -129,13 +121,6 @@ const DictationPageContent = () => {
       localStorage.setItem('dictationMode', dictationMode);
     }
   }, [dictationMode]);
-
-  // Save autoJumpToIncomplete to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('autoJumpToIncomplete', String(autoJumpToIncomplete));
-    }
-  }, [autoJumpToIncomplete]);
 
   // Use SWR hook for combined lesson + progress data
   const { lesson, progress: loadedProgress, studyTime: loadedStudyTime, isLoading: loading } = useLessonData(lessonId, 'dictation');
@@ -1198,42 +1183,11 @@ const DictationPageContent = () => {
     setCurrentSentenceIndex(clickedIndex);
   }, [transcriptData, isYouTube, isPlaying, currentTime, pausedPositions, currentSentenceIndex, userSeekTimeout]);
 
-  // Sort transcript indices to prioritize incomplete sentences (only when auto-jump is ON)
+  // Transcript indices in normal order
   const sortedTranscriptIndices = useMemo(() => {
     if (!transcriptData || transcriptData.length === 0) return [];
-
-    // If auto-jump is OFF, return normal order (1, 2, 3...)
-    if (!autoJumpToIncomplete) {
-      const normalOrder = [...Array(transcriptData.length).keys()];
-      console.log('🔢 Normal transcript order (auto-jump OFF):', {
-        total: normalOrder.length,
-        order: normalOrder.slice(0, 10)
-      });
-      return normalOrder;
-    }
-
-    // If auto-jump is ON, prioritize incomplete sentences
-    const sorted = [...Array(transcriptData.length).keys()].sort((a, b) => {
-      const aCompleted = completedSentences.includes(a);
-      const bCompleted = completedSentences.includes(b);
-
-      // Incomplete sentences come first
-      if (!aCompleted && bCompleted) return -1;
-      if (aCompleted && !bCompleted) return 1;
-
-      // If both have same completion status, maintain original order
-      return a - b;
-    });
-    
-    console.log('🔢 Sorted transcript indices (auto-jump ON):', {
-      total: sorted.length,
-      completed: completedSentences.length,
-      firstFew: sorted.slice(0, 10),
-      completedList: completedSentences
-    });
-    
-    return sorted;
-  }, [transcriptData, completedSentences, autoJumpToIncomplete]);
+    return [...Array(transcriptData.length).keys()];
+  }, [transcriptData]);
 
   // Transcript display indices - ALWAYS in original order for the transcript column
   const transcriptDisplayIndices = useMemo(() => {
@@ -1242,32 +1196,10 @@ const DictationPageContent = () => {
     return [...Array(transcriptData.length).keys()];
   }, [transcriptData]);
 
-  // Filter indices for mobile dictation slides (only show incomplete when auto-jump is ON)
+  // Mobile dictation slides show all sentences in normal order
   const mobileVisibleIndices = useMemo(() => {
-    if (!autoJumpToIncomplete) {
-      // Show all sentences in normal order
-      return sortedTranscriptIndices;
-    }
-    
-    // Show only incomplete sentences
-    const incompleteOnly = sortedTranscriptIndices.filter(
-      (index) => !completedSentences.includes(index)
-    );
-    
-    console.log('📱 Mobile visible indices (auto-jump ON - incomplete only):', {
-      total: incompleteOnly.length,
-      completed: completedSentences.length,
-      indices: incompleteOnly.slice(0, 10)
-    });
-    
-    // If all completed, show all sentences (fallback to avoid empty slides)
-    if (incompleteOnly.length === 0) {
-      console.log('🎉 All sentences completed! Showing all sentences.');
-      return sortedTranscriptIndices;
-    }
-    
-    return incompleteOnly;
-  }, [sortedTranscriptIndices, completedSentences, autoJumpToIncomplete]);
+    return sortedTranscriptIndices;
+  }, [sortedTranscriptIndices]);
 
   // LAZY LOADING: Calculate visible slide range (only render 3 slides: prev, current, next)
   const lazySlideRange = useMemo(() => {
@@ -1656,30 +1588,6 @@ const DictationPageContent = () => {
 
         // Show success toast
         // toast.success(`✓ Chính xác ${similarity}%!`);
-
-        // Auto-jump to next incomplete sentence if enabled
-        if (autoJumpToIncomplete) {
-          setTimeout(() => {
-            let nextIncompleteIndex = -1;
-            for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-              const sentenceIdx = sortedTranscriptIndices[i];
-              if (!updatedCompleted.includes(sentenceIdx)) {
-                nextIncompleteIndex = sentenceIdx;
-                break;
-              }
-            }
-
-            if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== sentenceIndex) {
-              setCurrentSentenceIndex(nextIncompleteIndex);
-              const item = transcriptData[nextIncompleteIndex];
-              if (item) {
-                handleSentenceClick(item.start, item.end);
-              }
-            } else {
-              // toast.success(t('lesson.completion.allCompleted'));
-            }
-          }, 500);
-        }
       }
     } else {
       // Haptic feedback for error
@@ -1688,7 +1596,7 @@ const DictationPageContent = () => {
       // Show error with similarity percentage
       // toast.error(`✗ Chỉ đúng ${similarity}%. Cần ≥80%`);
     }
-  }, [fullSentenceInputs, transcriptData, completedSentences, completedWords, autoJumpToIncomplete, sortedTranscriptIndices, saveProgress, handleSentenceClick, t]);
+  }, [fullSentenceInputs, transcriptData, completedSentences, completedWords, saveProgress]);
 
   // Toggle reveal hint word
   const toggleRevealHintWord = useCallback((sentenceIndex, wordIndex) => {
@@ -2073,54 +1981,21 @@ const DictationPageContent = () => {
         saveProgress(updatedCompleted, completedWords);
         console.log(`✅ Sentence ${currentSentenceIndex} completed!`);
 
-        // Auto-navigate to next incomplete sentence after a short delay (if enabled)
-        if (autoJumpToIncomplete) {
-          setTimeout(() => {
-            // Find current position in sorted list
-            const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
-            console.log('🎯 Auto-navigation:', {
-              currentSentenceIndex,
-              currentPositionInSorted,
-              sortedLength: sortedTranscriptIndices.length,
-              updatedCompleted
-            });
+        // Check if all sentences are completed
+        setTimeout(() => {
+          if (updatedCompleted.length === transcriptData.length) {
+            console.log('🎉 All sentences completed!');
             
-            // Find next incomplete sentence (first incomplete in sorted list after current)
-            let nextIncompleteIndex = -1;
-            for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-              const sentenceIdx = sortedTranscriptIndices[i];
-              if (!updatedCompleted.includes(sentenceIdx)) {
-                nextIncompleteIndex = sentenceIdx;
-                console.log(`✅ Found next incomplete sentence at index ${nextIncompleteIndex}`);
-                break;
-              }
-            }
+            // Haptic feedback for lesson completion
+            hapticEvents.lessonComplete();
             
-            // Navigate to next incomplete sentence if found
-            if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
-              console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex}`);
-              setCurrentSentenceIndex(nextIncompleteIndex);
-              const item = transcriptData[nextIncompleteIndex];
-              if (item) {
-                handleSentenceClick(item.start, item.end);
-              }
-            } else {
-              console.log('🎉 All sentences completed!');
-              
-              // Haptic feedback for lesson completion
-              hapticEvents.lessonComplete();
-              
-              // Show celebration toast
-              toast.success(t('lesson.completion.allCompleted'));
-            }
-          }, 400); // Increased to 400ms to let user see completion + smooth scroll
-        } else {
-          console.log('🔕 Auto-jump disabled, staying on current sentence');
-        }
-        
+            // Show celebration toast
+            toast.success(t('lesson.completion.allCompleted'));
+          }
+        }, 400);
       }
     }, 50); // Reduced to 50ms for faster detection
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete, t]);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, transcriptData, hidePercentage, t]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
@@ -3203,25 +3078,6 @@ const DictationPageContent = () => {
                     )}
                   </button>
                 )}
-                {/* Auto-Jump Toggle Button - Show on both desktop and mobile */}
-                <button
-                  onClick={() => setAutoJumpToIncomplete(!autoJumpToIncomplete)}
-                  className={styles.autoJumpToggle}
-                  data-active={autoJumpToIncomplete}
-                  title={autoJumpToIncomplete ? t('lesson.ui.autoJumpOn') : t('lesson.ui.autoJumpOff')}
-                >
-                  {autoJumpToIncomplete ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="13 17 18 12 13 7"></polyline>
-                      <polyline points="6 17 11 12 6 7"></polyline>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  )}
-                </button>
               </div>
               {!isMobile && (
                 <div className={styles.sentenceCounter}>
@@ -3390,17 +3246,6 @@ const DictationPageContent = () => {
                                 rows={3}
                               />
 
-                              {sentenceResults[originalIndex] && (
-                                <div className={`${styles.sentenceResult} ${sentenceResults[originalIndex].isCorrect ? styles.resultCorrect : styles.resultIncorrect}`}>
-                                  <span className={styles.resultIcon}>
-                                    {sentenceResults[originalIndex].isCorrect ? '✓' : '✗'}
-                                  </span>
-                                  <span className={styles.resultText}>
-                                    {sentenceResults[originalIndex].similarity}% đúng
-                                  </span>
-                                </div>
-                              )}
-
                               {isActive && !isCompleted && (
                                 <div className={styles.dictationActions}>
                                   <button
@@ -3486,34 +3331,6 @@ const DictationPageContent = () => {
                                           setCompletedSentences(updatedCompleted);
                                           saveProgress(updatedCompleted, updatedWords);
                                           console.log(`✅ Sentence ${originalIndex} completed via Show All (mobile)!`);
-
-                                          // Auto-jump to next incomplete sentence if enabled
-                                          if (autoJumpToIncomplete) {
-                                            setTimeout(() => {
-                                              // Find next incomplete sentence
-                                              let nextIncompleteIndex = -1;
-                                              for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-                                                const sentenceIdx = sortedTranscriptIndices[i];
-                                                if (!updatedCompleted.includes(sentenceIdx)) {
-                                                  nextIncompleteIndex = sentenceIdx;
-                                                  console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All (mobile)`);
-                                                  break;
-                                                }
-                                              }
-                                              
-                                              // Navigate to next incomplete sentence if found
-                                              if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== originalIndex) {
-                                                setCurrentSentenceIndex(nextIncompleteIndex);
-                                                const item = transcriptData[nextIncompleteIndex];
-                                                if (item) {
-                                                  handleSentenceClick(item.start, item.end);
-                                                }
-                                              } else {
-                                                console.log('🎉 All sentences completed!');
-                                                toast.success(t('lesson.completion.allCompleted'));
-                                              }
-                                            }, 400);
-                                          }
                                         } else {
                                           // Just save progress without marking as complete
                                           saveProgress(completedSentences, updatedWords);
@@ -3624,34 +3441,6 @@ const DictationPageContent = () => {
                                 setCompletedSentences(updatedCompleted);
                                 saveProgress(updatedCompleted, updatedWords);
                                 console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
-
-                                // Auto-jump to next incomplete sentence if enabled
-                                if (autoJumpToIncomplete) {
-                                  setTimeout(() => {
-                                    // Find next incomplete sentence
-                                    let nextIncompleteIndex = -1;
-                                    for (let i = 0; i < sortedTranscriptIndices.length; i++) {
-                                      const sentenceIdx = sortedTranscriptIndices[i];
-                                      if (!updatedCompleted.includes(sentenceIdx)) {
-                                        nextIncompleteIndex = sentenceIdx;
-                                        console.log(`🚀 Auto-jumping to sentence ${nextIncompleteIndex} after Show All`);
-                                        break;
-                                      }
-                                    }
-                                    
-                                    // Navigate to next incomplete sentence if found
-                                    if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
-                                      setCurrentSentenceIndex(nextIncompleteIndex);
-                                      const item = transcriptData[nextIncompleteIndex];
-                                      if (item) {
-                                        handleSentenceClick(item.start, item.end);
-                                      }
-                                    } else {
-                                      console.log('🎉 All sentences completed!');
-                                      toast.success(t('lesson.completion.allCompleted'));
-                                    }
-                                  }, 400);
-                                }
                               } else {
                                 // Just save progress without marking as complete
                                 saveProgress(completedSentences, updatedWords);
