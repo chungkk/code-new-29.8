@@ -887,6 +887,10 @@
       font-size: 14px;
       margin-bottom: 4px;
       line-height: 1.4;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px;
     }
 
     .transcriptItem {
@@ -927,6 +931,11 @@
     /* Hide playback button (listening to recording) on mobile */
     .playbackButtonIcon {
       display: none !important;
+    }
+
+    /* Show bottom mic button on mobile */
+    .bottomMicButton {
+      display: flex !important;
     }
   }
 
@@ -1048,6 +1057,40 @@
 .startButtonContainer .startButton:active::before {
   width: 300px;
   height: 300px;
+}
+
+/* Bottom Mic Button - matches inline mic at sentence */
+.bottomMicButton {
+  display: none; /* Hidden on desktop by default */
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.bottomMicButton:active {
+  transform: scale(0.95);
+}
+
+.bottomMicDisabled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.1);
+  font-size: 18px;
+  opacity: 0.4;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
 }
 
 .startButtonContainer .startButton svg {
@@ -1209,44 +1252,106 @@
   }
 }
 
-/* Score Badge */
+/* Score Badge - Enhanced with animations */
 .scoreBadge {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 45px;
-  height: 26px;
-  padding: 0 8px;
-  border-radius: 13px;
-  font-size: 12px;
-  font-weight: 700;
+  min-width: 55px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 800;
   transition: all 0.3s ease;
   cursor: help;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: scoreAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.scoreBadge > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes scoreAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .scoreBadgePassed {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(56, 142, 60, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(56, 142, 60, 0.25) 100%);
   color: #4CAF50;
-  border: 2px solid rgba(76, 175, 80, 0.5);
+  border: 2px solid rgba(76, 175, 80, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.scoreBadgePassed::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.4) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
 }
 
 .scoreBadgePassed:hover {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(56, 142, 60, 0.25) 100%);
-  border-color: rgba(76, 175, 80, 0.8);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.35) 0%, rgba(56, 142, 60, 0.35) 100%);
+  border-color: rgba(76, 175, 80, 1);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
 .scoreBadgeFailed {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(245, 124, 0, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(245, 124, 0, 0.25) 100%);
   color: #FF9800;
-  border: 2px solid rgba(255, 152, 0, 0.5);
+  border: 2px solid rgba(255, 152, 0, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.scoreBadgeFailed::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.4) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  animation: glowPulse 2s ease-in-out infinite;
 }
 
 .scoreBadgeFailed:hover {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(245, 124, 0, 0.25) 100%);
-  border-color: rgba(255, 152, 0, 0.8);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.35) 0%, rgba(245, 124, 0, 0.35) 100%);
+  border-color: rgba(255, 152, 0, 1);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
 }
 
 /* Recording Controls in Transcript */
@@ -1282,50 +1387,92 @@
 .mobileInlineMicControls {
   display: none; /* Hidden on desktop by default */
   align-items: center;
-  vertical-align: middle;
-  margin-right: 10px;
-  margin-bottom: 2px;
+  justify-content: center;
+  margin-right: 4px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 50%;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  height: 28px;
+  width: 28px;
 }
 
 .micPlaceholderInline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1.5px solid rgba(148, 163, 184, 0.4);
-  background: rgba(148, 163, 184, 0.08);
-  font-size: 12px;
-  opacity: 0.5;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.05);
+  font-size: 9px;
+  opacity: 0.35;
   cursor: not-allowed;
   transition: all 0.2s ease;
 }
 
-/* Inline Score Percentage (Mobile) */
+/* Inline Score Percentage (Mobile) - Enhanced & Compact */
 .inlineScorePercent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
-  margin-left: 6px;
+  padding: 0 9px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-right: 8px;
+  margin-left: 0;
   transition: all 0.2s ease;
+  animation: scoreAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  flex-shrink: 0;
+  line-height: 1;
+  min-width: 42px;
+  height: 28px;
+}
+
+.inlineScorePercent > * {
+  position: relative;
+  z-index: 2;
 }
 
 .inlineScorePercentPassed {
-  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.35) 0%, rgba(56, 142, 60, 0.35) 100%);
   color: #4CAF50;
-  border: 1px solid rgba(76, 175, 80, 0.4);
+  border: 1.5px solid rgba(76, 175, 80, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.inlineScorePercentPassed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(76, 175, 80, 0.4) 0%, transparent 70%);
+  animation: glowPulse 2s ease-in-out infinite;
 }
 
 .inlineScorePercentFailed {
-  background: linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(245, 124, 0, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.35) 0%, rgba(245, 124, 0, 0.35) 100%);
   color: #FF9800;
-  border: 1px solid rgba(255, 152, 0, 0.4);
+  border: 1.5px solid rgba(255, 152, 0, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+
+.inlineScorePercentFailed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 152, 0, 0.4) 0%, transparent 70%);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+
 
 /* Hide playback button unless hovering or has active playback */
 .playbackButtonIcon {

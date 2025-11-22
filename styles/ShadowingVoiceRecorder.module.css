@@ -51,6 +51,20 @@
   color: #2196F3;
 }
 
+/* Large variant for bottom bar */
+.recordButtonLarge {
+  width: 38px;
+  height: 38px;
+  font-size: 16px;
+  border-width: 2px;
+}
+
+.recordButtonLarge .micIcon,
+.recordButtonLarge .stopIcon,
+.recordButtonLarge .spinner {
+  font-size: 16px;
+}
+
 @keyframes recordingPulse {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.6);
@@ -143,27 +157,28 @@
   }
 
   .recordButton {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-width: 1.5px;
-    font-size: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 11px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
   }
 
   .recordButton:hover:not(:disabled) {
-    transform: scale(1.1);
+    transform: scale(1.08);
   }
 
   .recordButton.recording {
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 
   .micIcon, .stopIcon {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .spinner {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .interimText {

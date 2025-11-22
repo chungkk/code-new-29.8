@@ -9,11 +9,13 @@ import styles from '../styles/ShadowingVoiceRecorder.module.css';
  * @param {Function} props.onTranscript - Callback when transcription is complete
  * @param {Function} props.onAudioRecorded - Callback when audio is recorded (returns blob)
  * @param {string} props.language - Language code (de-DE, vi-VN, etc.)
+ * @param {string} props.size - Size variant: 'small' (inline) or 'large' (bottom bar)
  */
 const ShadowingVoiceRecorder = ({
   onTranscript,
   onAudioRecorded,
-  language = 'de-DE'
+  language = 'de-DE',
+  size = 'small'
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
@@ -158,7 +160,7 @@ const ShadowingVoiceRecorder = ({
   return (
     <div className={styles.container}>
       <button
-        className={`${styles.recordButton} ${isRecording ? styles.recording : ''} ${isProcessing ? styles.processing : ''}`}
+        className={`${styles.recordButton} ${size === 'large' ? styles.recordButtonLarge : ''} ${isRecording ? styles.recording : ''} ${isProcessing ? styles.processing : ''}`}
         onClick={handleButtonClick}
         disabled={isProcessing}
         type="button"

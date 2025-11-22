@@ -1900,6 +1900,33 @@ const ShadowingPageContent = () => {
                   </svg>
                 </button>
                 
+                {/* Microphone Button - matches inline mic at sentence start */}
+                {(() => {
+                  const canRecordCurrent = transcriptData[currentSentenceIndex] ? true : false;
+                  return (
+                    <div 
+                      className={styles.bottomMicButton}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {canRecordCurrent ? (
+                        <ShadowingVoiceRecorder
+                          onTranscript={(transcript) => handleVoiceTranscript(currentSentenceIndex, transcript)}
+                          onAudioRecorded={(audioBlob) => handleAudioRecorded(currentSentenceIndex, audioBlob)}
+                          language="de-DE"
+                          size="large"
+                        />
+                      ) : (
+                        <div 
+                          className={styles.bottomMicDisabled}
+                          title="Phát câu này để bắt đầu ghi âm"
+                        >
+                          🎤
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 <button 
                   className={`${styles.startButton} ${isPlaying ? styles.startButtonPlaying : ''}`} 
                   onClick={handlePlayPause}
