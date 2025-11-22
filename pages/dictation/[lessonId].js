@@ -1637,7 +1637,22 @@ const DictationPageContent = () => {
       if (!completedSentences.includes(sentenceIndex)) {
         const updatedCompleted = [...completedSentences, sentenceIndex];
         setCompletedSentences(updatedCompleted);
-        saveProgress(updatedCompleted, completedWords);
+        
+        // Also update completedWords for full-sentence mode
+        // Fill completedWords for the sentence so progress indicator shows 100%
+        const sentenceWords = correctSentence.split(/\s+/).filter(w => {
+          const pureWord = w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+          return pureWord.length >= 1;
+        });
+        
+        const updatedCompletedWords = { ...completedWords };
+        updatedCompletedWords[sentenceIndex] = {};
+        sentenceWords.forEach((word, idx) => {
+          updatedCompletedWords[sentenceIndex][idx] = word;
+        });
+        setCompletedWords(updatedCompletedWords);
+        
+        saveProgress(updatedCompleted, updatedCompletedWords);
 
         // Show success toast
         // toast.success(`✓ Chính xác ${similarity}%!`);
@@ -3439,18 +3454,18 @@ const DictationPageContent = () => {
 
                                   setCompletedWords(prevWords => {
                                     const updatedWords = { ...prevWords };
-                                    if (!updatedWords[currentSentenceIndex]) {
-                                      updatedWords[currentSentenceIndex] = {};
+                                    if (!updatedWords[originalIndex]) {
+                                      updatedWords[originalIndex] = {};
                                     }
-                                    updatedWords[currentSentenceIndex] = {
-                                      ...updatedWords[currentSentenceIndex],
+                                    updatedWords[originalIndex] = {
+                                      ...updatedWords[originalIndex],
                                       ...wordsToComplete
                                     };
                                     
                                     // Only mark as completed if we actually revealed words AND they meet the threshold
                                     if (Object.keys(wordsToComplete).length > 0) {
                                       // Calculate total words that needed to be filled
-                                      const sentence = transcriptData[currentSentenceIndex];
+                                      const sentence = transcriptData[originalIndex];
                                       if (sentence) {
                                         const words = sentence.text.split(/\s+/);
                                         const validWordIndices = [];
@@ -3463,14 +3478,14 @@ const DictationPageContent = () => {
                                         
                                         const totalValidWords = validWordIndices.length;
                                         const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
-                                        const totalCompletedWords = Object.keys(updatedWords[currentSentenceIndex]).length;
+                                        const totalCompletedWords = Object.keys(updatedWords[originalIndex]).length;
                                         
                                         // Mark as completed only if total completed words >= required threshold
-                                        if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(currentSentenceIndex)) {
-                                          const updatedCompleted = [...completedSentences, currentSentenceIndex];
+                                        if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(originalIndex)) {
+                                          const updatedCompleted = [...completedSentences, originalIndex];
                                           setCompletedSentences(updatedCompleted);
                                           saveProgress(updatedCompleted, updatedWords);
-                                          console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All (mobile)!`);
+                                          console.log(`✅ Sentence ${originalIndex} completed via Show All (mobile)!`);
 
                                           // Auto-jump to next incomplete sentence if enabled
                                           if (autoJumpToIncomplete) {
@@ -3487,7 +3502,7 @@ const DictationPageContent = () => {
                                               }
                                               
                                               // Navigate to next incomplete sentence if found
-                                              if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== currentSentenceIndex) {
+                                              if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== originalIndex) {
                                                 setCurrentSentenceIndex(nextIncompleteIndex);
                                                 const item = transcriptData[nextIncompleteIndex];
                                                 if (item) {
@@ -3679,10 +3694,35 @@ const DictationPageContent = () => {
                 completedSentences={completedSentences}
                 totalSentences={transcriptData.length}
                 completedWords={completedWords}
-                totalWords={transcriptData.reduce((sum, sentence) => {
-                  const words = sentence.text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "").length >= 1);
-                  return sum + words.length;
-                }, 0)}
+                totalWords={(() => {
+                  const total = transcriptData.reduce((sum, sentence) => {
+                    const words = sentence.text.split(/\s+/).filter(w => {
+                      const pureWord = w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                      return pureWord.length >= 1;
+                    });
+                    return sum + words.length;
+                  }, 0);
+                  
+                  // Debug: log progress data
+                  const completedWordsCount = Object.values(completedWords).reduce((sum, sentenceWords) => {
+                    return sum + Object.keys(sentenceWords).length;
+                  }, 0);
+                  
+                  console.log('📊 Progress Debug:', {
+                    completedSentences: completedSentences.length,
+                    totalSentences: transcriptData.length,
+                    completedWordsCount,
+                    totalWords: total,
+                    sentencePercent: Math.round((completedSentences.length / transcriptData.length) * 100),
+                    wordPercent: Math.round((completedWordsCount / total) * 100),
+                    overallPercent: Math.round(
+                      (completedSentences.length / transcriptData.length) * 100 * 0.7 +
+                      (completedWordsCount / total) * 100 * 0.3
+                    )
+                  });
+                  
+                  return total;
+                })()}
                 difficultyLevel={difficultyLevel}
                 hidePercentage={hidePercentage}
                 studyTime={studyTime}
