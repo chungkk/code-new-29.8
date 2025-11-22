@@ -123,19 +123,20 @@ function SettingsPage() {
       />
 
       <DashboardLayout>
-        <div className={styles.container}>
-          {/* Page Header */}
-          <div className={styles.pageHeader}>
-            <div>
-              <h1 className={styles.pageTitle}>⚙️ {t('settings.title')}</h1>
-              <p className={styles.pageSubtitle}>
-                {t('settings.subtitle')}
-              </p>
+        <div className={styles.dashboardGrid} style={{ gridTemplateColumns: '1fr' }}>
+          <div className={styles.mainContent}>
+            {/* Page Header */}
+            <div className={styles.pageHeader}>
+              <div>
+                <h1 className={styles.pageTitle}>⚙️ {t('settings.title')}</h1>
+                <p className={styles.pageSubtitle}>
+                  {t('settings.subtitle')}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Settings Sections */}
-          <div className={styles.settingsGrid}>
+            {/* Settings Sections */}
+            <div className={styles.settingsGrid}>
             {/* Profile Card */}
             <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
@@ -158,6 +159,36 @@ function SettingsPage() {
                       {user?.role === 'admin' ? t('settings.profile.admin') : t('settings.profile.user')}
                     </span>
                   </div>
+                </div>
+
+                {/* Native Language Section */}
+                <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
+                  <label className={styles.settingLabel}>
+                    🌐 {t('settings.nativeLanguage.title')}
+                  </label>
+                  <p className={styles.settingDescription}>
+                    {t('settings.nativeLanguage.description')}
+                  </p>
+                  <select
+                    value={user?.nativeLanguage || 'vi'}
+                    onChange={(e) => handleProfileUpdate('nativeLanguage', e.target.value)}
+                    className={styles.settingSelect}
+                  >
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="zh">🇨🇳 中文</option>
+                  </select>
+                  <p className={styles.settingHint}>
+                    {t('settings.nativeLanguage.current')} <strong>{user?.nativeLanguage || 'Tiếng Việt'}</strong>
+                  </p>
                 </div>
               </div>
             </div>
@@ -196,39 +227,6 @@ function SettingsPage() {
                 </div>
                 <p className={styles.settingHint}>
                   {t('settings.appearance.current')} <strong>{currentTheme?.label}</strong>
-                </p>
-              </div>
-            </div>
-
-            {/* Language Setting Card */}
-            <div className={styles.settingCard}>
-              <div className={styles.settingCardHeader}>
-                <div className={styles.settingCardIcon}>🌐</div>
-                <h3 className={styles.settingCardTitle}>{t('settings.nativeLanguage.title')}</h3>
-              </div>
-              <div className={styles.settingCardBody}>
-                <p className={styles.settingDescription}>
-                  {t('settings.nativeLanguage.description')}
-                </p>
-                <select
-                  value={user?.nativeLanguage || 'vi'}
-                  onChange={(e) => handleProfileUpdate('nativeLanguage', e.target.value)}
-                  className={styles.settingSelect}
-                >
-                  <option value="vi">🇻🇳 Tiếng Việt</option>
-                  <option value="en">🇬🇧 English</option>
-                  <option value="es">🇪🇸 Español</option>
-                  <option value="fr">🇫🇷 Français</option>
-                  <option value="de">🇩🇪 Deutsch</option>
-                  <option value="it">🇮🇹 Italiano</option>
-                  <option value="pt">🇵🇹 Português</option>
-                  <option value="ru">🇷🇺 Русский</option>
-                  <option value="ja">🇯🇵 日本語</option>
-                  <option value="ko">🇰🇷 한국어</option>
-                  <option value="zh">🇨🇳 中文</option>
-                </select>
-                <p className={styles.settingHint}>
-                  {t('settings.nativeLanguage.current')} <strong>{user?.nativeLanguage || 'Tiếng Việt'}</strong>
                 </p>
               </div>
             </div>
@@ -302,7 +300,7 @@ function SettingsPage() {
             </div>
 
             {/* Password Change Card */}
-            <div className={`${styles.settingCard} ${styles.fullWidth}`}>
+            <div className={styles.settingCard}>
               <div className={styles.settingCardHeader}>
                 <div className={styles.settingCardIcon}>🔒</div>
                 <h3 className={styles.settingCardTitle}>{t('settings.password.title')}</h3>
@@ -352,6 +350,7 @@ function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </DashboardLayout>
     </>

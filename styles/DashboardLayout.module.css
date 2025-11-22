@@ -27,12 +27,14 @@
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   padding: var(--spacing-xl) var(--spacing-lg);
+  margin-left: 50px;
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
   overflow-y: auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
 }
 
 .sidebar.collapsed {

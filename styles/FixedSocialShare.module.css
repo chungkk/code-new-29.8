@@ -3,7 +3,7 @@
   left: 5px;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 999;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   gap: 4px;

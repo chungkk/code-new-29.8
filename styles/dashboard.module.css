@@ -87,18 +87,18 @@
     PAGE HEADER
     ============================================ */
 .pageHeader {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 2px solid var(--border-color);
   animation: slideInLeft 0.5s ease-out;
 }
 
 .pageTitle {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 8px 0;
-  letter-spacing: -0.6px;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -107,11 +107,11 @@
 }
 
 .pageSubtitle {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text-secondary);
   margin: 0;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* ============================================
@@ -604,8 +604,9 @@
    ============================================ */
 .settingsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
 }
 
 .settingCard {
@@ -619,8 +620,8 @@
 }
 
 .settingCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
   border-color: var(--accent-blue);
 }
 
@@ -631,27 +632,27 @@
 .settingCardHeader {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 28px 32px 24px;
+  gap: 12px;
+  padding: 18px 24px 16px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
 }
 
 .settingCardIcon {
-  font-size: 36px;
-  width: 60px;
-  height: 60px;
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: 10px;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .settingCardTitle {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -659,21 +660,21 @@
 }
 
 .settingCardBody {
-  padding: 32px;
+  padding: 20px 24px;
 }
 
 .settingDescription {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
-  line-height: 1.6;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
 }
 
 .settingHint {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-muted);
-  margin: 16px 0 0 0;
-  padding: 12px 16px;
+  margin: 12px 0 0 0;
+  padding: 8px 12px;
   background: var(--bg-secondary);
   border-radius: var(--border-radius-small);
   border-left: 3px solid var(--accent-blue);
@@ -683,14 +684,14 @@
 .profileInfo {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
 .profileItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 12px 14px;
   background: var(--bg-secondary);
   border-radius: var(--border-radius-small);
   transition: background 0.2s ease;
@@ -701,7 +702,7 @@
 }
 
 .profileLabel {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -709,7 +710,7 @@
 }
 
 .profileValue {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -718,14 +719,14 @@
 .themeOptions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .themeOption {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px;
+  padding: 14px 16px;
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -741,7 +742,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
+  width: 3px;
   background: var(--accent-gradient);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -755,7 +756,7 @@
 .themeOption.themeOptionActive {
   background: var(--bg-hover);
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
 }
 
 .themeOption.themeOptionActive::before {
@@ -763,14 +764,14 @@
 }
 
 .themeOptionEmoji {
-  font-size: 32px;
-  width: 48px;
-  height: 48px;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-card);
-  border-radius: 10px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
@@ -778,23 +779,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .themeOptionLabel {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .themeOptionDescription {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .checkmark {
-  font-size: 24px;
+  font-size: 20px;
   color: var(--accent-blue);
   font-weight: bold;
 }
@@ -802,8 +803,8 @@
 /* Form Elements */
 .settingSelect {
   width: 100%;
-  padding: 14px 18px;
-  font-size: 15px;
+  padding: 10px 14px;
+  font-size: 14px;
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -821,24 +822,32 @@
 .settingSelect:focus {
   outline: none;
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+.settingLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: block;
 }
 
 /* Password Form */
 .passwordForm {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .formLabel {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -847,8 +856,8 @@
 
 .formInput {
   width: 100%;
-  padding: 14px 18px;
-  font-size: 15px;
+  padding: 10px 14px;
+  font-size: 14px;
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -865,7 +874,7 @@
 .formInput:focus {
   outline: none;
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
   background: var(--bg-card);
 }
 
@@ -874,8 +883,8 @@
 }
 
 .submitButton {
-  padding: 16px 32px;
-  font-size: 16px;
+  padding: 12px 24px;
+  font-size: 14px;
   font-weight: 700;
   background: var(--accent-gradient);
   color: white;
@@ -883,13 +892,13 @@
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  margin-top: 4px;
 }
 
 .submitButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
 }
 
 .submitButton:active:not(:disabled) {
