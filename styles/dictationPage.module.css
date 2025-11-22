@@ -815,6 +815,22 @@
   transform: scale(1.01);
 }
 
+.transcriptItem.incomplete {
+  position: relative;
+}
+
+.transcriptItem.incomplete::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-green);
+  border-radius: 0 3px 3px 0;
+  opacity: 0.6;
+}
+
 .transcriptItemNumber {
   position: absolute;
   top: var(--spacing-sm);
@@ -822,6 +838,27 @@
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.completedCheck {
+  color: var(--accent-green);
+  font-size: 12px;
+  font-weight: bold;
+  animation: checkFadeIn 0.3s ease;
+}
+
+@keyframes checkFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .transcriptItemText {
@@ -1612,6 +1649,325 @@
 
 .nextButton:disabled:hover {
   transform: none;
+}
+
+/* ============================================================================
+   FULL SENTENCE MODE STYLES
+   ============================================================================ */
+
+.modeToggle {
+  width: 36px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(102, 126, 234, 0.2);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.modeToggle:hover {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
+  transform: scale(1.05);
+}
+
+.modeToggle:active {
+  transform: scale(0.95);
+}
+
+.modeToggle[data-mode="full-sentence"] {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.modeToggle[data-mode="full-sentence"]:hover {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+.fullSentenceMode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fullSentenceDisplay {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.completedSentenceText {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+.hintSentenceText {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: flex-end;
+}
+
+.hintWordContainer {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.hintWordBox {
+  display: inline-block;
+  min-width: 35px;
+  height: 32px;
+  padding: 6px 10px;
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px dashed rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  color: transparent;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: center;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hintWordBox:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: scale(1.05);
+}
+
+.hintWordBox:active {
+  transform: scale(0.98);
+}
+
+.hintWordRevealed {
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  font-weight: 600;
+  animation: revealWord 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hintWordRevealed:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+.hintWordPartial {
+  background: rgba(59, 130, 246, 0.12);
+  border: 2px solid rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.hintWordPartial:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.hintWordCorrect {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid rgba(16, 185, 129, 0.6);
+  color: #10b981;
+  font-weight: 700;
+  animation: correctWord 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  cursor: default;
+}
+
+.hintWordIncorrect {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  color: #ef4444;
+  font-weight: 700;
+  animation: incorrectWord 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  cursor: default;
+}
+
+@keyframes revealWord {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotateX(-90deg);
+  }
+  50% {
+    transform: scale(1.1) rotateX(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg);
+  }
+}
+
+@keyframes correctWord {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes incorrectWord {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  25% {
+    transform: translateX(10px);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.hintPunctuation {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  margin-left: 1px;
+  line-height: 1.3;
+}
+
+.hiddenWord {
+  color: rgba(255, 255, 255, 0.3);
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.fullSentenceInput {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.95);
+  resize: vertical;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.fullSentenceInput:focus {
+  outline: none;
+  border-color: rgba(102, 126, 234, 0.6);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.fullSentenceInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.fullSentenceInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sentenceResult {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  animation: resultFadeIn 0.3s ease;
+}
+
+@keyframes resultFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resultCorrect {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.resultIncorrect {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.resultIcon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.resultText {
+  flex: 1;
+}
+
+.checkButton {
+  flex: 1;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: white;
+  padding: 16px 28px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.checkButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.checkButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 /* ============================================================================
@@ -2442,6 +2798,58 @@
   .dictationSlide .nextButton svg {
     width: 12px;
     height: 12px;
+  }
+
+  /* Full sentence mode mobile adjustments */
+  .fullSentenceMode {
+    padding: 6px;
+    gap: 10px;
+  }
+
+  .fullSentenceDisplay {
+    padding: 10px;
+    font-size: 14px;
+    min-height: 50px;
+  }
+
+  .fullSentenceInput {
+    min-height: 80px;
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .sentenceResult {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .checkButton {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    height: 28px;
+  }
+
+  .modeToggle {
+    width: 36px;
+    height: 20px;
+  }
+
+  .modeToggle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .hintWordBox {
+    min-width: 30px;
+    height: 26px;
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .hintPunctuation {
+    font-size: 14px;
   }
 
   /* Style video wrapper on mobile */

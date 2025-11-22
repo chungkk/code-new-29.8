@@ -41,6 +41,43 @@ const PERCENTAGE_TO_DIFFICULTY = {
 const MAX_STUDY_TIME = 24 * 60 * 60; // 24 hours in seconds
 const DEBUG_TIMER = false; // Set to true to enable timer logs
 
+// Calculate similarity between two sentences (word-level comparison)
+const calculateSimilarity = (userInput, correctSentence) => {
+  // Normalize both strings
+  const normalize = (str) => {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[.,!?;:"""''„]/g, '') // Remove punctuation
+      .replace(/\s+/g, ' '); // Normalize whitespace
+  };
+
+  const normalizedInput = normalize(userInput);
+  const normalizedCorrect = normalize(correctSentence);
+
+  // Split into words
+  const userWords = normalizedInput.split(' ').filter(w => w.length > 0);
+  const correctWords = normalizedCorrect.split(' ').filter(w => w.length > 0);
+
+  if (correctWords.length === 0) return 0;
+
+  // Count matching words (order doesn't matter for now)
+  let correctCount = 0;
+  const correctWordsCopy = [...correctWords];
+
+  userWords.forEach(userWord => {
+    const index = correctWordsCopy.indexOf(userWord);
+    if (index !== -1) {
+      correctCount++;
+      correctWordsCopy.splice(index, 1); // Remove matched word
+    }
+  });
+
+  // Calculate percentage
+  const similarity = (correctCount / correctWords.length) * 100;
+  return Math.round(similarity);
+};
+
 const DictationPageContent = () => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -71,6 +108,27 @@ const DictationPageContent = () => {
   
   // Auto-stop video at end of sentence (similar to shadowing mode)
   const [autoStop, setAutoStop] = useState(true);
+
+  // Dictation mode: 'fill-blanks' or 'full-sentence'
+  const [dictationMode, setDictationMode] = useState(() => {
+    if (typeof window === 'undefined') return 'fill-blanks';
+    const saved = localStorage.getItem('dictationMode');
+    return saved || 'fill-blanks';
+  });
+
+  // Full sentence input states
+  const [fullSentenceInputs, setFullSentenceInputs] = useState({}); // { sentenceIndex: inputText }
+  const [sentenceResults, setSentenceResults] = useState({}); // { sentenceIndex: { similarity: number, isCorrect: boolean } }
+  const [revealedHintWords, setRevealedHintWords] = useState({}); // { sentenceIndex: { wordIndex: true } }
+  const [wordComparisonResults, setWordComparisonResults] = useState({}); // { sentenceIndex: { wordIndex: 'correct' | 'incorrect' } }
+  const [partialRevealedChars, setPartialRevealedChars] = useState({}); // { sentenceIndex: { wordIndex: numberOfCharsRevealed } }
+
+  // Save dictationMode to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dictationMode', dictationMode);
+    }
+  }, [dictationMode]);
 
   // Save autoJumpToIncomplete to localStorage when it changes
   useEffect(() => {
@@ -1177,6 +1235,13 @@ const DictationPageContent = () => {
     return sorted;
   }, [transcriptData, completedSentences, autoJumpToIncomplete]);
 
+  // Transcript display indices - ALWAYS in original order for the transcript column
+  const transcriptDisplayIndices = useMemo(() => {
+    if (!transcriptData || transcriptData.length === 0) return [];
+    // Always return normal order (1, 2, 3...) for transcript display
+    return [...Array(transcriptData.length).keys()];
+  }, [transcriptData]);
+
   // Filter indices for mobile dictation slides (only show incomplete when auto-jump is ON)
   const mobileVisibleIndices = useMemo(() => {
     if (!autoJumpToIncomplete) {
@@ -1347,8 +1412,8 @@ const DictationPageContent = () => {
         }
         break;
       case ' ':
-        // Space key should always work for play/pause, even when input is focused
-        if (isMediaReady) {
+        // Space key for play/pause only when NOT focused on input/textarea
+        if (isMediaReady && !isInputFocused) {
           event.preventDefault();
           handlePlayPause();
         }
@@ -1508,6 +1573,172 @@ const DictationPageContent = () => {
       console.error('Error saving progress:', error);
     }
   }, [lessonId, transcriptData, currentSentenceIndex]);
+
+  // Handle full sentence submission
+  const handleFullSentenceSubmit = useCallback((sentenceIndex) => {
+    const userInput = fullSentenceInputs[sentenceIndex] || '';
+    const correctSentence = transcriptData[sentenceIndex]?.text || '';
+
+    if (!userInput.trim()) {
+      // toast.warning('Vui lòng nhập văn bản');
+      return;
+    }
+
+    // Calculate similarity
+    const similarity = calculateSimilarity(userInput, correctSentence);
+    const isCorrect = similarity >= 80;
+
+    // Compare word by word
+    const normalize = (str) => str.toLowerCase().trim().replace(/[.,!?;:"""''„]/g, '').replace(/\s+/g, ' ');
+    const userWords = normalize(userInput).split(' ').filter(w => w.length > 0);
+    const correctWords = normalize(correctSentence).split(' ').filter(w => w.length > 0);
+
+    // Build word comparison results
+    const wordComparison = {};
+    correctWords.forEach((correctWord, idx) => {
+      const userWord = userWords[idx] || '';
+      wordComparison[idx] = userWord === correctWord ? 'correct' : 'incorrect';
+    });
+
+    // Update sentence results
+    setSentenceResults(prev => ({
+      ...prev,
+      [sentenceIndex]: { similarity, isCorrect }
+    }));
+
+    // Update word comparison results
+    setWordComparisonResults(prev => ({
+      ...prev,
+      [sentenceIndex]: wordComparison
+    }));
+
+    // Auto-reveal all hint words to show comparison
+    const revealAllWords = {};
+    correctWords.forEach((_, idx) => {
+      revealAllWords[idx] = true;
+    });
+    setRevealedHintWords(prev => ({
+      ...prev,
+      [sentenceIndex]: revealAllWords
+    }));
+
+    // Clear partial reveals after checking
+    setPartialRevealedChars(prev => ({
+      ...prev,
+      [sentenceIndex]: {}
+    }));
+
+    // If correct (>=80%), mark as completed
+    if (isCorrect) {
+      // Haptic feedback for success
+      hapticEvents.wordCorrect();
+
+      // Mark sentence as completed
+      if (!completedSentences.includes(sentenceIndex)) {
+        const updatedCompleted = [...completedSentences, sentenceIndex];
+        setCompletedSentences(updatedCompleted);
+        saveProgress(updatedCompleted, completedWords);
+
+        // Show success toast
+        // toast.success(`✓ Chính xác ${similarity}%!`);
+
+        // Auto-jump to next incomplete sentence if enabled
+        if (autoJumpToIncomplete) {
+          setTimeout(() => {
+            let nextIncompleteIndex = -1;
+            for (let i = 0; i < sortedTranscriptIndices.length; i++) {
+              const sentenceIdx = sortedTranscriptIndices[i];
+              if (!updatedCompleted.includes(sentenceIdx)) {
+                nextIncompleteIndex = sentenceIdx;
+                break;
+              }
+            }
+
+            if (nextIncompleteIndex !== -1 && nextIncompleteIndex !== sentenceIndex) {
+              setCurrentSentenceIndex(nextIncompleteIndex);
+              const item = transcriptData[nextIncompleteIndex];
+              if (item) {
+                handleSentenceClick(item.start, item.end);
+              }
+            } else {
+              // toast.success(t('lesson.completion.allCompleted'));
+            }
+          }, 500);
+        }
+      }
+    } else {
+      // Haptic feedback for error
+      hapticEvents.wordIncorrect();
+
+      // Show error with similarity percentage
+      // toast.error(`✗ Chỉ đúng ${similarity}%. Cần ≥80%`);
+    }
+  }, [fullSentenceInputs, transcriptData, completedSentences, completedWords, autoJumpToIncomplete, sortedTranscriptIndices, saveProgress, handleSentenceClick, t]);
+
+  // Toggle reveal hint word
+  const toggleRevealHintWord = useCallback((sentenceIndex, wordIndex) => {
+    setRevealedHintWords(prev => {
+      const updated = { ...prev };
+      if (!updated[sentenceIndex]) {
+        updated[sentenceIndex] = {};
+      }
+
+      // Toggle the word
+      if (updated[sentenceIndex][wordIndex]) {
+        // Hide word
+        const newSentenceState = { ...updated[sentenceIndex] };
+        delete newSentenceState[wordIndex];
+        updated[sentenceIndex] = newSentenceState;
+      } else {
+        // Show word
+        updated[sentenceIndex] = {
+          ...updated[sentenceIndex],
+          [wordIndex]: true
+        };
+        // Haptic feedback
+        hapticEvents.buttonPress();
+      }
+
+      console.log('Revealed hint words:', updated);
+      return updated;
+    });
+  }, []);
+
+  // Calculate partial reveals based on user input
+  const calculatePartialReveals = useCallback((sentenceIndex, userInput, correctSentence) => {
+    const normalize = (str) => str.toLowerCase().trim().replace(/[.,!?;:"""''„]/g, '');
+    const userWords = normalize(userInput).split(/\s+/).filter(w => w.length > 0);
+    const correctWords = correctSentence.split(/\s+/).filter(w => w.length > 0).map(w => {
+      return w.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+    });
+
+    const partialReveals = {};
+
+    correctWords.forEach((correctWord, wordIdx) => {
+      const userWord = userWords[wordIdx] || '';
+      const normalizedCorrect = normalize(correctWord);
+      const normalizedUser = normalize(userWord);
+
+      // Count how many characters match from the start
+      let matchingChars = 0;
+      for (let i = 0; i < Math.min(normalizedCorrect.length, normalizedUser.length); i++) {
+        if (normalizedCorrect[i] === normalizedUser[i]) {
+          matchingChars++;
+        } else {
+          break; // Stop at first mismatch
+        }
+      }
+
+      if (matchingChars > 0) {
+        partialReveals[wordIdx] = matchingChars;
+      }
+    });
+
+    setPartialRevealedChars(prev => ({
+      ...prev,
+      [sentenceIndex]: partialReveals
+    }));
+  }, []);
 
   // Save word function
   const saveWord = useCallback((word) => {
@@ -2933,6 +3164,30 @@ const DictationPageContent = () => {
                     <option value="c2">C2 (100%)</option>
                   </select>
                 </div>
+                {/* Dictation Mode Toggle - Show on mobile only */}
+                {isMobile && (
+                  <button
+                    onClick={() => setDictationMode(dictationMode === 'fill-blanks' ? 'full-sentence' : 'fill-blanks')}
+                    className={styles.modeToggle}
+                    data-mode={dictationMode}
+                    title={dictationMode === 'fill-blanks' ? 'Chuyển sang chế độ nhập câu' : 'Chuyển sang chế độ điền từ'}
+                  >
+                    {dictationMode === 'fill-blanks' ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                      </svg>
+                    )}
+                  </button>
+                )}
                 {/* Auto-Jump Toggle Button - Show on both desktop and mobile */}
                 <button
                   onClick={() => setAutoJumpToIncomplete(!autoJumpToIncomplete)}
@@ -3026,15 +3281,142 @@ const DictationPageContent = () => {
                               <span className={styles.slideCompleted}>✓</span>
                             </div>
                           )}
-                          <div
-                            className={`${styles.dictationInputArea} ${swipeDirection && isActive ? styles[`swipe-${swipeDirection}`] : ''}`}
-                            data-sentence-index={originalIndex}
-                            dangerouslySetInnerHTML={{ __html: sentenceProcessedText }}
-                            onTouchStart={isActive ? handleTouchStart : undefined}
-                            onTouchMove={isActive ? handleTouchMove : undefined}
-                            onTouchEnd={isActive ? handleTouchEnd : undefined}
-                          />
-                          {isActive && (
+
+                          {/* Mode 1: Fill in blanks */}
+                          {dictationMode === 'fill-blanks' ? (
+                            <div
+                              className={`${styles.dictationInputArea} ${swipeDirection && isActive ? styles[`swipe-${swipeDirection}`] : ''}`}
+                              data-sentence-index={originalIndex}
+                              dangerouslySetInnerHTML={{ __html: sentenceProcessedText }}
+                              onTouchStart={isActive ? handleTouchStart : undefined}
+                              onTouchMove={isActive ? handleTouchMove : undefined}
+                              onTouchEnd={isActive ? handleTouchEnd : undefined}
+                            />
+                          ) : (
+                            /* Mode 2: Full sentence input */
+                            <div className={styles.fullSentenceMode}>
+                              <div className={styles.fullSentenceDisplay}>
+                                {isCompleted ? (
+                                  <div className={styles.completedSentenceText}>
+                                    {sentence.text}
+                                  </div>
+                                ) : (
+                                  <div className={styles.hintSentenceText}>
+                                    {sentence.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
+                                      // Remove punctuation to get pure word
+                                      const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                                      const punctuation = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
+
+                                      if (pureWord.length === 0) return null;
+
+                                      // Check if this word is revealed
+                                      const isRevealed = revealedHintWords[originalIndex]?.[idx];
+
+                                      // Check word comparison result
+                                      const comparisonResult = wordComparisonResults[originalIndex]?.[idx];
+
+                                      // Get partial reveal count
+                                      const partialCount = partialRevealedChars[originalIndex]?.[idx] || 0;
+
+                                      const wordClass = comparisonResult
+                                        ? (comparisonResult === 'correct' ? styles.hintWordCorrect : styles.hintWordIncorrect)
+                                        : (isRevealed ? styles.hintWordRevealed : (partialCount > 0 ? styles.hintWordPartial : ''));
+
+                                      // Determine what to display
+                                      let displayText;
+                                      if (comparisonResult || isRevealed) {
+                                        // Show full word if checked or manually revealed
+                                        displayText = pureWord;
+                                      } else if (partialCount > 0) {
+                                        // Show partial characters
+                                        displayText = pureWord.substring(0, partialCount) + '\u00A0'.repeat(pureWord.length - partialCount);
+                                      } else {
+                                        // Show all spaces
+                                        displayText = '\u00A0'.repeat(pureWord.length);
+                                      }
+
+                                      return (
+                                        <span key={idx} className={styles.hintWordContainer}>
+                                          <span
+                                            className={`${styles.hintWordBox} ${wordClass}`}
+                                            onClick={() => !comparisonResult && toggleRevealHintWord(originalIndex, idx)}
+                                            title={comparisonResult ? (comparisonResult === 'correct' ? 'Đúng' : 'Sai') : (isRevealed ? 'Click để ẩn' : 'Click để hiện gợi ý')}
+                                          >
+                                            {displayText}
+                                          </span>
+                                          {punctuation && <span className={styles.hintPunctuation}>{punctuation}</span>}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+
+                              <textarea
+                                className={styles.fullSentenceInput}
+                                placeholder="Nhập toàn bộ câu..."
+                                value={fullSentenceInputs[originalIndex] || ''}
+                                onChange={(e) => {
+                                  setFullSentenceInputs(prev => ({
+                                    ...prev,
+                                    [originalIndex]: e.target.value
+                                  }));
+                                  // Calculate partial reveals as user types
+                                  calculatePartialReveals(originalIndex, e.target.value, sentence.text);
+                                }}
+                                onKeyDown={(e) => {
+                                  // Auto-check on Enter (but allow Shift+Enter for new line)
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleFullSentenceSubmit(originalIndex);
+                                  }
+                                }}
+                                disabled={isCompleted}
+                                rows={3}
+                              />
+
+                              {sentenceResults[originalIndex] && (
+                                <div className={`${styles.sentenceResult} ${sentenceResults[originalIndex].isCorrect ? styles.resultCorrect : styles.resultIncorrect}`}>
+                                  <span className={styles.resultIcon}>
+                                    {sentenceResults[originalIndex].isCorrect ? '✓' : '✗'}
+                                  </span>
+                                  <span className={styles.resultText}>
+                                    {sentenceResults[originalIndex].similarity}% đúng
+                                  </span>
+                                </div>
+                              )}
+
+                              {isActive && !isCompleted && (
+                                <div className={styles.dictationActions}>
+                                  <button
+                                    className={styles.checkButton}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleFullSentenceSubmit(originalIndex);
+                                    }}
+                                  >
+                                    Kiểm tra
+                                  </button>
+
+                                  <button
+                                    className={styles.nextButton}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      goToNextSentence();
+                                    }}
+                                    disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
+                                  >
+                                    {t('lesson.ui.next')}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {isActive && dictationMode === 'fill-blanks' && (
                             <div className={styles.dictationActions}>
                               <button
                                 className={styles.showAllWordsButton}
@@ -3309,7 +3691,7 @@ const DictationPageContent = () => {
             
              <div className={styles.transcriptSection} ref={transcriptSectionRef}>
                <div className={styles.transcriptList}>
-                 {sortedTranscriptIndices.map((originalIndex) => {
+                 {transcriptDisplayIndices.map((originalIndex) => {
                    const segment = transcriptData[originalIndex];
                    const isCompleted = completedSentences.includes(originalIndex);
                    const sentenceWordsCompleted = completedWords[originalIndex] || {};
@@ -3320,10 +3702,13 @@ const DictationPageContent = () => {
                        ref={(el) => {
                          transcriptItemRefs.current[originalIndex] = el;
                        }}
-                       className={`${styles.transcriptItem} ${originalIndex === currentSentenceIndex ? styles.active : ''}`}
+                       className={`${styles.transcriptItem} ${originalIndex === currentSentenceIndex ? styles.active : ''} ${!isCompleted ? styles.incomplete : ''}`}
                        onClick={() => handleSentenceClick(segment.start, segment.end)}
                      >
-                       <div className={styles.transcriptItemNumber}>#{originalIndex + 1}</div>
+                       <div className={styles.transcriptItemNumber}>
+                         #{originalIndex + 1}
+                         {isCompleted && <span className={styles.completedCheck}>✓</span>}
+                       </div>
                        <div className={styles.transcriptItemText}>
                          {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, hidePercentage, sentenceWordsCompleted)}
                        </div>
