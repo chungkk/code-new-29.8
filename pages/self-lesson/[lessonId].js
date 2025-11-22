@@ -859,7 +859,7 @@ const SelfLessonPageContent = () => {
       console.error('Save vocabulary error:', error);
       toast.error(t('lesson.vocabulary.generalError'));
     }
-  }, [lessonId, transcriptData, currentSentenceIndex]);
+  }, [lessonId, transcriptData, currentSentenceIndex, t]);
 
   // Handle word click for popup (for completed words)
   const handleWordClickForPopup = useCallback((word, event) => {

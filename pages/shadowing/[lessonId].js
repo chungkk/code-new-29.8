@@ -1837,9 +1837,9 @@ const ShadowingPageContent = () => {
                                language="de-DE"
                              />
                            ) : (
-                             <div 
+                             <div
                                className={styles.micPlaceholder}
-                               title="Phát câu này để bắt đầu ghi âm"
+                               title="Satz abspielen um Aufnahme zu starten"
                              >
                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                  <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
@@ -1854,7 +1854,7 @@ const ShadowingPageContent = () => {
                              <button
                                className={`${styles.playbackButtonIcon} ${sentenceState.isPlaying ? styles.playingIcon : ''}`}
                                onClick={() => playRecordedAudio(index)}
-                               title={sentenceState.isPlaying ? 'Dừng phát' : 'Nghe lại bản ghi'}
+                               title={sentenceState.isPlaying ? 'Wiedergabe stoppen' : 'Aufnahme abspielen'}
                              >
                                {sentenceState.isPlaying ? (
                                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1975,9 +1975,9 @@ const ShadowingPageContent = () => {
                           size="large"
                         />
                       ) : (
-                        <div 
+                        <div
                           className={styles.bottomMicDisabled}
-                          title="Phát câu này để bắt đầu ghi âm"
+                          title="Satz abspielen um Aufnahme zu starten"
                         >
                           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>

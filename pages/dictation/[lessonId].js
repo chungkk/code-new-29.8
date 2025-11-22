@@ -382,7 +382,7 @@ const DictationPageContent = () => {
         });
       }, 1000);
     }
-  }, [isPlaying, user, lessonId, isTimerRunning, lastPauseTime, progressLoaded]);
+  }, [isPlaying, user, lessonId, isTimerRunning, lastPauseTime, progressLoaded, studyTime]);
 
   // Cleanup timer only on unmount
   useEffect(() => {
@@ -450,7 +450,7 @@ const DictationPageContent = () => {
         clearTimeout(inactivityTimeoutRef.current);
       }
     };
-  }, [lastActivityTime, isTimerRunning, user, lessonId, progressLoaded]);
+  }, [lastActivityTime, isTimerRunning, user, lessonId, progressLoaded, studyTime]);
 
   // Track user activity to reset inactivity timer
   useEffect(() => {
@@ -1222,16 +1222,6 @@ const DictationPageContent = () => {
     const start = Math.max(0, currentSlideIndex - 1);
     const end = Math.min(mobileVisibleIndices.length, currentSlideIndex + 2);
 
-    console.log('🎯 Lazy loading range:', {
-      currentSentenceIndex,
-      currentSlideIndex,
-      start,
-      end,
-      renderCount: end - start,
-      totalSlides: mobileVisibleIndices.length,
-      percentageRendered: ((end - start) / mobileVisibleIndices.length * 100).toFixed(1) + '%'
-    });
-
     return { start, end };
   }, [isMobile, mobileVisibleIndices, currentSentenceIndex]);
 
@@ -1256,14 +1246,6 @@ const DictationPageContent = () => {
             behavior: 'smooth',
             block: 'nearest',
             inline: 'center'
-          });
-          
-          console.log('📱 Auto-scrolled dictation to slide (lazy):', {
-            currentSentenceIndex,
-            slideIndex,
-            totalVisibleSlides: mobileVisibleIndices.length,
-            lazyRange: `${lazySlideRange.start}-${lazySlideRange.end}`,
-            renderedSlides: lazySlideRange.end - lazySlideRange.start
           });
         } else {
           console.warn('⚠️ Target slide not found in lazy-loaded range');
@@ -1572,7 +1554,7 @@ const DictationPageContent = () => {
       console.error('Save vocabulary error:', error);
       toast.error(t('lesson.vocabulary.generalError'));
     }
-  }, [lessonId, transcriptData, currentSentenceIndex]);
+  }, [lessonId, transcriptData, currentSentenceIndex, t]);
 
   // Handle word click for popup (for completed words)
   const handleWordClickForPopup = useCallback(async (word, eventOrElement) => {
@@ -1892,7 +1874,7 @@ const DictationPageContent = () => {
         
       }
     }, 50); // Reduced to 50ms for faster detection
-  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete]);
+  }, [completedSentences, currentSentenceIndex, completedWords, saveProgress, sortedTranscriptIndices, transcriptData, handleSentenceClick, hidePercentage, autoJumpToIncomplete, t]);
 
   // Show points animation
   const showPointsAnimation = useCallback((points, element) => {
@@ -2096,7 +2078,7 @@ const DictationPageContent = () => {
         console.log('⚠️ Length mismatch, waiting for full word length');
       }
     }
-  }, [saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints, consecutiveSentences, user]);
+  }, [saveWord, updateInputBackground, checkSentenceCompletion, saveWordCompletion, currentSentenceIndex, wordPointsProcessed, updatePoints, consecutiveSentences]);
 
   /**
    * Seeded random number generator for deterministic word selection
@@ -2416,7 +2398,7 @@ const DictationPageContent = () => {
     // Reset consecutive sentence counter when wrong word is selected
     console.log('❌ Wrong word selected from suggestion! Resetting consecutive counter to 0');
     setConsecutiveSentences(0);
-  }, [showPointsAnimation, updatePoints, user]);
+  }, [showPointsAnimation, updatePoints]);
 
   /**
    * ============================================================================
@@ -2569,7 +2551,7 @@ const DictationPageContent = () => {
     });
 
     return processedSentences.join(" ");
-  }, [currentSentenceIndex, seededRandom]);
+  }, [currentSentenceIndex, seededRandom, t]);
 
   // Initialize dictation for current sentence
   useEffect(() => {

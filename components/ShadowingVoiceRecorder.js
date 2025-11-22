@@ -33,6 +33,27 @@ const ShadowingVoiceRecorder = ({
       setRecordedBlob(null);
       audioChunksRef.current = [];
 
+      // Check if browser supports required APIs
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('Ihr Browser unterstützt keine Audioaufnahme');
+        return;
+      }
+
+      // Check for HTTPS on iOS Safari (required for getUserMedia)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+
+      if (isIOS && !isSecure) {
+        setError('iOS benötigt HTTPS für Mikrofonzugriff');
+        return;
+      }
+
+      // Check if MediaRecorder is supported
+      if (typeof MediaRecorder === 'undefined') {
+        setError('Audioaufnahme wird nicht unterstützt');
+        return;
+      }
+
       // Pause audio/video when starting recording so user can speak clearly
       if (typeof window !== 'undefined') {
         // Pause YouTube player
@@ -89,30 +110,26 @@ const ShadowingVoiceRecorder = ({
       setIsRecording(true);
     } catch (err) {
       console.error('Error starting recording:', err);
-      setError(err.message || 'Không thể truy cập microphone');
+
+      // Provide German error messages based on error type
+      let errorMessage = 'Mikrofonzugriff fehlgeschlagen';
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMessage = 'Mikrofonzugriff verweigert';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMessage = 'Kein Mikrofon gefunden';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMessage = 'Mikrofon wird bereits verwendet';
+      } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+        errorMessage = 'Mikrofoneinstellungen nicht unterstützt';
+      } else if (err.name === 'SecurityError') {
+        errorMessage = 'HTTPS erforderlich für Mikrofonzugriff';
+      }
+
+      setError(errorMessage);
       setIsRecording(false);
     }
   }, [onAudioRecorded]);
-
-  // Stop recording
-  const stopRecording = useCallback(async () => {
-    setIsRecording(false);
-
-    // Stop media recorder
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-
-    // Process the recorded audio with Whisper
-    setIsProcessing(true);
-
-    // Wait for blob to be ready
-    setTimeout(async () => {
-      if (audioChunksRef.current.length > 0) {
-        await processWhisperAudio();
-      }
-    }, 100);
-  }, []);
 
   // Process audio with Whisper API
   const processWhisperAudio = useCallback(async () => {
@@ -138,15 +155,35 @@ const ShadowingVoiceRecorder = ({
         }
         setError(null);
       } else {
-        setError(data.message || 'Transcription failed');
+        setError(data.message || 'Transkription fehlgeschlagen');
       }
     } catch (err) {
       console.error('Error processing audio:', err);
-      setError('Lỗi khi xử lý âm thanh');
+      setError('Fehler bei der Audioverarbeitung');
     } finally {
       setIsProcessing(false);
     }
   }, [language, onTranscript]);
+
+  // Stop recording
+  const stopRecording = useCallback(async () => {
+    setIsRecording(false);
+
+    // Stop media recorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    // Process the recorded audio with Whisper
+    setIsProcessing(true);
+
+    // Wait for blob to be ready
+    setTimeout(async () => {
+      if (audioChunksRef.current.length > 0) {
+        await processWhisperAudio();
+      }
+    }, 100);
+  }, [processWhisperAudio]);
 
   // Handle button click
   const handleButtonClick = useCallback(() => {
@@ -164,7 +201,7 @@ const ShadowingVoiceRecorder = ({
         onClick={handleButtonClick}
         disabled={isProcessing}
         type="button"
-        title={isProcessing ? 'Đang xử lý...' : isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
+        title={isProcessing ? 'Wird verarbeitet...' : isRecording ? 'Aufnahme stoppen' : 'Aufnahme starten'}
       >
         {isProcessing ? (
           <span className={styles.spinner}>

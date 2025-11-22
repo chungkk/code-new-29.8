@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 import SEO, { generateBreadcrumbStructuredData } from '../../components/SEO';
@@ -19,13 +19,7 @@ function VocabularyPage() {
   const [selectedWord, setSelectedWord] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, placement: 'bottom' });
 
-  useEffect(() => {
-    if (user) {
-      loadVocabulary();
-    }
-  }, [user]);
-
-  const loadVocabulary = async () => {
+  const loadVocabulary = useCallback(async () => {
     try {
       setLoading(true);
       const targetLanguage = user?.nativeLanguage || 'vi';
@@ -38,7 +32,13 @@ function VocabularyPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, t]);
+
+  useEffect(() => {
+    if (user) {
+      loadVocabulary();
+    }
+  }, [user, loadVocabulary]);
 
   const deleteVocabulary = async (id, e) => {
     e.stopPropagation();

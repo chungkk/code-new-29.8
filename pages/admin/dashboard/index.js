@@ -5,6 +5,8 @@ import Head from 'next/head';
 import ProtectedPage from '../../../components/ProtectedPage';
 import AdminDashboardLayout from '../../../components/AdminDashboardLayout';
 import { toast } from 'react-toastify';
+import { mutate } from 'swr';
+import { broadcastLessonUpdate } from '../../../lib/hooks/useLessons';
 import styles from '../../../styles/adminDashboard.module.css';
 
 
@@ -61,6 +63,13 @@ function AdminLessonsPage() {
 
       if (!res.ok) throw new Error('Lektion konnte nicht gelöscht werden');
       toast.success('Erfolgreich gelöscht!');
+      
+      // Invalidate all SWR cache for lessons to update homepage
+      mutate(key => typeof key === 'string' && key.startsWith('/api/lessons'), undefined, { revalidate: true });
+      
+      // Broadcast update to all open tabs
+      broadcastLessonUpdate();
+      
       fetchLessons();
     } catch (error) {
       toast.error('Fehler: ' + error.message);
@@ -110,6 +119,13 @@ function AdminLessonsPage() {
 
       if (!res.ok) throw new Error('Lektionen konnten nicht gelöscht werden');
       toast.success(`${selectedLessons.size} Lektion(en) erfolgreich gelöscht!`);
+      
+      // Invalidate all SWR cache for lessons to update homepage
+      mutate(key => typeof key === 'string' && key.startsWith('/api/lessons'), undefined, { revalidate: true });
+      
+      // Broadcast update to all open tabs
+      broadcastLessonUpdate();
+      
       setSelectedLessons(new Set());
       fetchLessons();
     } catch (error) {

@@ -32,7 +32,6 @@ const OfflineIndicator = () => {
         setSyncing(true);
         try {
           await processSyncQueue();
-          console.log('Offline data synced successfully');
         } catch (error) {
           console.error('Failed to sync offline data:', error);
         } finally {
