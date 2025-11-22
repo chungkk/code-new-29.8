@@ -306,16 +306,16 @@ const Header = () => {
 
                     <div className={styles.userDropdownMenu}>
                       <Link
-                        href="/dashboard"
+                        href="/profile"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <span className={styles.dropdownIcon}>📊</span>
+                        <span className={styles.dropdownIcon}>👤</span>
                         <span>{t('header.userMenu.dashboard')}</span>
                       </Link>
 
                       <Link
-                        href="/dashboard/vocabulary"
+                        href="/profile/vocabulary"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >
@@ -333,7 +333,7 @@ const Header = () => {
                       </Link>
 
                       <Link
-                        href="/dashboard/settings"
+                        href="/profile/settings"
                         className={styles.userDropdownItem}
                         onClick={() => setUserMenuOpen(false)}
                       >

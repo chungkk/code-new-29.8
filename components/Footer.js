@@ -83,7 +83,7 @@ const Footer = () => {
             <Link href="/" className={styles.footerLink}>
               {t('footer.links.dictation')}
             </Link>
-            <Link href="/dashboard/vocabulary" className={styles.footerLink}>
+            <Link href="/profile/vocabulary" className={styles.footerLink}>
               {t('footer.links.vocabulary')}
             </Link>
           </div>

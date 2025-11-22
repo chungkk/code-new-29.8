@@ -153,7 +153,7 @@ export default function Custom404() {
               flexWrap: 'wrap'
             }}>
               <Link
-                href="/dashboard"
+                href="/profile"
                 style={{
                   color: '#667eea',
                   textDecoration: 'none',

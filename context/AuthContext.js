@@ -254,7 +254,7 @@ export function AuthProvider({ children }) {
     try {
       // Use popup mode instead of redirect
       await nextAuthSignIn('google', { 
-        callbackUrl: '/dashboard',
+        callbackUrl: '/profile',
         redirect: false
       });
       return { success: true };

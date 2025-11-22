@@ -6,7 +6,7 @@
       "review": "Ôn tập",
       "vocabulary": "Từ vựng",
       "leaderboard": "Bảng xếp hạng",
-      "dashboard": "Trang chủ"
+      "dashboard": "Hồ sơ"
     },
     "themeToggle": "Đổi giao diện",
     "language": "Tiếng Việt",
@@ -16,7 +16,7 @@
     "userMenu": {
       "label": "Menu người dùng",
       "user": "Người dùng",
-      "dashboard": "Trang chủ",
+      "dashboard": "Hồ sơ",
       "myVocabulary": "Từ vựng của tôi",
       "leaderboard": "Bảng xếp hạng",
       "settings": "Cài đặt",
@@ -117,7 +117,7 @@
   },
   "breadcrumb": {
     "home": "Trang chủ",
-    "dashboard": "Bảng điều khiển",
+    "dashboard": "Hồ sơ",
     "settings": "Cài đặt"
   },
   "dictionaryPopup": {
@@ -267,7 +267,7 @@
     }
   },
   "dashboard": {
-    "title": "Trang chủ",
+    "title": "Hồ sơ",
     "subtitle": "Tiến độ học tập của bạn",
     "loading": "Đang tải...",
     "stats": {
@@ -367,7 +367,7 @@
     "goBack": "Quay lại",
     "suggestions": "Có thể bạn đang tìm:",
     "links": {
-      "dashboard": "Trang chủ",
+      "dashboard": "Hồ sơ",
       "login": "Đăng nhập"
     }
   },

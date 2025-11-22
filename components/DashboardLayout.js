@@ -28,14 +28,14 @@ const DashboardLayout = ({ children }) => {
   }, [sidebarCollapsed, mounted]);
 
   const navItems = [
-    { href: '/dashboard', label: 'Overview', icon: '📊' },
-    { href: '/dashboard/vocabulary', label: 'Vocabulary', icon: '📚' },
-    { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
+    { href: '/profile', label: 'Profile', icon: '👤' },
+    { href: '/profile/vocabulary', label: 'Vocabulary', icon: '📚' },
+    { href: '/profile/settings', label: 'Settings', icon: '⚙️' },
   ];
 
   const isActive = (path) => {
-    if (path === '/dashboard') {
-      return router.pathname === '/dashboard';
+    if (path === '/profile') {
+      return router.pathname === '/profile';
     }
     return router.pathname.startsWith(path);
   };

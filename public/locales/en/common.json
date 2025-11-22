@@ -6,7 +6,7 @@
       "review": "Review",
       "vocabulary": "Vocabulary",
       "leaderboard": "Leaderboard",
-      "dashboard": "Dashboard"
+      "dashboard": "Profile"
     },
     "themeToggle": "Toggle theme",
     "language": "English",
@@ -16,7 +16,7 @@
     "userMenu": {
       "label": "User menu",
       "user": "User",
-      "dashboard": "Dashboard",
+      "dashboard": "Profile",
       "myVocabulary": "My Vocabulary",
       "leaderboard": "Leaderboard",
       "settings": "Settings",
@@ -117,7 +117,7 @@
   },
   "breadcrumb": {
     "home": "Home",
-    "dashboard": "Dashboard",
+    "dashboard": "Profile",
     "settings": "Settings"
   },
   "dictionaryPopup": {
@@ -270,7 +270,7 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Profile",
     "subtitle": "Your Learning Progress",
     "loading": "Loading...",
     "stats": {
@@ -371,7 +371,7 @@
     "goBack": "Go Back",
     "suggestions": "You might be looking for:",
     "links": {
-      "dashboard": "Dashboard",
+      "dashboard": "Profile",
       "login": "Login"
     }
   },

@@ -44,7 +44,7 @@ const AuthForm = ({ mode = 'login' }) => {
       }
 
       if (result.success) {
-        navigateWithLocale(router, '/dashboard');
+        navigateWithLocale(router, '/profile');
       } else {
         setError(result.error);
       }

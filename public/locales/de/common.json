@@ -6,7 +6,7 @@
       "review": "Überprüfung",
       "vocabulary": "Vokabular",
       "leaderboard": "Bestenliste",
-      "dashboard": "Armaturenbrett"
+      "dashboard": "Profil"
     },
     "themeToggle": "Thema umschalten",
     "language": "Deutsch",
@@ -16,7 +16,7 @@
     "userMenu": {
       "label": "Benutzermenü",
       "user": "Benutzer",
-      "dashboard": "Dashboard",
+      "dashboard": "Profil",
       "myVocabulary": "Mein Vokabular",
       "leaderboard": "Bestenliste",
       "settings": "Einstellungen",
@@ -117,7 +117,7 @@
   },
   "breadcrumb": {
     "home": "Home",
-    "dashboard": "Dashboard",
+    "dashboard": "Profil",
     "settings": "Einstellungen"
   },
   "dictionaryPopup": {
@@ -270,7 +270,7 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Profil",
     "subtitle": "Ihr Lernfortschritt",
     "loading": "Lädt...",
     "stats": {
@@ -371,7 +371,7 @@
     "goBack": "Zurück",
     "suggestions": "Vielleicht suchen Sie nach:",
     "links": {
-      "dashboard": "Dashboard",
+      "dashboard": "Profil",
       "login": "Anmelden"
     }
   },
