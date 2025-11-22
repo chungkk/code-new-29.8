@@ -71,6 +71,18 @@ async function translateWithGoogle(text, sourceLang, targetLang) {
     throw new Error('GOOGLE_TRANSLATE_API_KEY not configured');
   }
 
+  // Prepare request body - omit source for auto-detection
+  const requestBody = {
+    q: text,
+    target: targetLang,
+    format: 'text',
+  };
+
+  // Only include source if it's not 'auto' (Google will auto-detect if omitted)
+  if (sourceLang && sourceLang !== 'auto') {
+    requestBody.source = sourceLang;
+  }
+
   const response = await fetch(
     `https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_API_KEY}`,
     {
@@ -78,12 +90,7 @@ async function translateWithGoogle(text, sourceLang, targetLang) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        q: text,
-        source: sourceLang,
-        target: targetLang,
-        format: 'text',
-      }),
+      body: JSON.stringify(requestBody),
     }
   );
 
@@ -98,20 +105,25 @@ async function translateWithGoogle(text, sourceLang, targetLang) {
 /**
  * Translate using OpenAI GPT-4 (high quality but expensive)
  */
-async function translateWithOpenAI(text, context = '', targetLang = 'vi') {
+async function translateWithOpenAI(text, context = '', targetLang = 'vi', sourceLang = 'de') {
   if (!OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY not configured');
   }
 
   const targetLanguageName = LANGUAGE_NAMES[targetLang] || 'the target language';
 
+  // Handle auto-detection
+  const sourceText = (sourceLang === 'auto' || !sourceLang)
+    ? 'automatically detect the source language and translate'
+    : `Translate from ${LANGUAGE_NAMES[sourceLang] || sourceLang}`;
+
   const prompt = context
-    ? `Translate from German to ${targetLanguageName}. This word appears in context: "${context}"
+    ? `${sourceText} to ${targetLanguageName}. This word appears in context: "${context}"
 
 Word: ${text}
 
 Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Example: "house, home, building". No explanations.`
-    : `Translate from German to ${targetLanguageName}: ${text}
+    : `${sourceText} to ${targetLanguageName}: ${text}
 
 Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Example: "house, home, building". No explanations.`;
 
@@ -126,7 +138,7 @@ Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Exampl
       messages: [
         {
           role: 'system',
-          content: 'Bạn là một chuyên gia dịch thuật Đức-Việt chuyên nghiệp. Cung cấp bản dịch chính xác và tự nhiên.',
+          content: `You are a professional translation expert. Provide accurate and natural translations to ${targetLanguageName}.`,
         },
         {
           role: 'user',
@@ -147,22 +159,27 @@ Return 2-3 common meanings in ${targetLanguageName}, separated by commas. Exampl
 }
 
 /**
- * Translate using Groq AI (improved prompt for better German-Vietnamese)
+ * Translate using Groq AI (improved prompt for better translation with auto-detection)
  */
-async function translateWithGroq(text, context = '', targetLang = 'vi') {
+async function translateWithGroq(text, context = '', targetLang = 'vi', sourceLang = 'de') {
   if (!GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY not configured');
   }
 
   const targetLanguageName = LANGUAGE_NAMES[targetLang] || 'the target language';
 
+  // Handle auto-detection
+  const sourceText = (sourceLang === 'auto' || !sourceLang)
+    ? 'Automatically detect the source language and translate'
+    : `Translate from ${LANGUAGE_NAMES[sourceLang] || sourceLang}`;
+
   const prompt = context
-    ? `Translate from German to ${targetLanguageName}. This word appears in context: "${context}"
+    ? `${sourceText} to ${targetLanguageName}. This word appears in context: "${context}"
 
 Word to translate: ${text}
 
 ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional text. If it's a noun, DO NOT add articles (der/die/das). Translation must be concise, natural and accurate.`
-    : `Translate from German to ${targetLanguageName}: ${text}
+    : `${sourceText} to ${targetLanguageName}: ${text}
 
 ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional text. If it's a noun, DO NOT add articles (der/die/das). Translation must be concise, natural and accurate.`;
 
@@ -177,7 +194,7 @@ ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional
       messages: [
         {
           role: 'system',
-          content: `You are an expert German-${targetLanguageName} translator with 20 years of experience. You always provide accurate, natural translations that fit the context. ONLY return the ${targetLanguageName} translation, NO explanations or additional text.`,
+          content: `You are an expert multilingual translator with 20 years of experience. You always provide accurate, natural translations to ${targetLanguageName} that fit the context. ONLY return the ${targetLanguageName} translation, NO explanations or additional text.`,
         },
         {
           role: 'user',
@@ -195,7 +212,7 @@ ONLY return the meaning in ${targetLanguageName}, NO explanations, NO additional
 
   const data = await response.json();
   const translation = data.choices[0]?.message?.content?.trim();
-  
+
   return translation;
 }
 
@@ -237,16 +254,16 @@ function withTimeout(promise, timeoutMs, serviceName) {
  */
 async function translateParallel(text, context, sourceLang, targetLang) {
   const promises = [];
-  
+
   // OpenAI with 4s timeout
   if (OPENAI_API_KEY) {
     promises.push(
-      withTimeout(translateWithOpenAI(text, context, targetLang), 4000, 'OpenAI')
+      withTimeout(translateWithOpenAI(text, context, targetLang, sourceLang), 4000, 'OpenAI')
         .then(result => ({ method: 'openai-gpt4', translation: result, priority: 1 }))
         .catch(error => ({ error: error.message, method: 'openai-gpt4', priority: 1 }))
     );
   }
-  
+
   // Google Translate with 3s timeout
   if (GOOGLE_TRANSLATE_API_KEY) {
     promises.push(
@@ -255,23 +272,23 @@ async function translateParallel(text, context, sourceLang, targetLang) {
         .catch(error => ({ error: error.message, method: 'google-translate', priority: 2 }))
     );
   }
-  
+
   // Groq with 4s timeout
   if (GROQ_API_KEY) {
     promises.push(
-      withTimeout(translateWithGroq(text, context, targetLang), 4000, 'Groq')
+      withTimeout(translateWithGroq(text, context, targetLang, sourceLang), 4000, 'Groq')
         .then(result => ({ method: 'groq-llama', translation: result, priority: 3 }))
         .catch(error => ({ error: error.message, method: 'groq-llama', priority: 3 }))
     );
   }
-  
+
   // MyMemory with 3s timeout (always available)
   promises.push(
     withTimeout(translateWithMyMemory(text, sourceLang, targetLang), 3000, 'MyMemory')
       .then(result => ({ method: 'mymemory', translation: result, priority: 4 }))
       .catch(error => ({ error: error.message, method: 'mymemory', priority: 4 }))
   );
-  
+
   if (promises.length === 0) {
     return null;
   }

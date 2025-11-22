@@ -311,6 +311,9 @@
     "empty": "Ihr Vokabular ist noch leer",
     "startAdding": "Beginnen Sie, Wörter hinzuzufügen!",
     "deleteConfirm": "Dieses Wort löschen?",
+    "meaning": "Bedeutung",
+    "examples": "Beispiele",
+    "context": "Kontext",
     "errors": {
       "loading": "Fehler beim Laden des Wortschatzes",
       "deleting": "Fehler beim Löschen des Wortes",

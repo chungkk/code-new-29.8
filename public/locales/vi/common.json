@@ -308,6 +308,9 @@
     "empty": "Từ vựng của bạn đang trống",
     "startAdding": "Bắt đầu thêm từ!",
     "deleteConfirm": "Xóa từ này?",
+    "meaning": "Nghĩa",
+    "examples": "Ví dụ",
+    "context": "Ngữ cảnh",
     "errors": {
       "loading": "Lỗi khi tải từ vựng",
       "deleting": "Lỗi khi xóa từ",

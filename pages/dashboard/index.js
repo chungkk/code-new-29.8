@@ -147,7 +147,7 @@ function DashboardIndex() {
           {/* LEFT COLUMN - User Profile Sidebar */}
           <UserProfileSidebar
             stats={{
-              totalLessons: allLessons.length,
+              totalLessons: allLessons.filter(l => calculateProgress(l.id) > 0).length,
               completedLessons: allLessons.filter(l => calculateProgress(l.id) === 100).length,
               inProgressLessons: allLessons.filter(l => {
                 const p = calculateProgress(l.id);

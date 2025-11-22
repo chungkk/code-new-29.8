@@ -311,6 +311,9 @@
     "empty": "Your vocabulary is empty",
     "startAdding": "Start adding words!",
     "deleteConfirm": "Delete this word?",
+    "meaning": "Meaning",
+    "examples": "Examples",
+    "context": "Context",
     "errors": {
       "loading": "Error loading vocabulary",
       "deleting": "Error deleting word",

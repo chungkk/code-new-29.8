@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from '../styles/DashboardLayout.module.css';
@@ -6,7 +6,26 @@ import styles from '../styles/DashboardLayout.module.css';
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+  // Load sidebar state from localStorage before paint (useLayoutEffect)
+  useLayoutEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved !== null) {
+        setSidebarCollapsed(saved === 'true');
+      }
+      setMounted(true);
+    }
+  }, []);
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    if (mounted && typeof window !== 'undefined') {
+      localStorage.setItem('sidebarCollapsed', sidebarCollapsed);
+    }
+  }, [sidebarCollapsed, mounted]);
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: '📊' },
@@ -27,9 +46,9 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <>
-      <div className={styles.layout}>
+      <div className={`${styles.layout} ${mounted ? styles.animated : ''}`}>
         {/* Sidebar */}
-        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.open : ''} ${sidebarCollapsed ? styles.collapsed : ''}`}>
+        <aside className={`${styles.sidebar} ${mobileMenuOpen ? styles.open : ''} ${sidebarCollapsed ? styles.collapsed : ''} ${!mounted ? styles.noTransition : ''}`}>
           <nav className={styles.nav}>
             {navItems.map((item) => (
               <Link

@@ -4,38 +4,39 @@
   max-width: 1800px;
   margin: 0 auto;
   padding: 2rem 3rem;
+  padding-top: calc(2rem + 64px);
   width: 100%;
 }
 
 .pageHeader {
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .pageTitle {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .parrotIcon {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.6rem;
 }
 
 .pageSubtitle {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #64b5f6;
   font-weight: 400;
 }
@@ -95,13 +96,14 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  min-height: 120px;
+  min-height: 80px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
 }
 
 .vocabCard:hover {
@@ -114,8 +116,8 @@
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  align-items: center;
+  width: 100%;
 }
 
 .wordSection {
@@ -124,10 +126,9 @@
 }
 
 .word {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #64b5f6;
-  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -150,13 +151,13 @@
   background: transparent;
   border: none;
   color: #ef5350;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.4rem;
+  padding: 0.5rem;
   border-radius: 50%;
   transition: all 0.2s ease;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,15 +165,8 @@
 }
 
 .deleteBtn:hover {
-  background: rgba(239, 83, 80, 0.1);
-  transform: scale(1.1);
-}
-
-.translation {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
+  background: rgba(239, 83, 80, 0.15);
+  transform: scale(1.15);
 }
 
 /* Dropdown for word details */
@@ -689,6 +683,7 @@
   .container {
     max-width: 1200px;
     padding: 2rem;
+    padding-top: calc(2rem + 64px);
   }
 
   .vocabGrid {
@@ -705,6 +700,7 @@
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
+    padding-top: calc(1rem + 64px);
   }
 
   .pageTitle {

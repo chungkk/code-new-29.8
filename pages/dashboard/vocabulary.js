@@ -7,24 +7,29 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { fetchWithAuth } from '../../lib/api';
 import { toast } from 'react-toastify';
 import { speakText } from '../../lib/textToSpeech';
+import { useAuth } from '../../context/AuthContext';
 import styles from '../../styles/vocabulary.module.css';
 
 function VocabularyPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { user } = useAuth();
   const [vocabulary, setVocabulary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedWord, setSelectedWord] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, placement: 'bottom' });
 
   useEffect(() => {
-    loadVocabulary();
-  }, []);
+    if (user) {
+      loadVocabulary();
+    }
+  }, [user]);
 
   const loadVocabulary = async () => {
     try {
       setLoading(true);
-      const vocabRes = await fetchWithAuth('/api/vocabulary');
+      const targetLanguage = user?.nativeLanguage || 'vi';
+      const vocabRes = await fetchWithAuth(`/api/vocabulary?targetLanguage=${targetLanguage}`);
       const vocabData = await vocabRes.json();
       setVocabulary(Array.isArray(vocabData) ? vocabData : []);
     } catch (error) {
@@ -152,7 +157,6 @@ function VocabularyPage() {
                   {vocab.word}
                   {vocab.level && <span className={styles.level}>{vocab.level}</span>}
                 </div>
-                <div className={styles.translation}>{vocab.translation}</div>
               </div>
               <button
                 className={styles.deleteBtn}
@@ -228,7 +232,7 @@ function VocabularyPage() {
 
             {/* Translation */}
             <div className={styles.dropdownTranslation}>
-              <strong>Nghĩa:</strong> {selectedWord.translation}
+              <strong>{t('vocabulary.meaning')}:</strong> {selectedWord.translation}
             </div>
 
             {/* Definition */}
@@ -239,7 +243,7 @@ function VocabularyPage() {
             {/* Examples */}
             {selectedWord.examples && selectedWord.examples.length > 0 && (
               <div className={styles.examplesSection}>
-                <div className={styles.examplesTitle}>Ví dụ:</div>
+                <div className={styles.examplesTitle}>{t('vocabulary.examples')}:</div>
                 {selectedWord.examples.map((example, idx) => (
                   <div key={idx} className={styles.example}>
                     <div className={styles.exampleText}>&ldquo;{example.text}&rdquo;</div>
@@ -254,7 +258,7 @@ function VocabularyPage() {
             {/* Context from lesson */}
             {selectedWord.context && !selectedWord.examples?.length && (
               <div className={styles.examplesSection}>
-                <div className={styles.examplesTitle}>Ngữ cảnh:</div>
+                <div className={styles.examplesTitle}>{t('vocabulary.context')}:</div>
                 <div className={styles.example}>
                   <div className={styles.exampleText}>&ldquo;{selectedWord.context}&rdquo;</div>
                 </div>
