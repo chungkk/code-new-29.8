@@ -2326,11 +2326,14 @@
     font-size: 15px;
     line-height: 1.4;
     padding: 6px 4px;
+    padding-bottom: 120px; /* Extra space at bottom for keyboard */
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 3px 4px;
     row-gap: 4px;
+    scroll-behavior: smooth;
+    scroll-padding-bottom: 100px;
   }
 
   /* Override word-input sizing in slides */

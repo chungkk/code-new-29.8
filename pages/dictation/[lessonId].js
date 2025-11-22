@@ -2164,7 +2164,7 @@ const DictationPageContent = () => {
     return processedWords.join(" ");
   }, [seededRandom]);
 
-  // Handle input focus - keep placeholder visible
+  // Handle input focus - keep placeholder visible and scroll into view
   const handleInputFocus = useCallback((input, correctWord) => {
     // Keep placeholder showing the masked word length
     if (input.value === '') {
@@ -2173,6 +2173,48 @@ const DictationPageContent = () => {
       input.style.removeProperty('background');
       input.style.removeProperty('border-color');
     }
+
+    // Scroll input into view when focused (prevent keyboard from covering it)
+    // Use setTimeout to wait for keyboard to appear on mobile
+    setTimeout(() => {
+      // Check if we're on mobile
+      const isMobileView = window.innerWidth <= 768;
+      
+      if (isMobileView) {
+        // For mobile slides mode, scroll within the slide container
+        const slide = input.closest('.dictationSlide');
+        const inputArea = input.closest('.dictationInputArea');
+        
+        if (slide && inputArea) {
+          // Get positions
+          const inputRect = input.getBoundingClientRect();
+          const slideRect = slide.getBoundingClientRect();
+          const inputAreaRect = inputArea.getBoundingClientRect();
+          
+          // Calculate if input is in the lower half of the slide
+          const inputTop = inputRect.top - slideRect.top;
+          const slideHeight = slideRect.height;
+          const isInLowerHalf = inputTop > slideHeight / 2;
+          
+          if (isInLowerHalf) {
+            // Scroll the input area to show the input near the top
+            const scrollTop = inputArea.scrollTop + (inputRect.top - inputAreaRect.top) - 80;
+            
+            inputArea.scrollTo({
+              top: Math.max(0, scrollTop),
+              behavior: 'smooth'
+            });
+          }
+        }
+      } else {
+        // For desktop, use standard scrollIntoView
+        input.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }, 300); // Wait 300ms for keyboard animation
   }, []);
 
   // Handle input blur - show placeholder if empty
