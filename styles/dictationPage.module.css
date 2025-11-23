@@ -1988,8 +1988,8 @@
 
 .fullSentenceInput {
   width: 100%;
-  min-height: 52px;
-  max-height: 102px;
+  min-height: 72px;
+  max-height: 122px;
   padding: 10px;
   padding-right: 64px; /* Space for voice button */
   padding-bottom: 10px;
