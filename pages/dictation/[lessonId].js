@@ -3187,30 +3187,28 @@ const DictationPageContent = () => {
                     <option value="c2">C2 (100%)</option>
                   </select>
                 </div>
-                {/* Dictation Mode Toggle - Show on mobile only */}
-                {isMobile && (
-                  <button
-                    onClick={() => setDictationMode(dictationMode === 'fill-blanks' ? 'full-sentence' : 'fill-blanks')}
-                    className={styles.modeToggle}
-                    data-mode={dictationMode}
-                    title={dictationMode === 'fill-blanks' ? 'Chuyển sang chế độ nhập câu' : 'Chuyển sang chế độ điền từ'}
-                  >
-                    {dictationMode === 'fill-blanks' ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                      </svg>
-                    )}
-                  </button>
-                )}
+                {/* Dictation Mode Toggle - Show on both mobile and desktop */}
+                <button
+                  onClick={() => setDictationMode(dictationMode === 'fill-blanks' ? 'full-sentence' : 'fill-blanks')}
+                  className={styles.modeToggle}
+                  data-mode={dictationMode}
+                  title={dictationMode === 'fill-blanks' ? 'Chuyển sang chế độ nhập câu' : 'Chuyển sang chế độ điền từ'}
+                >
+                  {dictationMode === 'fill-blanks' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                  )}
+                </button>
               </div>
               {!isMobile && (
                 <div className={styles.sentenceCounter}>
@@ -3541,93 +3539,222 @@ const DictationPageContent = () => {
               ) : (
                 /* Desktop: Single Sentence View */
                 <>
-                  <div
-                    className={styles.dictationInputArea}
-                    data-sentence-index={currentSentenceIndex}
-                    dangerouslySetInnerHTML={{ __html: processedText }}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                  />
+                  {dictationMode === 'fill-blanks' ? (
+                    /* Mode 1: Fill in blanks */
+                    <>
+                      <div
+                        className={styles.dictationInputArea}
+                        data-sentence-index={currentSentenceIndex}
+                        dangerouslySetInnerHTML={{ __html: processedText }}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                      />
 
-                  <div className={styles.dictationActions}>
-                    <button
-                      className={styles.showAllWordsButton}
-                      onClick={() => {
-                        const allInputs = document.querySelectorAll('.word-input');
-                        const wordsToComplete = {};
+                      <div className={styles.dictationActions}>
+                        <button
+                          className={styles.showAllWordsButton}
+                          onClick={() => {
+                            const allInputs = document.querySelectorAll('.word-input');
+                            const wordsToComplete = {};
 
-                        allInputs.forEach((input) => {
-                          const wordIndexMatch = input.id.match(/word-(\d+)/);
-                          if (wordIndexMatch) {
-                            const wordIndex = parseInt(wordIndexMatch[1]);
-                            const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-                            wordsToComplete[wordIndex] = correctWord;
-                            saveWord(correctWord);
-                          }
-                        });
+                            allInputs.forEach((input) => {
+                              const wordIndexMatch = input.id.match(/word-(\d+)/);
+                              if (wordIndexMatch) {
+                                const wordIndex = parseInt(wordIndexMatch[1]);
+                                const correctWord = input.getAttribute('oninput').match(/'([^']+)'/)[1];
+                                wordsToComplete[wordIndex] = correctWord;
+                                saveWord(correctWord);
+                              }
+                            });
 
-                        setCompletedWords(prevWords => {
-                          const updatedWords = { ...prevWords };
-                          if (!updatedWords[currentSentenceIndex]) {
-                            updatedWords[currentSentenceIndex] = {};
-                          }
-                          updatedWords[currentSentenceIndex] = {
-                            ...updatedWords[currentSentenceIndex],
-                            ...wordsToComplete
-                          };
-                          
-                          // Only mark as completed if we actually revealed words AND they meet the threshold
-                          if (Object.keys(wordsToComplete).length > 0) {
-                            // Calculate total words that needed to be filled
-                            const sentence = transcriptData[currentSentenceIndex];
-                            if (sentence) {
-                              const words = sentence.text.split(/\s+/);
-                              const validWordIndices = [];
-                              words.forEach((word, idx) => {
-                                const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
-                                if (pureWord.length >= 1) {
-                                  validWordIndices.push(idx);
+                            setCompletedWords(prevWords => {
+                              const updatedWords = { ...prevWords };
+                              if (!updatedWords[currentSentenceIndex]) {
+                                updatedWords[currentSentenceIndex] = {};
+                              }
+                              updatedWords[currentSentenceIndex] = {
+                                ...updatedWords[currentSentenceIndex],
+                                ...wordsToComplete
+                              };
+                              
+                              // Only mark as completed if we actually revealed words AND they meet the threshold
+                              if (Object.keys(wordsToComplete).length > 0) {
+                                // Calculate total words that needed to be filled
+                                const sentence = transcriptData[currentSentenceIndex];
+                                if (sentence) {
+                                  const words = sentence.text.split(/\s+/);
+                                  const validWordIndices = [];
+                                  words.forEach((word, idx) => {
+                                    const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                                    if (pureWord.length >= 1) {
+                                      validWordIndices.push(idx);
+                                    }
+                                  });
+                                  
+                                  const totalValidWords = validWordIndices.length;
+                                  const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
+                                  const totalCompletedWords = Object.keys(updatedWords[currentSentenceIndex]).length;
+                                  
+                                  // Mark as completed only if total completed words >= required threshold
+                                  if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(currentSentenceIndex)) {
+                                    const updatedCompleted = [...completedSentences, currentSentenceIndex];
+                                    setCompletedSentences(updatedCompleted);
+                                    saveProgress(updatedCompleted, updatedWords);
+                                    console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
+                                  } else {
+                                    // Just save progress without marking as complete
+                                    saveProgress(completedSentences, updatedWords);
+                                  }
                                 }
-                              });
-                              
-                              const totalValidWords = validWordIndices.length;
-                              const wordsToHideCount = Math.ceil((totalValidWords * hidePercentage) / 100);
-                              const totalCompletedWords = Object.keys(updatedWords[currentSentenceIndex]).length;
-                              
-                              // Mark as completed only if total completed words >= required threshold
-                              if (totalCompletedWords >= wordsToHideCount && wordsToHideCount > 0 && !completedSentences.includes(currentSentenceIndex)) {
-                                const updatedCompleted = [...completedSentences, currentSentenceIndex];
-                                setCompletedSentences(updatedCompleted);
-                                saveProgress(updatedCompleted, updatedWords);
-                                console.log(`✅ Sentence ${currentSentenceIndex} completed via Show All!`);
                               } else {
-                                // Just save progress without marking as complete
                                 saveProgress(completedSentences, updatedWords);
                               }
-                            }
-                          } else {
-                            saveProgress(completedSentences, updatedWords);
-                          }
-                          
-                          return updatedWords;
-                        });
-                      }}
-                    >
-                      {t('lesson.ui.showAll')}
-                    </button>
+                              
+                              return updatedWords;
+                            });
+                          }}
+                        >
+                          {t('lesson.ui.showAll')}
+                        </button>
 
-                    <button
-                      className={styles.nextButton}
-                      onClick={goToNextSentence}
-                      disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
-                    >
-                      {t('lesson.ui.next')}
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                      </svg>
-                    </button>
-                  </div>
+                        <button
+                          className={styles.nextButton}
+                          onClick={goToNextSentence}
+                          disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
+                        >
+                          {t('lesson.ui.next')}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    /* Mode 2: Full sentence input for Desktop */
+                    <div className={styles.fullSentenceMode}>
+                      <div className={styles.fullSentenceDisplay}>
+                        {completedSentences.includes(currentSentenceIndex) ? (
+                          <div className={styles.completedSentenceText}>
+                            {transcriptData[currentSentenceIndex]?.text}
+                          </div>
+                        ) : (
+                          <div className={styles.hintSentenceText}>
+                            {transcriptData[currentSentenceIndex]?.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
+                              // Remove punctuation to get pure word
+                              const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+                              const punctuation = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
+
+                              if (pureWord.length === 0) return null;
+
+                              // Check if this word is revealed
+                              const isRevealed = revealedHintWords[currentSentenceIndex]?.[idx];
+
+                              // Check word comparison result
+                              const comparisonResult = wordComparisonResults[currentSentenceIndex]?.[idx];
+
+                              // Get partial reveal count
+                              const partialCount = partialRevealedChars[currentSentenceIndex]?.[idx] || 0;
+
+                              const wordClass = comparisonResult
+                                ? (comparisonResult === 'correct' ? styles.hintWordCorrect : styles.hintWordIncorrect)
+                                : (isRevealed ? styles.hintWordRevealed : (partialCount > 0 ? styles.hintWordPartial : ''));
+
+                              // Determine what to display
+                              let displayText;
+                              if (comparisonResult || isRevealed) {
+                                // Show full word if checked or manually revealed
+                                displayText = pureWord;
+                              } else if (partialCount > 0) {
+                                // Show partial characters
+                                displayText = pureWord.substring(0, partialCount) + '\u00A0'.repeat(pureWord.length - partialCount);
+                              } else {
+                                // Show all spaces
+                                displayText = '\u00A0'.repeat(pureWord.length);
+                              }
+
+                              return (
+                                <span key={idx} className={styles.hintWordContainer}>
+                                  <span
+                                    className={`${styles.hintWordBox} ${wordClass}`}
+                                    onClick={() => !comparisonResult && toggleRevealHintWord(currentSentenceIndex, idx)}
+                                    title={comparisonResult ? (comparisonResult === 'correct' ? 'Đúng' : 'Sai') : (isRevealed ? 'Click để ẩn' : 'Click để hiện gợi ý')}
+                                  >
+                                    {displayText}
+                                  </span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.textareaWithVoice}>
+                        <textarea
+                          className={styles.fullSentenceInput}
+                          placeholder="Nhập toàn bộ câu..."
+                          value={fullSentenceInputs[currentSentenceIndex] || ''}
+                          onChange={(e) => {
+                            setFullSentenceInputs(prev => ({
+                              ...prev,
+                              [currentSentenceIndex]: e.target.value
+                            }));
+                            // Calculate partial reveals as user types
+                            if (transcriptData[currentSentenceIndex]) {
+                              calculatePartialReveals(currentSentenceIndex, e.target.value, transcriptData[currentSentenceIndex].text);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // Auto-check on Enter (but allow Shift+Enter for new line)
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleFullSentenceSubmit(currentSentenceIndex);
+                            }
+                          }}
+                          disabled={completedSentences.includes(currentSentenceIndex)}
+                          rows={3}
+                        />
+                        {!completedSentences.includes(currentSentenceIndex) && (
+                          <div className="voiceButton">
+                            <ShadowingVoiceRecorder
+                              onTranscript={(text) => {
+                                setFullSentenceInputs(prev => ({
+                                  ...prev,
+                                  [currentSentenceIndex]: text
+                                }));
+                                if (transcriptData[currentSentenceIndex]) {
+                                  calculatePartialReveals(currentSentenceIndex, text, transcriptData[currentSentenceIndex].text);
+                                }
+                              }}
+                              onAudioRecorded={(audioBlob) => console.log('Audio recorded:', audioBlob)}
+                              language="de-DE"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.dictationActions}>
+                        <button
+                          className={styles.checkButton}
+                          onClick={() => handleFullSentenceSubmit(currentSentenceIndex)}
+                          disabled={completedSentences.includes(currentSentenceIndex)}
+                        >
+                          Kiểm tra
+                        </button>
+
+                        <button
+                          className={styles.nextButton}
+                          onClick={goToNextSentence}
+                          disabled={sortedTranscriptIndices.indexOf(currentSentenceIndex) >= sortedTranscriptIndices.length - 1}
+                        >
+                          {t('lesson.ui.next')}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -3684,6 +3811,9 @@ const DictationPageContent = () => {
                    const segment = transcriptData[originalIndex];
                    const isCompleted = completedSentences.includes(originalIndex);
                    const sentenceWordsCompleted = completedWords[originalIndex] || {};
+                   
+                   // In full-sentence mode, hide all text (100%) in transcript
+                   const effectiveHidePercentage = dictationMode === 'full-sentence' ? 100 : hidePercentage;
 
                    return (
                      <div
@@ -3699,32 +3829,8 @@ const DictationPageContent = () => {
                          {isCompleted && <span className={styles.completedCheck}>✓</span>}
                        </div>
                         <div className={styles.transcriptItemText}>
-                          {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, hidePercentage, sentenceWordsCompleted)}
+                          {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, effectiveHidePercentage, sentenceWordsCompleted)}
                         </div>
-
-                        {/* Voice recording controls for active sentence */}
-                        {originalIndex === currentSentenceIndex && (
-                          <div style={{
-                            marginTop: '12px',
-                            padding: '8px 12px',
-                            background: 'var(--bg-secondary)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: 'var(--border-radius-small)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            fontSize: '13px',
-                            color: 'var(--text-secondary)'
-                          }}>
-                            <span style={{ fontSize: '14px' }}>🎤</span>
-                            <span style={{ fontWeight: '500' }}>Voice Practice</span>
-                            <ShadowingVoiceRecorder
-                              onTranscript={(transcript) => console.log('Voice transcript:', transcript)}
-                              onAudioRecorded={(audioBlob) => console.log('Audio recorded:', audioBlob)}
-                              language="de-DE"
-                            />
-                          </div>
-                        )}
                       </div>
                     );
                   })}
