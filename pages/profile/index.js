@@ -29,15 +29,23 @@ function DashboardIndex() {
       const progressRes = await fetchWithAuth('/api/progress');
       const progressData = await progressRes.json();
       const validProgress = Array.isArray(progressData) ? progressData : [];
+      
+      console.log('📊 Loaded progress:', validProgress.length, 'records');
+      console.log('📊 Sample progress lessonIds:', validProgress.slice(0, 3).map(p => ({ lessonId: p.lessonId, mode: p.mode, percent: p.completionPercent })));
+      
       setProgress(validProgress);
 
       // Load ALL lessons (sorted by order)
       try {
-        const lessonsRes = await fetchWithAuth('/api/lessons');
+        // Fetch all lessons without pagination limit
+        const lessonsRes = await fetchWithAuth('/api/lessons?limit=1000');
         const lessonsData = await lessonsRes.json();
 
         // Handle both old array format and new object format
         const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData.lessons || []);
+
+        console.log('📚 Loaded lessons:', lessons.length, 'lessons');
+        console.log('📚 Sample lesson IDs:', lessons.slice(0, 3).map(l => l.id));
 
         if (lessons && lessons.length > 0) {
           // Sort by newest first (createdAt descending)
@@ -48,6 +56,7 @@ function DashboardIndex() {
           });
           setAllLessons(sortedLessons);
         } else {
+          console.warn('⚠️ No lessons found');
           setAllLessons([]);
         }
       } catch (lessonError) {
@@ -74,6 +83,21 @@ function DashboardIndex() {
 
     return Math.min(100, maxProgress);
   }, [progress]);
+
+  // Debug: Log filtered lessons count
+  useEffect(() => {
+    const lessonsWithProgress = allLessons.filter(l => calculateProgress(l.id) > 0);
+    console.log('🔍 Debug Info:');
+    console.log('  - Total lessons:', allLessons.length);
+    console.log('  - Total progress records:', progress.length);
+    console.log('  - Lessons with progress > 0:', lessonsWithProgress.length);
+    
+    if (allLessons.length > 0 && progress.length > 0 && lessonsWithProgress.length === 0) {
+      console.warn('⚠️ Mismatch detected! Lessons and progress exist but no matches found');
+      console.log('Sample lesson IDs:', allLessons.slice(0, 3).map(l => ({ id: l.id, _id: l._id })));
+      console.log('Sample progress lessonIds:', progress.slice(0, 3).map(p => p.lessonId));
+    }
+  }, [allLessons, progress, calculateProgress]);
 
   // Get progress details for a lesson (both modes)
   const getProgressDetails = (lessonId) => {
@@ -159,8 +183,114 @@ function DashboardIndex() {
 
           {/* RIGHT COLUMN - Main Content */}
           <div className={styles.mainContent}>
-            {/* Lesson Progress Section */}
-            <div className={styles.lessonProgressSection}>
+            {/* Overall Lesson Progress - List of all lessons with % */}
+            <div className={styles.overallProgressSection}>
+              <div className={styles.overallProgressHeader}>
+                <h2 className={styles.sectionTitleSmall}>📊 Tiến độ bài học</h2>
+                <div className={styles.overallStats}>
+                  <span className={styles.overallStatBadge}>
+                    {allLessons.filter(l => calculateProgress(l.id) > 0).length} / {allLessons.length} bài
+                  </span>
+                  <span className={styles.overallStatBadge}>
+                    {allLessons.length > 0 
+                      ? Math.round((allLessons.filter(l => calculateProgress(l.id) > 0).length / allLessons.length) * 100)
+                      : 0}% tổng
+                  </span>
+                </div>
+              </div>
+
+              {allLessons.filter(l => calculateProgress(l.id) > 0).length === 0 ? (
+                <div className={styles.emptyProgress}>
+                  <div className={styles.emptyProgressIcon}>📚</div>
+                  <p className={styles.emptyProgressText}>Chưa có bài học nào. Bắt đầu học ngay!</p>
+                </div>
+              ) : (
+                <div className={styles.lessonProgressList}>
+                  {allLessons
+                    .filter(l => calculateProgress(l.id) > 0)
+                    .sort((a, b) => calculateProgress(b.id) - calculateProgress(a.id))
+                    .map((lesson) => {
+                      const progressPercent = calculateProgress(lesson.id);
+                      const progressDetails = getProgressDetails(lesson.id);
+                      return (
+                        <div key={lesson.id} className={styles.lessonProgressItem}>
+                          <div className={styles.lessonProgressItemHeader}>
+                            <div className={styles.lessonProgressItemTitle}>
+                              <span className={styles.lessonProgressItemIcon}>
+                                {progressPercent === 100 ? '✅' : '⏱️'}
+                              </span>
+                              <div className={styles.lessonProgressItemTitleText}>
+                                <h4 className={styles.lessonProgressItemName}>
+                                  {lesson.displayTitle || lesson.title}
+                                </h4>
+                                <span className={styles.lessonProgressItemLevel}>
+                                  {lesson.level || 'A1'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className={styles.lessonProgressItemPercent}>
+                              {Math.round(progressPercent)}%
+                            </div>
+                          </div>
+
+                          {/* Overall Progress Bar */}
+                          <div className={styles.lessonProgressItemBar}>
+                            <div
+                              className={styles.lessonProgressItemBarFill}
+                              style={{ width: `${progressPercent}%` }}
+                            />
+                          </div>
+
+                          {/* Mode Progress */}
+                          <div className={styles.lessonProgressItemModes}>
+                            <div className={styles.lessonProgressItemMode}>
+                              <span className={styles.modeIcon}>🎤</span>
+                              <span className={styles.modeName}>Shadowing</span>
+                              <div className={styles.modeProgressMini}>
+                                <div 
+                                  className={`${styles.modeProgressMiniFill} ${styles.shadowingFillMini}`}
+                                  style={{ width: `${progressDetails.shadowing}%` }}
+                                />
+                              </div>
+                              <span className={styles.modePercentMini}>{progressDetails.shadowing}%</span>
+                            </div>
+                            <div className={styles.lessonProgressItemMode}>
+                              <span className={styles.modeIcon}>✍️</span>
+                              <span className={styles.modeName}>Dictation</span>
+                              <div className={styles.modeProgressMini}>
+                                <div 
+                                  className={`${styles.modeProgressMiniFill} ${styles.dictationFillMini}`}
+                                  style={{ width: `${progressDetails.dictation}%` }}
+                                />
+                              </div>
+                              <span className={styles.modePercentMini}>{progressDetails.dictation}%</span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className={styles.lessonProgressItemActions}>
+                            <button
+                              onClick={() => navigateWithLocale(router, `/shadowing/${lesson.id}`)}
+                              className={`${styles.lessonProgressItemBtn} ${styles.shadowingBtn}`}
+                            >
+                              🎤 Shadowing
+                            </button>
+                            <button
+                              onClick={() => navigateWithLocale(router, `/dictation/${lesson.id}`)}
+                              className={`${styles.lessonProgressItemBtn} ${styles.dictationBtn}`}
+                            >
+                              ✍️ Dictation
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            {/* Old Lesson Progress Section - Keep for detailed view with tabs */}
+            <div className={styles.lessonProgressSection} style={{ display: 'none' }}>
               <h2 className={styles.lessonProgressTitle}>{t('dashboard.progress.title')}</h2>
 
               {/* Progress Tabs */}

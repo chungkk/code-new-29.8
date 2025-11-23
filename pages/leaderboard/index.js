@@ -60,12 +60,6 @@ export default function LeaderboardPage() {
   const leaderboardData = data?.leaderboard || [];
   const currentUserRank = data?.currentUserRank || null;
 
-
-
-
-
-
-
   // Get top 3 users
   const topThree = leaderboardData.slice(0, 3);
   const restOfUsers = leaderboardData.slice(3);
@@ -89,49 +83,33 @@ export default function LeaderboardPage() {
         <p className={styles.subtitle}>{t('leaderboard.subtitle')}</p>
       </div>
 
-        <div className={styles.mainCard}>
+      <div className={styles.mainCard}>
+        {/* Ranking Section */}
+        <div className={styles.rankingSection}>
+          <h2 className={styles.rankingTitle}>
+            <span className={styles.titleIcon}>💎</span>
+            {t('leaderboard.allTime')}
+          </h2>
 
-
-
-
-
-          {/* Ranking Section */}
-          <div className={styles.rankingSection}>
-            <h2 className={styles.rankingTitle}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              {t('leaderboard.allTime')}
-            </h2>
-
-            {/* Current User Rank */}
-            {currentUserRank && user && (
-              <div className={styles.currentUserCard}>
-                <div className={styles.rankBadgeSmall}>#{currentUserRank.rank}</div>
-                <div className={styles.userAvatar}>
-                  <div className={styles.avatarCircle}>{user.name.charAt(0).toUpperCase()}</div>
-                </div>
-                <div className={styles.userDetails}>
-                  <h3 className={styles.userName}>{user.name}</h3>
-                  <div className={styles.userLabel}>{t('leaderboard.yourRank')}</div>
-                  <div className={styles.userPoints}>
-                    <span className={styles.pointBadge}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
-                      </svg>
-                      {currentUserRank.totalPoints || 0} {t('leaderboard.pts')}
-                    </span>
-                    <span className={styles.pointBadge}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
-                      </svg>
-                      {t('leaderboard.maxStreak')}: {currentUserRank.maxStreak || 0}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.rankBadgeSmall}>#{currentUserRank.rank}</div>
+          {/* Current User Rank */}
+          {currentUserRank && user && (
+            <div className={styles.currentUserCard}>
+              <div className={styles.rankBadgeSmall}>#{currentUserRank.rank}</div>
+              <div className={styles.userAvatar}>
+                <div className={styles.avatarCircle}>{user.name.charAt(0).toUpperCase()}</div>
               </div>
-            )}
+              <div className={styles.userDetails}>
+                <h3 className={styles.userName}>{user.name}</h3>
+                <div className={styles.userLabel}>{t('leaderboard.yourRank')}</div>
+                <div className={styles.userPoints}>
+                  <span className={styles.pointBadge}>
+                    <span className={styles.pointIcon}>💎</span>
+                    {currentUserRank.totalPoints || 0} {t('leaderboard.pts')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
             {/* Top 3 Users */}
             {isLoading ? (
@@ -166,16 +144,8 @@ export default function LeaderboardPage() {
                       <h3 className={styles.userName}>{userData.name}</h3>
                       <div className={styles.userPoints}>
                         <span className={styles.pointBadge}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
-                          </svg>
+                          <span className={styles.pointIcon}>💎</span>
                           {userData.totalPoints || 0} {t('leaderboard.pts')}
-                        </span>
-                        <span className={styles.pointBadge}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
-                          </svg>
-                          {t('leaderboard.maxStreak')}: {userData.maxStreak || 0}
                         </span>
                       </div>
                     </div>
@@ -202,16 +172,8 @@ export default function LeaderboardPage() {
                       <h3 className={styles.userName}>{userData.name}</h3>
                       <div className={styles.userPoints}>
                         <span className={styles.pointBadge}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/>
-                          </svg>
+                          <span className={styles.pointIcon}>💎</span>
                           {userData.totalPoints || 0} {t('leaderboard.pts')}
-                        </span>
-                        <span className={styles.pointBadge}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
-                          </svg>
-                          {t('leaderboard.maxStreak')}: {userData.maxStreak || 0}
                         </span>
                       </div>
                     </div>

@@ -5,7 +5,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
   border-radius: 0;
-  margin-top: 80px; /* Account for fixed header height (64px) + some extra spacing */
+  margin-top: 88px; /* Account for fixed header height + spacing */
 }
 
 .header {
@@ -146,8 +146,8 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.rankingTitle svg {
-  color: #8a2be2;
+.rankingTitle .titleIcon {
+  font-size: 1.5rem;
   filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.5));
 }
 
@@ -404,8 +404,8 @@
   box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
 }
 
-.pointBadge svg {
-  color: #fbbf24;
+.pointBadge .pointIcon {
+  font-size: 1rem;
   filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5));
 }
 
@@ -432,7 +432,7 @@
   .container {
     max-width: 100%;
     padding: 0.75rem;
-    margin-top: 80px;
+    margin-top: 88px;
   }
 
   .title {
@@ -469,7 +469,7 @@
 @media (max-width: 768px) {
   .container {
     padding: 0.75rem 0.5rem;
-    margin-top: 64px; /* Header height 56px + 8px spacing */
+    margin-top: 80px; /* Header height + spacing for tablet */
   }
 
   .header {
@@ -534,7 +534,7 @@
 @media (max-width: 480px) {
   .container {
     padding: 0.5rem;
-    margin-top: 60px; /* Header height 52px + 8px spacing */
+    margin-top: 72px; /* Header height + spacing for mobile */
   }
 
   .header {
