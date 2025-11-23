@@ -1773,14 +1773,13 @@ const DictationPageContent = () => {
       setTimeout(() => {
         const firstWordBox = document.querySelector(`[data-sentence-index="${sentenceIndex}"] .${styles.hintWordBox}`);
         
-        // Award points for correct words (+1 per word)
-        if (correctCount > 0) {
-          updatePoints(correctCount, `Full-sentence: ${correctCount} từ đúng`, firstWordBox);
-        }
+        // Calculate total points: +1 per correct word, -0.5 per incorrect word
+        const totalPoints = (correctCount * 1) + (incorrectCount * -0.5);
         
-        // Deduct points for incorrect words (-0.5 per word)
-        if (incorrectCount > 0) {
-          updatePoints(-0.5 * incorrectCount, `Full-sentence: ${incorrectCount} từ sai`, firstWordBox);
+        // Only update if there's a point change
+        if (totalPoints !== 0) {
+          const reason = `Full-sentence: ${correctCount} từ đúng, ${incorrectCount} từ sai (tổng: ${totalPoints > 0 ? '+' : ''}${totalPoints})`;
+          updatePoints(totalPoints, reason, firstWordBox);
         }
         
         // Mark all words as processed
@@ -2272,15 +2271,15 @@ const DictationPageContent = () => {
 
           // Trigger points refresh in AuthContext (if available)
           if (typeof window !== 'undefined') {
-            // Show +1 animation in header for positive points
+            // Show animation in header with actual point value
             if (pointsChange > 0 && window.showPointsPlusOne) {
-              console.log('🎉 Calling showPointsPlusOne');
-              window.showPointsPlusOne();
+              console.log('🎉 Calling showPointsPlusOne with:', pointsChange);
+              window.showPointsPlusOne(pointsChange);
             }
-            // Show -0.5 animation in header for negative points
+            // Show animation in header with actual point value
             if (pointsChange < 0 && window.showPointsMinus) {
-              console.log('⚠️ Calling showPointsMinus');
-              window.showPointsMinus();
+              console.log('⚠️ Calling showPointsMinus with:', pointsChange);
+              window.showPointsMinus(pointsChange);
             }
             
             // Wait a bit to ensure the update is committed to DB before fetching

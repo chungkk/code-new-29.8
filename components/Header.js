@@ -19,7 +19,9 @@ const Header = () => {
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [showPointsPlusOne, setShowPointsPlusOne] = useState(false);
+  const [pointsPlusValue, setPointsPlusValue] = useState(1);
   const [showPointsMinus, setShowPointsMinus] = useState(false);
+  const [pointsMinusValue, setPointsMinusValue] = useState(-0.5);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
@@ -35,18 +37,20 @@ const Header = () => {
     console.log('📊 Header userPoints changed:', userPoints);
   }, [userPoints]);
 
-  // Show points +1 animation
-  const showPointsAnimation = useCallback(() => {
-    console.log('🎉 showPointsAnimation called!');
+  // Show points animation (positive points)
+  const showPointsAnimation = useCallback((points = 1) => {
+    console.log('🎉 showPointsAnimation called with:', points);
+    setPointsPlusValue(points);
     setShowPointsPlusOne(true);
     setTimeout(() => {
       setShowPointsPlusOne(false);
     }, 1500);
   }, []);
 
-  // Show points -0.5 animation
-  const showPointsMinusAnimation = useCallback(() => {
-    console.log('⚠️ showPointsMinusAnimation called!');
+  // Show points animation (negative points)
+  const showPointsMinusAnimation = useCallback((points = -0.5) => {
+    console.log('⚠️ showPointsMinusAnimation called with:', points);
+    setPointsMinusValue(points);
     setShowPointsMinus(true);
     setTimeout(() => {
       setShowPointsMinus(false);
@@ -235,11 +239,11 @@ const Header = () => {
                 </div>
 
                 {showPointsPlusOne && (
-                  <div className={styles.pointsPlusOne}>+1</div>
+                  <div className={styles.pointsPlusOne}>+{pointsPlusValue}</div>
                 )}
 
                 {showPointsMinus && (
-                  <div className={styles.pointsMinus}>-0.5</div>
+                  <div className={styles.pointsMinus}>{pointsMinusValue}</div>
                 )}
               </div>
 
