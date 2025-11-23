@@ -35,7 +35,8 @@ const DIFFICULTY_TO_PERCENTAGE = {
   'b1': 30,
   'b2': 60,
   'c1': 100,
-  'c2': 100
+  'c2': 100,
+  'c1c2': 100  // Combined C1+C2 option
 };
 
 const PERCENTAGE_TO_DIFFICULTY = {
@@ -103,7 +104,7 @@ const DictationPageContent = () => {
   const [userSeekTimeout, setUserSeekTimeout] = useState(null);
   const [isTextHidden, setIsTextHidden] = useState(true);
   const [hidePercentage, setHidePercentage] = useState(30); // Will be loaded from user profile
-  const [difficultyLevel, setDifficultyLevel] = useState('b1'); // a1, a2, b1, b2, c1, c2
+  const [difficultyLevel, setDifficultyLevel] = useState('b1'); // a1, a2, b1, b2, c1c2 (or legacy c1, c2)
   
   // Auto-stop video at end of sentence (similar to shadowing mode)
   const [autoStop, setAutoStop] = useState(true);
@@ -139,12 +140,34 @@ const DictationPageContent = () => {
   // Load user's preferred difficulty level
   useEffect(() => {
     if (user && user.preferredDifficultyLevel) {
-      const level = user.preferredDifficultyLevel;
+      let level = user.preferredDifficultyLevel;
+      
+      // Migrate legacy c1/c2 to c1c2
+      if (level === 'c1' || level === 'c2') {
+        level = 'c1c2';
+        // Save the migration automatically
+        updateDifficultyLevel('c1c2').then(result => {
+          if (result.success) {
+            console.log('✅ Migrated difficulty level from', user.preferredDifficultyLevel, '→ c1c2');
+          }
+        });
+      }
+      
       setDifficultyLevel(level);
       setHidePercentage(DIFFICULTY_TO_PERCENTAGE[level] || 30);
+      
+      // Auto-switch mode based on difficulty level
+      if (level === 'c1c2') {
+        setDictationMode('full-sentence');
+        console.log('✅ Auto-switched to full-sentence mode for C1+C2');
+      } else {
+        setDictationMode('fill-blanks');
+        console.log('✅ Auto-switched to fill-blanks mode for', level.toUpperCase());
+      }
+      
       console.log('✅ Loaded difficulty level from user:', level, '→', DIFFICULTY_TO_PERCENTAGE[level] + '%');
     }
-  }, [user]);
+  }, [user, updateDifficultyLevel]);
 
   // Handle difficulty level change
   const handleDifficultyChange = useCallback(async (newLevel) => {
@@ -152,6 +175,15 @@ const DictationPageContent = () => {
     
     setHidePercentage(newPercentage);
     setDifficultyLevel(newLevel);
+    
+    // Auto-switch mode based on difficulty level
+    if (newLevel === 'c1c2') {
+      setDictationMode('full-sentence');
+      console.log('✅ Auto-switched to full-sentence mode for C1+C2');
+    } else {
+      setDictationMode('fill-blanks');
+      console.log('✅ Auto-switched to fill-blanks mode for', newLevel.toUpperCase());
+    }
     
     // Save to database
     if (user) {
@@ -3262,32 +3294,9 @@ const DictationPageContent = () => {
                     <option value="a2">A2 (30%)</option>
                     <option value="b1">B1 (30%)</option>
                     <option value="b2">B2 (60%)</option>
-                    <option value="c1">C1 (100%)</option>
-                    <option value="c2">C2 (100%)</option>
+                    <option value="c1c2">C1+C2 (100%)</option>
                   </select>
                 </div>
-                {/* Dictation Mode Toggle - Show on both mobile and desktop */}
-                <button
-                  onClick={() => setDictationMode(dictationMode === 'fill-blanks' ? 'full-sentence' : 'fill-blanks')}
-                  className={styles.modeToggle}
-                  data-mode={dictationMode}
-                  title={dictationMode === 'fill-blanks' ? 'Chuyển sang chế độ nhập câu' : 'Chuyển sang chế độ điền từ'}
-                >
-                  {dictationMode === 'fill-blanks' ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="8" y1="6" x2="21" y2="6"></line>
-                      <line x1="8" y1="12" x2="21" y2="12"></line>
-                      <line x1="8" y1="18" x2="21" y2="18"></line>
-                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                    </svg>
-                  )}
-                </button>
               </div>
               {!isMobile && (
                 <div className={styles.sentenceCounter}>
@@ -3794,7 +3803,7 @@ const DictationPageContent = () => {
                           rows={3}
                         />
                         {!completedSentences.includes(currentSentenceIndex) && (
-                          <div className="voiceButton">
+                          <div className={styles.dictationVoiceButton}>
                             <ShadowingVoiceRecorder
                               onTranscript={(text) => {
                                 setFullSentenceInputs(prev => ({

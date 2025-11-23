@@ -280,8 +280,7 @@ function SettingsPage() {
                     <option value="a2">A2 (30% hidden)</option>
                     <option value="b1">B1 (30% hidden)</option>
                     <option value="b2">B2 (60% hidden)</option>
-                    <option value="c1">C1 (100% hidden)</option>
-                    <option value="c2">C2 (100% hidden)</option>
+                    <option value="c1c2">C1+C2 (100% hidden)</option>
                   </select>
                   <p className={styles.settingHint} style={{ fontSize: '12px', marginTop: '6px' }}>
                     {t('lesson.ui.currentLevel')} <strong>{
@@ -289,8 +288,7 @@ function SettingsPage() {
                       user?.preferredDifficultyLevel === 'a2' ? 'A2 (30%)' :
                       user?.preferredDifficultyLevel === 'b1' ? 'B1 (30%)' :
                       user?.preferredDifficultyLevel === 'b2' ? 'B2 (60%)' :
-                      user?.preferredDifficultyLevel === 'c1' ? 'C1 (100%)' :
-                      user?.preferredDifficultyLevel === 'c2' ? 'C2 (100%)' :
+                      (user?.preferredDifficultyLevel === 'c1c2' || user?.preferredDifficultyLevel === 'c1' || user?.preferredDifficultyLevel === 'c2') ? 'C1+C2 (100%)' :
                       'B1 (30%)'
                     }</strong>
                     {' '}<small>• {t('lesson.ui.appliesTo')}</small>

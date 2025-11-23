@@ -2035,13 +2035,221 @@
   to { transform: rotate(360deg); }
 }
 
+/* ============================================================================
+ * DICTATION VOICE BUTTON STYLING (Desktop)
+ * ============================================================================
+ * Custom styling for dictation mode voice recorder button:
+ * - Larger size (60px vs 44px in shadowing)
+ * - Centered position at bottom (instead of bottom-right corner)
+ * - Uses same color scheme as original (purple/violet gradient)
+ * ============================================================================
+ */
+.dictationVoiceButton {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 60px;
+  height: 60px;
+  opacity: 1;
+}
+
+.dictationVoiceButton :global(button) {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  background: 
+    linear-gradient(135deg, rgba(167, 139, 250, 0.35) 0%, rgba(139, 92, 246, 0.3) 50%, rgba(124, 58, 237, 0.35) 100%) !important;
+  border: 3px solid transparent !important;
+  background-clip: padding-box !important;
+  position: relative !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 
+    0 8px 32px -4px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(167, 139, 250, 0.3),
+    inset 0 2px 8px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(124, 58, 237, 0.2) !important;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer;
+  animation: gentleFloat 3s ease-in-out infinite !important;
+}
+
+.dictationVoiceButton :global(button::before) {
+  content: '' !important;
+  position: absolute !important;
+  inset: -3px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.8), rgba(139, 92, 246, 0.6), rgba(124, 58, 237, 0.8)) !important;
+  z-index: -1 !important;
+  opacity: 0 !important;
+  transition: opacity 0.4s ease !important;
+}
+
+.dictationVoiceButton :global(button:hover:not(:disabled)) {
+  transform: translateY(-4px) scale(1.12) rotate(5deg) !important;
+  box-shadow: 
+    0 12px 48px -8px rgba(139, 92, 246, 0.6),
+    0 0 0 2px rgba(167, 139, 250, 0.5),
+    0 0 60px rgba(167, 139, 250, 0.4),
+    inset 0 2px 12px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 8px rgba(124, 58, 237, 0.3) !important;
+  background: 
+    linear-gradient(135deg, rgba(167, 139, 250, 0.45) 0%, rgba(139, 92, 246, 0.4) 50%, rgba(124, 58, 237, 0.45) 100%) !important;
+  animation: gentleFloat 3s ease-in-out infinite, gentlePulse 2s ease-in-out infinite !important;
+}
+
+.dictationVoiceButton :global(button:hover::before) {
+  opacity: 1 !important;
+  animation: rotateBorder 8s linear infinite !important;
+}
+
+.dictationVoiceButton :global(button:active:not(:disabled)) {
+  transform: translateY(-1px) scale(1.05) rotate(0deg) !important;
+  box-shadow: 
+    0 6px 24px rgba(139, 92, 246, 0.5),
+    0 0 0 1px rgba(167, 139, 250, 0.4),
+    inset 0 3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 4px rgba(255, 255, 255, 0.1) !important;
+}
+
+.dictationVoiceButton :global(button svg) {
+  width: 28px !important;
+  height: 28px !important;
+  stroke: #c4b5fd !important;
+  stroke-width: 2.5 !important;
+  fill: none !important;
+  filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.4)) !important;
+  transition: all 0.3s ease !important;
+}
+
+.dictationVoiceButton :global(button:hover svg) {
+  stroke: #e9d5ff !important;
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6)) !important;
+  animation: gentleBounce 0.6s ease-in-out !important;
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes rotateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gentleBounce {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+/* Recording state - cute vibrant red */
+.dictationVoiceButton :global(button[class*="recording"]) {
+  background: 
+    linear-gradient(135deg, rgba(251, 113, 133, 0.4) 0%, rgba(244, 63, 94, 0.35) 50%, rgba(225, 29, 72, 0.4) 100%) !important;
+  box-shadow: 
+    0 8px 32px rgba(244, 63, 94, 0.5),
+    0 0 0 2px rgba(251, 113, 133, 0.4),
+    0 0 60px rgba(251, 113, 133, 0.3),
+    inset 0 2px 8px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(225, 29, 72, 0.3) !important;
+  animation: dictationVoiceButtonPulse 1.2s ease-in-out infinite, gentleFloat 3s ease-in-out infinite !important;
+  transform: scale(1.08) !important;
+}
+
+.dictationVoiceButton :global(button[class*="recording"] svg) {
+  stroke: #fecdd3 !important;
+  filter: drop-shadow(0 0 10px rgba(251, 113, 133, 0.8)) !important;
+  animation: recordingPulse 1.2s ease-in-out infinite !important;
+}
+
+@keyframes dictationVoiceButtonPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 0 rgba(251, 113, 133, 0.8),
+      0 8px 32px rgba(244, 63, 94, 0.5),
+      0 0 0 2px rgba(251, 113, 133, 0.4),
+      inset 0 2px 8px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 16px rgba(251, 113, 133, 0),
+      0 12px 48px rgba(244, 63, 94, 0.7),
+      0 0 0 3px rgba(251, 113, 133, 0.6),
+      inset 0 2px 12px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes recordingPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+/* Processing state - cute blue */
+.dictationVoiceButton :global(button[class*="processing"]) {
+  background: 
+    linear-gradient(135deg, rgba(147, 197, 253, 0.35) 0%, rgba(96, 165, 250, 0.3) 50%, rgba(59, 130, 246, 0.35) 100%) !important;
+  box-shadow: 
+    0 8px 32px rgba(96, 165, 250, 0.45),
+    0 0 0 2px rgba(147, 197, 253, 0.4),
+    0 0 60px rgba(147, 197, 253, 0.3),
+    inset 0 2px 8px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(59, 130, 246, 0.3) !important;
+  animation: processingShimmer 2s ease-in-out infinite, gentleFloat 3s ease-in-out infinite !important;
+}
+
+.dictationVoiceButton :global(button[class*="processing"] svg) {
+  stroke: #dbeafe !important;
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6)) !important;
+  animation: spin 1.5s linear infinite !important;
+}
+
+@keyframes processingShimmer {
+  0%, 100% {
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  50% {
+    filter: brightness(1.2) hue-rotate(10deg);
+  }
+}
+
 .fullSentenceInput {
   width: 100%;
   min-height: 92px;
   max-height: 142px;
   padding: 10px;
-  padding-right: 64px; /* Space for voice button */
-  padding-bottom: 10px;
+  padding-bottom: 72px; /* Space for centered voice button at bottom */
   font-size: 16px;
   line-height: 1.4;
   background: rgba(255, 255, 255, 0.08);
