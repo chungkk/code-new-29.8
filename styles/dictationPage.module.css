@@ -1903,6 +1903,9 @@
   width: 100%;
   margin-top: auto;
   margin-bottom: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .textareaWithVoice .voiceButton {
@@ -1988,8 +1991,8 @@
 
 .fullSentenceInput {
   width: 100%;
-  min-height: 72px;
-  max-height: 122px;
+  min-height: 92px;
+  max-height: 142px;
   padding: 10px;
   padding-right: 64px; /* Space for voice button */
   padding-bottom: 10px;
