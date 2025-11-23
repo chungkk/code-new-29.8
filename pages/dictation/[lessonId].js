@@ -3360,7 +3360,7 @@ const DictationPageContent = () => {
                                 )}
                               </div>
 
-                              <div className={styles.textareaWithVoice}>
+                              <div className={styles.textareaWithVoice} style={{ position: 'relative' }}>
                                 <textarea
                                   className={styles.fullSentenceInput}
                                   placeholder="Nhập toàn bộ câu..."
@@ -3382,21 +3382,27 @@ const DictationPageContent = () => {
                                   }}
                                   disabled={isCompleted}
                                   rows={3}
+                                  style={{ paddingRight: '50px' }}
                                 />
                                 {!isCompleted && (
-                                  <VoiceInputButton
-                                    onTranscript={(text) => {
-                                      setFullSentenceInputs(prev => ({
-                                        ...prev,
-                                        [originalIndex]: text
-                                      }));
-                                      calculatePartialReveals(originalIndex, text, sentence.text);
-                                    }}
-                                    language="de-DE"
-                                    mode="whisper"
-                                    className={styles.voiceButton}
-                                    disabled={isCompleted}
-                                  />
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '8px',
+                                    right: '8px',
+                                    zIndex: 1
+                                  }}>
+                                    <ShadowingVoiceRecorder
+                                      onTranscript={(text) => {
+                                        setFullSentenceInputs(prev => ({
+                                          ...prev,
+                                          [originalIndex]: text
+                                        }));
+                                        calculatePartialReveals(originalIndex, text, sentence.text);
+                                      }}
+                                      onAudioRecorded={(audioBlob) => console.log('Audio recorded:', audioBlob)}
+                                      language="de-DE"
+                                    />
+                                  </div>
                                 )}
                               </div>
 

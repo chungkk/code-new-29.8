@@ -1698,7 +1698,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 8px;
+  padding: 8px 8px 0 8px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -1711,10 +1711,11 @@
   font-size: 16px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.7);
-  min-height: 60px;
+  min-height: 140px;
+  max-height: 210px;
   display: flex;
   align-items: flex-start;
-  overflow: hidden;
+  overflow-y: auto;
   width: 100%;
   box-sizing: border-box;
 }
@@ -1900,6 +1901,8 @@
 .textareaWithVoice {
   position: relative;
   width: 100%;
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 .textareaWithVoice .voiceButton {
@@ -1985,7 +1988,8 @@
 
 .fullSentenceInput {
   width: 100%;
-  min-height: 59px; /* Reduced by 30% from 84px */
+  min-height: 52px;
+  max-height: 102px;
   padding: 10px;
   padding-right: 64px; /* Space for voice button */
   padding-bottom: 10px;
@@ -2918,18 +2922,20 @@
 
   /* Full sentence mode mobile adjustments */
   .fullSentenceMode {
-    padding: 6px;
+    padding: 6px 6px 0 6px;
     gap: 10px;
   }
 
   .fullSentenceDisplay {
     padding: 10px;
     font-size: 14px;
-    min-height: 50px;
+    min-height: 120px;
+    max-height: 190px;
   }
 
   .fullSentenceInput {
-    min-height: 80px;
+    min-height: 40px;
+    max-height: 80px;
     font-size: 14px;
     padding: 10px;
   }
@@ -3124,7 +3130,8 @@
   }
 
   .fullSentenceInput {
-    min-height: 59px; /* Reduced by 30% from 84px */
+    min-height: 40px;
+    max-height: 80px;
     font-size: 16px;
     padding: 8px;
     padding-right: 68px; /* Space for larger voice button on mobile */
