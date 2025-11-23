@@ -1273,11 +1273,11 @@ const DictationPageContent = () => {
     if (isMobile && dictationSlidesRef.current && transcriptData.length > 0) {
       const container = dictationSlidesRef.current;
       const slideIndex = mobileVisibleIndices.indexOf(currentSentenceIndex);
-      
+
       if (slideIndex !== -1) {
         // Find the actual rendered slide by data-slide-index attribute
         const targetSlide = container.querySelector(`[data-slide-index="${slideIndex}"]`);
-        
+
         if (targetSlide) {
           // Scroll to center the slide
           targetSlide.scrollIntoView({
@@ -1291,6 +1291,71 @@ const DictationPageContent = () => {
       }
     }
   }, [currentSentenceIndex, isMobile, mobileVisibleIndices, transcriptData.length, lazySlideRange]);
+
+  // Sync currentSentenceIndex when user manually scrolls slides
+  useEffect(() => {
+    if (!isMobile || !dictationSlidesRef.current) return;
+
+    const container = dictationSlidesRef.current;
+    let scrollTimeout;
+
+    const handleScroll = () => {
+      // Clear previous timeout
+      clearTimeout(scrollTimeout);
+
+      // Debounce to avoid too many updates during scroll
+      scrollTimeout = setTimeout(() => {
+        const containerRect = container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        // Find which slide is currently centered
+        const slides = container.querySelectorAll('[data-slide-index]');
+        let closestSlide = null;
+        let minDistance = Infinity;
+
+        slides.forEach((slide) => {
+          const slideRect = slide.getBoundingClientRect();
+          const slideCenter = slideRect.left + slideRect.width / 2;
+          const distance = Math.abs(slideCenter - containerCenter);
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestSlide = slide;
+          }
+        });
+
+        if (closestSlide) {
+          const slideIndex = parseInt(closestSlide.getAttribute('data-slide-index'));
+          const sentenceIndex = mobileVisibleIndices[slideIndex];
+
+          // Only update if different from current
+          if (sentenceIndex !== undefined && sentenceIndex !== currentSentenceIndex) {
+            setCurrentSentenceIndex(sentenceIndex);
+
+            // Update audio/video position to match the sentence
+            const sentence = transcriptData[sentenceIndex];
+            if (sentence) {
+              if (youtubePlayerRef.current && isYouTube) {
+                youtubePlayerRef.current.seekTo(sentence.start, true);
+                setCurrentTime(sentence.start);
+              } else if (audioRef.current) {
+                audioRef.current.currentTime = sentence.start;
+                setCurrentTime(sentence.start);
+              }
+              setSegmentPlayEndTime(sentence.end);
+            }
+          }
+        }
+      }, 150); // 150ms debounce
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [isMobile, mobileVisibleIndices, currentSentenceIndex, transcriptData, isYouTube]);
 
   const goToPreviousSentence = useCallback(() => {
     // Find current position in sorted list
