@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SEO, { generateVideoStructuredData, generateBreadcrumbStructuredData } from '../../components/SEO';
 import AudioControls from '../../components/AudioControls';
 import FooterControls from '../../components/FooterControls';
+import dynamic from 'next/dynamic';
 import SentenceListItem from '../../components/SentenceListItem';
 import DictionaryPopup from '../../components/DictionaryPopup';
 import WordTooltip from '../../components/WordTooltip';
@@ -11,6 +12,11 @@ import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
 import ProgressIndicator from '../../components/ProgressIndicator';
 import VoiceInputButton from '../../components/VoiceInputButton';
+
+const ShadowingVoiceRecorder = dynamic(() => import('../../components/ShadowingVoiceRecorder'), {
+  ssr: false,
+  loading: () => <div style={{ width: '40px', height: '40px', background: '#f0f0f0', borderRadius: '50%' }}></div>
+});
 import { useLessonData } from '../../lib/hooks/useLessonData';
 import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
@@ -211,6 +217,10 @@ const DictationPageContent = () => {
   
   // Consecutive sentence completion counter
   const [consecutiveSentences, setConsecutiveSentences] = useState(0);
+
+  // Voice recording states for dictation practice (per sentence)
+  const [recordingStates, setRecordingStates] = useState({}); // { sentenceIndex: { isRecording, recordedBlob, comparisonResult, isPlaying } }
+  const audioPlaybackRef = useRef(null);
 
   // Study time tracking
   const [studyTime, setStudyTime] = useState(0); // Total study time in seconds
@@ -3682,12 +3692,36 @@ const DictationPageContent = () => {
                          #{originalIndex + 1}
                          {isCompleted && <span className={styles.completedCheck}>✓</span>}
                        </div>
-                       <div className={styles.transcriptItemText}>
-                         {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, hidePercentage, sentenceWordsCompleted)}
-                       </div>
-                     </div>
-                   );
-                 })}
+                        <div className={styles.transcriptItemText}>
+                          {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, hidePercentage, sentenceWordsCompleted)}
+                        </div>
+
+                        {/* Voice recording controls for active sentence */}
+                        {originalIndex === currentSentenceIndex && (
+                          <div style={{
+                            marginTop: '12px',
+                            padding: '8px 12px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: 'var(--border-radius-small)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '13px',
+                            color: 'var(--text-secondary)'
+                          }}>
+                            <span style={{ fontSize: '14px' }}>🎤</span>
+                            <span style={{ fontWeight: '500' }}>Voice Practice</span>
+                            <ShadowingVoiceRecorder
+                              onTranscript={(transcript) => console.log('Voice transcript:', transcript)}
+                              onAudioRecorded={(audioBlob) => console.log('Audio recorded:', audioBlob)}
+                              language="de-DE"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                </div>
              </div>
           </div>
