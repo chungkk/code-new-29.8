@@ -857,7 +857,47 @@ const DictationPageContent = () => {
     }
   }, [loadedProgress, loadedStudyTime]);
 
+  // Auto-jump to first incomplete sentence on page load (once only)
+  useEffect(() => {
+    // Only run once when progress is loaded and transcript is ready
+    if (!progressLoaded || !transcriptData.length || hasJumpedToIncomplete.current) {
+      return;
+    }
 
+    // Find first incomplete sentence
+    let firstIncompleteIndex = -1;
+    for (let i = 0; i < transcriptData.length; i++) {
+      if (!completedSentences.includes(i)) {
+        firstIncompleteIndex = i;
+        break;
+      }
+    }
+
+    // Jump to first incomplete sentence if found and different from current
+    if (firstIncompleteIndex !== -1 && firstIncompleteIndex !== currentSentenceIndex) {
+      console.log(`🚀 Auto-jumping to first incomplete sentence: ${firstIncompleteIndex}`);
+      setCurrentSentenceIndex(firstIncompleteIndex);
+      
+      // Seek to the start of that sentence
+      const targetSentence = transcriptData[firstIncompleteIndex];
+      if (targetSentence) {
+        if (isYouTube) {
+          const player = youtubePlayerRef.current;
+          if (player && player.seekTo) {
+            player.seekTo(targetSentence.start);
+          }
+        } else {
+          const audio = audioRef.current;
+          if (audio) {
+            audio.currentTime = targetSentence.start;
+          }
+        }
+      }
+    }
+
+    // Mark as jumped so we don't auto-jump again
+    hasJumpedToIncomplete.current = true;
+  }, [progressLoaded, transcriptData, completedSentences, currentSentenceIndex, isYouTube]);
 
   // Smooth time update with requestAnimationFrame
   useEffect(() => {
