@@ -170,7 +170,6 @@ const DictationPageContent = () => {
   // Touch swipe handling
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const [swipeDirection, setSwipeDirection] = useState(null);
 
   // Progress tracking
   const [completedSentences, setCompletedSentences] = useState([]);
@@ -234,6 +233,7 @@ const DictationPageContent = () => {
   
   // Ref for mobile dictation slides to enable auto-scroll
   const dictationSlidesRef = useRef(null);
+  const isProgrammaticScrollRef = useRef(false); // Track programmatic vs manual scroll
 
   // Leaderboard tracking
   const sessionStartTimeRef = useRef(Date.now());
@@ -1300,6 +1300,11 @@ const DictationPageContent = () => {
     let scrollTimeout;
 
     const handleScroll = () => {
+      // Skip if this is a programmatic scroll (from buttons/swipe/keyboard)
+      if (isProgrammaticScrollRef.current) {
+        return;
+      }
+
       // Clear previous timeout
       clearTimeout(scrollTimeout);
 
@@ -1361,11 +1366,19 @@ const DictationPageContent = () => {
     // Find current position in sorted list
     const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
     if (currentPositionInSorted > 0) {
+      // Mark as programmatic scroll to prevent handleScroll from interfering
+      isProgrammaticScrollRef.current = true;
+
       // Get previous index from sorted list
       const newIndex = sortedTranscriptIndices[currentPositionInSorted - 1];
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
+
+      // Clear flag after scroll animation completes (smooth scroll ~300ms)
+      setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 500);
     }
   }, [currentSentenceIndex, transcriptData, handleSentenceClick, sortedTranscriptIndices]);
 
@@ -1373,11 +1386,19 @@ const DictationPageContent = () => {
     // Find current position in sorted list
     const currentPositionInSorted = sortedTranscriptIndices.indexOf(currentSentenceIndex);
     if (currentPositionInSorted < sortedTranscriptIndices.length - 1) {
+      // Mark as programmatic scroll to prevent handleScroll from interfering
+      isProgrammaticScrollRef.current = true;
+
       // Get next index from sorted list
       const newIndex = sortedTranscriptIndices[currentPositionInSorted + 1];
       setCurrentSentenceIndex(newIndex);
       const item = transcriptData[newIndex];
       handleSentenceClick(item.start, item.end);
+
+      // Clear flag after scroll animation completes (smooth scroll ~300ms)
+      setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 500);
     }
   }, [currentSentenceIndex, transcriptData, handleSentenceClick, sortedTranscriptIndices]);
 
@@ -1400,22 +1421,18 @@ const DictationPageContent = () => {
 
     if (isLeftSwipe) {
       e.preventDefault();
-      
+
       // Haptic feedback for swipe
       hapticEvents.slideSwipe();
-      
-      setSwipeDirection('left');
+
       goToNextSentence();
-      setTimeout(() => setSwipeDirection(null), 300);
     } else if (isRightSwipe) {
       e.preventDefault();
-      
+
       // Haptic feedback for swipe
       hapticEvents.slideSwipe();
-      
-      setSwipeDirection('right');
+
       goToPreviousSentence();
-      setTimeout(() => setSwipeDirection(null), 300);
     }
 
     setTouchStart(null);
@@ -3262,7 +3279,7 @@ const DictationPageContent = () => {
                           {/* Mode 1: Fill in blanks */}
                           {dictationMode === 'fill-blanks' ? (
                             <div
-                              className={`${styles.dictationInputArea} ${swipeDirection && isActive ? styles[`swipe-${swipeDirection}`] : ''}`}
+                              className={styles.dictationInputArea}
                               data-sentence-index={originalIndex}
                               dangerouslySetInnerHTML={{ __html: sentenceProcessedText }}
                               onTouchStart={isActive ? handleTouchStart : undefined}
@@ -3271,7 +3288,12 @@ const DictationPageContent = () => {
                             />
                           ) : (
                             /* Mode 2: Full sentence input */
-                            <div className={styles.fullSentenceMode}>
+                            <div
+                              className={styles.fullSentenceMode}
+                              onTouchStart={isActive ? handleTouchStart : undefined}
+                              onTouchMove={isActive ? handleTouchMove : undefined}
+                              onTouchEnd={isActive ? handleTouchEnd : undefined}
+                            >
                               <div className={styles.fullSentenceDisplay}>
                                 {isCompleted ? (
                                   <div className={styles.completedSentenceText}>
@@ -3321,7 +3343,6 @@ const DictationPageContent = () => {
                                           >
                                             {displayText}
                                           </span>
-                                          {punctuation && <span className={styles.hintPunctuation}>{punctuation}</span>}
                                         </span>
                                       );
                                     })}
@@ -3505,7 +3526,7 @@ const DictationPageContent = () => {
                 /* Desktop: Single Sentence View */
                 <>
                   <div
-                    className={`${styles.dictationInputArea} ${swipeDirection ? styles[`swipe-${swipeDirection}`] : ''}`}
+                    className={styles.dictationInputArea}
                     data-sentence-index={currentSentenceIndex}
                     dangerouslySetInnerHTML={{ __html: processedText }}
                     onTouchStart={handleTouchStart}
