@@ -11,41 +11,44 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #ddd;
-  background: white;
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   outline: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
 .voiceButton:hover:not(:disabled) {
-  border-color: #4CAF50;
-  background: #f0f9f0;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border-color: rgba(239, 68, 68, 0.9);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
 }
 
 .voiceButton:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(1.05);
 }
 
 .voiceButton:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .voiceButton.active {
-  border-color: #f44336;
-  background: #fff0f0;
+  border-color: rgba(239, 68, 68, 1);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%);
   animation: pulseButton 1.5s ease-in-out infinite;
 }
 
 .voiceButton.processing {
-  border-color: #2196F3;
-  background: #e3f2fd;
+  border-color: rgba(33, 150, 243, 0.7);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.25) 0%, rgba(21, 101, 192, 0.25) 100%);
 }
 
 .micIcon {
@@ -53,6 +56,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 1;
+  filter: brightness(1.5) contrast(1.1);
 }
 
 /* Pulse animation for recording state */
@@ -137,13 +142,7 @@
 }
 
 .modeIndicator {
-  position: absolute;
-  bottom: -20px;
-  font-size: 10px;
-  color: #999;
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 4px;
+  display: none; /* Hide mode indicator */
 }
 
 /* Mobile styles */

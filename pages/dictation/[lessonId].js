@@ -10,6 +10,7 @@ import WordTooltip from '../../components/WordTooltip';
 import WordSuggestionPopup from '../../components/WordSuggestionPopup';
 import PointsAnimation from '../../components/PointsAnimation';
 import ProgressIndicator from '../../components/ProgressIndicator';
+import VoiceInputButton from '../../components/VoiceInputButton';
 import { useLessonData } from '../../lib/hooks/useLessonData';
 import { youtubeAPI } from '../../lib/youtubeApi';
 import { useAuth } from '../../context/AuthContext';
@@ -3263,28 +3264,45 @@ const DictationPageContent = () => {
                                 )}
                               </div>
 
-                              <textarea
-                                className={styles.fullSentenceInput}
-                                placeholder="Nhập toàn bộ câu..."
-                                value={fullSentenceInputs[originalIndex] || ''}
-                                onChange={(e) => {
-                                  setFullSentenceInputs(prev => ({
-                                    ...prev,
-                                    [originalIndex]: e.target.value
-                                  }));
-                                  // Calculate partial reveals as user types
-                                  calculatePartialReveals(originalIndex, e.target.value, sentence.text);
-                                }}
-                                onKeyDown={(e) => {
-                                  // Auto-check on Enter (but allow Shift+Enter for new line)
-                                  if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleFullSentenceSubmit(originalIndex);
-                                  }
-                                }}
-                                disabled={isCompleted}
-                                rows={3}
-                              />
+                              <div className={styles.textareaWithVoice}>
+                                <textarea
+                                  className={styles.fullSentenceInput}
+                                  placeholder="Nhập toàn bộ câu..."
+                                  value={fullSentenceInputs[originalIndex] || ''}
+                                  onChange={(e) => {
+                                    setFullSentenceInputs(prev => ({
+                                      ...prev,
+                                      [originalIndex]: e.target.value
+                                    }));
+                                    // Calculate partial reveals as user types
+                                    calculatePartialReveals(originalIndex, e.target.value, sentence.text);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    // Auto-check on Enter (but allow Shift+Enter for new line)
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleFullSentenceSubmit(originalIndex);
+                                    }
+                                  }}
+                                  disabled={isCompleted}
+                                  rows={3}
+                                />
+                                {!isCompleted && (
+                                  <VoiceInputButton
+                                    onTranscript={(text) => {
+                                      setFullSentenceInputs(prev => ({
+                                        ...prev,
+                                        [originalIndex]: text
+                                      }));
+                                      calculatePartialReveals(originalIndex, text, sentence.text);
+                                    }}
+                                    language="de-DE"
+                                    mode="whisper"
+                                    className={styles.voiceButton}
+                                    disabled={isCompleted}
+                                  />
+                                )}
+                              </div>
 
                               {isActive && !isCompleted && (
                                 <div className={styles.dictationActions}>

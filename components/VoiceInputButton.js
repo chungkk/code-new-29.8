@@ -192,14 +192,28 @@ const VoiceInputButton = ({
         type="button"
       >
         {isProcessing ? (
-          <span className={styles.spinner}>⏳</span>
+          <svg className={styles.spinner} width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="0">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
         ) : isActive ? (
           <>
-            <span className={styles.micIcon}>🎤</span>
+            <svg className={styles.micIcon} width="20" height="20" viewBox="0 0 24 24">
+              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="currentColor"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <path d="M12 18v4" fill="currentColor"/>
+              <path d="M8 22h8" fill="currentColor"/>
+            </svg>
             <span className={styles.pulse}></span>
           </>
         ) : (
-          <span className={styles.micIcon}>🎤</span>
+          <svg className={styles.micIcon} width="20" height="20" viewBox="0 0 24 24">
+            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="currentColor"/>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <path d="M12 18v4" fill="currentColor"/>
+            <path d="M8 22h8" fill="currentColor"/>
+          </svg>
         )}
       </button>
 

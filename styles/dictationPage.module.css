@@ -1869,10 +1869,23 @@
   letter-spacing: 1px;
 }
 
+.textareaWithVoice {
+  position: relative;
+  width: 100%;
+}
+
+.textareaWithVoice .voiceButton {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
 .fullSentenceInput {
   width: 100%;
   min-height: 100px;
   padding: 12px;
+  padding-bottom: 52px; /* Space for voice button */
   font-size: 15px;
   line-height: 1.5;
   background: rgba(255, 255, 255, 0.08);
@@ -2943,6 +2956,18 @@
 
   .leftSection {
     height: auto;
+  }
+
+  .textareaWithVoice .voiceButton {
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .fullSentenceInput {
+    min-height: 80px;
+    font-size: 14px;
+    padding: 10px;
+    padding-bottom: 48px; /* Space for voice button on mobile */
   }
 
   .videoWrapper {
