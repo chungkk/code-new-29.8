@@ -17,10 +17,11 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
+  transform: scale(0.85); /* Scale down the entire circle by 15% */
 }
 
 .circularProgress:hover {
-  transform: scale(1.05);
+  transform: scale(0.9); /* Slightly larger on hover, but still smaller than original */
 }
 
 .circularProgress.milestone {
@@ -29,10 +30,10 @@
 
 @keyframes pulse {
   0%, 100% {
-    transform: scale(1);
+    transform: scale(0.85);
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(0.95);
   }
 }
 
@@ -55,12 +56,12 @@
 }
 
 .progressPercent {
-  font-size: 14px;
+  font-size: 12px; /* Reduced from 14px */
   line-height: 1;
 }
 
 .progressSymbol {
-  font-size: 9px;
+  font-size: 8px; /* Reduced from 9px */
   margin-left: 1px;
   opacity: 0.7;
 }
@@ -76,11 +77,11 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  padding: 3px 6px;
+  padding: 2px 5px; /* Reduced padding */
   background: var(--bg-primary);
   border: 1.5px solid;
-  border-radius: 8px;
-  font-size: 11px;
+  border-radius: 6px; /* Smaller border radius */
+  font-size: 10px; /* Reduced from 11px */
   font-weight: 600;
   transition: all 0.2s ease;
 }
@@ -91,14 +92,14 @@
 }
 
 .statIcon {
-  font-size: 12px;
+  font-size: 11px; /* Reduced from 12px */
   line-height: 1;
 }
 
 .statValue {
   color: var(--text-primary);
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  font-size: 11px;
+  font-size: 10px; /* Reduced from 11px */
 }
 
 /* Tooltip - Smaller, more compact */

@@ -23,6 +23,7 @@ const Header = () => {
   const [showPointsMinus, setShowPointsMinus] = useState(false);
   const [pointsMinusValue, setPointsMinusValue] = useState(-0.5);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const userMenuRef = useRef(null);
   const languageMenuRef = useRef(null);
   const notificationMenuRef = useRef(null);
@@ -36,6 +37,20 @@ const Header = () => {
   useEffect(() => {
     console.log('📊 Header userPoints changed:', userPoints);
   }, [userPoints]);
+
+  // Detect scroll for transparent header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Show points animation (positive points)
   const showPointsAnimation = useCallback((points = 1) => {
@@ -167,7 +182,7 @@ const Header = () => {
   };
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={styles.headerContent}>
         <Link href="/" className={styles.logo}>
           <div className={styles.logoIcon}>🦜</div>
@@ -234,7 +249,7 @@ const Header = () => {
             <>
               <div className={styles.pointsContainer}>
                 <div className={styles.pointsBadge} title={t('header.points')}>
-                  <span className={styles.pointsIcon}>€</span>
+                  <span className={styles.pointsIcon}>💎</span>
                   <span className={styles.pointsValue}>{userPoints || 0}</span>
                 </div>
 

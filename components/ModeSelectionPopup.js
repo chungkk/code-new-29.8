@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import styles from '../styles/ModeSelectionPopup.module.css';
 
 const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const formatStudyTime = (seconds) => {
     if (!seconds || seconds === 0) return '0s';
     
@@ -72,10 +74,12 @@ const ModeSelectionPopup = ({ lesson, onClose, onSelectMode }) => {
                 <div className={styles.modeName}>{mode.name}</div>
               </div>
               <div className={styles.modeDescription}>{mode.description}</div>
-              <div className={styles.modeStudyTime}>
-                <span className={styles.studyTimeIcon}>⏱️</span>
-                <span className={styles.studyTimeText}>{t('modeSelection.studied', { time: formatStudyTime(mode.studyTime) })}</span>
-              </div>
+              {user && (
+                <div className={styles.modeStudyTime}>
+                  <span className={styles.studyTimeIcon}>⏱️</span>
+                  <span className={styles.studyTimeText}>{t('modeSelection.studied', { time: formatStudyTime(mode.studyTime) })}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

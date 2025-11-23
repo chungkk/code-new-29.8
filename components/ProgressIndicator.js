@@ -29,7 +29,10 @@ const ProgressIndicator = ({
     const wordAccuracyPercent = totalWords > 0 ? Math.round((correctWordsCount / totalWords) * 100) : 0;
 
     // Overall progress (weighted average: 70% sentences, 30% words)
-    const overallPercent = Math.round(sentencePercent * 0.7 + wordAccuracyPercent * 0.3);
+    // If all sentences completed, show 100%
+    const overallPercent = sentencePercent === 100 
+      ? 100 
+      : Math.round(sentencePercent * 0.7 + wordAccuracyPercent * 0.3);
 
     // Study time formatted
     const hours = Math.floor(studyTime / 3600);

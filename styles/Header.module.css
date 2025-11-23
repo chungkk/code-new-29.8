@@ -27,6 +27,19 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(139, 92, 246, 0.25);
 }
 
+/* Scrolled state - More transparent */
+[data-theme="light"] .header.scrolled {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(247, 251, 245, 0.70) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom-color: rgba(107, 166, 85, 0.2);
+}
+
+[data-theme="dark"] .header.scrolled {
+  background: rgba(15, 5, 32, 0.65);
+  backdrop-filter: blur(20px);
+  border-bottom-color: rgba(147, 51, 234, 0.2);
+}
+
 .headerContent {
   max-width: 1400px;
   margin: 0 auto;
