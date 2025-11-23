@@ -121,6 +121,7 @@ const DictationPageContent = () => {
   const [revealedHintWords, setRevealedHintWords] = useState({}); // { sentenceIndex: { wordIndex: true } }
   const [wordComparisonResults, setWordComparisonResults] = useState({}); // { sentenceIndex: { wordIndex: 'correct' | 'incorrect' } }
   const [partialRevealedChars, setPartialRevealedChars] = useState({}); // { sentenceIndex: { wordIndex: numberOfCharsRevealed } }
+  const [checkedSentences, setCheckedSentences] = useState([]); // Array of sentence indices that have been checked (revealed after check)
 
   // Save dictationMode to localStorage when it changes
   useEffect(() => {
@@ -1693,6 +1694,11 @@ const DictationPageContent = () => {
       [sentenceIndex]: {}
     }));
 
+    // Mark sentence as checked (to reveal in transcript, regardless of correct/incorrect)
+    if (!checkedSentences.includes(sentenceIndex)) {
+      setCheckedSentences(prev => [...prev, sentenceIndex]);
+    }
+
     // If correct (>=80%), mark as completed
     if (isCorrect) {
       // Haptic feedback for success
@@ -1729,7 +1735,72 @@ const DictationPageContent = () => {
       // Show error with similarity percentage
       // toast.error(`✗ Chỉ đúng ${similarity}%. Cần ≥80%`);
     }
-  }, [fullSentenceInputs, transcriptData, completedSentences, completedWords, saveProgress]);
+  }, [fullSentenceInputs, transcriptData, completedSentences, completedWords, checkedSentences, saveProgress]);
+
+  // Handle points for full-sentence mode when word comparison results change
+  useEffect(() => {
+    if (!transcriptData.length) return;
+    
+    // Process points for each sentence that has comparison results
+    Object.keys(wordComparisonResults).forEach(sentenceIdx => {
+      const sentenceIndex = parseInt(sentenceIdx);
+      const comparisonResults = wordComparisonResults[sentenceIndex];
+      const sentence = transcriptData[sentenceIndex];
+      
+      if (!sentence || !comparisonResults) return;
+      
+      // Check if this sentence has already been scored
+      const allWordsProcessed = Object.keys(comparisonResults).every(wordIdx => 
+        wordPointsProcessed[sentenceIndex]?.[parseInt(wordIdx)]
+      );
+      
+      if (allWordsProcessed) return; // Already scored this sentence
+      
+      // Count correct and incorrect words
+      let correctCount = 0;
+      let incorrectCount = 0;
+      
+      Object.keys(comparisonResults).forEach(wordIdxStr => {
+        const wordIdx = parseInt(wordIdxStr);
+        if (comparisonResults[wordIdx] === 'correct') {
+          correctCount++;
+        } else {
+          incorrectCount++;
+        }
+      });
+      
+      // Award/deduct points as batch (with small delay for DOM update)
+      setTimeout(() => {
+        const firstWordBox = document.querySelector(`[data-sentence-index="${sentenceIndex}"] .${styles.hintWordBox}`);
+        
+        // Award points for correct words (+1 per word)
+        if (correctCount > 0) {
+          updatePoints(correctCount, `Full-sentence: ${correctCount} từ đúng`, firstWordBox);
+        }
+        
+        // Deduct points for incorrect words (-0.5 per word)
+        if (incorrectCount > 0) {
+          updatePoints(-0.5 * incorrectCount, `Full-sentence: ${incorrectCount} từ sai`, firstWordBox);
+        }
+        
+        // Mark all words as processed
+        const updatedProcessed = {};
+        Object.keys(comparisonResults).forEach(wordIdxStr => {
+          const wordIdx = parseInt(wordIdxStr);
+          updatedProcessed[wordIdx] = comparisonResults[wordIdx];
+        });
+        
+        setWordPointsProcessed(prev => ({
+          ...prev,
+          [sentenceIndex]: {
+            ...(prev[sentenceIndex] || {}),
+            ...updatedProcessed
+          }
+        }));
+      }, 50);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wordComparisonResults, transcriptData, wordPointsProcessed]);
 
   // Toggle reveal hint word
   const toggleRevealHintWord = useCallback((sentenceIndex, wordIndex) => {
@@ -2349,15 +2420,19 @@ const DictationPageContent = () => {
   }, []);
 
   // Mask text by percentage - used for transcript display
-  const maskTextByPercentage = useCallback((text, sentenceIdx, hidePercent, sentenceWordsCompleted = {}) => {
+  const maskTextByPercentage = useCallback((text, sentenceIdx, hidePercent, sentenceWordsCompleted = {}, revealedWords = {}) => {
     if (hidePercent === 100) {
-      // Mask all letters except completed words
+      // Mask all letters except completed words or revealed hint words
       const words = text.split(/\s+/);
       const processedWords = words.map((word, wordIndex) => {
         const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
         if (pureWord.length >= 1) {
           // If word is completed, show it
           if (sentenceWordsCompleted[wordIndex]) {
+            return word;
+          }
+          // If word is revealed via hint click, show it
+          if (revealedWords[wordIndex]) {
             return word;
           }
           // Otherwise mask it
@@ -2400,6 +2475,11 @@ const DictationPageContent = () => {
       if (pureWord.length >= 1) {
         // If word is completed, always show it
         if (sentenceWordsCompleted[wordIndex]) {
+          return word;
+        }
+
+        // If word is revealed via hint click, always show it
+        if (revealedWords[wordIndex]) {
           return word;
         }
 
@@ -3308,7 +3388,7 @@ const DictationPageContent = () => {
                                     {sentence.text}
                                   </div>
                                 ) : (
-                                  <div className={styles.hintSentenceText}>
+                                  <div className={styles.hintSentenceText} data-sentence-index={originalIndex}>
                                     {sentence.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
                                       // Remove punctuation to get pure word
                                       const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
@@ -3639,7 +3719,7 @@ const DictationPageContent = () => {
                             {transcriptData[currentSentenceIndex]?.text}
                           </div>
                         ) : (
-                          <div className={styles.hintSentenceText}>
+                          <div className={styles.hintSentenceText} data-sentence-index={currentSentenceIndex}>
                             {transcriptData[currentSentenceIndex]?.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
                               // Remove punctuation to get pure word
                               const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
@@ -3812,8 +3892,17 @@ const DictationPageContent = () => {
                    const isCompleted = completedSentences.includes(originalIndex);
                    const sentenceWordsCompleted = completedWords[originalIndex] || {};
                    
-                   // In full-sentence mode, hide all text (100%) in transcript
+                   // Check if sentence has been checked in full-sentence mode
+                   const isChecked = checkedSentences.includes(originalIndex);
+                   
+                   // In full-sentence mode, hide all text (100%) in transcript UNTIL checked
                    const effectiveHidePercentage = dictationMode === 'full-sentence' ? 100 : hidePercentage;
+                   
+                   // Get revealed hint words for this sentence (for full-sentence mode)
+                   const sentenceRevealedWords = revealedHintWords[originalIndex] || {};
+                   
+                   // Show full text if completed OR if checked in full-sentence mode
+                   const shouldShowFullText = isCompleted || (dictationMode === 'full-sentence' && isChecked);
 
                    return (
                      <div
@@ -3829,7 +3918,7 @@ const DictationPageContent = () => {
                          {isCompleted && <span className={styles.completedCheck}>✓</span>}
                        </div>
                         <div className={styles.transcriptItemText}>
-                          {isCompleted ? segment.text : maskTextByPercentage(segment.text, originalIndex, effectiveHidePercentage, sentenceWordsCompleted)}
+                          {shouldShowFullText ? segment.text : maskTextByPercentage(segment.text, originalIndex, effectiveHidePercentage, sentenceWordsCompleted, sentenceRevealedWords)}
                         </div>
                       </div>
                     );
