@@ -2809,6 +2809,27 @@ const DictationPageContent = () => {
 
   /**
    * ============================================================================
+   * HELPER: Render completed sentence as word boxes (for C1+C2 mode)
+   * ============================================================================
+   */
+  const renderCompletedSentenceWithWordBoxes = useCallback((sentence) => {
+    const words = sentence.split(/\s+/).filter(w => w.length > 0);
+    
+    return words.map((word, idx) => {
+      const pureWord = word.replace(/[^a-zA-Z0-9üäöÜÄÖß]/g, "");
+      const punctuation = word.replace(/[a-zA-Z0-9üäöÜÄÖß]/g, "");
+      
+      if (pureWord.length === 0) return null;
+      
+      return `<span class="word-container">
+        <span class="correct-word completed-word" onclick="window.handleWordClickForPopup && window.handleWordClickForPopup('${pureWord}', this)">${pureWord}</span>
+        <span class="word-punctuation">${punctuation}</span>
+      </span>`;
+    }).filter(Boolean).join(' ');
+  }, []);
+
+  /**
+   * ============================================================================
    * DYNAMIC HTML GENERATION FOR DICTATION
    * ============================================================================
    *
@@ -3392,9 +3413,10 @@ const DictationPageContent = () => {
                             >
                               <div className={styles.fullSentenceDisplay}>
                                 {isCompleted ? (
-                                  <div className={styles.completedSentenceText}>
-                                    {sentence.text}
-                                  </div>
+                                  <div 
+                                    className={styles.dictationInputArea}
+                                    dangerouslySetInnerHTML={{ __html: renderCompletedSentenceWithWordBoxes(sentence.text) }}
+                                  />
                                 ) : (
                                   <div className={styles.hintSentenceText} data-sentence-index={originalIndex}>
                                     {sentence.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
@@ -3723,9 +3745,10 @@ const DictationPageContent = () => {
                     <div className={styles.fullSentenceMode}>
                       <div className={styles.fullSentenceDisplay}>
                         {completedSentences.includes(currentSentenceIndex) ? (
-                          <div className={styles.completedSentenceText}>
-                            {transcriptData[currentSentenceIndex]?.text}
-                          </div>
+                          <div 
+                            className={styles.dictationInputArea}
+                            dangerouslySetInnerHTML={{ __html: renderCompletedSentenceWithWordBoxes(transcriptData[currentSentenceIndex]?.text || '') }}
+                          />
                         ) : (
                           <div className={styles.hintSentenceText} data-sentence-index={currentSentenceIndex}>
                             {transcriptData[currentSentenceIndex]?.text.split(/\s+/).filter(w => w.length > 0).map((word, idx) => {
