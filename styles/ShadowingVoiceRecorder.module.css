@@ -1,6 +1,33 @@
 .container {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
+  width: auto;
+  height: auto;
+  justify-content: center;
+  position: relative;
+  background: transparent;
+}
+
+/* When used with size="large", make container full width */
+.containerLarge {
+  width: 100%;
+  height: 100%;
+}
+
+/* On mobile, make container fixed size */
+@media (max-width: 768px) {
+  .containerLarge {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.buttonText {
+  font-size: 14px;
+  font-weight: 600;
+  color: currentColor;
+  white-space: nowrap;
 }
 
 .recordButton {
@@ -9,41 +36,41 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  border: 2px solid rgba(239, 68, 68, 0.6);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%);
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .recordButton svg {
   width: 16px;
   height: 16px;
   fill: none;
-  stroke: #ef4444;
+  stroke: #ffffff;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
   transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .recordButton:hover:not(:disabled) {
-  transform: scale(1.1);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
-  border-color: rgba(239, 68, 68, 0.9);
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #7c8eea 0%, #8a5bb2 100%);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .recordButton:hover:not(:disabled) svg {
   transform: scale(1.1);
-  stroke: #dc2626;
+  stroke: #ffffff;
 }
 
 .recordButton:active:not(:disabled) {
-  transform: scale(1.05) rotate(0deg);
+  transform: translateY(0);
 }
 
 .recordButton:disabled {
@@ -52,18 +79,17 @@
 }
 
 .recordButton.recording {
-  border-color: rgba(239, 68, 68, 1);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   animation: recordingPulse 1.5s ease-in-out infinite;
 }
 
 .recordButton.recording svg {
-  stroke: #dc2626;
+  stroke: #ffffff;
   animation: recordingIconPulse 1.5s ease-in-out infinite;
 }
 
 .recordButton.recording .stopIcon svg {
-  fill: #dc2626;
+  fill: #ffffff;
   stroke: none;
 }
 
@@ -73,16 +99,53 @@
   color: #2196F3;
 }
 
-/* Large variant for bottom bar */
+.recordButton.error {
+  border-color: rgba(100, 100, 100, 0.6);
+  background: linear-gradient(135deg, rgba(50, 50, 50, 0.15) 0%, rgba(30, 30, 30, 0.15) 100%);
+  animation: none;
+}
+
+.recordButton.error svg {
+  stroke: #666;
+  fill: none;
+  opacity: 0.7;
+  animation: none;
+}
+
+/* Large variant for video controls - full size clickable button */
 .recordButtonLarge {
-  width: 38px;
-  height: 38px;
-  border-width: 2.5px;
+  width: 100%;
+  height: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.12) 100%);
+  box-shadow: none;
+  padding: 12px 20px;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.recordButtonLarge:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border-color: rgba(102, 126, 234, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
+}
+
+.recordButtonLarge.recording {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #ef4444;
 }
 
 .recordButtonLarge svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 @keyframes recordingPulse {
@@ -110,6 +173,9 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
 }
 
 .spinner {
@@ -155,17 +221,6 @@
   }
 }
 
-.error {
-  padding: 8px 12px;
-  background: #ffebee;
-  border: 1px solid #ffcdd2;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #c62828;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
 /* Mobile styles */
 @media (max-width: 768px) {
   .container {
@@ -173,32 +228,40 @@
   }
 
   .recordButton {
-    width: 22px;
-    height: 22px;
-    border-width: 1.5px;
-    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
+    width: 28px;
+    height: 28px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     flex-shrink: 0;
   }
 
   .recordButton svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.5;
   }
 
   .recordButton:hover:not(:disabled) {
-    transform: scale(1.08);
+    transform: translateY(-2px);
   }
 
   .recordButton.recording {
-    transform: scale(1.03);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
   }
 
   .micIcon, .stopIcon {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .spinner {
-    font-size: 10px;
+    font-size: 12px;
+  }
+
+  .spinner svg {
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
   }
 
   .interimText {
@@ -207,8 +270,36 @@
     max-width: 250px;
   }
 
-  .error {
-    display: none; /* Hide error messages on mobile inline */
+  /* Large button variant on mobile - for bottom control bar */
+  .recordButtonLarge {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    padding: 0;
+    border-radius: 12px;
+  }
+  
+  .recordButtonLarge:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+  
+  .recordButtonLarge.recording {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: recordingPulse 1.5s ease-in-out infinite;
+  }
+
+  /* Hide text on mobile, show only icon */
+  .recordButtonLarge span:not(.micIcon):not(.stopIcon):not(.spinner) {
+    display: none;
+  }
+
+  .recordButtonLarge svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -235,11 +326,5 @@
   .interimText {
     background: #3a3a3a;
     color: #ccc;
-  }
-
-  .error {
-    background: #3a1a1a;
-    border-color: #5a2a2a;
-    color: #ff8a80;
   }
 }

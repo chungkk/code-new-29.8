@@ -240,8 +240,6 @@ const ShadowingPageContent = () => {
     loadSentenceProgress();
   }, [user, lessonId]);
 
-
-
   // Study timer - starts when user plays video for the first time
   // Stops on inactivity (3 min), pause > 30s, or page unload
   const studyTimeRefForTimer = useRef(studyTime);
@@ -835,6 +833,55 @@ const ShadowingPageContent = () => {
     scrollToActiveSentence();
   }, [currentSentenceIndex, scrollToActiveSentence]);
 
+  // Auto-jump to first unrecorded sentence on page load
+  const hasAutoJumpedRef = useRef(false);
+  useEffect(() => {
+    // Only run once when both transcript and progress data are loaded and media is ready
+    if (hasAutoJumpedRef.current || !transcriptData.length || !progressLoaded || duration === 0) return;
+    
+    // For YouTube, also wait for player to be ready
+    if (isYouTube && (!youtubePlayerRef.current || !youtubePlayerRef.current.seekTo)) return;
+    
+    // Find first sentence that hasn't been recorded or passed (< 80% accuracy)
+    let firstUnrecordedIndex = -1;
+    for (let i = 0; i < transcriptData.length; i++) {
+      const progress = sentenceProgressData[i];
+      if (!progress || progress.accuracyPercent < 80) {
+        firstUnrecordedIndex = i;
+        break;
+      }
+    }
+
+    // If found an unrecorded sentence, jump to it
+    if (firstUnrecordedIndex !== -1) {
+      hasAutoJumpedRef.current = true;
+      const targetSentence = transcriptData[firstUnrecordedIndex];
+      
+      // Update sentence index
+      setCurrentSentenceIndex(firstUnrecordedIndex);
+      
+      // Seek audio/video to the sentence start time
+      if (isYouTube) {
+        const player = youtubePlayerRef.current;
+        if (player && player.seekTo) {
+          player.seekTo(targetSentence.start);
+        }
+      } else {
+        const audio = audioRef.current;
+        if (audio) {
+          audio.currentTime = targetSentence.start;
+        }
+      }
+      
+      // Scroll to the sentence after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        scrollToActiveSentence();
+      }, 300);
+      
+      console.log(`Auto-jumped to first unrecorded sentence: ${firstUnrecordedIndex} at ${targetSentence.start}s`);
+    }
+  }, [transcriptData.length, sentenceProgressData, progressLoaded, scrollToActiveSentence, duration, isYouTube]);
+
   // Cleanup user seek timeout
   useEffect(() => {
     return () => {
@@ -1226,6 +1273,7 @@ const ShadowingPageContent = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
+      // Save progress metadata first
       await fetch('/api/shadowing-sentence-progress', {
         method: 'POST',
         headers: {
@@ -1239,10 +1287,47 @@ const ShadowingPageContent = () => {
           score
         })
       });
+
+      // Upload audio file if exists
+      const audioBlob = recordingStates[sentenceIndex]?.recordedBlob;
+      if (audioBlob) {
+        try {
+          const formData = new FormData();
+          formData.append('audio', audioBlob, `sentence_${sentenceIndex}.webm`);
+          formData.append('lessonId', lessonId);
+          formData.append('sentenceIndex', sentenceIndex.toString());
+          formData.append('accuracyPercent', Math.round(accuracyPercent).toString());
+          formData.append('score', score.toString());
+
+          const audioResponse = await fetch('/api/save-shadowing-audio', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          if (audioResponse.ok) {
+            const data = await audioResponse.json();
+            console.log('Audio saved successfully:', data.audioUrl);
+          }
+        } catch (audioError) {
+          console.error('Error uploading audio:', audioError);
+        }
+      }
+
+      // Update local state immediately after save
+      setSentenceProgressData(prev => ({
+        ...prev,
+        [sentenceIndex]: {
+          accuracyPercent: Math.round(accuracyPercent),
+          bestScore: score
+        }
+      }));
     } catch (error) {
       console.error('Error saving sentence progress:', error);
     }
-  }, [user, lessonId]);
+  }, [user, lessonId, recordingStates]);
 
   // Handle voice transcript for shadowing practice (per sentence)
   const handleVoiceTranscript = useCallback((sentenceIndex, transcript) => {
@@ -1740,8 +1825,134 @@ const ShadowingPageContent = () => {
                    </div>
                  </div>
 
-                 {/* Current Sentence Display */}
-                 {transcriptData[currentSentenceIndex] && (
+                 {/* Video Controls - Desktop Only */}
+                 {!isMobile && transcriptData[currentSentenceIndex] && (
+                   <div className={styles.videoControlsSection}>
+                     {/* Top Row: 4 Control Buttons + 2 Recording Buttons */}
+                     <div className={styles.videoControlsTopRow}>
+                       {/* 4 Video Control Buttons */}
+                       <div className={styles.videoControlButtons}>
+                         <button 
+                           className={styles.videoControlBtn}
+                           onClick={goToPreviousSentence}
+                           disabled={currentSentenceIndex === 0}
+                           title="Previous sentence"
+                         >
+                           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                             <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
+                           </svg>
+                         </button>
+                         
+                         <button 
+                           className={styles.videoControlBtn}
+                           onClick={() => handleSeek('backward')}
+                           title="Repeat (replay 3s)"
+                         >
+                           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                             <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                           </svg>
+                         </button>
+                         
+                         <button 
+                           className={`${styles.videoControlBtn} ${styles.videoControlBtnPlay}`}
+                           onClick={handlePlayPause}
+                           title={isPlaying ? 'Pause' : 'Play'}
+                         >
+                           {isPlaying ? (
+                             <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                               <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                             </svg>
+                           ) : (
+                             <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                               <path d="M8 5v14l11-7z"/>
+                             </svg>
+                           )}
+                         </button>
+                         
+                         <button 
+                           className={styles.videoControlBtn}
+                           onClick={goToNextSentence}
+                           disabled={currentSentenceIndex >= transcriptData.length - 1}
+                           title="Next sentence"
+                         >
+                           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                             <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/>
+                           </svg>
+                         </button>
+                       </div>
+                       
+                       {/* Recording Controls - 2 Large Buttons */}
+                       <div className={styles.recordingControlsLarge}>
+                       {/* Playback Recorded Audio Button */}
+                       {recordingStates[currentSentenceIndex]?.recordedBlob && (
+                         <button
+                           className={`${styles.largeRecordBtn} ${styles.largeRecordBtnPlayback} ${recordingStates[currentSentenceIndex]?.isPlaying ? styles.playing : ''}`}
+                           onClick={() => playRecordedAudio(currentSentenceIndex)}
+                         >
+                           {recordingStates[currentSentenceIndex]?.isPlaying ? (
+                             <>
+                               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                 <rect x="6" y="4" width="4" height="16" rx="1"/>
+                                 <rect x="14" y="4" width="4" height="16" rx="1"/>
+                               </svg>
+                               Đang phát
+                             </>
+                           ) : (
+                             <>
+                               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                 <path d="M8 5v14l11-7z"/>
+                               </svg>
+                               Phát lại ghi âm
+                             </>
+                           )}
+                         </button>
+                       )}
+                       
+                       {/* Record Button */}
+                       <ShadowingVoiceRecorder
+                         onTranscript={(transcript) => handleVoiceTranscript(currentSentenceIndex, transcript)}
+                         onAudioRecorded={(audioBlob) => handleAudioRecorded(currentSentenceIndex, audioBlob)}
+                         language="de-DE"
+                         size="large"
+                         onRecordingStateChange={(state) => handleRecordingStateChange(currentSentenceIndex, state)}
+                       />
+                       </div>
+                     </div>
+                     
+                     {/* Current Sentence Display */}
+                     <div className={styles.currentSentenceDisplay}>
+                       <div className={styles.currentSentenceText}>
+                         {transcriptData[currentSentenceIndex].text.split(/\s+/).map((word, idx) => {
+                           const cleanWord = word.replace(/[.,!?;:)(\[\]{}\"'`„"‚'»«›‹—–-]/g, '');
+                           if (cleanWord.length > 0) {
+                             return (
+                               <span
+                                 key={idx}
+                                 className={styles.word}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleWordClickForPopup(word, e);
+                                 }}
+                                 style={{ marginRight: '6px', cursor: 'pointer' }}
+                               >
+                                 {word}
+                               </span>
+                             );
+                           }
+                           return <span key={idx} style={{ marginRight: '6px' }}>{word}</span>;
+                         })}
+                       </div>
+                       {showIPA && transcriptData[currentSentenceIndex].ipa && (
+                         <div className={styles.currentSentenceIPA}>
+                           {transcriptData[currentSentenceIndex].ipa}
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 )}
+                 
+                 {/* Mobile: Keep old current sentence display */}
+                 {isMobile && transcriptData[currentSentenceIndex] && (
                    <div className={styles.currentSentenceDisplay}>
                      <div className={styles.currentSentenceText}>
                        {transcriptData[currentSentenceIndex].text.split(/\s+/).map((word, idx) => {
@@ -1826,100 +2037,72 @@ const ShadowingPageContent = () => {
                          ref={isActive ? activeTranscriptItemRef : null}
                          className={`${styles.transcriptItem} ${isActive ? styles.transcriptItemActive : ''}`}
                        >
-                         {/* Recording controls - desktop: top-right corner, mobile: inline with text */}
-                         <div 
-                           className={styles.recordingControlsInTranscript}
-                           onClick={(e) => e.stopPropagation()}
-                         >
-                           {/* Show score badge if has comparison result */}
-                           {sentenceState.comparisonResult && (
-                             <div 
-                               className={`${styles.scoreBadge} ${sentenceState.comparisonResult.isPassed ? styles.scoreBadgePassed : styles.scoreBadgeFailed}`}
-                               title={sentenceState.comparisonResult.feedback}
-                             >
-                               {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
-                             </div>
-                           )}
+                         {/* Desktop: Show only score badge, no recording controls */}
+                         <div className={styles.transcriptItemHeader}>
+                           <div className={styles.transcriptNumberWithControls}>
+                             <div className={styles.transcriptNumber}>#{index + 1}</div>
+                             
+                             {/* Desktop: Only show score badge if available */}
+                             {!isMobile && sentenceState.comparisonResult && (
+                               <div 
+                                 className={`${styles.scoreBadge} ${sentenceState.comparisonResult.isPassed ? styles.scoreBadgePassed : styles.scoreBadgeFailed}`}
+                                 title={sentenceState.comparisonResult.feedback}
+                               >
+                                 {Math.round(sentenceState.comparisonResult.overallSimilarity)}%
+                               </div>
+                             )}
+                           </div>
+                         </div>
 
-                           {/* Show recorder when can record, or placeholder icon when cannot */}
-                           {canRecord ? (
-                             <ShadowingVoiceRecorder
-                               onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
-                               onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
-                               language="de-DE"
-                               externalIsRecording={sentenceState.isRecording}
-                               externalIsProcessing={sentenceState.isProcessing}
-                               onRecordingStateChange={(state) => handleRecordingStateChange(index, state)}
-                             />
-                           ) : (
-                             <div
-                               className={styles.micPlaceholder}
-                               title="Satz abspielen um Aufnahme zu starten"
-                             >
-                               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                 <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
-                                 <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                                 <path d="M12 18v4"/>
-                                 <path d="M8 22h8"/>
-                               </svg>
-                             </div>
-                           )}
-
-                           {sentenceState.recordedBlob && (
+                         <div onClick={() => handleSentenceClick(segment.start, segment.end)} style={!isMobile ? { display: 'flex', gap: '12px', alignItems: 'flex-start' } : {}}>
+                           {/* Desktop: Play Button Circle - Left of text */}
+                           {!isMobile && (
                              <button
-                               className={`${styles.playbackButtonIcon} ${sentenceState.isPlaying ? styles.playingIcon : ''}`}
-                               onClick={() => playRecordedAudio(index)}
-                               title={sentenceState.isPlaying ? 'Wiedergabe stoppen' : 'Aufnahme abspielen'}
+                               className={styles.sentencePlayButton}
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleSentenceClick(segment.start, segment.end);
+                               }}
+                               aria-label={isPlaying && isActive ? 'Pause' : 'Play'}
                              >
-                               {sentenceState.isPlaying ? (
-                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                   <rect x="6" y="4" width="4" height="16" rx="1"/>
-                                   <rect x="14" y="4" width="4" height="16" rx="1"/>
+                               {isPlaying && isActive ? (
+                                 <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor">
+                                   <rect x="0" y="0" width="2.5" height="10" rx="0.5"/>
+                                   <rect x="5.5" y="0" width="2.5" height="10" rx="0.5"/>
                                  </svg>
                                ) : (
-                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                   <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                                   <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                 <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor">
+                                   <path d="M0 0L8 5L0 10V0Z"/>
                                  </svg>
                                )}
                              </button>
                            )}
-                         </div>
-
-                         <div onClick={() => handleSentenceClick(segment.start, segment.end)}>
-                           <div className={styles.transcriptItemHeader}>
-                             <span className={styles.transcriptNumber}>#{index + 1}</span>
-                           </div>
-
-                           <div className={styles.transcriptText}>
-                         {/* Mobile: Show mic controls inline at the beginning - only when active */}
-                         {isMobile && isActive && (
-                           <span 
-                             className={styles.mobileInlineMicControls}
-                             onClick={(e) => e.stopPropagation()}
+                           
+                           <div style={!isMobile ? { flex: 1, minWidth: 0 } : {}}>
+                             <div className={styles.transcriptText}>
+                         {/* Mobile: Show play button at the beginning */}
+                         {isMobile && (
+                           <button
+                             className={styles.sentencePlayButtonMobile}
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               handleSentenceClick(segment.start, segment.end);
+                             }}
+                             aria-label={isPlaying && isActive ? 'Pause' : 'Play'}
                            >
-                             {canRecord ? (
-                               <ShadowingVoiceRecorder
-                                 onTranscript={(transcript) => handleVoiceTranscript(index, transcript)}
-                                 onAudioRecorded={(audioBlob) => handleAudioRecorded(index, audioBlob)}
-                                 language="de-DE"
-                                 externalIsRecording={sentenceState.isRecording}
-                                 externalIsProcessing={sentenceState.isProcessing}
-                                 onRecordingStateChange={(state) => handleRecordingStateChange(index, state)}
-                               />
+                             {isPlaying && isActive ? (
+                               <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor">
+                                 <rect x="0" y="0" width="2.5" height="10" rx="0.5"/>
+                                 <rect x="5.5" y="0" width="2.5" height="10" rx="0.5"/>
+                               </svg>
                              ) : (
-                               <span className={styles.micPlaceholderInline}>
-                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                   <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
-                                   <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                                   <path d="M12 18v4"/>
-                                   <path d="M8 22h8"/>
-                                 </svg>
-                               </span>
+                               <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor">
+                                 <path d="M0 0L8 5L0 10V0Z"/>
+                               </svg>
                              )}
-                           </span>
+                           </button>
                          )}
+                         {/* Mobile: Don't show inline mic - use bottom bar mic instead */}
                          {/* Mobile: Show percentage always if available, even when not active */}
                          {isMobile && sentenceState.comparisonResult && (
                            <span 
@@ -1939,23 +2122,24 @@ const ShadowingPageContent = () => {
                                    e.stopPropagation();
                                    handleWordClickForPopup(word, e);
                                  } : undefined}
-                                 style={{ marginRight: '6px' }}
+                                 style={{ marginRight: '6px', whiteSpace: 'nowrap', display: 'inline-block' }}
                                >
                                  {word}
                                </span>
                              );
                            }
-                           return <span key={idx} style={{ marginRight: '6px' }}>{word}</span>;
+                           return <span key={idx} style={{ marginRight: '6px', whiteSpace: 'nowrap', display: 'inline-block' }}>{word}</span>;
                          })}
-                       </div>
+                             </div>
+                           
+                             {showIPA && segment.ipa && (
+                               <div className={styles.transcriptIPA}>{segment.ipa}</div>
+                             )}
 
-                           {showIPA && segment.ipa && (
-                             <div className={styles.transcriptIPA}>{segment.ipa}</div>
-                           )}
-
-                           {showTranslation && segment.translation && (
-                             <div className={styles.transcriptTranslation}>{segment.translation}</div>
-                           )}
+                             {showTranslation && segment.translation && (
+                               <div className={styles.transcriptTranslation}>{segment.translation}</div>
+                             )}
+                           </div>
                          </div>
                        </div>
                      );
@@ -1991,8 +2175,6 @@ const ShadowingPageContent = () => {
                           onAudioRecorded={(audioBlob) => handleAudioRecorded(currentSentenceIndex, audioBlob)}
                           language="de-DE"
                           size="large"
-                          externalIsRecording={recordingStates[currentSentenceIndex]?.isRecording}
-                          externalIsProcessing={recordingStates[currentSentenceIndex]?.isProcessing}
                           onRecordingStateChange={(state) => handleRecordingStateChange(currentSentenceIndex, state)}
                         />
                       ) : (

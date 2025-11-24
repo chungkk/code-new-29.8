@@ -44,7 +44,7 @@
 .videoWrapper {
   position: relative;
   width: 100%;
-  padding-top: 50.625%; /* 16:9 aspect ratio reduced by 10% (56.25% * 0.9) */
+  padding-top: 45%; /* 16:9 aspect ratio reduced by 20% (56.25% * 0.8) */
   background: #000;
 }
 
@@ -99,6 +99,127 @@
   font-size: 12px;
   font-weight: 600;
   backdrop-filter: blur(4px);
+}
+
+/* Video Controls Section - Desktop Only */
+.videoControlsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.videoControlsTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.videoControlButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.videoControlBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.videoControlBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(74, 144, 226, 0.5);
+  transform: scale(1.05);
+}
+
+.videoControlBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.videoControlBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.videoControlBtn svg {
+  transition: transform 0.2s ease;
+}
+
+.videoControlBtn:hover:not(:disabled) svg {
+  transform: scale(1.1);
+}
+
+.videoControlBtnPlay {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.videoControlBtnPlay:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7c8eea 0%, #8a5bb2 100%);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Recording Controls Large - 2 Buttons */
+.recordingControlsLarge {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex: 1;
+  align-items: center;
+}
+
+.recordingControlsLarge > * {
+  flex: 0 1 auto;
+  min-width: 160px;
+  max-width: 200px;
+}
+
+.largeRecordBtnPlayback {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 2px solid;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #cbd5e1;
+}
+
+.largeRecordBtnPlayback svg {
+  flex-shrink: 0;
+}
+
+.largeRecordBtnPlayback:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(148, 163, 184, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.3);
+}
+
+.largeRecordBtnPlayback.playing {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.6);
+  color: #f97316;
 }
 
 /* Current Sentence Display */
@@ -540,6 +661,89 @@
   position: relative;
 }
 
+/* Sentence Play Button - Purple Circle */
+.sentencePlayButton {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
+  padding: 0;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sentencePlayButton:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, #7c8eea 0%, #8a5bb2 100%);
+}
+
+.sentencePlayButton:active {
+  transform: scale(0.9);
+}
+
+.sentencePlayButton svg {
+  margin-left: 1px;
+  transition: transform 0.2s ease;
+  width: 8px;
+  height: 10px;
+}
+
+/* When playing (pause icon), center it */
+.sentencePlayButton:has(rect) svg {
+  margin-left: 0;
+}
+
+/* Mobile Play Button - Smaller version */
+.sentencePlayButtonMobile {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+  padding: 0;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Hide mobile play button on desktop */
+@media (min-width: 769px) {
+  .sentencePlayButtonMobile {
+    display: none !important;
+  }
+}
+
+.sentencePlayButtonMobile:active {
+  transform: scale(0.9);
+}
+
+.sentencePlayButtonMobile svg {
+  margin-left: 1px;
+  transition: transform 0.2s ease;
+}
+
+.sentencePlayButtonMobile:has(rect) svg {
+  margin-left: 0;
+}
+
 .transcriptItem:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.2);
@@ -555,12 +759,27 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  width: 100%;
+}
+
+/* On desktop, show number with controls on the left */
+@media (min-width: 769px) {
+  .transcriptItemHeader {
+    margin-bottom: 12px;
+  }
 }
 
 .transcriptNumberWithControls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+/* Hide sentence number on mobile - already in CSS but ensure it works */
+@media (max-width: 768px) {
+  .transcriptNumberWithControls {
+    display: none !important;
+  }
 }
 
 .transcriptNumber {
@@ -608,8 +827,9 @@
   color: var(--text-primary);
   font-weight: 500;
   margin-bottom: 6px;
-  word-wrap: break-word;
+  word-break: normal;
   overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .clickableWord {
@@ -659,7 +879,7 @@
 /* Responsive Design */
 @media (min-width: 769px) {
   .videoWrapper {
-    padding-top: 50.625%; /* 16:9 aspect ratio reduced by 10% (56.25% * 0.9) */
+    padding-top: 45%; /* 16:9 aspect ratio reduced by 20% (56.25% * 0.8) */
   }
 }
 
@@ -696,7 +916,7 @@
   .videoWrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 20 / 9;
+    aspect-ratio: 5 / 2;
     background: #000;
   }
 
@@ -858,10 +1078,10 @@
     }
     
     .mobileControlButtonActive {
-      background: linear-gradient(135deg, #4a90e2 0%, #5a9ff5 100%);
-      border-color: #4a90e2;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
       color: white;
-      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
     }
     
     .mobileControlButtonActive svg {
@@ -1067,24 +1287,31 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  padding: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.bottomMicButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .bottomMicButton:active {
   transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .bottomMicDisabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   border: 2px solid rgba(148, 163, 184, 0.35);
   background: rgba(148, 163, 184, 0.1);
   opacity: 0.4;
@@ -1093,8 +1320,8 @@
 }
 
 .bottomMicDisabled svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: #94a3b8;
   stroke-width: 2;
@@ -1266,9 +1493,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 55px;
+  min-width: 60px;
+  width: 60px;
   height: 32px;
-  padding: 0 12px;
+  padding: 0;
   border-radius: 16px;
   font-size: 15px;
   font-weight: 800;
@@ -1279,6 +1507,7 @@
   position: relative;
   overflow: hidden;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 .scoreBadge > * {
@@ -1363,33 +1592,19 @@
   box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
 }
 
-/* Recording Controls in Transcript */
-.recordingControlsInTranscript {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+/* Recording Controls Desktop - next to sentence number */
+.recordingControlsDesktop {
   display: flex;
   gap: 8px;
   align-items: center;
-  opacity: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-  pointer-events: none;
 }
 
-/* Enable pointer events when visible */
-.recordingControlsInTranscript > * {
-  pointer-events: auto;
-}
-
-/* Show on hover */
-.transcriptItem:hover .recordingControlsInTranscript {
-  opacity: 1;
-}
-
-/* Show on active sentence (when clicked) */
-.transcriptItemActive .recordingControlsInTranscript {
-  opacity: 1;
+/* Hide on mobile */
+@media (max-width: 768px) {
+  .recordingControlsDesktop {
+    display: none !important;
+  }
 }
 
 /* Mobile Inline Mic Controls - shown at the beginning of sentence */
@@ -1397,34 +1612,35 @@
   display: none; /* Hidden on desktop by default */
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
+  margin-right: 6px;
   margin-bottom: 0;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 50%;
-  padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  height: 28px;
-  width: 28px;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0;
+  border: none;
+  height: 32px;
+  width: 32px;
+  transition: all 0.2s ease;
 }
 
 .micPlaceholderInline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(148, 163, 184, 0.05);
-  opacity: 0.35;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.08);
+  opacity: 0.4;
   cursor: not-allowed;
   transition: all 0.2s ease;
 }
 
 .micPlaceholderInline svg {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   fill: none;
   stroke: #94a3b8;
   stroke-width: 2;
@@ -1437,7 +1653,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 9px;
+  padding: 0;
   border-radius: 14px;
   font-size: 12px;
   font-weight: 800;
@@ -1451,7 +1667,8 @@
   z-index: 1;
   flex-shrink: 0;
   line-height: 1;
-  min-width: 42px;
+  min-width: 48px;
+  width: 48px;
   height: 28px;
 }
 
@@ -1516,7 +1733,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: 2px solid rgba(148, 163, 184, 0.3);
   background: rgba(148, 163, 184, 0.08);
   cursor: not-allowed;

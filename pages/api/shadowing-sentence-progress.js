@@ -1,6 +1,8 @@
 import { optionalAuth } from '../../lib/authMiddleware';
 import connectDB from '../../lib/mongodb';
 import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
 
 // Schema for sentence-level progress
 const ShadowingSentenceProgressSchema = new mongoose.Schema({
@@ -30,6 +32,10 @@ const ShadowingSentenceProgressSchema = new mongoose.Schema({
   bestScore: {
     type: Number,
     required: true
+  },
+  audioFilePath: {
+    type: String,
+    default: null
   },
   lastAttemptDate: {
     type: Date,
@@ -131,6 +137,37 @@ async function handler(req, res) {
         });
       }
 
+      // Auto-cleanup: Delete progress older than 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      // Find old progress to delete their audio files first
+      const oldProgressList = await ShadowingSentenceProgress.find({
+        userId: req.user._id,
+        lastAttemptDate: { $lt: thirtyDaysAgo }
+      });
+
+      // Delete audio files for old progress
+      for (const progress of oldProgressList) {
+        if (progress.audioFilePath) {
+          const filePath = path.join(process.cwd(), 'public', progress.audioFilePath);
+          if (fs.existsSync(filePath)) {
+            try {
+              fs.unlinkSync(filePath);
+              console.log('Deleted old audio file:', filePath);
+            } catch (err) {
+              console.error('Error deleting old audio file:', err);
+            }
+          }
+        }
+      }
+      
+      // Delete progress records
+      await ShadowingSentenceProgress.deleteMany({
+        userId: req.user._id,
+        lastAttemptDate: { $lt: thirtyDaysAgo }
+      });
+
       // Get all sentence progress for this lesson
       const sentenceProgressList = await ShadowingSentenceProgress.find({
         userId: req.user._id,
@@ -144,7 +181,8 @@ async function handler(req, res) {
           accuracyPercent: item.accuracyPercent,
           attempts: item.attempts,
           bestScore: item.bestScore,
-          lastAttemptDate: item.lastAttemptDate
+          lastAttemptDate: item.lastAttemptDate,
+          audioFilePath: item.audioFilePath
         };
       });
 

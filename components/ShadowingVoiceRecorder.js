@@ -10,8 +10,6 @@ import styles from '../styles/ShadowingVoiceRecorder.module.css';
  * @param {Function} props.onAudioRecorded - Callback when audio is recorded (returns blob)
  * @param {string} props.language - Language code (de-DE, vi-VN, etc.)
  * @param {string} props.size - Size variant: 'small' (inline) or 'large' (bottom bar)
- * @param {boolean} props.externalIsRecording - External recording state (for synchronization)
- * @param {boolean} props.externalIsProcessing - External processing state (for synchronization)
  * @param {Function} props.onRecordingStateChange - Callback when recording state changes
  */
 const ShadowingVoiceRecorder = ({
@@ -19,8 +17,6 @@ const ShadowingVoiceRecorder = ({
   onAudioRecorded,
   language = 'de-DE',
   size = 'small',
-  externalIsRecording,
-  externalIsProcessing,
   onRecordingStateChange
 }) => {
   const [internalIsRecording, setInternalIsRecording] = useState(false);
@@ -28,25 +24,23 @@ const ShadowingVoiceRecorder = ({
   const [internalIsProcessing, setInternalIsProcessing] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
 
-  // Use external state if provided, otherwise use internal state
-  const isRecording = externalIsRecording !== undefined ? externalIsRecording : internalIsRecording;
-  const isProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
+  // Always use internal state for UI
+  const isRecording = internalIsRecording;
+  const isProcessing = internalIsProcessing;
 
   const updateRecordingState = useCallback((value) => {
     setInternalIsRecording(value);
     if (onRecordingStateChange) {
-      const currentProcessing = externalIsProcessing !== undefined ? externalIsProcessing : internalIsProcessing;
-      onRecordingStateChange({ isRecording: value, isProcessing: currentProcessing });
+      onRecordingStateChange({ isRecording: value, isProcessing: internalIsProcessing });
     }
-  }, [onRecordingStateChange, externalIsProcessing, internalIsProcessing]);
+  }, [onRecordingStateChange, internalIsProcessing]);
 
   const updateProcessingState = useCallback((value) => {
     setInternalIsProcessing(value);
     if (onRecordingStateChange) {
-      const currentRecording = externalIsRecording !== undefined ? externalIsRecording : internalIsRecording;
-      onRecordingStateChange({ isRecording: currentRecording, isProcessing: value });
+      onRecordingStateChange({ isRecording: internalIsRecording, isProcessing: value });
     }
-  }, [onRecordingStateChange, externalIsRecording, internalIsRecording]);
+  }, [onRecordingStateChange, internalIsRecording]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -221,44 +215,46 @@ const ShadowingVoiceRecorder = ({
   }, [isRecording, startRecording, stopRecording]);
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${size === 'large' ? styles.containerLarge : ''}`}>
       <button
-        className={`${styles.recordButton} ${size === 'large' ? styles.recordButtonLarge : ''} ${isRecording ? styles.recording : ''} ${isProcessing ? styles.processing : ''}`}
+        className={`${styles.recordButton} ${size === 'large' ? styles.recordButtonLarge : ''} ${isRecording ? styles.recording : ''} ${isProcessing ? styles.processing : ''} ${error ? styles.error : ''}`}
         onClick={handleButtonClick}
         disabled={isProcessing}
         type="button"
-        title={isProcessing ? 'Wird verarbeitet...' : isRecording ? 'Aufnahme stoppen' : 'Aufnahme starten'}
+        title={error ? error : (isProcessing ? 'Wird verarbeitet...' : isRecording ? 'Aufnahme stoppen' : 'Aufnahme starten')}
       >
         {isProcessing ? (
-          <span className={styles.spinner}>
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"/>
-            </svg>
-          </span>
+          <>
+            <span className={styles.spinner}>
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"/>
+              </svg>
+            </span>
+            {size === 'large' && <span>Đang xử lý...</span>}
+          </>
         ) : isRecording ? (
-          <span className={styles.stopIcon}>
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="6" width="12" height="12" rx="2"/>
-            </svg>
-          </span>
+          <>
+            <span className={styles.stopIcon}>
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+            </span>
+            {size === 'large' && <span>Dừng ghi âm</span>}
+          </>
         ) : (
-          <span className={styles.micIcon}>
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-              <path d="M12 18v4"/>
-              <path d="M8 22h8"/>
-            </svg>
-          </span>
+          <>
+            <span className={styles.micIcon}>
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                <path d="M12 18v4"/>
+                <path d="M8 22h8"/>
+              </svg>
+            </span>
+            {size === 'large' && <span>Ghi âm</span>}
+          </>
         )}
       </button>
-
-      {/* Error display */}
-      {error && (
-        <div className={styles.error}>
-          {error}
-        </div>
-      )}
     </div>
   );
 };
