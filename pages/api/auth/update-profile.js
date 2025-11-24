@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
     // Validate preferredDifficultyLevel if provided
     if (preferredDifficultyLevel) {
-      const validDifficultyLevels = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
+      const validDifficultyLevels = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c1c2'];
       if (!validDifficultyLevels.includes(preferredDifficultyLevel)) {
         return res.status(400).json({ message: 'Độ khó không hợp lệ' });
       }
