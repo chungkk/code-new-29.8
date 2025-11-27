@@ -222,6 +222,20 @@
   color: #f97316;
 }
 
+/* Disabled state for large playback button */
+.largeRecordBtnDisabled {
+  background: rgba(148, 163, 184, 0.05) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  color: #475569 !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.largeRecordBtnDisabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Current Sentence Display */
 .currentSentenceDisplay {
   background: rgba(255, 255, 255, 0.03);

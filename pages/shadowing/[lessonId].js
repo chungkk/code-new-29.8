@@ -1883,30 +1883,29 @@ const ShadowingPageContent = () => {
                        
                        {/* Recording Controls - 2 Large Buttons */}
                        <div className={styles.recordingControlsLarge}>
-                       {/* Playback Recorded Audio Button */}
-                       {recordingStates[currentSentenceIndex]?.recordedBlob && (
-                         <button
-                           className={`${styles.largeRecordBtn} ${styles.largeRecordBtnPlayback} ${recordingStates[currentSentenceIndex]?.isPlaying ? styles.playing : ''}`}
-                           onClick={() => playRecordedAudio(currentSentenceIndex)}
-                         >
-                           {recordingStates[currentSentenceIndex]?.isPlaying ? (
-                             <>
-                               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                                 <rect x="6" y="4" width="4" height="16" rx="1"/>
-                                 <rect x="14" y="4" width="4" height="16" rx="1"/>
-                               </svg>
-                               Đang phát
-                             </>
-                           ) : (
-                             <>
-                               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                                 <path d="M8 5v14l11-7z"/>
-                               </svg>
-                               Phát lại ghi âm
-                             </>
-                           )}
-                         </button>
-                       )}
+                       {/* Playback Recorded Audio Button - Always visible */}
+                       <button
+                         className={`${styles.largeRecordBtn} ${styles.largeRecordBtnPlayback} ${recordingStates[currentSentenceIndex]?.isPlaying ? styles.playing : ''} ${!recordingStates[currentSentenceIndex]?.recordedBlob ? styles.largeRecordBtnDisabled : ''}`}
+                         onClick={() => playRecordedAudio(currentSentenceIndex)}
+                         disabled={!recordingStates[currentSentenceIndex]?.recordedBlob}
+                       >
+                         {recordingStates[currentSentenceIndex]?.isPlaying ? (
+                           <>
+                             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                               <rect x="6" y="4" width="4" height="16" rx="1"/>
+                               <rect x="14" y="4" width="4" height="16" rx="1"/>
+                             </svg>
+                             Đang phát
+                           </>
+                         ) : (
+                           <>
+                             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                               <path d="M8 5v14l11-7z"/>
+                             </svg>
+                             Phát lại
+                           </>
+                         )}
+                       </button>
                        
                        {/* Record Button */}
                        <ShadowingVoiceRecorder
